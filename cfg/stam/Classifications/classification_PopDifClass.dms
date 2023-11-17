@@ -1,0 +1,39 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+//generate colors with:
+//http://meyerweb.com/eric/tools/color-blend
+
+unit<uint16> PopDifClass: nrofrows = 19
+{
+
+	attribute<float32> ClassBreak: DialogType = "Classification",
+	[
+		-150000,-1000,-500,-200,-100,
+		-50,-20,-5,-0.000000001,
+		0,0.000000001, 5, 20, 50,
+		100, 200, 500, 1000,3000
+	];
+
+	attribute<uint32> BrushColor: DialogType = "BrushColor",
+	[
+		rgb(29,112,0),rgb(58,132,26),rgb(88,153,51),rgb(117,173,77),rgb(147,194,103)
+		,rgb(176,214,129),rgb(206,235,154),rgb(235,255,180),rgb(255,255,255),rgb(255,255,255)
+		,rgb(255,225,225),rgb(233,193,193),rgb(211,161,161),rgb(189,129,129),rgb(166,96,96)
+		,rgb(144,64,64),rgb(122,32,32),rgb(100,0,0),rgb(0,0,0)
+	];
+
+	attribute<String> Label: DialogType = "LabelText",
+	[
+		'-150000 - -1000','-1000 - -500','-500 - -200','-200 - -100','-100 - -50',
+		'-50 - -20','-20 - -5','-5 - -0.000000001','-0.000000001 - 0',
+		'0-0.000000001','0.000000001-5','5-20','20-50','50-100',
+		'100-200', '200-500','500-1000','1000-2000','>3000'
+	];
+}

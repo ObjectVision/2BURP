@@ -1,0 +1,42 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container ScenarioSpecs: url="%MondiaalDataDir%/SSP/The_roads_ahead__Narratives_for_shared_socioeconomic_pathways.pdf"// USER INPUT
+{
+	container Natura2000					//Protected & Natural areas
+	{
+		parameter<float32> Factor_SSP1 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSP2 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSP3 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSP4 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSP5 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSPP := 1.0f; //Unrestricted
+	}
+	
+	container ProtectionLevel					//Protected & Natural areas
+	{
+		parameter<float32> Factor_SSP1 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSP2 := 1.0f; //Unrestricted
+		parameter<float32> Factor_SSP3 := 1.0f; //Unrestricted
+		parameter<float32> Factor_SSP4 := 1.0f; //UnRestricted
+		parameter<float32> Factor_SSP5 := 0.00001f; //Restricted
+		parameter<float32> Factor_SSPP := 1.0f; //Unrestricted
+	}
+
+	container FloodArea //Floodprone areas
+	{
+		parameter<float32> Factor_SSP1 := 0.00001f;	//Restricted
+		parameter<float32> Factor_SSP2 := 1.0f; //Unrestricted
+		parameter<float32> Factor_SSP3 := 1.0f; //Unrestricted
+		parameter<float32> Factor_SSP4 := 1.0f;	//UnRestricted
+		parameter<float32> Factor_SSP5 := 0.00001f;	//Restricted
+		parameter<float32> Factor_SSPP := 1.0f; //UnRestricted
+	}
+}

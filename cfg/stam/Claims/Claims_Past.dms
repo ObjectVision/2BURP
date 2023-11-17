@@ -1,0 +1,28 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP september 2018             //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Read population claims of past by /Preprocessing/Claims/Past/export_csv/Result
+
+container Past
+{
+	unit<uint32> SSPPast
+	: StorageName = "%projdir%/data/Past/Past_Claim_1990_2015_validation.csv"
+	, StorageType = "gdal.vect"
+	, StorageReadonly = "True"
+	, DialogType  = "Map"
+	, DialogData  = "PolyData"
+		{
+			attribute<Input/administrative/Countries/Country> Country_rel := rlookup(Region, Input/administrative/Countries/Country/ISO3);
+
+			attribute<float32> population_to_use_1990 := SSPPast_population_to_use_1990[float32];
+			attribute<float32> population_to_use_2000 := SSPPast_population_to_use_2000[float32];
+			attribute<float32> population_to_use_2015 := SSPPast_population_to_use_2015[float32];
+
+			parameter<string> Name := 'SSPPast';
+		}
+}

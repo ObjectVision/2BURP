@@ -1,0 +1,20 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+
+container Countries: =
+for_each_ne(
+	   Input/administrative/Countries/Country/Name_from_utf_cor
+	,replace(
+		'Country(@nr@d,@nr2@d,@nr3@d,@nr4@d)'
+		,'@nr@', string(Input/administrative/Countries/Country/MIN_Y_INT)
+		,'@nr2@', string(Input/administrative/Countries/Country/MIN_X_INT)
+		,'@nr3@', string(Input/administrative/Countries/Country/MAX_Y_INT)
+		,'@nr4@', string(Input/administrative/Countries/Country/MAX_X_INT)
+		)
+);

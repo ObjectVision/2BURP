@@ -1,0 +1,67 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Evaluation: using = "units"
+{
+	container SSPs := 
+		for_each_ne(Scenarios/SSP/name, 
+			'CheckSSPClaim(Scenarios/SSPs/'+/Scenarios/SSP/name+')'
+		);
+
+	template CheckSSPClaim 
+	{
+		container SSPoutput;
+		
+		container CountryPop
+		{
+			attribute<Input/administrative/Countries/Country >   Country_rel (/Scenarios/SSPs/SSP1/CompactedDomain):= lookup(SSPoutput/CompactedDomain/nr_OrgEntity, Input/administrative/Countries/Country_grid);
+
+			container ProjectionDates := 
+			for_each_nedv(Scenarios/SSPs/SSP2/ProjectionDate/name, 
+			'sum(SSPoutput/ProjectionDates/' + Scenarios/SSPs/SSP2/ProjectionDate/name + '/NewState/Pop,Country_rel)'
+				, Input/administrative/Countries/Country 
+				,Float32
+			);
+	
+			attribute<float32> Diff_Pop_2100_2010 (Input/administrative/Countries/Country ):= ProjectionDates/Y2100 - ProjectionDates/Y2010;
+			attribute<Difprc>  Growth_2100_2010 (Input/administrative/Countries/Country )  := (Diff_Pop_2100_2010 / ProjectionDates/Y2010) * 100f;
+
+			container Check_Pop := 
+			for_each_nedv(Scenarios/SSPs/SSP2/ProjectionDate/name, 
+			'ProjectionDates/' + Scenarios/SSPs/SSP2/ProjectionDate/name + ' - SSPoutput/ExpPops/' + Scenarios/SSPs/SSP2/ProjectionDate/name
+				, Input/administrative/Countries/Country 
+				,Float32
+			);
+
+			attribute<float32> Check_Urban_Pop_2100 (Input/administrative/Countries/Country ):= SSPoutput/ProjectionDates/Y2100/PopUrban - SSPoutput/population_claimregion/ExpUrbanPops/Y2100;
+			attribute<float32> Check_Rural_Pop_2100 (Input/administrative/Countries/Country ):= SSPoutput/ProjectionDates/Y2100/PopRural - SSPoutput/population_claimregion/ExpRuralPops/Y2100;
+		}
+
+		container Admin2Pop
+		{
+			attribute<Input/administrative/Subnational/CountryEurSelection>   CountryEurSelection_rel (/Scenarios/SSPs/SSP1/CompactedDomain):= lookup(SSPoutput/CompactedDomain/nr_OrgEntity,Input/administrative/Subnational/CountryEurSelection_grid);
+
+			attribute<float32> PopAdmin2EurSelection_2010 (Input/administrative/Subnational/CountryEurSelection)          := sum(SSPoutput/ProjectionDates/Y2010/NewState/Pop,CountryEurSelection_rel);
+			attribute<float32> PopAdmin2EurSelection_2100 (Input/administrative/Subnational/CountryEurSelection)          := sum(SSPoutput/ProjectionDates/Y2100/NewState/Pop,CountryEurSelection_rel);
+			attribute<float32> Diff_PopAdmin2EurSelection_2100_2010 (Input/administrative/Subnational/CountryEurSelection):= PopAdmin2EurSelection_2100-PopAdmin2EurSelection_2010;
+			attribute<Difprc>  Growth_2100_2010 (Input/administrative/Subnational/CountryEurSelection)                    := (Diff_PopAdmin2EurSelection_2100_2010 / PopAdmin2EurSelection_2010) * 100f;
+		}
+
+		container Subnational 
+		{
+			attribute<Input/administrative/Subnational/Subnational>   Subnational_rel (/Scenarios/SSPs/SSP1/CompactedDomain):= lookup(SSPoutput/CompactedDomain/nr_OrgEntity,Input/administrative/Subnational/Subnational_grid);
+			
+			attribute<float32> Subnational_2010 (Input/administrative/Subnational/Subnational)           := sum(SSPoutput/ProjectionDates/Y2010/NewState/Pop,Subnational_rel);
+			attribute<float32> Subnational_2100 (Input/administrative/Subnational/Subnational)           := sum(SSPoutput/ProjectionDates/Y2100/NewState/Pop,Subnational_rel);
+			attribute<float32> Diff_Subnational_2100_2010 (Input/administrative/Subnational/Subnational) := Subnational_2100-Subnational_2010;
+			attribute<Difprc>  Growth_2100_2010 (Input/administrative/Subnational/Subnational)           := (Diff_Subnational_2100_2010 / Subnational_2010) * 100f;
+		}
+	}
+}

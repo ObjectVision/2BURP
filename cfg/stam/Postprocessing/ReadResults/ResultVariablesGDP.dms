@@ -1,0 +1,75 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container ResultVariablesGDP
+{
+	template Var
+	{
+		//begin case parameters
+		parameter<string> domainscale := Postprocessing/Scenarios/ReadResults/All/domainscale;
+		parameter<string> Period      := Postprocessing/Scenarios/ReadResults/All/Period;
+		//end case parameters
+
+		unit<wpoint> domainref := = domainscale="All" ? 'Input/gtopo' : 'gtopoc/gtopo_country';
+		unit<uint32> Periodref := = Period="Past" ? 'ReadResultsPast/SSP_Year' : 'ReadResults/SSP_Year';
+		
+		parameter<string> Variant              := Postprocessing/Scenarios/ReadResults/All/Variant;
+
+		parameter<string> Filenameprefix       :=Postprocessing/Scenarios/ReadResults/All/Filenameprefix;
+		parameter<string> FolderFilenameprefix :=Postprocessing/Scenarios/ReadResults/All/FolderFilenameprefix;
+		
+	//GDP missing for Past
+	//GDP/Results/SSPs/SSP1/Export/Export_GDP_Cell/Y2010
+	container gdp_cell_org: =
+		for_each_ind(
+			   'ndvdaru',
+			   Periodref/name
+			,  domainref
+			,  float32
+			,  'GDP in a gridcell' + String(Periodref/Year_c)
+			, '%MondiaalDataDir%/' + FolderFilenameprefix + '_'  + PeriodRef/SSP_c2 +'_'+Periodref/Year_c2 + '_GDP_Cell_kUSD.tif'
+			,  True
+			, '%MondiaalDataDir%/' + FolderFilenameprefix + '_'  + PeriodRef/SSP_c2 +'_'+Periodref/Year_c2 + '_GDP_Cell_kUSD.xml'
+		);
+	
+	///GDP/Results/SSPs/SSP1/Export/GDP_Cell/Y2010
+	container gdp_cell: =
+		for_each_ind(
+			   'nedv',
+			   Periodref/name
+			,  'gdp_cell_org/'+Periodref/name+' < -9998f ? 0f/0f : gdp_cell_org/'+Periodref/name
+			,  domainref
+			,  float32
+		);
+
+	///GDP/Results/SSPs/SSP1/Export/Export_GDP_Cell_national/Y2010
+	container gdp_cell_national_org: =
+		for_each_ind(
+			   'ndvdaru',
+			   Periodref/name
+			,  domainref
+			,  float32
+			,  'GDP based on national figures in a gridcell' + String(Periodref/Year_c)
+			, '%MondiaalDataDir%/' + FolderFilenameprefix + '_'  + PeriodRef/SSP_c2 +'_'+Periodref/Year_c2 + '_GDP_Cell_National_kUSD.tif'
+			,  True
+			, '%MondiaalDataDir%/' + FolderFilenameprefix + '_'  + PeriodRef/SSP_c2 +'_'+Periodref/Year_c2 + '_GDP_Cell_National_kUSD.xml'
+		);
+
+	///GDP/Results/SSPs/SSP1/RunPeriods3/Y2010/GDP_Cell_R1
+	container gdp_cell_national: =
+		for_each_ind(
+			   'nedv',
+			   Periodref/name
+			,  'gdp_cell_national_org/'+Periodref/name+' < -9998f ? 0f/0f : gdp_cell_national_org/'+Periodref/name
+			,  domainref
+			,  float32
+		);
+	}
+}

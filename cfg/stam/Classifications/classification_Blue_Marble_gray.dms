@@ -1,0 +1,29 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Classification of The Blue Marble in gray-scale
+
+container Blue_Marble_Gray
+{
+	unit<uint16> Blue_Marble_Gray_Class: nrofrows = 11
+	{
+		attribute<float32> ClassBreak: DialogType = "Classification",//245 sea
+		[
+			  0, 34, 72,102,141,
+			175,196,214,240,245,
+			254
+		];
+
+		attribute<uint32> BrushColor: DialogType = "BrushColor",
+		[
+			rgb(215,215,215),rgb(200,200,200),rgb(185,185,185),rgb(170,170,170),rgb(155,155,155),
+			rgb(140,140,140),rgb(125,125,125),rgb(110,110,110),rgb(230,230,230),rgb(240,240,240),
+			rgb(250,250,250)
+		];
+	}
+}

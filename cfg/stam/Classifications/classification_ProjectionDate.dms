@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Definition names of projection years (Dutch: Zichtjaren)
+
+unit<uint8> ProjectionDate: using = "units", nrofrows = 10
+{
+	attribute<Year>   Yr: [ 2010, 2020, 2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100];
+	attribute<string> name          := 'Y'+string(Yr);
+	
+	//official solution for: Error: Numeric overflow when subtracting UInt16 values 1 from 0.
+	//attribute<string> prev_name     := MakeDefined(name[sub_or_null(ID(.), 1b)], 'StartingYear');
+	//attribute<string> prevStateName := MakeDefined(name[sub_or_null(ID(.), 1b)]+'/NewState', 'InitialState');
+
+	attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
+	attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
+}

@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Maarten Hilferink
+// Function: Generate population claims per claimregion
+
+// Refer to column with URBAN POPULATION
+container population_claimregion
+{
+	container ExpUrbanPops := 
+		for_each_nedv(ProjectionDate/name,
+			'MakeDefined('
+				'SSPclaim/URBANPOP'+String(ProjectionDate/Yr)+'[MPerson][invert(SSPclaim/Country_rel) ] * 1000000[Person / MPerson]'
+			', 0[Person]'
+			')'
+		,	ClaimRegion, Person
+		);
+	
+	container ExpRuralPops := 
+		for_each_nedv(ProjectionDate/name,
+				'MakeDefined('
+					'SSPclaim/population_to_use_'+String(ProjectionDate/Yr)+'[MPerson][invert(SSPclaim/Country_rel)] * 1000000[Person / MPerson] '
+					'- ExpUrbanPops/'+ProjectionDate/name+', '
+				'0[Person]'
+				')'
+		,	ClaimRegion, Person
+		);
+	
+	container ExpPops := 
+		for_each_nedv(ProjectionDate/name,
+				'MakeDefined('
+					'SSPclaim/population_to_use_'+String(ProjectionDate/Yr)+'[MPerson][invert(SSPclaim/Country_rel)] * 1000000[Person / MPerson]'
+				', 0[Person]'
+				')'
+		,	ClaimRegion, Person
+		);
+}

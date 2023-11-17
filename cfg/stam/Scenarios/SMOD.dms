@@ -1,0 +1,84 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//Author:   Bas van Bemmel
+//Function: Create GHSMOD-classes from Urban-map (only for M3,var2 startmap present
+
+container SMOD: url="%projdir%/doc/Table_8_Settlement_Model_L2_synthetic_explanation_of_logical_definition_and_grid_cell_sets_MODELLED.jpg"
+{
+	container Level1
+	{
+		attribute<bool> HDC(CompactedDomain) :=URBANCENTREGRIDCELL30;
+		attribute<bool> MDC(CompactedDomain) :=(PopDensity300 && Inhabitants5000) || HDC; //same as (PopDensity300 && Inhabitants5000)
+		attribute<bool> LDC(CompactedDomain) :=!(URBANCENTREGRIDCELL30 || DENSEURBANCLUSTERGRIDCELL23);
+	}
+
+	container Level2
+	{
+		attribute<bool> Inhabitants500_5000  (CompactedDomain)            := NewState/grid2poly/IsUrban_pol/PopInPol_c >= 500f && NewState/grid2poly/IsUrban_pol/PopInPol_c < 5000f;
+	
+		attribute<bool> UrbanCentre           (CompactedDomain) := Level1/HDC;
+		attribute<bool> DenseUrbanCluster     (CompactedDomain) := Level1/MDC;
+		attribute<bool> SemidenseUrbanCluster (CompactedDomain) := SEMIDENSEURBANCLUSTERGRIDCELL22;
+		attribute<bool> RuralCluster          (CompactedDomain) := PopDensity300 && Inhabitants500_5000;
+	}
+
+// 					container Level3
+// 					{
+// 						attribute<bool> SUBURBANORPERIURBANGRIDCELL21           (CompactedDomain) := Level1/MDC && !(Level2/DenseUrbanCluster || Level2/SemidenseUrbanCluster);
+// 					}
+
+	//30 URBAN CENTRE GRID CELL
+	attribute<bool> PopDensity1500  (CompactedDomain)      := PopDensity >= 1500f;
+	attribute<bool> Inhabitants50000  (CompactedDomain)    := NewState/grid2poly/IsUrban_pol/PopInPol_c >= 50000f;
+	attribute<bool> URBANCENTREGRIDCELL30 (CompactedDomain):= PopDensity1500 && Inhabitants50000;
+
+	attribute<float32> Within3km_30 (CompactedDomain) :
+		= ((potential(float32(URBANCENTREGRIDCELL30[invert(Input/CompactedDomain/gtopo_rel)]), /Input/Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)))[Input/CompactedDomain/gtopo_rel];
+	attribute<bool> Within3km_30_filter (CompactedDomain) := Within3km_30 > 30f;
+
+	//23'DENSE URBAN CLUSTER GRID CELL
+	attribute<bool> Inhabitants5000  (CompactedDomain)            := NewState/grid2poly/IsUrban_pol/PopInPol_c >= 5000f;
+	attribute<bool> DENSEURBANCLUSTERGRIDCELL23 (CompactedDomain) := (PopDensity1500 && Inhabitants5000) && !URBANCENTREGRIDCELL30;
+
+	//22:SEMI-DENSE URBAN CLUSTER GRID CELL
+	attribute<bool> PopDensity300  (CompactedDomain)                  := PopDensity >= 300f;
+	attribute<bool> GRIDCELL30_23(CompactedDomain):= URBANCENTREGRIDCELL30 || DENSEURBANCLUSTERGRIDCELL23;
+
+	attribute<bool> Within3km (CompactedDomain) :
+		= ((potential(float32(GRIDCELL30_23[invert(Input/CompactedDomain/gtopo_rel)]), /Input/Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)) > 0f)[Input/CompactedDomain/gtopo_rel];
+
+	attribute<bool> SEMIDENSEURBANCLUSTERGRIDCELL22 (CompactedDomain) := (PopDensity300 && Inhabitants5000) && (!URBANCENTREGRIDCELL30 && !DENSEURBANCLUSTERGRIDCELL23) && !Within3km;
+
+	//21:SUBURBAN OR PERI-URBAN GRID CELL
+	attribute<bool> SUBURBANORPERIURBANGRIDCELL21 (CompactedDomain) :=(PopDensity300 && Inhabitants5000) && (!URBANCENTREGRIDCELL30 && !DENSEURBANCLUSTERGRIDCELL23) && Within3km;
+	
+	//RURAL (13,12,11)
+	attribute<bool> RURALCLUSTERGRIDCELL13        (CompactedDomain) :=Level2/RuralCluster;
+	attribute<bool> LOWDENSITYRURALGRIDCELL12     (CompactedDomain) :=(Level1/LDC && PopDensity >50f) && !Level2/RuralCluster;
+	attribute<bool> VERYLOWDENSITYRURALGRIDCELL11 (CompactedDomain) :=(Level1/LDC && PopDensity <=50f) && !Level2/RuralCluster;
+
+
+	attribute<Units/SMOD>    urban_30 (CompactedDomain)         := URBANCENTREGRIDCELL30[uint32]           >0u ? 30[Units/SMOD] : 0[uint32];
+	attribute<Units/SMOD>    urban_23 (CompactedDomain)         := DENSEURBANCLUSTERGRIDCELL23[uint32]     >0u ? 23[Units/SMOD] : 0[uint32];
+	attribute<Units/SMOD>    urban_22 (CompactedDomain)         := SEMIDENSEURBANCLUSTERGRIDCELL22[uint32] >0u ? 22[Units/SMOD] : 0[uint32];
+	attribute<Units/SMOD>    urban_21 (CompactedDomain)         := SUBURBANORPERIURBANGRIDCELL21[uint32]   >0u ? 21[Units/SMOD] : 0[uint32];
+	
+	attribute<Units/SMOD>    rural_13 (CompactedDomain)         := RURALCLUSTERGRIDCELL13[uint32]          >0u ? 13[Units/SMOD] : 0[uint32];
+	attribute<Units/SMOD>    rural_12 (CompactedDomain)         := LOWDENSITYRURALGRIDCELL12[uint32]       >0u ? 12[Units/SMOD] : 0[uint32];
+	attribute<Units/SMOD>    rural_11 (CompactedDomain)         := VERYLOWDENSITYRURALGRIDCELL11[uint32]   >0u ? 11[Units/SMOD] : 0[uint32];
+
+	attribute<Units/SMOD>    SMODgtopo (CompactedDomain)       := urban_30 =30u ? 
+																	urban_30 : (urban_23 =23u ? 
+																	urban_23 : (urban_22 =22u ? 
+																	urban_22 : (urban_21 =21u ? 
+																	urban_21 : (rural_13 =13u ? 
+																	rural_13 : (rural_12 =12u ? 
+																	rural_12 : (rural_11 =11u ? 
+																	rural_11 : 10u))))));
+																	//rural_11 : Preprocessing/SMOD/SMOD_generator/PastDates/Y2015/JRC_GHS/water_10[Input/CompactedDomain/gtopo_rel]))))));
+}

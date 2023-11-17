@@ -1,0 +1,88 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Classification of SMOD for export purposes, generated tif visible in paint-software
+
+unit<uint8> Settlement_Model_L2_nomenclature_export: nrofrows = 31
+{
+	attribute <uint8> id:=id(.);
+
+	attribute <uint32> BrushColor: DialogType = "BrushColor",
+	[
+		rgb(130,158,192),//0
+		rgb(255,255,225),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),//9
+
+		rgb( 170,255,255),//10
+		rgb(205,245,122),
+		rgb( 12,171,205),
+		rgb( 55, 86, 35),//13
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),//20
+	
+		rgb(255,255,  0),//21
+		rgb(168,112,  0),
+		rgb(115, 38,  0),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,255,255),
+		rgb(255,  0,  0)
+	];
+
+	attribute<String> Label: DialogType = "LabelText",
+	[
+		'Sea',
+		'not modelled land',
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+
+		'WATER GRID CELL',//10 not modelled
+		'VERY LOW DENSITY RURAL GRID CELL',//11
+		'LOW DENSITY RURAL GRID CELL',//12
+		'RURAL CLUSTER GRID CELL',//13
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+
+		'SUBURBAN OR PERI-URBAN GRID CELL',//21
+		'SEMI-DENSE URBAN CLUSTER GRID CELL',//22
+		'DENSE URBAN CLUSTER GRID CELL',//23
+		'',
+		'',
+		'',
+		'',
+		'',
+		'',
+		'URBAN CENTRE GRID CELL'//30
+	];
+}

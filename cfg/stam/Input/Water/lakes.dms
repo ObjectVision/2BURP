@@ -1,0 +1,111 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Calculate distance to lakes
+
+container Lakes
+{
+	unit<ipoint> Lake
+	:	StorageName = "%MondiaalDataDir%/Water/lakes/glwd_3_lake_1_ed_arcmap1031_1000_INT.tif"
+	,	StorageType = "gdal.grid"
+	,	url        = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
+	,	Source     = "ArcMap 10.3.1 Euclidean Distance with 1 grid as cellsize, convert to tif Times 1000, Integer"
+					 "Y:\Kennisbasis\WRI_GlobalCities\ontwapps_WRI_GlobalCities\toUP_Global\SD_config\lakes\glwd_3_lake_1_ed_arcmap1031.gdb"
+	,	StorageReadOnly = "True"
+	,	DialogData = "LatLong"
+	{
+		attribute<float32> ReadData(gtopo);
+	}
+
+	container Lakesglwd
+	{
+		parameter<String> Generate_LakeFSS := 'Ready',
+		ExplicitSuppliers = "MakeFSS/geometry";
+	
+		container WWF
+		:  StorageName     = "%MondiaalDataDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.gdb"
+		,  StorageType     = "gdal.vect"
+		,  url             = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
+		,  StorageReadOnly = "True"
+		,  Source          = "Step 1: org: arcinfo-file glwd_3, Raster to Polygon 10.6.1, field gridcode No simplify polygons no ceate multipart features"
+							 "Step 2 ArcMap 10.6.1: glwd_3.gdb: select gridcode1 (lakes) and create new file. 343690 records"
+							 "Step 3: Run Union with gaps allowed unchecked, 18259 additional records are created. The islands in lakes now become new records and are identifiable with a FID=-1"
+							 "Step 4: now select all records (361949) and do union features (in edit mode). 1 extra record is created with the geometry of all polygons. Select this polygon and create a new file"
+							 "Step 5: multipart to single part conversion.(average distance of all cells 45km)"
+		,  DialogType         = "Map"
+		,  DialogData         = "Geometry"
+		{
+			unit<uint32> glwd
+				{
+					attribute<Input/LatLong> Geometry (arc);
+					parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+					parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+				}
+		}
+
+		unit<uint32> MakeFSS := WWF/glwd
+		, 	StorageName = "%LocalDataProjDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.fss"
+		{
+			attribute<Input/LatLong> Geometry (arc) := WWF/glwd/geometry;
+		}
+	
+		unit<uint32> glwd_3
+		: 	StorageName = "%MondiaalDataDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.fss"
+		,  StorageReadOnly = "True"
+		,  Source          = "item /Input/Water/Lakes/Lakesglwd/MakeFSS/Geometry geodms 7.312 PD 7616 SD 7656"
+		{
+			attribute<Input/LatLong> Geometry (arc);
+			unit<uint32> LakePointSet := sequence2points(geometry)
+			{
+				attribute<Float64> lat_deg  := pointrow(point);
+				attribute<Float64> long_deg := pointcol(point);
+				attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
+	//				attribute<float64> sinlat   := sin(lat_rad);
+				attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
+				attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
+	
+				attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
+				
+				attribute<Input/Mercator> Point_mer := point(mercator_y_deg, long_deg, Input/Mercator);
+			}
+	
+			attribute<Input/Mercator> geometry_mer (arc):= points2sequence(LakePointSet/Point_mer, LakePointSet/sequencenr);
+			
+			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+		}
+
+		attribute<Float32> Location2Lake_mer(Input/CompactedDomain)   := dist_info(glwd_3/geometry_mer, Input/CompactedDomain/Geometry_mer, Sqr(250[km] / Input/lengthdegree / Input/CompactedDomain/lat_factor));
+		attribute<km>      Location2Lake_km(Input/CompactedDomain)    := (Location2Lake_mer * Input/lengthdegree * Input/CompactedDomain/lat_factor);
+		attribute<km>      Location2Lake_km_gtopo_export (input/gtopo):= Location2Lake_km[Input/CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to MondiaalDataDir
+
+		container Lake_grid
+		{
+			unit<ipoint> glwd_3
+				:	StorageName     = "%MondiaalDataDir%/Water/lakes/Location2Lake_km.tif"
+				,	StorageType     = "gdal.grid"
+				,	Source          = "item /Input/Water/Lakes/Lakesglwd/Location2Lake_km_gtopo_export geodms 7.312 PD 7612 SD 7611"
+				,	StorageReadOnly = "True"
+				,	DialogData      = "LatLong"
+			{
+				attribute<float32> ReadData(gtopo);
+				attribute<float32>  Lake(gtopo)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+				attribute<float32>  LakeMD (gtopo) := Lake;//as used in Suitability 
+				
+				unit<uint8> Country:=Input/administrative/Countries/Country 
+				{
+					attribute<uint32>  sumLake  := sum(Lake,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  MeanLake := mean(Lake,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  MinLake  := min(Lake,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  MaxLake  := max(Lake,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  SDLake   := sd(Lake,Input/administrative/Countries/Country_grid);
+				}
+			}
+		}
+	}
+}

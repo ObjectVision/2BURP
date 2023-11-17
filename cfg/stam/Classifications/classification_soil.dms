@@ -1,0 +1,55 @@
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Legend soil-map with rgb values D_SYMBOL.csv for abbreviations
+
+container Soil
+{
+	unit<uint8> Class: nrofrows = 36
+		{
+			attribute<uint8> ek := id(.) + 1[uint8];
+			attribute <uint32> Palette: DialogType = "BrushColor",
+		[
+			 rgb(254,206,  0) //AC
+			,rgb(254,151, 71) //AL
+			,rgb(104,104,104) //AN
+			,rgb(254,223,223) //AR
+			,rgb( 97,100,145) //AT
+			,rgb( 60, 90,110) //CH
+			,rgb(254,239,175) //CL
+			,rgb(223,223, 17) //CM
+			,rgb( 63,254,223) //FL
+			,rgb(254, 96,142) //FR
+			,rgb(127,160,254) //GL
+			,rgb( 73,102,103) //GR
+			,rgb(254,254, 17) //GY
+			,rgb( 47,190,190) //HS
+			,rgb(223, 50, 17) //KS
+			,rgb(191,191,191) //LP
+			,rgb(254,190, 81) //LV
+			,rgb(208,130, 73) //LX
+			,rgb(160, 99, 50) //NT
+			,rgb(159,122,122) //PD
+			,rgb(200,124, 63) //PH
+			,rgb(193,249,232) //PL
+			,rgb(147,172, 57) //PT
+			,rgb(190,254, 17) //PZ
+			,rgb(216,234,204) //RG
+			,rgb(254,190,223) //SC
+			,rgb(223, 50,223) //SN
+			,rgb(223,223,254) //VR
+			,rgb(139,137,137) //RK
+			,rgb(255,236,139) //DS
+			,rgb( 67,110,238) //WR
+			,rgb(139,131,120) //UR
+			,rgb(238,233,233) //ST
+			,rgb(229,255,255) //NI
+			,rgb(231,205,173) //GG
+			,rgb( 47, 79, 19) //IS
+		];
+	}
+}

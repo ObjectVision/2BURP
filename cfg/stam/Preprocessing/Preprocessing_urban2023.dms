@@ -1,0 +1,114 @@
+container Urban2023
+{
+	parameter<uint8>  BuiltUp_threshold := 50b;
+	
+	unit<dpoint> WorldMollweide    : SpatialReference = "ESRI:54009";
+	unit<ipoint> mollweide_grid_base := /Preprocessing/Urban2023/BuiltUpPresence_R2023_Create/Y1975/big_raster;
+
+	parameter<float64> gridsize := 100d;
+	parameter<int32> nr_cols := int32(360820);
+	parameter<int32> nr_rows := int32(180000);
+	parameter<float64> y_max := float64(9000000);
+	parameter<float64> x_min := float64(-18041000);
+	
+	
+	unit<ipoint> mollweide_grid :=
+		range(
+			 gridset(
+				 WorldMollweide
+				,point(-gridsize, gridsize, WorldMollweide)
+				,point(y_max, x_min, WorldMollweide)
+				,ipoint
+			)
+			,point(0i, 0i)
+			,point(nr_rows, nr_cols)
+		),	DialogData = "mollweide_grid_base"
+	{
+		attribute<uint8> test := const(0b, . );
+	}
+	
+	
+	
+	template BuiltUpPresence_T : using = "units"
+	{
+		parameter<uint16> Year;
+		////
+		parameter<string> FileName := '%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2023/GHS_BUILT_S_E'+string(Year)+'_GLOBE_R2023A_54009_100_V1_0';
+		unit<DPoint> WorldMollweide := Input/WorldMollweide ;
+
+		unit<ipoint> big_raster
+			:	StorageName     = "= FileName+'.tif'"
+			,	StorageType     = "gdal.grid"
+			,	StorageReadOnly = "True"
+			,	DialogData      = "WorldMollweide"
+		{
+			attribute<uint16> GridData; // don't read this; memory will explode
+			attribute<uint16> ReadData       (mollweide_grid);
+			attribute<uint8>  GridData_uint8 (mollweide_grid):= uint8(ReadData / 100w);
+			
+			unit<uint64> urban_cells := select_with_org_rel(GridData_uint8 > 0b), DialogType = "map", DialogData = "org_rel"  
+			{
+				attribute<input/WorldMollweide> org_rel_to_mollweide := convert(org_rel,input/WorldMollweide);
+				attribute<Input/latlong> latlon_point := convert(org_rel_to_mollweide, Input/latlong);
+				attribute<Input/latlong> latlon_point_swapped := point(PointCol(latlon_point), PointRow(latlon_point), Input/latlong);
+				attribute<Input/gtopo> gtopo_rel := convert(latlon_point_swapped, Input/gtopo);
+				
+				attribute<WorldMollweide> WorldMollweide_coordinates := org_rel[WorldMollweide];
+				parameter<meter2>             AreaPerCell         := 100[meter] * 100[meter];
+				attribute<uint8>              PercUrban           := select_data(., GridData_uint8);
+				attribute<meter2>             UrbanArea_threshold := PercUrban >= BuiltUp_threshold ? AreaPerCell : 0[meter2];
+				attribute<meter2>             UrbanArea           := AreaPerCell * float32(PercUrban);
+				
+				attribute<Input/latlong> latlong_coord_reversed := WorldMollweide_coordinates[Input/latlong];
+				attribute<Input/latlong> latlong_coord          := Point(PointCol(latlong_coord_reversed), PointRow(latlong_coord_reversed), Input/latlong);
+				
+				unit<uint8> Countries := Input/administrative/Countries/Country;
+				attribute<Countries> Country_rel := point_in_polygon(latlong_coord, Countries/geometry);
+			}
+		}
+		
+
+		 
+		attribute<uint32> TotalGridData      (Input/gtopo) := sum(uint32(big_raster/urban_cells/PercUrban), big_raster/urban_cells/gtopo_rel), DialogData = "input/wms_layer_llh", FreeData = "false";
+	}
+
+	template Population_T : using = "units"
+	{
+		parameter<uint16> Year;
+		////E:\SourceData\2UP\population\Past
+		parameter<string> FileName := '%MondiaalDataDir%/population/Past/2023/GHS_POP_E'+string(Year)+'_GLOBE_R2023A_54009_100_V1_0';
+		unit<DPoint> WorldMollweide := WorldMollweide ;
+
+		unit<ipoint> big_raster
+			:	StorageName     = "= FileName+'.tif'"
+			,	StorageType     = "gdal.grid"
+			,	StorageReadOnly = "True"
+			,	DialogData      = "WorldMollweide"
+		{
+			attribute<float64> GridData; // don't read this; memory will explode
+			attribute<float64> ReadData       (mollweide_grid);
+			attribute<float32> GridData_f32   (mollweide_grid):= float32(ReadData);
+			
+			unit<uint64> populated_cells := select_orgrel(GridData_f32 > 0f), DialogType = "map", DialogData = "org_rel"
+			{
+				attribute<float32>        Population             := select_data(., GridData_f32);
+				attribute<WorldMollweide> WorldMollweide_coord   := org_rel[WorldMollweide];
+				
+				attribute<Input/latlong>  latlong_coord_reversed := WorldMollweide_coord[Input/latlong];
+				attribute<Input/latlong>  latlong_coord          := Point(PointCol(latlong_coord_reversed), PointRow(latlong_coord_reversed), Input/latlong);
+				
+				unit<uint8>               Countries              := Input/administrative/Countries/Country;
+				attribute<Countries>      Country_rel            := point_in_polygon(latlong_coord, Countries/geometry);
+			}
+		}
+	}
+
+	unit<uint8> JrcDataset : nrofrows = 4 { attribute<uint16> year: [ 1975, 1990, 2000, 2014 ]; attribute<string> name := 'Y'+string(year); }
+	unit<uint8> GHS_years : nrofrows = 12 { attribute<uint16> year: [1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]; attribute<string> name := 'Y'+string(year); }
+
+	container BuiltUpPresence_R2023_Create := for_each_ne(GHS_years/name, 'BuiltUpPresence_T('+string(GHS_years/year)+'w)');
+	container Population_R2023_Create      := for_each_ne(GHS_years/name, 'Population_T('+string(GHS_years/year)+'w)');
+}
+
+
+

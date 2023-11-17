@@ -1,0 +1,29 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP september 2018             //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Scraping items together of start maps (5 times same for SSP, only call one in batch)
+
+container Start
+{
+	parameter<string> FolderFilenameprefix :==quote(folder + '/' + Method+Variant+InPresentUrban);
+
+	unit<wpoint> gtopo     :=Input/gtopo
+	{
+		attribute<Classifications/PopClass>                                tpop_classification: StorageName    = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix  +'_start_tpop_classification.tif'";
+		attribute<float32>                                                 upop: StorageName                   = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_upop.tif'";
+		attribute<float32>                                                 rpop: StorageName                   = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_rpop.tif'";
+		attribute<bool>                                                    IsUrban: StorageName                = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_urb.tif'";
+		attribute<Classifications/Urb/IsUrbClassSea>                       IsUrbanClassification: StorageName  = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_urb_classification.tif'";
+		attribute<uint32>                                                  urbCountry: StorageName             = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_urbCountry.tif'";
+		attribute<float32>                                                 bua_fraction: StorageName           = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_bua_fraction.tif'";
+		attribute<float32>                                                 buakm2: StorageName                 = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_buakm2.tif'";
+		attribute<float32>                                                 popd: StorageName                   = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_popd.tif'";
+		attribute<Classifications/PopClass>                                popd_classification: StorageName    = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_popd_classification.tif'";
+		attribute<Classifications/Settlement_Model_L2_nomenclature_export> smod: StorageName                   = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_smod.tif'";
+	}
+}

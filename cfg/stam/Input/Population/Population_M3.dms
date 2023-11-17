@@ -1,0 +1,49 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author: Bas van Bemmel
+// Function: to generate urbanpop-map for M3-method
+
+container M3
+{
+	//2010 for all SSP's same choose just one SSP2--> BAU
+	unit<uint32> Tpop_claim:=Claims/Scenario/M3/SSP2/FileData
+		{
+			attribute<string> Region                      := Claims/Scenario/M3/SSP2/FileData/Region;
+			attribute<string> SSP2_population_to_use_2010 := Claims/Scenario/M3/SSP2/FileData/population_to_use_2010;
+
+			attribute<Input/administrative/Countries/Country> Country_rel := rlookup(Region, Input/administrative/Countries/Country/ISO3);
+			attribute<Input/LatLong> PolyData (polygon)    := Input/administrative/Countries/Country/Geometry[ Country_rel ];
+			
+			attribute<string>  Label := Region;
+			attribute<float32> population_to_use := SSP2_population_to_use_2010[float32];
+		}
+
+	attribute<float32> tpop_to_use(administrative/Countries/Country)  := Tpop_claim/population_to_use[invert(Tpop_claim/Country_rel)] * 1000000f;
+	//this is needed for equalization of the pop-map to SSP-pop 2010
+	attribute<float32> TotalPopulation2010 (gtopo)     := scalesum(Population/Past/PastDates/Y2015[float32],administrative/Countries/Country_grid , tpop_to_use);
+
+	attribute<float32> Missing_pop (administrative/Countries/Country) := tpop_to_use - sum(TotalPopulation2010, administrative/Countries/Country_grid);
+
+	//this item is used in future modelling!
+	attribute<Person> UrbanPopulation2010 (gtopo)     := value(TotalPopulation2010 * Input/UrbanArea/UrbanArea2010/ReadData[float32], Person);
+
+	//attribute<float32> RuralPopulation2010 (gtopo)     := Input/UrbanArea/UrbanArea2010/ReadData[bool] ? 0.0f : TotalPopulation2010;
+	
+	//for reporting purposes
+	attribute<float32> UrbanPopulationCountry2010(administrative/Countries/Country) := sum(UrbanPopulation2010, administrative/Countries/Country_grid);
+	
+	container Urban_pop_2010
+	{
+		attribute<Person_km2> UrbanMeanPopDensity(administrative/Countries/Country )       := sum(UrbanPopulation2010, administrative/Countries/Country_grid) / UrbanArea;
+		attribute<km2>        UrbanArea(Input/administrative/Countries/Country )           := sum(Float32(Input/UrbanArea/UrbanArea2010/ReadData) * gtopo/area, administrative/Countries/Country_grid);
+	}
+
+	#include <PopulationDensity8dir.dms>
+	#include <PopulationDensity8dir_2021.dms>
+	#include <Population8dir.dms>
+}

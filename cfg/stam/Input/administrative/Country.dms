@@ -1,0 +1,142 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+// Remark:   Difference between Country_grid and ClaimCountry_grid --> ClaimCountry_grid only the countries where claims are available
+
+container Countries
+{	
+	parameter<string> ISO3str:="NLD"; //put countries_test for testing
+	parameter<string> SQLStringParam := 'SELECT * FROM countries_GADM_2012_UCD_v10 WHERE ISO3 = ' + quote(ISO3str) ;
+	
+	unit<uint8> Country
+		:  StorageName = "%MondiaalDataDir%/administrative/countries/countries_GADM_2012_UCD_v10.shp"
+		//activate to Run model for future with Countries with claim
+		//,  SQLString       = "SELECT * FROM countries_GADM_2012_UCD_v10 WHERE InModel =1"
+		//		,  SQLString       = "SELECT * FROM countries_GADM_2012_UCD_v10 WHERE contv2 ='Asia'" 
+		//activate to Run model for validation with Countries with population
+		//,  SQLString       = "SELECT * FROM countries_GADM_2012_UCD_v10 WHERE InVal =1"		
+		
+		//activate to Run model for only one country see parameter ISO3str -->
+		//,  SQLString         = "= SQLStringParam"
+
+		,  StorageType     = "gdal.vect"
+		,  url             = "%MondiaalDataDir%/administrative/countries/countries_GADM_2012_UCD_v10.txt"
+		,  StorageReadOnly = "True"
+		,  Source          = ""
+		,  DialogType         = "Map"
+		,  DialogData         = "Geometry"
+	{
+		attribute<uint8>   ID          := id(.);
+		attribute<uint32>  one         := const(1u,.);
+		attribute<LatLong> Geometry(polygon);
+		attribute<LatLong_mdegrees> Geometry_mdegrees       (polygon) := Geometry[LatLong_mdegrees];
+		attribute<LatLong_mdegrees> Geometry_mdegrees_clean (polygon) := partitioned_union_polygon(Geometry_mdegrees,id(.));
+		
+		attribute<mainland>mainland_rel     := rlookup(one, mainland/values);
+
+		attribute<uint8>   ID_0;            //number in shapefile (from dbf), prefer not to change this across different countries_GADM_2012_UCD_vx-versions
+		attribute<string>  ID_0_str         :="nr_" + string(ID_0);
+		attribute<string>  Name;
+		attribute<string>  Name_cor         :=replace(Name,"," ,"");//Bonaire, Saint Eustatius and Saba AND Virgin Islands, U.S. comma is seperator in Excel not handy
+		attribute<string>  Name_from_utf    :=from_utf(Name);
+		attribute<string>  Name_from_utf_cor    :=replace(Name_from_utf," ","_","Å","A",",","_","''","_","-","_",".","","'","","__","_");
+		attribute<string>  Label            := Name;
+		attribute<string>  ISO3;
+		attribute<string>  ISO3_cor         :=replace(ISO3,"-","_");
+		attribute<uint32>  claimnumber      := rlookup(id,Claims/Scenario/M1/SSP2/FileData/Country_rel);
+		attribute<uint32>  grid_count       := pcount(Country_grid);
+		attribute<km2>     area             := sum(gtopo/area ,Country_grid);
+		attribute<km2>     km2WCEA;         //surface area according to World_Cylindrical_Equal_Area in ArcGIS 10.3.1
+		attribute<km>      perikmWCEA;      //perimeter according to World_Cylindrical_Equal_Area in ArcGIS 10.3.1
+		attribute<km2>     dif_km2WCEA_area :=km2WCEA - area;
+		attribute<string>  Continent        := contv2;
+		attribute<string>  Continent_cor    := replace(Continent,'-','_');
+		attribute<bool>    IsIsland         := is_eiland[bool];
+		attribute<uint32>  InModel;
+		attribute<uint32>  InVal;            //1=pop ,2=no pop
+
+		attribute<Input/administrative/Continent/cont_uq>  Continent_id              := rlookup(Continent_cor, Input/administrative/Continent/cont_uq/Values);
+		attribute<Input/administrative/Continent/cont_uq>  Continent_id_grid (gtopo) := Continent_id[Country_grid];
+		
+		attribute<string>  World                                                 := ID < 0b ? '-' :'World';
+		attribute<Input/administrative/World/world_uq>     World_ID              := rlookup(World, Input/administrative/World/world_uq/Values);
+		attribute<Input/administrative/World/world_uq>     World_id_grid (gtopo) := World_ID[Country_grid];
+		
+		parameter<uint32>                PenColor      := rgb(0,0,255),DialogType = "PenColor";
+		parameter<float64>               PenWorldWidth := 0.0000001[float64],  DialogType = "PenWorldWidth";
+	}
+	
+	unit<uint8> mainland := unique(Country/one)
+	{
+		attribute<LatLong_mdegrees> mainland_1pol (polygon) := partitioned_union_polygon(ipolygon(Country/Geometry_mdegrees), Country/mainland_rel)[LatLong_mdegrees];
+	}
+
+		//necassary for some classifications if working with smaller extent as world (distingush not modelled countries and sea)
+		unit<ipoint> IsCountryWorld:StorageName = "%MondiaalDataDir%/administrative/countries/IsCountry_v10.tif",
+		StorageType     = "gdal.grid",
+		Source          = "export of item /Input/administrative/Countries/IsCountry GeoDMS 7.308 PD 7354 TowardsAnUrbanPreview SD 7353 2UP",
+		StorageReadOnly = "True",
+		DialogData      = "LatLong"
+		{
+			attribute<uint8> ReadData(gtopo);
+			attribute<bool>  IsCountryWorld_bool (gtopo): = (ReadData[uint32]==1 ? 1 :0)[bool];
+		}
+
+	unit<uint32> single_polygons := split_polygon(Country/Geometry_mdegrees_clean)
+	{
+		attribute<Input/LatLong_mdegrees>    Geometry (poly)
+		{
+			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+		}
+	}
+
+	//gridded country before claimed
+	attribute<Country> Country_grid (gtopo)                        := poly2grid(Country/Geometry , gtopo);
+	attribute<Classifications/Country> Country_grid_Carto (gtopo)  := Country_grid[Classifications/Country];
+
+	unit<uint8> TopoCountry := Country
+	{
+		attribute<LatLong> Geometry(polygon) := Country/Geometry;
+		attribute<UInt32> BrushColor := const(0/0, .), DialogType = "BrushColor";
+	}
+
+	//  Not all countries in country shapefile have a claim e.g. exist in the SSP claim tables. This new country map is used to present the correct claim regions 
+	unit<uint8> ClaimCountries: DialogType = "Map", DialogData= "PolyData"
+	{
+		attribute<uint8> ClaimCountry (Country):= rlookup(Country/ISO3, /Claims/Scenario/M1/SSP2/FileData/Region)[uint8];
+	}
+
+	//	This grid is used for the compacted domain definition in Scenarios.dms
+	attribute<uint8>   ClaimCountry_grid (gtopo)     := poly2grid(Claims/Scenario/M1/SSP2/Filedata/PolyData, gtopo)[uint8];
+	attribute<bool>    IsClaimCountry (gtopo)        := ClaimCountry_grid[int16] > -1s;
+	attribute<bool>    IsNotClaimCountry (gtopo)     := !IsClaimCountry;
+	attribute<float32> IsNotClaimCountryNull (gtopo) := IsClaimCountry ? 0f/0f : 1f;
+
+	attribute<string>  Name(gtopo):=rjoin(ClaimCountry_grid, Input/administrative/Countries/Country/claimnumber[uint8], Input/administrative/Countries/Country/name);
+	attribute<string>  ISO3(gtopo):=rjoin(ClaimCountry_grid, Input/administrative/Countries/Country/claimnumber[uint8], Input/administrative/Countries/Country/ISO3);
+
+	attribute<bool>        IsCountry (gtopo)        := Country_grid[int16] > -1s;
+	attribute</Units/km2>  IsCountrykm2 (gtopo)     := IsCountry[float32] * /Input/gtopo/area;
+	
+	
+	attribute<float32> IsCountryNull (gtopo)    := IsCountry ? 1f : 0f/0f;
+	attribute<bool>    IsNotCountry (gtopo)     := !IsCountry;
+	attribute<float32> IsNotCountryNull (gtopo) := IsCountry ? 0f/0f : 1f;
+
+
+	attribute<string> key             (gtopo) := string(IsCountry[uint2]) + "_" + string(CompactedDomain/IsCD[uint2]);
+	attribute<bool>   IsCountryNotCD  (gtopo) := strcount(key, '1_0') > 0;//lakes (but also ice!)
+	attribute<bool>   NotCountryNotCD (gtopo) := strcount(key, '0_0') > 0;//oceans-sea, but only with SQLString deactived
+	
+	unit<uint32> NotCountry := Subset(IsNotCountry)
+	{
+		attribute<LatLong> Geometry := nr_OrgEntity[LatLong];
+	}
+}

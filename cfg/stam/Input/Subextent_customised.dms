@@ -1,0 +1,48 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//Auhor:    Bas van Bemmel
+//Function: to get extent of each ISO3, produced by countries_GADM_2012_UCD_v5.dbf MIN_X_INT	MAX_X_INT	MIN_Y_INT	MAX_Y_INT
+
+container subextent
+{
+	unit<dpoint> LatLong_World                    := range(LatLong_Base, point(-90.0,-180.0), point(90.0, 180.0));
+
+	//For fast testing with extent of 1 country (no other country within extent)
+	unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point( 62.0, -25.0), point(68.0,-12.0));
+
+	unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point(-51.0, -40.0), point(85.0, 71.0));
+	unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point(-66.0, 170.0), point(85.0, 75.0));
+	
+	//continents
+	unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point( 29.0, -11.0), point(61.0, 30.0));
+	unit<dpoint> LatLong_Europe2                  := range(LatLong_Base, point( 24.0, -34.0), point(84.0, 41.0));
+
+	//based at min max Continent-field countries, doesnt work over datum-lines
+	unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point(-47.0, -26.0), point( 38.0, 64.0));
+	unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point(-90.0,-180.0), point(-11.0,180.0));
+	unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point(-13.0,-180.0), point( 82.0,180.0));
+	unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point(-56.0,-180.0), point( 29.0,180.0));
+	unit<dpoint> LatLong_Europe3                  := range(LatLong_Base, point( 27.0, -32.0), point( 81.0, 41.0));
+	unit<dpoint> LatLong_North_America            := range(LatLong_Base, point(  5.0,-180.0), point( 84.0,180.0));
+	unit<dpoint> LatLong_South_America            := range(LatLong_Base, point(-56.0,-110.0), point( 18.0,-28.0));
+
+	//countries
+	// Europe
+	unit<dpoint> LatLong_test                     := range(LatLong_Base, point(52.04, 5.04), point(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
+	unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point( 51.8,  4.7), point(52.3, 5.7));
+	unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point( 45.0, -2.0), point(54.0,11.0));
+	unit<dpoint> LatLong_Netherlands_narrow       := range(LatLong_Base, point( 50.7,  3.3), point(54.0, 7.3));
+	unit<dpoint> LatLong_Netherlands_visual       := range(LatLong_Base, point( 41.0, -9.0), point(61.0,20.0));//NL,BE,LUX,FR,GB,GE total in extent
+	unit<dpoint> LatLong_Benelux                  := range(LatLong_Base, point( 49.0,  2.0), point(54.0,8.0));//NL,BE,LUX
+	unit<dpoint> LatLong_Benelux_Germany          := range(LatLong_Base, point( 47.15, 2.5), point(55.1,15.15));//NL,BE,LUX,GER
+	
+	unit<dpoint> LatLong_Tromso                   := range(LatLong_Base, point( 69.0,  18.0), point(70.0, 20.0));
+
+	// code does not work over 0 meridian!
+	//unit<dpoint> LatLong_New_Sealand := range(LatLong_Base, point(-54.0, 163.0), point(-28.0, -174.0));
+}

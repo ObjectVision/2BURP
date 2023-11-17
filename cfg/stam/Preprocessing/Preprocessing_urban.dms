@@ -1,0 +1,177 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Maarten Hilferink, Bas van Bemmel
+// Function: Resample 38mtr urban maps (built-up presence by epoch) from SphericalMercator to WGS84 (gtopo) urban boolean maps (at least 50% built-up). Input for M2M3var1
+
+container Urban
+{
+	template UrbanAreaJRC_T {
+		// template parameters
+		parameter<string> FileName;
+		// end case parameters
+
+		unit<DPoint> SphericalMercator := /Input/SphericalMercator;
+
+		unit<ipoint> big_raster
+			:	StorageName     = "= FileName+'.tif'"
+			,	StorageType     = "gdal.grid"
+			,	url             = "%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/Global_Human_Settlement_GHS_BUILT_UP_GRID_European_Commission.htm"
+			,	Source          = "JRC"
+			,	StorageReadOnly = "True"
+			,	DialogData      = "SphericalMercator"
+		// From {0, 0} to {647168, 507904} for P1
+		{
+			attribute<uint8> GridData; // don't read this; memory will explode
+			//attribute<uint8> Build:=GridData - 100b;//geeft voor 1-->157
+			attribute<bool> Build_bool:=GridData=101b;
+			unit<ipoint> tiled_big_raster := TiledUnit(point(10240i, 10240i, big_raster)) {
+				attribute<uint8> GridData;
+				
+	//			attribute<Input/gtopo> gtopo_rel := mapping(., Input/gtopo); TODO Maarten Hilferink: Virtual Tiles
+			}
+			unit<uint64> urban_cells := select_orgrel(tiled_big_raster/GridData > 1b), DialogType = "map", DialogData = "org_rel"
+			{
+				attribute<uint8> PercUrbanPlusOne := select_data(., tiled_big_raster/GridData);
+				attribute<Input/gtopo> gtopo_rel := convert(org_rel, Input/gtopo);
+			}
+		}
+		unit<int32> rows := range(int32, PointRow(LowerBound(big_raster)), PointRow(UpperBound(big_raster))) {
+			attribute<big_raster> example_cell := point(ID(rows), const(first(ID(cols)), rows), big_raster);
+			attribute<Input/gtopo> gtopo_rel := example_cell[Input/gtopo];
+		}
+		unit<int32> cols := range(int32, PointCol(LowerBound(big_raster)), PointCol(UpperBound(big_raster))) {
+			attribute<big_raster> example_cell := point(const(first(ID(rows)), cols), ID(cols), big_raster);
+			attribute<Input/gtopo> gtopo_rel := example_cell[Input/gtopo];
+		}
+		unit<uint16> gtopo_rows := range(uint16, PointRow(LowerBound(Input/gtopo)), PointRow(UpperBound(Input/gtopo))) {
+			attribute<uint32> big_raster_count := pcount(pointrow(rows/gtopo_rel)[.]);
+		}
+		unit<uint16> gtopo_cols := range(uint16, PointCol(LowerBound(Input/gtopo)), PointCol(UpperBound(Input/gtopo))) {
+			attribute<uint32> big_raster_count := pcount(pointcol(cols/gtopo_rel)[.]);
+		}
+
+		attribute<uint32> TotalGridData      (Input/gtopo) := sum(uint32(big_raster/urban_cells/PercUrbanPlusOne-1b), big_raster/urban_cells/gtopo_rel), FreeData = "false";
+		attribute<uint32> TotalGridData_TEST1(Input/gtopo) := sum_uint32(big_raster/urban_cells/PercUrbanPlusOne-1b, big_raster/urban_cells/gtopo_rel), FreeData = "false";
+		attribute<uint32> TotalGridData_TEST2(Input/gtopo) := sum_uint32(big_raster/urban_cells/PercUrbanPlusOne, big_raster/urban_cells/gtopo_rel)-uint32(pcount(big_raster/urban_cells/gtopo_rel)), FreeData = "false";
+		attribute<uint32> TotalGridData_TEST3(Input/gtopo) := sum_uint32(big_raster/urban_cells/PercUrbanPlusOne, big_raster/urban_cells/gtopo_rel)-pcount_uint32(big_raster/urban_cells/gtopo_rel), FreeData = "false";
+//		attribute<uint16> HEAVY_cell_count   (gtopo) := mapping_count(big_raster/tiled_big_raster, gtopo, uint16), FreeData = "false";
+		attribute<uint16> LIGHT_cell_count   (Input/gtopo) := uint16(gtopo_rows/big_raster_count)[pointrow(id(Input/gtopo))] * uint16(gtopo_cols/big_raster_count)[pointcol(id(Input/gtopo))];
+	}
+
+	template BuiltUpPresenceJRC_T {
+		parameter<uint16> Year;
+
+		container P1 := UrbanAreaJRC_T('%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p1');
+		container P2 := UrbanAreaJRC_T('%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p2');
+
+		attribute<uint32> TotalGridData(Input/gtopo) := max_elem(P1/TotalGridData, P2/TotalGridData);
+		attribute<uint16> cell_count   (Input/gtopo) := max_elem(P1/LIGHT_cell_count, P2/LIGHT_cell_count);
+		attribute</Classifications/Prc/Prc_0_100>  urban_density(Input/gtopo) := MakeDefined(uint8(TotalGridData / uint32(cell_count)), 0b)
+			,	StorageName = "='%LocalDataProjDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/output/BuiltUpPresenceJRC_'+string(Year)+'.tif'";
+	}
+
+	unit<uint8> JrcDataset : nrofrows = 4 { attribute<uint16> year: [ 1975, 1990, 2000, 2014 ]; attribute<string> name := 'Y'+string(year); }
+
+	container BuiltUpPresenceJRC_Create := for_each_ne(JrcDataset/name, 'BuiltUpPresenceJRC_T('+string(JrcDataset/year)+'w)');
+
+	container BuiltUpPresenceJRC_Read := for_each_ndvat(JrcDataset/name, 
+		Input/gtopo, /Classifications/Prc/Prc_0_100, 
+		'%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/output/BuiltUpPresenceJRC_'+string(JrcDataset/year)+'.tif', 'gdal.grid'),
+		Source = "export van /Urban/UrbanAreaJRC_yyyy/LIGHT_urban_density in GeoDMS 7.159",
+		url = "";
+
+	//for postprocessing urban result
+	attribute<float32> Builtuparea(Input/gtopo)     := value((BuiltUpPresenceJRC_Read/Y2014),float32) / 100f;
+	attribute<Units/km2> Builtupareakm2(Input/gtopo)     := Builtuparea * Input/gtopo/area;
+	
+	attribute<float32> Builtuparea1990(Input/gtopo) := value((BuiltUpPresenceJRC_Read/Y1990),float32) / 100f;
+	attribute<Units/km2> Builtupareakm2_1990(Input/gtopo)     := Builtuparea1990 * Input/gtopo/area;
+	
+	attribute<float32> Builtuparea2000(Input/gtopo) := value((BuiltUpPresenceJRC_Read/Y2000),float32) / 100f;
+	attribute<Units/km2> Builtupareakm2_2000(Input/gtopo)     := Builtuparea2000 * Input/gtopo/area;
+	
+	
+	//classification of percentage, not used anywhere in the model, only visualisation
+	container BuiltUpPresenceJRC_View := for_each_nedv(JrcDataset/name, 
+		'/Classifications/Prc/Prc_0_100/Prc_0_100_K_rel[BuiltUpPresenceJRC_Read/'+JrcDataset/name+']',
+		Input/gtopo, /Classifications/Prc/Prc_0_100_K),
+		Source = "export of /Urban/UrbanAreaJRC_yyyy/LIGHT_urban_density in GeoDMS 7.159",
+		url = "";
+
+	unit<uint32> Jaartal: nrofrows = 4
+	{
+		attribute<int16>  dc:    [1975,1990,2000,2014];
+		attribute<int16>  dc2:   [1975,1990,2000,2015];
+		attribute<String> name:= 'y'+String(dc);
+		attribute<String> name2:='y'+String(dc2);
+	}
+
+	//these items are used for the modelling
+	container BuiltUpBoolJRC_50prc: =
+		for_each_nedvd(
+			 Jaartal/name
+			  ,'BuiltUpPresenceJRC_Read/'+ Jaartal/name + '> 50b'
+			,  Input/gtopo
+			,  bool
+			,  'Urban area 50percent in past year ' + String(Jaartal/dc)
+		);
+		
+	container BuiltUpBoolJRC_50prc_km2: =
+		for_each_nedvd(
+			 Jaartal/name
+			 ,'value(BuiltUpBoolJRC_50prc/'+ Jaartal/name + ',float32)*/Input/gtopo/area'
+			,  Input/gtopo
+			,  Units/km2
+			,  'Urban area in km2' + String(Jaartal/dc)
+		);
+
+	container NotBuiltUpBoolJRC_50prc: =
+		for_each_nedvd(
+			 Jaartal/name
+			  ,'!BuiltUpBoolJRC_50prc/'+ Jaartal/name
+			,  Input/gtopo
+			,  bool
+			,  'Not Urban area 50percent in past year ' + String(Jaartal/dc)
+		);
+
+	container Urban_km2: =
+		for_each_nedvd(
+			 Jaartal/name
+			  ,'BuiltUpBoolJRC_50prc/'+ Jaartal/name + '[float32] * Input/gtopo/area'
+			,  Input/gtopo
+			,  Units/km2
+			,  'Urban km2 in past year ' + String(Jaartal/dc)
+		);
+
+	container BuiltUpSum: =
+		for_each_nedvd(
+			 Jaartal/name
+			 ,'sum(value(BuiltUpBoolJRC_50prc/'+ Jaartal/name + ',uint32), Input/administrative/Countries/Country_grid)'
+			,  Input/administrative/Countries/Country 
+			,  uint32
+			,  'Sum Urban area ' + String(Jaartal/dc)
+		);
+
+	container BuiltUpSum_km2: =
+		for_each_nedvd(
+			 Jaartal/name2
+			 ,'sum(value(BuiltUpBoolJRC_50prc_km2/'+ Jaartal/name + ',Units/km2), Input/administrative/Countries/Country_grid)'
+			,  Input/administrative/Countries/Country 
+			,  Units/km2
+			,  'Sum Urban area in km2 ' + String(Jaartal/dc)
+		);
+
+	container BuiltUpSum_km2_1990: =
+		for_each_nedvd(
+			 Jaartal/name2
+			 ,'BuiltUpSum_km2/Y1990'
+			,  Input/administrative/Countries/Country 
+			,  Units/km2
+			,  'Sum Urban area in km2 ' + String(Jaartal/dc)
+		);
+}

@@ -1,0 +1,66 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//Auhor:    Bas van Bemmel
+//Function: to get extent of certain areas / group of ISO3
+
+container Subextent_special
+{
+		unit<dpoint> LatLong_Germanies                := range(LatLong_Base, point( 45.5,  5.5), point(55.0,15.1));
+		unit<dpoint> LatLong_France                   := range(LatLong_Base, point( 41.0, -7.0), point(52.0,10.0));
+		unit<dpoint> LatLong_Italy                    := range(LatLong_Base, point( 35.0,  6.0), point(48.0,30.0));
+		unit<dpoint> LatLong_Bulgaria                 := range(LatLong_Base, point( 40.0, 22.0), point(45.0,30.0));
+		unit<dpoint> LatLong_Ukraine                  := range(LatLong_Base, point( 43.0, 21.0), point(54.0,41.0));
+		unit<dpoint> LatLong_Finland                  := range(LatLong_Base, point( 59.0, 20.0), point(71.0,31.0));
+		unit<dpoint> LatLong_Netherlands_Iceland      := range(LatLong_Base, point( 45.0,-25.0), point(68.0,11.0));
+
+		unit<dpoint> LatLong_SRTM3_border             := range(LatLong_Base, point( 58.0, -2.0), point(62.0, 17.0));//to check SRTM-GTOPO30 border 60 degrees latitude)
+
+		// Africa
+		unit<dpoint> LatLong_West_Africa              := range(LatLong_Base, point(  3.0,-15.0), point( 15.0,  5.0));
+		unit<dpoint> LatLong_West_Africa_incl_Nigeria := range(LatLong_Base, point(  3.0,-15.0), point( 15.0, 15.0));
+		unit<dpoint> LatLong_Benin_Nigeria            := range(LatLong_Base, point(  4.0,  0.0), point( 14.0, 15.0));
+		unit<dpoint> LatLong_Mali                     := range(LatLong_Base, point( 11.0,  0.0), point( 25.0, 17.0));
+		unit<dpoint> LatLong_Sudan_old                := range(LatLong_Base, point(  3.0, 21.0), point( 22.0, 39.0));
+		unit<dpoint> LatLong_Gabon                    := range(LatLong_Base, point( -5.0,  7.0), point(  3.0, 16.0));
+		unit<dpoint> LatLong_East_Africa              := range(LatLong_Base, point(  0.0, 32.0), point( 20.0, 49.0));
+		unit<dpoint> LatLong_Tanzania                 := range(LatLong_Base, point(-12.0, 28.0), point(  1.0, 41.0));
+		unit<dpoint> LatLong_Zimbabwe                 := range(LatLong_Base, point(-23.0, 24.0), point(-15.0, 34.0));
+		unit<dpoint> LatLong_Zimbabwe_Groot           := range(LatLong_Base, point(-36.0, 10.0), point(-10.0, 44.0));
+		unit<dpoint> LatLong_Lesotho                  := range(LatLong_Base, point(-31.0, 26.0), point(-28.0, 30.0));
+		unit<dpoint> LatLong_SouthAfrica              := range(LatLong_Base, point(-36.0, 14.0), point(-22.0, 34.0));
+		unit<dpoint> LatLong_Ethiopia                 := range(LatLong_Base, point(  3.0, 32.0), point( 15.0, 49.0));
+		unit<dpoint> LatLong_Namibia                  := range(LatLong_Base, point(-29.0, 10.0), point(-16.0, 26.0));
+		unit<dpoint> LatLong_Angola                   := range(LatLong_Base, point(-18.0, 11.0), point( -5.0, 25.0));
+
+		//Asia
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point(  5.0, 67.0), point(54.0,130.0));
+		unit<dpoint> LatLong_Delhi                    := range(LatLong_Base, point( 27.0, 75.0), point(31.0, 79.0));
+		unit<dpoint> LatLong_China                    := range(dpoint,       point( 15.0, 70.0), point(55.0,140.0));
+		unit<dpoint> LatLong_Japan                    := range(LatLong_Base, point( 21.0,115.0), point(55.0,156.0));
+		unit<dpoint> LatLong_Taiwan                   := range(LatLong_Base, point(  2.0,119.0), point(26.0,123.0));
+		unit<dpoint> LatLong_Philippines              := range(dpoint,       point(  5.0,110.0), point(20.0,130.0));
+		unit<dpoint> LatLong_Indonesia_Philippines    := range(dpoint,       point(-12.0, 93.0), point(23.0,142.0));
+		unit<dpoint> LatLong_Maldives                 := range(dpoint,       point( -1.0, 70.0), point(13.0, 85.0));
+		unit<dpoint> LatLong_Afghanistan              := range(LatLong_Base, point( 29.0, 60.0), point(40.0, 75.0));
+		unit<dpoint> LatLong_MidEast                  := range(LatLong_Base, point( 23.0, 43.5), point(43.5, 78.5));
+		unit<dpoint> LatLong_Tobago                   := range(LatLong_Base, point(  8.0,-64.0), point(16.0,-56.0));
+		unit<dpoint> LatLong_EastTimor                := range(LatLong_Base, point(-10.0,124.0), point(-8.0,128.0));
+		unit<dpoint> LatLong_New_Sealand              := range(LatLong_Base, point(-54.0, 179.0), point(-31.0, 162.0));
+		
+		//North-South America
+		unit<dpoint> LatLong_USA                      := range(LatLong_Base, point( 17.0,172.0), point( 75.0,-60.0));
+		unit<dpoint> LatLong_Argentina                := range(LatLong_Base, point(-55.0,-75.0), point(-21.0,-52.0));
+		
+		//Australia
+		unit<dpoint> LatLong_Australia                := range(LatLong_Base, point(-45.0,107.0), point( -8.0,157.0));
+
+		//Testing
+		unit<dpoint> LatLong_Testing_1degree          := range(LatLong_Base, point(-90.0,-180.0), point(-89.0,-179.0));
+		unit<dpoint> LatLong_Testing_10degrees        := range(LatLong_Base, point( 45.0,   2.0), point( 55.0,  12.0));
+		unit<dpoint> LatLong_Testing_50degrees        := range(LatLong_Base, point( 35.0, -10.0), point( 85.0,  40.0));
+}

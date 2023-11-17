@@ -1,0 +1,42 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2023                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: get stats for whole files without null-values
+
+container Stats
+{
+	container Pop := 
+		for_each_nedv(ProjectionDate/name,
+			'MakeDefined('
+				'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/Pop), '
+				'0f'
+			')'
+			, Input/gtopo
+			,Float32
+		);
+		
+	container UrbanPop := 
+	for_each_nedv(ProjectionDate/name,
+		'MakeDefined('
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/UrbanPop), '
+			'0f'
+		')'
+		, Input/gtopo
+		,Float32
+	);
+	
+	container RuralPop := 
+	for_each_nedv(ProjectionDate/name,
+		'MakeDefined('
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/RuralPop), '
+			'0f'
+		')'
+		, Input/gtopo
+		,Float32
+	);
+}

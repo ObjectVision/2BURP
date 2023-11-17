@@ -1,0 +1,26 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Geography_real_distance: Using = "Units"
+{
+	container Distmatrices: isTemplate = "True"
+	{
+		parameter<float32> Latitude;
+
+		container Impl
+		{
+			container pot40km :=Templates/potrange(value(1, km), value(40, km),Latitude);
+		}
+		unit<spoint> pot40km :=Impl/pot40km/PotRange;
+	}
+
+	#include<Templates_real_distance.dms>
+}
+

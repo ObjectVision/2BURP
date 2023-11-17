@@ -1,0 +1,19 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Generate M_1 Urban map in /Input/UrbanArea. Fill population map from highest values until pop-claim is met
+//			 Used in /Input/UrbanArea/UrbanArea2010 if M1 ia active
+
+container UrbanM1
+{
+		attribute<float32> rank(Input/CompactedDomain)                             := -Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel][float32];
+		attribute<float32> cuttingline(/Input/administrative/Countries/Country )   := nth_element_weighted(rank, /Claims/Scenario/M1/SSP2/FileData/urbanpop2010_f_c, Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel], Scenarios/SSPs/SSP2/CompactedDomain/Country_rel);
+
+		//possible slightly more pop then urbanpop2010_f_c when summed with IsUrban 
+		attribute<bool>    IsUrban   (Input/CompactedDomain)   := rank <= cuttingline[Scenarios/SSPs/SSP2/CompactedDomain/Country_rel];
+}

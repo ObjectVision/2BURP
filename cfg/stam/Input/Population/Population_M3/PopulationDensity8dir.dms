@@ -1,0 +1,65 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container PopulationDensity8dir
+{
+	container Y1990
+	{
+		attribute<float32> TotalPopulation1990 (gtopo)            := Input/Population/Past/PastDates/Y1990;
+		attribute<Person_km2> TotalPopulationDensity1990 (gtopo)  := (TotalPopulation1990[Person] / gtopo/area);
+
+		attribute<Person_km2> North      (gtopo) := TotalPopulationDensity1990[(gtopo/id) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (gtopo) := TotalPopulationDensity1990[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (gtopo) := TotalPopulationDensity1990[(gtopo/id) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (gtopo) := TotalPopulationDensity1990[(gtopo/id) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (gtopo) := TotalPopulationDensity1990[(gtopo/id) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (gtopo) := TotalPopulationDensity1990[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (gtopo) := TotalPopulationDensity1990[(gtopo/id) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (gtopo) := TotalPopulationDensity1990[(gtopo/id) - point(1w, 1w, wpoint)];
+
+		attribute<Person_km2> TotalPopulationDensity1990_8dir_org   (gtopo) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /8f;
+
+		attribute<float32> TotalPopulationDensity1990_8dir (gtopo)    := MakeDefined(TotalPopulationDensity1990_8dir_org,0f);
+	}
+	
+	container Y2010
+	{
+		attribute<Person_km2> TotalPopulationDensity2010 (gtopo)  := (TotalPopulation2010[Person] / gtopo/area);
+
+		attribute<Person_km2> North      (gtopo) := TotalPopulationDensity2010[(gtopo/id) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (gtopo) := TotalPopulationDensity2010[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (gtopo) := TotalPopulationDensity2010[(gtopo/id) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (gtopo) := TotalPopulationDensity2010[(gtopo/id) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (gtopo) := TotalPopulationDensity2010[(gtopo/id) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (gtopo) := TotalPopulationDensity2010[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (gtopo) := TotalPopulationDensity2010[(gtopo/id) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (gtopo) := TotalPopulationDensity2010[(gtopo/id) - point(1w, 1w, wpoint)];
+
+		attribute<Person_km2> TotalPopulationDensity2010_8dir_org      (gtopo) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /8f;
+
+		attribute<float32> TotalPopulationDensity2010_8dir (gtopo)    := MakeDefined(TotalPopulationDensity2010_8dir_org,0f);
+	}
+}

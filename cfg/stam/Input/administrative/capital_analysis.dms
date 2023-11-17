@@ -1,0 +1,162 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Capital
+{
+	//ISO3: point in polygon countries_GADM_2012_UCD_v4 ArcGIS 10.3.1
+	//name: point in polygon countries_GADM_2012_UCD_v4 ArcGIS 10.3.1
+	//cont: point in polygon countries_GADM_2012_UCD_v4 ArcGIS 10.3.1
+	//p_i_p: point in  polygon with countries_GADM_2012_UCD_v4? 0=no, 1 =yes, if no--> handmade spatial search (nearest)
+	
+	unit<uint32> UN
+		:  StorageName     = "%MondiaalDataDir%/administrative/Capital/WUP2018_F13_Capital_Cities_v2.gdb"
+		,  SQLString      = "SELECT * FROM WUP2018_F13_Capital_Cities_v2 WHERE ISO3   ='NLD' OR ISO3   ='BEL' OR ISO3   ='LUX'"
+		//,  SQLString      = "SELECT * FROM WUP2018_F13_Capital_Cities_v2 WHERE ISO3 <>'VAT' AND ISO3  <>'COG'"
+		//,  SQLString      = "SELECT * FROM WUP2018_F13_Capital_Cities_v2 WHERE Capital_City ='Kabul'"
+		,  StorageType     = "gdal.vect"
+		,  url             = "https://www.google.nl/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwi606TqvbrmAhUMilwKHRObBSQQFjAAegQIAxAC&url=https%3A%2F%2Fpopulation.un.org%2Fwup%2FDownload%2FFiles%2FWUP2018-F13-Capital_Cities.xls&usg=AOvVaw0RIpv4-1Vfe5IMk3oilAzA"
+		,  StorageReadOnly = "True"
+		,  Source          = "WUP2018-F13-Capital_Cities.gdb",
+		DialogType         = "Map",
+		DialogData         = "Geometry"
+	{
+		//layername: WUP2018_F13_Capital_Cities
+		attribute<Input/LatLong> Geometry
+		{
+			parameter<uint32>  SymbolColor     := rgb(255,0,0),DialogType = "SymbolColor";
+			parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
+			parameter<float32> SymbolWorldSize := 0.05f,       DialogType = "SymbolWorldSize";
+		}
+		attribute<Input/gtopo> gtopo_rel                        := Geometry[Input/gtopo];
+		attribute<uint32>              nrCapitals (Input/gtopo) := sum(const(1,.), gtopo_rel);
+		attribute<.>                   id2                      := id(.);
+		attribute<UN>                  un_rel     (Input/gtopo) := modus(id(UN), gtopo_rel);
+
+		attribute<float64> X         := PointCol(Geometry);
+		attribute<float64> Y         := PointRow(Geometry);
+		attribute<km2>     area      := rjoin(ISO3,Countries/Country/ISO3,Countries/Country/area);
+		attribute<km2>     km2WCEA   := rjoin(ISO3,Countries/Country/ISO3,Countries/Country/km2WCEA);
+		attribute<string>  Continent := rjoin(ISO3,Countries/Country/ISO3,Countries/Country/Continent);
+		attribute<bool>    IsIsland  := rjoin(ISO3,Countries/Country/ISO3,Countries/Country/IsIsland);
+		attribute<string>    Capital_City_cor  := replace(Capital_City,"-","_");
+
+		attribute<float32>    one  := const(1.0f,.);
+		attribute<float32>    forty  := const(40.0f,.);
+
+		//attribute<int16> SymbolIndex := id(.) < 50 ? const(169[int16], .) : const(209[int16], .) ,  DialogType = "SymbolIndex";
+
+		//attribute<UInt32> SymbColor: DialogType = "SymbolColor", Expr = "Color";
+
+		attribute</Capital/Capital_GADM/GID0> gadm0rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID0/GeometryLL);
+		attribute</Capital/Capital_GADM/GID1> gadm1rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID1/GeometryLL);
+		attribute</Capital/Capital_GADM/GID2> gadm2rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID2/GeometryLL);
+		attribute</Capital/Capital_GADM/GID3> gadm3rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID3/GeometryLL);
+		attribute</Capital/Capital_GADM/GID4> gadm4rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID4/GeometryLL);
+		attribute</Capital/Capital_GADM/GID5> gadm5rel := point_in_polygon(Geometry, /Capital/Capital_GADM/GID5/GeometryLL);
+		
+		attribute</Capital/Capital_GADM/gadm_connected>  indexrakendrel := point_in_polygon(Geometry, /Capital/Capital_GADM/gadm_connected/GeometryLL);
+
+		attribute<Input/LatLong> ub := upper_bound(/Capital/Capital_GADM/gadm_connected/GeometryLL[indexrakendrel]);
+		attribute<Input/LatLong> lb := lower_bound(/Capital/Capital_GADM/gadm_connected/GeometryLL[indexrakendrel]);
+	}
+	
+		// code below in progress, cross-section most of times 1 grid wide, but not always
+
+		container boundingbox
+		{
+			unit<uint32> sq_point := range(uint32, 0, 5);
+			unit<uint32> points := combine(sq_point, UN)
+			{
+				attribute<Input/LatLong> all := union_data(.
+					,	point(PointRow(UN/lb), PointCol(UN/lb), Input/LatLong)
+					,	point(PointRow(UN/ub), PointCol(UN/lb), Input/LatLong)
+					,	point(PointRow(UN/ub), PointCol(UN/ub), Input/LatLong)
+					,	point(PointRow(UN/lb), PointCol(UN/ub), Input/LatLong)
+					,	point(PointRow(UN/lb), PointCol(UN/lb), Input/LatLong)
+				);
+			}
+			attribute<Input/LatLong> geometry_boundingbox (poly,UN) := points2sequence(points/all, points/nr_2, points/nr_1);
+		}
+
+		container arc_through_capital
+		{
+			unit<uint32> sq_point := range(uint32, 0, 3);
+			unit<uint32> points := combine(sq_point, UN)
+			{
+				attribute<Input/LatLong> all := union_data(.
+					,	point(UN/y, PointCol(UN/lb), Input/LatLong)
+					,	point(UN/y, UN/x,            Input/LatLong)
+					,	point(UN/y, PointCol(UN/ub), Input/LatLong)
+				);
+			}
+
+			attribute<Input/LatLong> geometry_boundingbox (arc, UN) := points2sequence(points/all, points/nr_2, points/nr_1);
+		}
+
+		container small
+		{
+			unit<uint32> sq_point := range(uint32, 0, 5);
+			unit<uint32> points := combine(sq_point, UN)
+			{
+				attribute<Input/LatLong> all := union_data(.
+					,	point(UN/y + (((PointRow(UN/lb)) - UN/y) / 15000.0d), PointCol(UN/lb), Input/LatLong)
+					,	point(UN/y + (((PointRow(UN/ub)) + UN/y) / 15000.0d), PointCol(UN/lb), Input/LatLong)
+					,	point(UN/y + (((PointRow(UN/ub)) + UN/y) / 15000.0d), PointCol(UN/ub), Input/LatLong)
+					,	point(UN/y + (((PointRow(UN/lb)) - UN/y) / 15000.0d), PointCol(UN/ub), Input/LatLong)
+					,	point(UN/y + (((PointRow(UN/lb)) - UN/y) / 15000.0d), PointCol(UN/lb), Input/LatLong)
+				);
+			}
+
+			attribute<Input/LatLong> geometry_boundingbox (arc, UN) := points2sequence(points/all, points/nr_2, points/nr_1);
+			attribute<Input/LatLong_mdegrees> geometry_mdegrees(poly, UN) := geometry_boundingbox[Input/LatLong_mdegrees];
+
+			unit<uint32> intersect := overlay_polygon(geometry_mdegrees, /Capital/Capital_GADM/gadm_connected/Geometry);
+			
+			
+			attribute<uint32> InCapital(intersect) := rlookup(Input/administrative/Capital/small/intersect/second_rel,UN/indexrakendrel);
+
+			unit<uint32> ssintersect := subset(IsDefined(InCapital))
+				,DialogType         = "Map"
+				,DialogData         = "Geometry"
+			{
+				attribute<Input/LatLong> Geometry(poly):=intersect/Geometry[nr_OrgEntity][Input/LatLong];
+				attribute<Input/LatLong> ub := upper_bound(Geometry[Input/LatLong]);
+				attribute<Input/LatLong> lb := lower_bound(Geometry[Input/LatLong]);
+			}
+			
+		}
+
+		container west_east_strip //with bays
+		{
+			unit<uint32> sq_point := range(uint32, 0, 5);
+			unit<uint32> points := combine(sq_point, small/ssintersect)
+			{
+				attribute<Input/LatLong> all := union_data(.
+					,	point(PointRow(small/ssintersect/lb), PointCol(small/ssintersect/lb), Input/LatLong)
+					,	point(PointRow(small/ssintersect/ub), PointCol(small/ssintersect/lb), Input/LatLong)
+					,	point(PointRow(small/ssintersect/ub), PointCol(small/ssintersect/ub), Input/LatLong)
+					,	point(PointRow(small/ssintersect/lb), PointCol(small/ssintersect/ub), Input/LatLong)
+					,	point(PointRow(small/ssintersect/lb), PointCol(small/ssintersect/lb), Input/LatLong)
+				);
+			}
+			attribute<Input/LatLong> geometry_boundingbox (poly, small/ssintersect) := points2sequence(points/all, points/nr_2, points/nr_1);
+
+			attribute<uint32> GridLine (gtopo)                     := poly2grid(west_east_strip/geometry_boundingbox, gtopo, 1);
+
+			unit<uint32> New := subset(IsDefined(GridLine))
+			{
+				attribute<float32>popd2010t := Postprocessing/Scenarios/ReadResults/All/popd/SSP2/Y2010[nr_OrgEntity];
+				attribute<float32>popd2100t := Postprocessing/Scenarios/ReadResults/All/popd/SSP2/Y2100[nr_OrgEntity];
+				attribute<float32>popdif    := popd2100t-popd2010t;
+				attribute<uint8>  number    := Input/administrative/Countries/ClaimCountry_grid[nr_OrgEntity];
+				attribute<string> name      := Input/administrative/Countries/name[nr_OrgEntity];
+			}
+		}
+}

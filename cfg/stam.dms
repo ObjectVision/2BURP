@@ -1,0 +1,43 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Root of model read all includes
+// Fur user guide interface see: https://www.geodms.nl/downloads/UserGuide/USERGUIDE_GEODMS_GUI_7198.pdf
+
+container toUP: url = "%projdir%/doc/pbl-2018-Towards-an-urban-preview_3255.pdf"
+{
+	//#include <Compare.dms>
+	#include <ConfigSettings.dms>
+	#include <ExportSettings.dms>
+	#include <Units.dms>
+	#include <Classifications.dms>
+	#include <Report.dms>
+	#include <Preprocessing.dms>
+	#include <Input.dms>
+	#include <Claims.dms>
+	#include <HYDE.dms>
+	#include <Calibration_AutoGLM.dms>
+	#include <Calibration_AutoGLM_2021.dms>
+	#include <Scenarios.dms>
+	#include <Scenarios_Past.dms>
+	#include <GDP.dms>
+	#include <Validation.dms>
+	#include <Analysis.dms>
+	#include <Analysis_Past.dms>
+	#include <Capital.dms>
+	#include <Evaluation.dms>
+	#include <Postprocessing.dms>
+	#include <Reference.dms>
+	#include <Sandbox.dms>
+
+	container RegressieTest
+	{
+		parameter<units/person> SSP1_UrbanPop_2020  := sum(/Scenarios/SSPs/SSP1/ProjectionDates/Y2020/UrbanPop);
+		parameter<units/km2>    SSP1_UrbanArea_2020 := sum(/Scenarios/SSPs/SSP1/ProjectionDates/Y2020/NewState/IsUrban ? /Scenarios/SSPs/SSP1/CompactedDomain/area : 0[units/km2]);
+	}
+}

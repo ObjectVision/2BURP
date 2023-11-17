@@ -1,0 +1,35 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container RestrictionsCountry
+{
+	template GridToGTopo
+	{
+		//begin case parameters
+		unit<uint32> PolyUnit;
+		attribute<Input/LatLong> Geometry (poly, PolyUnit);
+		unit<wpoint> gtopo_country;
+		//end case parameters
+
+		attribute<PolyUnit> grid_org   (gtopo_country) := poly2grid(Geometry , gtopo_country);
+		attribute<uint32>   grid       (gtopo_country) := (grid_org[int32] > -1i ? 1i : 0i)[uint32];
+		attribute<uint32>   grid_gtopo (input/gtopo)   := MakeDefined(grid[invert(gtopo_country/gtopo_rel)],0);
+	}
+
+	#include <Netherlands.dms>
+	#include <Belgium.dms>
+
+	attribute<uint32> IsRegional_org (Input/gtopo) := 
+		NLD/make_gtopo_rel/grid_gtopo +
+		BEL/make_gtopo_rel/grid_gtopo;
+
+	//attribute <bool>  IsRegional (Input/gtopo) := IsRegional_org >0u ? true : false;
+	attribute <bool>  IsRegional (Input/gtopo) := const(false,Input/gtopo);
+}

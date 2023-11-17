@@ -1,0 +1,85 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Generate metadata of export-files
+
+parameter<string> exportmetadata:=
+	"Metadata generated tif-files:
+	WGS84
+	LatLong_World: 933120000 cells: 43200 columns x 21600 rows
+	cellsize: 0.0083333333 (30 arcseconds)
+
+	country.csv                             : txt-file of countries, ID is code within country.tif
+	country.tif                             : uint8,   nodata:255,   Compression: LZW, 1 Band,         Countries from ISO3 Global Administrative Areas (GADM) 2.0 (January 2012) with modifications
+
+	M%_SSP%_YYYY_urb.tif                    : uint8,   nodata:255,   Compression: LZW, 1 Band,          Urban as Boolean, 0=not urban (rural) 1=urban, 
+	M%_SSP%_YYYY_urb_classification         : uint8,   nodata:255,   Compression: LZW, 1 Band,          Urban classification
+	M%_SSP%_YYYY_UrbCountry.tif             : uint8,   nodata:255,   Compression: LZW, 4 Bands-->Band1, M%_SSP%_YYYY_urb.tif combined with country
+	M%_SSP%_YYYY_UrbCountry.csv             : Table Urban combined with country, ID to be joined to M%_SSP%_YYYY_UrbCountry.tif (not generated in 7.182 --> lock)
+	M%_SSP%_YYYY_buakm2.tif                 : float32, nodata:nan,   Compression: LZW, 1 Band,          Built-up area in km2
+	M%_SSP%_YYYY_bua_fraction.tif           : float32, nodata:nan,   Compression: LZW, 1 Band,          Built-up area as fraction. urb per defintion 1
+	M%_SSP%_YYYY_smod.tif                   : uint8,   nodata:255,   Compression: LZW, 1 Band,          GHS Settlement Model grid 8 classes
+	M%_SSP%_YYYY_tpop.tif                   : float32, nodata:-9999, Compression: LZW, 1 Band,          Total population in Persons
+	M%_SSP%_YYYY_tpop_classification        : uint8,   nodata:255,   Compression: LZW, 1 Band,          Total population Classification
+	M%_SSP%_YYYY_upop.tif                   : float32, nodata:-9999, Compression: LZW, 1 Band,          Urban population in Persons
+	M%_SSP%_YYYY_rpop.tif                   : float32, nodata:-9999, Compression: LZW, 1 Band,          Rural population in Persons
+	M%_SSP%_YYYY_popd.tif                   : float32, nodata:-9999, Compression: LZW, 1 Band,          Population density in Persons per km2
+	M%_SSP%_YYYY_popd_classification        : uint8,   nodata:255,   Compression: LZW, 1 Band,          Population density Classification
+	M%_SSP%_YYYY_GDP_Cell_kUSD.tif          : float32, nodata:-9999, Compression: LZW, 1 Band,          Regional Gross Domestic Product (GDP) in United States kilodollar
+	M%_SSP%_YYYY_GDP_Cell_National_kUSD.tif : float32, nodata:-9999, Compression: LZW, 1 Band,          National Gross Domestic Product (GDP) in United States kilodollar
+	
+	analysis_modelled-map                   : CombinationUrbNotUrbOccurring_SSP%.csv txt-file of each occuring combination of urban over all years
+											  CombinationUrbNotUrbOccurring_Past.csv txt-file of each occuring combination of urban over past years
+											  
+	Check-map                               : M3var1_SSP%_Report_ClaimRealisation.csv:    Check if urban-claim is realised per year per country. OK(claim is realised), error under (claim is not totally realised), error over (more realised then claimed)
+	                                          M3var1_SSP%_Check_ClaimRealisation_km2.csv: difference urban-claim realised and urban allocated in km2 per year per country (allocated MINUS claimed)
+	                                          M3var1_SSP%_PRC_ClaimRealisation.csv:       urban-claim realisiation in percentage < 99%  error under > 101% error over per year per country
+	                                          M3var1_SSP%_UrbanCells_Alloc.csv:           number of urban cells allocated per year per country
+	                                          M3var1_SSP%_UrbanShare.csv:                 fraction of population living in urban area per year per country defined as PopUrban / ( PopUrban + PopRural)
+	                                          M3var1_SSP%_Urban_Alloc_km2.csv:            allocated urban area realised in km2 per year per country
+	                                          M3var1_SSP%_Urban_claim.csv                 urban area claim in km2 per year per country
+	                                          M3var1_SSP%_Urb_Observed.csv:               Urban area in cells and km2 for urban start map per year per country
+	                                          M3var1_SSP%_UrbanCluster.csv:               Number of urban clusters (4 directions connectivity) per year per country
+
+	Urban classification
+	0;'Not urban'
+	1;'Urban'
+	2;'Sea'
+	3;'Lakes-Ice'
+	4;'not modelled land'
+	
+	Total Population - Population density Classification
+	0;'sea -1-0'
+	1;'0-0.001'
+	2;'0.001-1'
+	3;'1-2'
+	4;'2-4'
+	5;'4-8'
+	6;'8-12'
+	7;'12-25'
+	8;'25-50'
+	9;'50-100'
+	10;'100-200'
+	11;'200-750'
+	12;'>750'
+	13;'inland lakes-ice'
+	14;'not modelled land'
+
+	SMOD-classes(adapted after page 22 https://ghsl.jrc.ec.europa.eu/documents/GHSL_Data_Package_2019.pdf)
+	0;'Sea'
+	1;'not modelled land'
+	10;'WATER GRID CELL'
+	11;'VERY LOW DENSITY RURAL GRID CELL'
+	12;'LOW DENSITY RURAL GRID CELL'
+	13;'RURAL CLUSTER GRID CELL'
+	21;'SUBURBAN OR PERI-URBAN GRID CELL'
+	22;'SEMI-DENSE URBAN CLUSTER GRID CELL'
+	23;'DENSE URBAN CLUSTER GRID CELL'
+	30;'URBAN CENTRE GRID CELL'
+	"
+	, StorageName= "='%LocalDataProjDir%/results/'+GridName+'/metadata.str'";

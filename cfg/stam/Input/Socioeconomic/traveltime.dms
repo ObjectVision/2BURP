@@ -1,0 +1,58 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container TravelTime
+{
+	unit<ipoint> TravelTimeGRIP:
+		StorageName     = "%MondiaalDataDir%/Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime_minutes_int.tif",
+		StorageType     = "gdal.grid",
+		url             = "",
+		Source          = "PBL Database: 	Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\TravelTime.gdb"
+						  "Raster: 	tt_pop50k_30sec"
+						  "Result of analyses at road-network (GRIP) and POI-file (tt_pop50k_30secCenterpoint --> 8407 records world)"
+						  "Database:	Y:\data\PBLbase\Data\GRIP_global_roads_vs2.gdb"
+						  "Feature Class:	grip_global_vs2_2009_new",
+		StorageReadOnly = "True",
+		DialogData      = "LatLong"
+	{
+		attribute<uint8>   ReadData(gtopo);
+		attribute<float32> ReadData32(gtopo):=value(ReadData,float32);
+		attribute<uint8>   TravelTime(gtopo):= MakeDefined(ReadData,60b);
+	}
+
+// 	unit<ipoint> TravelTimeJRC2000:
+// 		StorageName = "%MondiaalDataDir%/Socioeconomic/TravelTime/JRC/2000/acc_50k.tif",
+// 		StorageType = "gdal.grid",
+// 		url = "%MondiaalDataDir%/Socioeconomic/TravelTime/JRC/2000/Forest Observations_php.mht",
+// 		Source = "",
+// 		StorageReadOnly = "True",
+// 		DialogData = "LatLong"
+// 	{
+// 		attribute<float32> ReadData(gtopo);
+// 		attribute<float32> CorrData(gtopo):=ReadData<-2.14747E+09[float32]? 'null'[float32]:ReadData;
+// 		
+// 		attribute<float32> Dif_with_2008(gtopo):= TravelTimeGRIP/ReadData[float32] - CorrData;
+// 	}
+
+// 	unit<ipoint> TravelTimeJRC2015:
+// 		StorageName = "%MondiaalDataDir%/Socioeconomic/TravelTime/JRC/2015/accessibility_to_cities_2015_v1.0.tif",
+// 		StorageType = "gdal.grid",
+// 		url = "%MondiaalDataDir%/traveltime/2015/Accessibility to Cities - MAP.mht",
+// 		Source = " Open Street Map (OSM) data, distance-to-roads data derived from the Google roads database"
+// 				 "Google, the Joint Research Centre (JRC) of the EU, and the University of Twente (Netherlands)",
+// 		StorageReadOnly = "True",
+// 		DialogData = "LatLong"
+// 	{
+// 		attribute<float32> ReadData(gtopo);
+// 		attribute<float32> CorrData(gtopo):=ReadData<-9998[float32]? 'null'[float32]:ReadData;
+// 		
+// 		attribute<float32> Dif_with_2000(gtopo):=(CorrData - TravelTimeJRC2000/ReadData) < 2.14747E+09f ? (CorrData - TravelTimeJRC2000/ReadData) : 'null'[float32];
+// 	}
+}

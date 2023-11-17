@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Make Compacted Domain
+
+unit <uint32> CompactedDomain := Subset(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid"
+{
+	attribute<uint32>       CD                   := const(1,.);
+	attribute<gtopo>        gtopo_rel            := nr_OrgEntity;
+	attribute<.>            BaseGrid (gtopo)     := invert(gtopo_rel);
+//	attribute<.>            BaseBaseGrid (web_mercator_cell)     := lookup(web_mercator_cell/gtopo_rel, BaseGrid);
+	attribute<int64>        ISCDint64 (gtopo)    := MakeDefined(BaseGrid[int64],-1[int64]);
+	attribute<bool>         ISCD (gtopo)         := ISCDint64 = -1[int64] ? false : true;
+	attribute<gtopo/rowset> row                  := gtopo/row[gtopo_rel];
+	attribute<float32>      lat_factor           := gtopo/lat_factor[gtopo_rel];
+	attribute<km2>          area                 := gtopo/rowset/area[row];
+
+	attribute<Float64> lat_deg  := gtopo/lat [gtopo_rel];
+	attribute<Float64> long_deg := gtopo/long[gtopo_rel];
+	attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
+	attribute<float64> sinlat   := sin(lat_rad);
+	attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
+	attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
+	
+	attribute<Input/Mercator> geometry_mer:= point(mercator_y_deg, long_deg, Input/Mercator);
+	
+
+	attribute<administrative/Countries/Country> Country_rel   := Input/administrative/Countries/Country_grid[gtopo_rel], FreeData = "False";
+	attribute<administrative/Countries/Country> Continent_rel := Input/administrative/Countries/Country/Continent_id_grid[gtopo_rel], FreeData = "False";
+	attribute<administrative/Countries/Country> World_rel     := Input/administrative/Countries/Country/World_id_grid[gtopo_rel], FreeData = "False";
+
+	attribute<Input/LatLong> geometry_not_as_feature := nr_OrgEntity[Input/LatLong];
+}

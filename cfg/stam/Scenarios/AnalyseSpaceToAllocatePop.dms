@@ -1,0 +1,32 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: To detect if urban area is present to allocate pop without going over the set maximum pop. If so: pop from SSP isnt allocated fully
+
+container AnalyseSpaceToAllocatePop
+{
+	unit<uint8> OverlayRegios: nrofrows = 2
+	{
+		attribute<string> names: ['maxcur', 'urb'];
+	}
+
+	container OverlayGrids
+	{
+		attribute<uint2> maxcur (CompactedDomain) := (maximum_population > CurrPop)[uint2];
+		attribute<uint2> urb    (CompactedDomain) := landuse_allocation/IsUrban[uint2];
+		
+		attribute<string> Key     (CompactedDomain) := string(maxcur) + "_" + string(urb);
+		
+		attribute<bool>   HasUrbanSpaceToAllocatePop (CompactedDomain) := strcount(key, '1_1') > 0;
+	}
+
+	unit<uint32> combine:= overlay32(OverlayRegios/names, CompactedDomain, OverlayGrids)
+	{
+		attribute<uint32> ID                               := ID(.);
+	}
+}

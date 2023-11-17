@@ -1,0 +1,73 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Population_ANOVA
+{
+	template anova // anaysis of variance
+	{
+		// begin of case parameters
+		unit<UInt32> sample_set;
+		unit<uint8> P;
+		attribute<P> part_rel(sample_set);
+		unit<float32> S;
+		
+		attribute<S> past_val(sample_set);
+		attribute<S> curr_val(sample_set);
+		attribute<S> pred_val(sample_set);
+		// end of case parameters
+		
+		attribute<S> curr_min_past_val(sample_set) := curr_val -  (variances/curr_past_cov / variances/past_var)[part_rel] * past_val;
+		attribute<S> pred_min_past_val(sample_set) := pred_val -  (variances/pred_past_cov / variances/past_var)[part_rel] * past_val;
+		
+		attribute<S> curr_min_pred_val(sample_set) := curr_min_past_val - (variances/curr_pred_cov / variances/pred_min_past_var)[part_rel] * pred_min_past_val;
+		
+		container variances {
+			attribute<float32> past_var(P) := var(past_val, part_rel);
+			attribute<float32> curr_var(P) := var(curr_val, part_rel);
+			attribute<float32> pred_var(P) := var(pred_val, part_rel);
+			
+			attribute<float32> curr_past_cov(P) := cov(curr_val, past_val, part_rel);	
+			attribute<float32> curr_min_past_ortho_check(P) := cov(past_val, curr_min_past_val, part_rel);		
+			attribute<float32> curr_min_past_var  (P) := var(curr_min_past_val, part_rel);
+			
+			attribute<float32> pred_past_cov(P) := cov(pred_val, past_val, part_rel);	
+			attribute<float32> pred_min_past_ortho_check(P) := cov(past_val, pred_min_past_val, part_rel);		
+			attribute<float32> pred_min_past_var  (P) := var(pred_min_past_val, part_rel);
+	
+			// given past
+			attribute<float32> curr_pred_cov(P) := cov(curr_min_past_val, pred_min_past_val, part_rel);	 
+			attribute<float32> curr_min_pred_ortho_check(P) := cov(pred_min_past_val, curr_min_pred_val, part_rel);		
+			attribute<float32> curr_min_pred_var  (P) := var(curr_min_pred_val, part_rel);
+			
+	//			attribute<float32>  curr_min_past_check(P) := curr_var - curr_min_past_var - sqrt(curr_past_cov * past_var);
+						
+			// model quality factors: 0.0 is bad, 1.0 is perfect.
+			attribute<float32> past_var_reduction_factor(P) := 1f - curr_min_past_var / curr_var;
+			attribute<float32> pred_var_reduction_factor(P) := 1f - curr_min_pred_var / curr_min_past_var; // given past
+			attribute<float32> combined_var_reduction_factor(P) := 1f - curr_min_pred_var / curr_var;
+		}
+	}
+
+	container population_model_valuation_examples {
+	
+		container JRC_1990_2015_M2015 := anova(Input/CompactedDomain, Input/administrative/Countries/Country , Input/CompactedDomain/Country_rel,
+			units/PersonAnalysis,
+			Input/Population/Past/PastDates/Y1990[Input/CompactedDomain/gtopo_rel],
+			Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel],
+			Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
+
+			
+		container JRC_1975_2014_M2015_coarse := anova(Input/CompactedDomain, Input/administrative/Countries/Country , Input/CompactedDomain/Country_rel,
+			units/PersonAnalysis,
+			Input/Population/Past/PastDates/Y1990[Input/CompactedDomain/gtopo_rel],
+			Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel],
+			Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
+	}
+}

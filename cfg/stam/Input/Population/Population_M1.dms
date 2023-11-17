@@ -1,0 +1,31 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: to generate urbanpop-map for M1-method. UrbanMeanPopDensity --> used in modelling. M-method depended
+
+container M1
+{
+	container Urban_pop_2010
+	{
+		attribute<float32> PopulationData (gtopo)                        := Population/Past/PastDates/Y2015;
+		attribute<float32> UrbanPopulation (gtopo)                       := Population/Past/PastDates/Y2015 * Input/UrbanArea/UrbanArea2010/ReadData[float32];
+		attribute<float32> CorrData(gtopo)                               := max_elem(UrbanPopulation, 0f); // But use this, negative values present?
+		attribute<float32> Upop_to_use(administrative/Countries/Country) :=/Input/Population/M3/UrbanPopulationCountry2010;
+
+		attribute<float32>    UPopulation2010 (gtopo)                                    := Input/Method='M_1'? CorrData : scalesum(CorrData,administrative/Countries/Country_grid , Upop_to_use);
+		attribute<float32>    UrbanPopC(Input/administrative/Countries/Country )         := sum(UPopulation2010, administrative/Countries/Country_grid);
+
+		attribute<Person>     UrbPop2010_corr (gtopo)                                              := value(IsZero(UPopulation2010)? (0f / 0f) : UPopulation2010[float32], Person);
+		attribute<Person_km2> UrbanMinPopDensity (Input/administrative/Countries/Country ) := min(UrbPop2010_corr / gtopo/area, administrative/Countries/Country_grid);
+		attribute<Person>     UrbanPop(Input/administrative/Countries/Country )            := sum(UrbPop2010_corr, administrative/Countries/Country_grid);
+		attribute<Person_km2> UrbanMeanPopDensity(Input/administrative/Countries/Country ) := sum(UrbPop2010_corr, administrative/Countries/Country_grid) / UrbanArea;
+		attribute<float32>    UrbanMaxPopDensity (Input/administrative/Countries/Country ) := max(UrbPop2010_corr / gtopo/area, administrative/Countries/Country_grid);
+		attribute<int32>      GridCount(Input/administrative/Countries/Country )           := count(UrbPop2010_corr, administrative/Countries/Country_grid)[int32];
+		attribute<km2>        UrbanArea(Input/administrative/Countries/Country )           := sum(Float32(Input/UrbanArea/UrbanArea2010/ReadData) * gtopo/area, administrative/Countries/Country_grid);
+	}
+}

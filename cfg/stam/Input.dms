@@ -1,0 +1,197 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Input : using = "Units"
+{
+//----------------------------------------------USER INPUT---------------------------------------------------------//
+
+	unit<dpoint> LatLong := subextent/LatLong_World;
+	#include<wms_layer_llh.dms>
+
+	parameter<string> Method                := 'M3'; // Choose method (M1/M3)
+	parameter<string> Variant               := 'var1'; // Only relevant for M3, var1=JRC 50 percent bua, var2=GHSMOD/ Leave empty when working with M_1
+	parameter<string> InPresentUrban        := ''; //growth only inside present urban contour: InPresentUrban, otherwise Leave empty
+	
+	parameter<string> Calibration := 'yes';   // Choose "yes" for calibrated suitability, otherwise choose "no"
+
+//------------------------------------------END OF USER INPUT------------------------------------------------------//
+
+	unit<dpoint> WorldMollweide: SpatialReference    = "ESRI:54009";
+	Unit<dpoint> SphericalMercator: SpatialReference = "EPSG:3857", DialogData = "tms_layer_osm_webmercator";
+	
+	Unit<dpoint> SphericalMercator2 := range(SphericalMercator, point(-16000000.0, -20000000.0),  point(16000000.0, 20000000.0))
+	{
+	}
+	
+	parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
+	
+	unit<ipoint> web_mercator_cell := gridset(SphericalMercator2, point(SourceRasterFactor_in_eq_m, SourceRasterFactor_in_eq_m), point(-16000000.0, -20000000.0), ipoint)
+	{
+		attribute<LatLong>            ll_rel_rev := mapping(., LatLong);
+		attribute<LatLong>            ll_rel     := point(pointcol(ll_rel_rev), pointrow(ll_rel_rev), LatLong);
+		attribute<gtopo> gtopo_rel := value(ll_rel, gtopo);
+		attribute<km2>     Area    := gtopo_rel->area;
+//		attribute<gtopo> gtopo_rel_rev := mapping(web_mercator_cell, gtopo);
+	}
+
+	parameter<float64> SourceRasterFactor    := 0.00833333333333333333333333333333333333333333333333333333333;//http://mantis.objectvision.nl/view.php?id=1313
+	parameter<float64> SourceRasterSubFactor := 5.0 / 3600.0;
+
+	unit<ipoint> LatLong_mdegrees := gridset(LatLong, point(0.0000001, 0.0000001), point(0.0,0.0), ipoint);
+
+	unit<dpoint> LatLong_Base: SpatialReference = "EPSG:4326", DialogData = "wms_layer_llh"
+	{
+		parameter<float32> ViewPortMinSize := 100f / 3600f;
+		parameter<float32> PenWorldWidth   := 10f / 3600f, DialogType = "PenWorldWidth";
+		parameter<float32> LabelWorldSize  := 10f / 3600f, DialogType = "LabelWorldSize";
+	}
+
+	container subextent
+	{
+		unit<dpoint> LatLong_World                    := range(LatLong_Base, point(-90.0,-180.0), point(90.0, 180.0));
+
+		//For fast testing with extent of 1 country (no other country within extent)
+		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point( 62.0, -25.0), point(68.0,-12.0));
+
+		unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point(-51.0, -40.0), point(85.0, 71.0));
+		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point(-66.0, 170.0), point(85.0, 75.0));
+		
+		//continents
+		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point( 29.0, -11.0), point(61.0, 30.0));
+		unit<dpoint> LatLong_Europe2                  := range(LatLong_Base, point( 24.0, -34.0), point(84.0, 41.0));
+
+		//based at min max Continent-field countries, doesnt work over datum-lines
+		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point(-47.0, -26.0), point( 38.0, 64.0));
+		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point(-90.0,-180.0), point(-11.0,180.0));
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point(-13.0,-180.0), point( 82.0,180.0));
+		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point(-56.0,-180.0), point( 29.0,180.0));
+		unit<dpoint> LatLong_Europe3                  := range(LatLong_Base, point( 27.0, -32.0), point( 81.0, 41.0));
+		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point(  5.0,-180.0), point( 84.0,180.0));
+		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point(-56.0,-110.0), point( 18.0,-28.0));
+
+		//countries
+		// Europe
+		unit<dpoint> LatLong_test                     := range(LatLong_Base, point(52.04, 5.04), point(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
+		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point( 51.8,  4.7), point(52.3, 5.7));
+		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point( 45.0, -2.0), point(54.0,11.0));
+		unit<dpoint> LatLong_Netherlands_narrow       := range(LatLong_Base, point( 50.7,  3.3), point(54.0, 7.3));
+		unit<dpoint> LatLong_Netherlands_visual       := range(LatLong_Base, point( 41.0, -9.0), point(61.0,20.0));//NL,BE,LUX,FR,GB,GE total in extent
+		unit<dpoint> LatLong_Benelux                  := range(LatLong_Base, point( 49.0,  2.0), point(54.0,8.0));//NL,BE,LUX
+		unit<dpoint> LatLong_Benelux_Germany          := range(LatLong_Base, point( 47.15, 2.5), point(55.1,15.15));//NL,BE,LUX,GER
+		
+		unit<dpoint> LatLong_Tromso                   := range(LatLong_Base, point( 69.0,  18.0), point(70.0, 20.0));
+
+		// code does not work over 0 meridian!
+		//unit<dpoint> LatLong_New_Sealand := range(LatLong_Base, point(-54.0, 163.0), point(-28.0, -174.0));
+}
+	#include <Subextent_Special.dms>
+	#include <Subextent_ISO3.dms>
+
+
+	unit<wpoint> gtopo_base :=
+		gridset(
+			range(LatLong, 
+				LowerBound(LatLong) + point(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong), 
+				UpperBound(LatLong) - point(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong)
+			)
+			, point(-SourceRasterFactor, SourceRasterFactor, LatLong)
+			, point(90d, -180d, LatLong)
+			, wpoint
+		);
+
+	unit<ipoint> gtopo_sub_base :=
+		gridset(
+			range(LatLong, 
+				LowerBound(LatLong) + point(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong), 
+				UpperBound(LatLong) - point(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong)
+			)
+			, point(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong)
+			, point(90d, -180d, LatLong)
+			, ipoint
+		);
+
+	parameter<km> lengthdegree := 40000km / 360f; // 40075.017d/360d;//at Equator
+	
+	unit<wpoint> gtopo     := TiledUnit(point(1024w, 43200w, gtopo_base))
+	{
+		attribute<.>     id                   :=id(.);
+		attribute<uint8> aidgrid              := const(1b,gtopo);
+		attribute<bool>  BaseGridBool         := IsDefined(CompactedDomain/BaseGrid);
+
+		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(gtopo)), pointrow(Upperbound(gtopo)))
+		{
+			attribute<.>       id      :=id(.);
+
+			attribute<float64> lat_top := pointrow( point(ID(rowset), const(0w, rowset), gtopo)[LatLong] );
+			attribute<float64> lat_mid := lat_top  + 0.5 * pointrow(getprojectionfactor(gtopo)[LatLong]);
+
+			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			attribute<km2> area := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(gtopo)[LatLong])) * lengthdegree));
+		}
+
+
+		unit<uint16>colset := range(uint16, pointcol(Lowerbound(gtopo)), pointcol(Upperbound(gtopo)))
+		{
+			attribute<.>       id       :=id(.);
+			attribute<float64> long_top := pointcol( point(const(0w, colset),ID(colset), gtopo)[LatLong] );
+			attribute<float64> long_mid := long_top  + 0.5 * pointcol(getprojectionfactor(gtopo)[LatLong]);
+
+			//attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			//attribute<km2> area := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(gtopo)[LatLong])) * 40000km / 360f));
+		}
+
+		parameter<uint32> boundrange_c := uint32(PointCol(boundrange(gtopo)));
+
+		attribute<rowset> row        := pointrow(ID(gtopo));
+		attribute<colset> col_colset := pointcol(ID(gtopo));
+
+		attribute<uint32> col      := uint32(pointcol(ID(gtopo)));
+		attribute<uint32> rowcol   := uint32(row) * boundrange_c;
+		attribute<uint32> number   := (rowcol +col) + 1;
+		attribute<uint8>  one_grid := number > 0 ? 1b : 0b;
+
+		attribute<Float32> lat_factor := rowset/lat_factor[row];
+
+		attribute<Float64> lat   := rowset/lat_mid[row];
+		attribute<Float64> long  := colset/long_mid[col_colset];
+
+		attribute<km2> area           := rowset/area[row]; //use rowset area
+		
+//		attribute<Input/LatLong> geometry   := id[Input/LatLong];
+		
+	}
+	unit<dpoint> mercator: DialogData = "TopoCountry/Mercator", Format = "EPSG:???? Mercator Conformal Projection [x,y] = R*[lamda, 180/p * log(tan(p/4+phi/2))]";
+	
+	unit<ipoint> gtopo_sub := TiledUnit(point(1024i, 43200i * 6i, gtopo_sub_base))
+	{
+		attribute<gtopo> gtopo_rel := mapping(., gtopo);
+	}
+
+	#include <Griddata.dms>
+	#include <CompactedDomain.dms>
+	#include <Geography.dms>
+	//#include <Geography_real_distance.dms>
+	#include <Suitability.dms>
+	#include <administrative.dms>
+
+	#include <UrbanArea.dms>
+	#include <CreateIsUrbanCD.dms>
+	#include <Population.dms>
+
+	#include <Physical.dms>
+	#include <Water.dms>
+	#include <Policy.dms>
+	#include <Socioeconomic.dms>
+	
+	#include <RestrictionsCountry.dms>
+
+	#include <gazetteer.dms>
+	#include <tms_layer_osm_webmercator.dms>
+}

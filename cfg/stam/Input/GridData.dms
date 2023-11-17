@@ -1,0 +1,28 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Preprocess Compacted Domain (Freeland) and startmaps population for modelling. Freeland is  M-depended
+
+container GridData {
+	// for evalution of condition population.dms is needed!
+	attribute<Person> InitPopGrid (gtopo)        := Input/Method='M3'? convert(Input/Population/M3/UrbanPopulation2010, Person) : convert(Input/Population/M1/Urban_pop_2010/UPopulation2010, Person);
+	attribute<Person> InitPopGrid1990 (gtopo)    := Input/CompactedDomain/ISCD ? Input/Population/Past/PastDates/Y1990 * Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[float32] :0f/0f;
+
+	attribute<Person> InitTpopGrid (gtopo)        := Input/Method='M3'? convert(Input/Population/M3/TotalPopulation2010, Person) : convert(Input/Population/M1/Urban_pop_2010/PopulationData, Person);
+	attribute<Person> InitTpopGrid1990 (gtopo)    := Input/CompactedDomain/ISCD ? Input/Population/Past/PastDates/Y1990 :0f/0f;
+
+	attribute<Bool> InRegion (gtopo): = IsDefined(Input/administrative/Countries/Country_grid);
+	attribute<Bool> HasPop   (gtopo): = InitTpopGrid > 0[Person];
+	attribute<Bool> HasUrb   (gtopo): = IsDefined(administrative/Countries/Country_grid) ? ((Input/UrbanArea/UrbanArea2010/ReadData) > 0b) : false;
+
+	attribute<bool> IsNotLake(gtopo): = not(Water/Water_without_oceans/ReadData);
+	attribute<bool> IsNotIce (gtopo): = not(Physical/SnowIceCover/ReadData);
+
+	attribute<Bool> InRegionHasPopHasUrb (gtopo): = (InRegion || HasPop || HasUrb);//at file-level already present in country file 
+	attribute<Bool> FreeLand (gtopo): = InRegionHasPopHasUrb && (IsNotLake || HasUrb || HasPop) && (IsNotIce || HasUrb || HasPop), FreeData = "False";
+}

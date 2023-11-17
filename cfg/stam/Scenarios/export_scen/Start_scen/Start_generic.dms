@@ -1,0 +1,69 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP september 2018             //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Scraping items together of start maps (5 times same for SSP, only call one in batch)
+
+container Generic
+{
+	unit<wpoint> gtopo     :=Input/gtopo
+	{
+		attribute<Classifications/PopClass> tpop_classify := Input/administrative/Countries/IsCountryNotCD ? 13b : (classify((!Input/administrative/Countries/IsCountryWorld/IsCountryWorld_bool) ? -1f : 
+			(!Input/administrative/Countries/IsClaimCountry ? 2000000000f: 
+			tpop), Classifications/PopClass/ClassBreak));
+
+		attribute<Classifications/PopClass> tpop_classification :=
+				tpop_classify[uint8],StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_tpop_classification.tif'"
+				{
+					attribute<UInt32> PaletteData(Classifications/PopClass): = Classifications/PopClass/BrushColor[uint32];
+				}
+
+		attribute<float32>    upop          := MakeDefined(lookup(CompactedDomain/BaseGrid, InitialState/Pop),-9999f),                   StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_upop.tif'";
+		attribute<float32>    rpop          := MakeDefined(!IsUrban ? tpop : 0f,-9999f),                                                 StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_rpop.tif'";
+		attribute<bool>       IsUrban       := lookup(CompactedDomain/BaseGrid, InitialState/IsUrban),                                   StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urb.tif'";
+
+		attribute<Classifications/Urb/IsUrbClassSea> IsUrban_Classify := 
+			Input/administrative/Countries/IsCountryNotCD ? 3b : classify((!Input/administrative/Countries/IsCountryWorld/IsCountryWorld_bool) ? 2f : 
+			(!Input/administrative/Countries/IsClaimCountry ? 4f: 
+			IsUrban[float32]), Classifications/Urb/IsUrbClassSea/ClassBreak);
+
+		attribute<Classifications/Urb/IsUrbClassSea> IsUrbanClassification :=
+					IsUrban_Classify[uint8],StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urb_classification.tif'"
+				{
+					attribute<UInt32> PaletteData(Classifications/Urb/IsUrbClassSea): = Classifications/Urb/IsUrbClassSea/BrushColor[uint32];
+				}
+		
+		attribute<uint32>     urbCountry    := lookup(CompactedDomain/BaseGrid, UrbCountryCombine/urbcombine/UnionData)                , StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urbCountry.tif'";
+		attribute<float32>    urbkm2        := lookup(CompactedDomain/BaseGrid, (InitialState/IsUrban[float32] * CompactedDomain/Area)), StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urbkm2.tif'";
+		attribute<float32>    bua_fraction  := Input/CompactedDomain/ISCD ? (IsUrban ? value(IsUrban,float32) : Preprocessing/urban/Builtuparea) :0f/0f,                       StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_bua_fraction.tif'";
+		attribute<float32>    buakm2        := bua_fraction * lookup(CompactedDomain/BaseGrid,Input/CompactedDomain/area),               StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_buakm2.tif'";
+	
+		attribute<float32>    popd          := MakeDefined(tpop / lookup(CompactedDomain/BaseGrid,CompactedDomain/area),-9999f),         StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_popd.tif'";
+		
+		//attribute<Classifications/PopClass> popd_classify :=  classify(popd, Classifications/PopClass/ClassBreak);
+		
+		//-9999 of popd considered as nodata in classification
+		attribute<Classifications/PopClass> popd_classify := MakeDefined(classify((!Input/administrative/Countries/IsCountryWorld/IsCountryWorld_bool) ? -1f : 
+			(!Input/administrative/Countries/IsClaimCountry ? 2000000000f: 
+			popd), Classifications/PopClass/ClassBreak),13b);
+
+
+		attribute<Classifications/PopClass> popd_classification :=
+				popd_classify[uint8],StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_popd_classification.tif'"
+				{
+					attribute<UInt32> PaletteData(Classifications/PopClass): = Classifications/PopClass/BrushColor[uint32];
+				}
+	
+		attribute<Classifications/Settlement_Model_L2_nomenclature_export> smod :=
+				MakeDefined(!Input/administrative/Countries/IsCountryWorld/IsCountryWorld_bool ? 0b : (!Input/administrative/Countries/IsClaimCountry ? 1b : smod_org[uint8]),10b),StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_smod.tif'"
+				{
+					attribute<UInt32> PaletteData(/Classifications/Settlement_Model_L2_nomenclature_export): = /Classifications/Settlement_Model_L2_nomenclature_export/BrushColor[uint32];
+				}
+			}
+			
+	#include <Start_stats.dms>
+}

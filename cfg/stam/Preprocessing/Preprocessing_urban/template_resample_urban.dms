@@ -1,0 +1,31 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Maarten Hilferink
+// Function: Resample urban maps from WorldMollweide to WGS84 (gtopo)
+// Syntax:   https://www.geodms.nl/Mapping, https://www.geodms.nl/Mean
+
+template resample
+{
+	// template parameters	
+	parameter<String> NameFile;
+	// end case parameters
+
+	unit<DPoint> WorldMollweide := /Input/WorldMollweide;
+
+	unit<wpoint> JRC_GHS
+	: StorageName     = "=NameFile"	
+	, StorageType     = "gdal.grid"
+	, StorageReadonly = "True"
+	, DialogData      = "WorldMollweide"
+	{
+		// Read in GridData as float32 instead of uint32! otherwise only mean on zeros and ones
+		attribute<float32> GridData;
+		attribute<.> per_gtopo_sub(Input/gtopo_sub)    := mapping(Input/gtopo_sub, .);
+		attribute<Float32> var_per_gtopo (Input/gtopo) := mean(GridData[per_gtopo_sub], Input/gtopo_sub/gtopo_rel);
+	}
+}

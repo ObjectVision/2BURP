@@ -1,0 +1,100 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Source for naming of urb-areas
+
+container Gazetteer
+{
+	container Geonames
+	{
+		unit<uint32> data
+			:  StorageName     = "%MondiaalDataDir%/Gazetteer/Geonames/20201115/allCountries_with_header.csv"
+			//,	SQLString      = "SELECT * FROM allCountries_with_header WHERE country_code   ='NL'"
+			,  StorageType     = "gdal.vect"
+			,  url             = "http://download.geonames.org/export/dump/"
+			,  StorageReadOnly = "True"
+			,  Source          = "Geonames website http://download.geonames.org/export/dump/ 15 november 2020"
+			, SyncMode         = "None"
+			, DialogType       = "Map"
+			, DialogData       = "Geometry"
+		{
+			attribute<float64> longitude_float64 :=longitude[float64];
+			attribute<float64> latitude_float64  :=latitude[float64];
+
+			attribute<string> geonameid;
+			attribute<string> name;
+			attribute<string> asciiname;
+			attribute<string> alternatenames; //--> gives error when exporting as shp
+			//attribute<string> alternatenames_utf :=from_utf(alternatenames);
+			attribute<string> latitude;
+			attribute<string> longitude;
+			attribute<string> featureclass;
+			attribute<string> featurecode;
+			attribute<string> countrycode;
+			attribute<string> cc2;
+			attribute<string> admin1code;
+			attribute<string> admin2code;
+			attribute<string> admin3code;
+			attribute<string> admin4code;
+			attribute<string> population;
+			attribute<string> elevation;
+			attribute<string> dem;
+			attribute<string> timezone;
+			attribute<string> modificationdate;
+
+			attribute<Input/LatLong> Geometry   := point(latitude_float64, longitude_float64, Input/LatLong)
+			{
+				parameter<uint32>  SymbolColor     := rgb(255,0,0),DialogType = "SymbolColor";
+				parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
+				parameter<float32> SymbolWorldSize := 0.02f,       DialogType = "SymbolWorldSize";
+			}
+
+			attribute<Input/gtopo>   gtopo_rel               := Geometry[Input/gtopo];
+			attribute<data>          data_rel  (Input/gtopo) := modus(id(data), gtopo_rel);
+
+		unit<uint32> contiguous          := district(Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014)
+			, DialogData  = "data_rel"
+			, DialogType  = "Map"
+			{
+				attribute<data>   data_rel   := modus(data/data_rel, districts);
+				attribute<string> name_area  := data/name[data_rel];
+			}
+		}
+
+		unit<uint32> data_NL :=subset(data/countrycode='NL')
+			,DialogType         = "Map"
+			,DialogData         = "Geometry"
+		{
+			attribute<Input/LatLong> Geometry :=data/Geometry[nr_OrgEntity][Input/LatLong]
+			{
+				parameter<uint32>  SymbolColor     := rgb(255,0,0),DialogType = "SymbolColor";
+				parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
+				parameter<float32> SymbolWorldSize := 0.02f,       DialogType = "SymbolWorldSize";
+			}
+			attribute<string> name                   :=Data/featureclass[nr_OrgEntity];
+			attribute<string> featureclass           :=Data/featureclass[nr_OrgEntity];
+			attribute<string> featurecode            :=Data/featurecode[nr_OrgEntity];
+		}
+
+		attribute<feature_code_uq_NL>  feature_code_id_NL (data_NL)      := rlookup(data_NL/featurecode, feature_code_uq_NL/Values);
+
+		unit<uint32> feature_code_uq_NL := unique(data_NL/featurecode)
+		{
+			attribute<uint32> aantal := pcount(feature_code_id_NL);
+			attribute<string> Label := values, DialogType = "LabelText";
+		}
+
+		attribute<feature_code_uq>  feature_code_id (data)      := rlookup(data/featurecode, feature_code_uq/Values);
+
+		unit<uint32> feature_code_uq := unique(data/featurecode)
+		{
+			attribute<uint32> aantal := pcount(feature_code_id);
+			attribute<string> Label := values, DialogType = "LabelText";
+		}
+	}
+}

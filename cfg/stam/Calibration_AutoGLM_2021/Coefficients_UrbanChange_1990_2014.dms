@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Coefficients per calibration variable for each per continent for Urban Change 1990 - 2014 calculated by Pendula Ferdinand 23 november 2020 (table 7 from pdf)
+
+container coefficients_UrbanChange: url="%projdir%/doc/Forecasting_patterns_of_urban_ expansion_Pendula_Ferdinand_August2020.pdf"
+{
+	unit<uint8> continent_coef: url="%projdir%/doc/Revised_calibration_of_the_2UP_model_20201214.pdf", NrOfRows = 7
+	{
+		attribute<string>  name                                 :[     'Africa', 'Antarctica',        'Asia','Australia_Oceania',     'Europe','North_America','South_America'];
+
+		attribute<float32> TotalPopulationDensity1990_8dir_coef :[  0.003565116,         null,  0.002522516,          0.01411108,   0.00403282,   0.0059549932,     0.00709008];//Population Density
+		attribute<float32> DistanceToCoast_coef                 :[-0.0001147354,0.00000000001,-0.0001076143,       -0.0002897215, 2.977103E-06,   -0.000140793,  -0.0002003853];//Distance to coast
+		attribute<float32> DistanceToRiver_coef                 :[   -0.1909272,         null,  -0.05684095,          -0.2735055,  -0.08214991,  -0.5756074312,   -0.002488483];//Distance to river
+		attribute<float32> DistanceToLake_coef                  :[-0.0001011306,         null,-0.0001535121,        0.0001794095,-9.959011E-05,  -0.0006727354,  -0.0005667616];//Distance to lake
+		attribute<float32> Elevation_coef                       :[ 0.0004137768,         null, 1.290963E-05,        -0.001670281, -0.001622761,     0.00039099,  -9.604897E-05];//Elevation
+		attribute<float32> Slope_coef                           :[   0.02540044,         null,   0.04558994,                null,  -0.01034123,   0.0338019566,   -0.005738627];//Slope
+		attribute<float32> TRI_coef                             :[   -0.4347447,         null,     -0.51298,          -0.4263202,         null,  -0.6340550073,     -0.4347447];//TRI
+		attribute<float32> TravelTime_coef                      :[    0.5211207,         null,     0.232743,           0.7258895,    0.1055026,   0.3772594902,      0.4933061];//Travel Time
+		attribute<float32> ProtectedArea_coef                   :[  -0.09458723,         null,   -0.7921386,           0.7628388,    -0.286493,   0.1070650301,     -0.5455115];//Protected Area
+		attribute<float32> FloodProneArea_coef                  :[    0.4773374,         null,    0.2972641,           0.2785185,    0.5756012,   0.3550880881,       1.521927];//Flood Prone Area
+		attribute<float32> Earthquake_coef                      :[    0.0297688,         null,     0.057597,          -0.1312285,    0.0809148,  -0.0937825478,     0.01762315];//Earthquake
+		attribute<float32> Landslide_PR_coef                    :[   -0.4411243,         null,   -0.1411265,            1.521268,    -0.238185,  -0.6152168926,     -0.8790049];//Landslide [PR]
+		attribute<float32> Landslide_EQ_coef                    :[    -1.115089,         null,   -0.3599445,           -1.253695,    -1.101815,  -0.2127882979,      0.0521176];//Landslide [EQ]
+		attribute<float32> DistanceMainRoads_coef               :[-3.892096E-05,         null,-8.135599E-05,       -7.235707E-05,-0.0002397139,  -0.0005062615,  -9.632594E-05];//Distance main roads
+		attribute<float32> DistanceSecondaryRoads_coef          :[-0.0001006383,         null,-4.180194E-06,        -3.87389E-05,  -0.00026519,           null,   2.971953E-06];//Distance secondary roads
+		
+		attribute<float32> Constant_coef                        :[    0.8268405,         null,     0.346214,           0.7836519,   -0.7851582,   0.9890623681,     -0.9595059];
+
+		attribute<string>  label          := name;
+
+		container V := for_each_nedv(name, string(id(.))+'[..]', void, .);
+	}
+
+	#include <../coefficients/coef2gtopo.dms>
+}

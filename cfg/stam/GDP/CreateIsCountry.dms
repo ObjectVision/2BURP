@@ -1,0 +1,48 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: reading results for each variable
+
+container CreateRegion
+{
+		attribute<bool> C(Input/gtopo):=/Input/administrative/Countries/IsCountry;
+		attribute<bool> R(Input/gtopo):=/GDP/IsGDPregion_grid;
+		
+		attribute<bool> allUrban(Input/gtopo):=C || R;
+
+		attribute<bool> AllAll(Input/gtopo):=allUrban;
+
+		attribute<uint32> allUrbanNull               (Input/gtopo) :=AllAll ? 1u : 0u/0u;
+		attribute<uint32> leftover                   (Input/gtopo) :=allUrbanNull * /GDP/IsNotGDPregion_grid[uint32];
+		attribute<uint32> leftoverOutsideRegion     (Input/gtopo) :=leftover=1u ? 1u : 0u/0u;
+
+		unit<uint32> leftoverOutsideRegionSel := subset(IsDefined(leftoverOutsideRegion))
+		{
+			attribute<Input/LatLong_mdegrees> Geometry := nr_OrgEntity[Input/LatLong_mdegrees];
+			parameter<uint32>  SymbolColor       := rgb(255,0,0)  ,  DialogType = "SymbolColor";
+			parameter<meter>   SymbolWorldSize   := 0.0001[meter]     ,  DialogType = "SymbolWorldSize";
+			parameter<int16>   SymbolIndex       := 169s,  DialogType = "SymbolIndex";
+		}
+
+		container Location2Region  := connect_info(/GDP/Data/single_polygons/Geometry,leftoverOutsideRegionSel/Geometry[Input/LatLong_mdegrees])
+		{
+		
+			attribute</GDP/Data/GDPregions> Region_rel  (leftoverOutsideRegionSel):= /GDP/Data/single_polygons/nr_OrgEntity[ArcID];
+			attribute<string>                                 Region_name (leftoverOutsideRegionSel):= /GDP/Data/GDPregions/name[Region_rel];
+		}
+		attribute</GDP/Data/GDPregions> connected_Region_rel  (Input/gtopo):= Location2Region/Region_rel[invert(leftoverOutsideRegionSel/nr_OrgEntity)], StorageName = "%LocalDataProjDir%/results/connected_region_rel.tif";
+
+		unit<uint32> Location2RegionConnect  := connect(Input/administrative/Countries/single_polygons/Geometry,leftoverOutsideRegionSel/Geometry[Input/LatLong_mdegrees])
+		{
+			attribute<Input/LatLong_mdegrees> UnionData (arc)
+			{
+				parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+				parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+			}
+		}
+}

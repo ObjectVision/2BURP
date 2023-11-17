@@ -1,0 +1,27 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Jolien van Huystee, Bas van Bemmel
+// Function: Classification of urban boolean
+
+container urban_discrete
+{
+	unit <uint8> lu_type: nrofrows = 2
+	{
+		attribute<string>       Name           : ['Rural','Urban'];
+		attribute<string>       Label          := Name;
+		attribute<uint32>       Color          : [ rgb(196, 255, 196), rgb(255, 0, 0) ], DialogType = "BrushColor";
+		attribute<partitioning> partioning_rel : = const(0[partitioning], lu_type);
+	
+		container V := for_each_nedv(Name, 'value('+string(ID(.))+',..)', void, .);
+	}
+
+	unit <uint8> partitioning: nrofrows = 1
+	{
+		attribute<string>  name : ['country'];
+	}
+}

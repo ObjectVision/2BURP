@@ -1,0 +1,107 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Population8dir
+{
+	container Y1990
+	{
+		attribute<float32> TotalPopulation1990 (gtopo)            := Input/Population/Past/PastDates/Y1990;
+		attribute<float32> TotalPopulation1990Null (gtopo)        := Input/Population/Past/PastDatesNull/Y1990;
+
+		attribute<Person> North      (gtopo) := TotalPopulation1990[(gtopo/id) - point(1w, 0w, wpoint)];
+		attribute<Person> NorthEast  (gtopo) := TotalPopulation1990[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person> East       (gtopo) := TotalPopulation1990[(gtopo/id) + point(0w, 1w, wpoint)];
+		attribute<Person> SouthEast  (gtopo) := TotalPopulation1990[(gtopo/id) + point(1w, 1w, wpoint)];
+		attribute<Person> South      (gtopo) := TotalPopulation1990[(gtopo/id) + point(1w, 0w, wpoint)];
+		attribute<Person> SouthWest  (gtopo) := TotalPopulation1990[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person> West       (gtopo) := TotalPopulation1990[(gtopo/id) - point(0w, 1w, wpoint)];
+		attribute<Person> NorthWest  (gtopo) := TotalPopulation1990[(gtopo/id) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (gtopo) := IsDefined(TotalPopulation1990Null[(gtopo/id) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (gtopo) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person> MeanPopulation1990_8dir_org   (gtopo) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /Cells_with_data;//max 8
+
+		//attribute<bool> IsMeanPopulation1990_8dir   (gtopo) := IsDefined(MeanPopulation1990_8dir_org);
+
+		attribute<float32> MeanPopulation1990_8dir (gtopo)    := MakeDefined(MeanPopulation1990_8dir_org,0f);
+	}
+
+
+	container Y2015
+	{
+		attribute<float32> TotalPopulation2015 (gtopo)            := Input/Population/Past/PastDates/Y2015;
+		attribute<float32> TotalPopulation2015Null (gtopo)        := Input/Population/Past/PastDatesNull/Y2015;
+
+		attribute<Person> North      (gtopo) := TotalPopulation2015[(gtopo/id) - point(1w, 0w, wpoint)];
+		attribute<Person> NorthEast  (gtopo) := TotalPopulation2015[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person> East       (gtopo) := TotalPopulation2015[(gtopo/id) + point(0w, 1w, wpoint)];
+		attribute<Person> SouthEast  (gtopo) := TotalPopulation2015[(gtopo/id) + point(1w, 1w, wpoint)];
+		attribute<Person> South      (gtopo) := TotalPopulation2015[(gtopo/id) + point(1w, 0w, wpoint)];
+		attribute<Person> SouthWest  (gtopo) := TotalPopulation2015[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person> West       (gtopo) := TotalPopulation2015[(gtopo/id) - point(0w, 1w, wpoint)];
+		attribute<Person> NorthWest  (gtopo) := TotalPopulation2015[(gtopo/id) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (gtopo) := IsDefined(TotalPopulation2015Null[(gtopo/id) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (gtopo) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person> MeanPopulation2015_8dir_org   (gtopo) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /Cells_with_data;//max 8
+
+		//attribute<bool> IsMeanPopulation2015_8dir   (gtopo) := IsDefined(MeanPopulation2015_8dir_org);
+
+		attribute<float32> MeanPopulation2015_8dir (gtopo)    := MakeDefined(MeanPopulation2015_8dir_org,0f);
+	}
+}

@@ -1,0 +1,109 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Classification of combines of urban maps, tooling colors:http://meyerweb.com/eric/tools/color-blend
+
+container Past
+{
+	unit<uint16> UrbanAreaReeksClass: nrofrows = 16
+	{
+		attribute<uint32> BrushColor: DialogType = "BrushColor",
+		[
+			rgb(102,255,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+			,rgb(255,0,0)
+		];
+	
+		attribute<String> Key:
+		[
+			//all
+			 '0_0_0_0'
+			,'1_1_1_1'
+	
+			//with two 0 and two 1
+			,'0_1_1_0'
+			,'1_1_0_0'
+			,'1_0_0_1'
+			,'0_1_0_1'
+			,'1_0_1_0'
+			,'0_0_1_1'
+
+			//with 3 and 1
+			,'0_0_0_1'
+			,'0_0_1_0'
+			,'0_1_0_0'
+			,'1_0_0_0'
+			,'1_1_1_0'
+			,'1_1_0_1'
+			,'1_0_1_1'
+			,'0_1_1_1'
+	
+		];
+		attribute<String> Value:
+		[
+			//all
+			 'no urban area in series'
+			,'urban area in all series'
+	
+			//with two 0 and two 1
+			,'0_1_1_0'
+			,''
+			,''
+			,''
+			,''
+			,'urban area from 2000'
+			
+	
+			//with 3 and 1
+			,'urban area from 2014'
+			,'no urban area from 2014'
+			,'no urban area from 2000'
+			,'no urban area from 1990'
+			,'urban area - not in 2014'
+			,'urban area - not in 2000'
+			,'urban area - not in 1990'
+			,'urban area from 1990'
+
+		];
+		attribute<String> Label:=  Key + ': ' + Value, DialogType = "LabelText";
+	}
+
+	unit<uint16> UrbanAreaReeksClass_new: nrofrows = 8
+	{
+		attribute<uint16> ClassBreak: DialogType = "Classification",
+		[
+			0, 1, 2, 3, 4,
+			5, 6, 7
+		];
+
+		attribute<uint32> BrushColor: DialogType = "BrushColor",
+		[
+			 rgb( 76,255, 0),rgb(255,235,235),rgb(200,200,200),rgb(255,150,150),rgb(127,127,127)
+			,rgb(255, 50,50),rgb(137,119,  0),rgb(153,  0,  0)
+		];
+
+		attribute<String> Label: DialogType = "LabelText",
+		[
+			'no urban area in series 0_0_0_0','urban area from 2014 0_0_0_1',     'temporary short urban 0_0_1_0','urban area from 2000 0_0_1_1','temporary long urban 0_1_1_0',
+			'urban area from 1990 0_1_1_1',   'urban area - not in 2014 1_1_1_0', 'urban area in all series 1_1_1_1'
+		];
+	}
+}

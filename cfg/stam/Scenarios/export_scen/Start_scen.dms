@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP september 2018             //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Scraping items together of start maps for modelleing (5 times same for SSP, only call one in batch)
+
+container Start: FreeData = "false"
+{
+	#include <UrbCountry.dms>
+	#include <Start_generic.dms>
+
+	attribute<float32>    tpop (Input/gtopo)     := MakeDefined(Input/GridData/InitTPopGrid[float32],-9999f), StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_tpop.tif'";
+	attribute<Units/SMOD> smod_org (Input/gtopo) := Input/CompactedDomain/ISCD ? Preprocessing/SMOD/SMOD_preprocessed/PastDates_imp/Y2015 : 0u/0u;
+	
+	
+	
+	
+}

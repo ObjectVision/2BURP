@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: results for now only to 2080 instead of 2100
+
+container ReadResultsPast: Using = "Units;"
+{
+	unit<dpoint> WorldMollweide: Format = "ESRI:54009";
+	Unit<dpoint> SphericalMercator: Format = "EPSG:3857";
+
+	parameter<string> folder         :='LatLong_test';
+	parameter<string> Method         := 'M3';
+	parameter<string> Variant        := 'var1'; // Only relevant for M3, var1=JRC 50 percent bua, var2=GHSMOD/ Leave empty when working with M_1
+	parameter<string> InPresentUrban := '';
+	
+	parameter<string> From   := 'All';
+	parameter<string> Period := 'Past';
+
+	unit<uint32> SSP_Year := combine(Past/SSP, Past/SSPs/SSPPast/ProjectionDate)
+	{
+		attribute<string> SSP_c   := Past/SSP/name[nr_1]+'/';
+		attribute<string> SSP_c2  := Past/SSP/name[nr_1];
+		attribute<string> Year_c  := Past/SSPs/SSPPast/ProjectionDate/name[nr_2];
+		attribute<string> Year_c2 := string(Past/SSPs/SSPPast/ProjectionDate/Yr[nr_2]);
+		attribute<string> name    := SSP_c + Year_c;
+	}
+
+	//#include <ResultVariables_Start.dms>
+	
+	container All: = ResultVariables/var(From,Period);
+
+	#include <../ReadResults/ResultVariables.dms>
+}
