@@ -1,0 +1,118 @@
+container Scenario : using = "units", url=""
+{
+	container UrbanShareY2015
+	{
+		attribute<float32> UrbanPop (domain) := Input/CreateIsUrbanCD/M2M3v1[float32] * SourceData/Population/Past/PastDates/Y2015;
+
+		unit<uint8> Country := Countries/Country 
+		{
+			attribute<float32> UrbanPopCountry   := sum(UrbanPop, Countries/Country_grid);
+			attribute<float32> PopCountry        := sum(SourceData/Population/Past/PastDates/Y2015, Countries/Country_grid);
+			attribute<float64> UrbanShareCountry := (UrbanPopCountry[float64] / PopCountry[float64]) * 100d;
+		}
+	}
+
+	container SSPs: = 
+		for_each_ne(
+			/Scenarios/SSP/Name
+			,'Scenarios('+quote(string(/Scenarios/SSP/Name))+')'
+		);
+
+	template Scenarios 
+	{
+		//begin case parameters
+		parameter<string> SPPscen;
+		//end case parameters
+
+		//urbanshare_YYYY not directly used in model (so to run the model not necessary, but it was needed to determine urbanpop_YYYY)
+		unit<uint32> M1 := unique(Population/all/Region)
+		{
+			attribute<string>  Region                  := Values;
+			attribute<string>  Name                    := rjoin(Region,Input/administrative/Countries/Country/ISO3,Input/administrative/Countries/Country/Name_cor);
+			attribute<string>  Key                     := SPPscen + "_" + string(values);
+
+			//urban_share_Y2015: only for missing urban shares (not in SSP), not present anymore
+			//attribute<float64> urban_share_Y2015       := rjoin(values,SSP/UrbanShare/Country/ISO3,/SSP/UrbanShare/Country/UrbanShareCountry);
+
+			attribute<float64> population_to_use_2010  := rjoin(Key,Population/All/Key,Population/All/population_2010);
+			attribute<float64> population_to_use_2020  := rjoin(Key,Population/All/Key,Population/All/population_2020);
+			attribute<float64> population_to_use_2030  := rjoin(Key,Population/All/Key,Population/All/population_2030);
+			attribute<float64> population_to_use_2040  := rjoin(Key,Population/All/Key,Population/All/population_2040);
+			attribute<float64> population_to_use_2050  := rjoin(Key,Population/All/Key,Population/All/population_2050);
+			attribute<float64> population_to_use_2060  := rjoin(Key,Population/All/Key,Population/All/population_2060);
+			attribute<float64> population_to_use_2070  := rjoin(Key,Population/All/Key,Population/All/population_2070);
+			attribute<float64> population_to_use_2080  := rjoin(Key,Population/All/Key,Population/All/population_2080);
+			attribute<float64> population_to_use_2090  := rjoin(Key,Population/All/Key,Population/All/population_2090);
+			attribute<float64> population_to_use_2100  := rjoin(Key,Population/All/Key,Population/All/population_2100);
+
+			attribute<float64> urban_share_2010    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2010);
+			attribute<float64> urban_share_2020    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2020);
+			attribute<float64> urban_share_2030    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2030);
+			attribute<float64> urban_share_2040    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2040);
+			attribute<float64> urban_share_2050    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2050);
+			attribute<float64> urban_share_2060    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2060);
+			attribute<float64> urban_share_2070    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2070);
+			attribute<float64> urban_share_2080    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2080);
+			attribute<float64> urban_share_2090    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2090);
+			attribute<float64> urban_share_2100    := rjoin(Key,UrbanShare/All/Key,UrbanShare/All/urbanshare_2100);
+
+			attribute<float64> urbanpop2010          := population_to_use_2010 * (urban_share_2010 / 100d);
+			attribute<float64> urbanpop2020          := population_to_use_2020 * (urban_share_2020 / 100d);
+			attribute<float64> urbanpop2030          := population_to_use_2030 * (urban_share_2030 / 100d);
+			attribute<float64> urbanpop2040          := population_to_use_2040 * (urban_share_2040 / 100d);
+			attribute<float64> urbanpop2050          := population_to_use_2050 * (urban_share_2050 / 100d);
+			attribute<float64> urbanpop2060          := population_to_use_2060 * (urban_share_2060 / 100d);
+			attribute<float64> urbanpop2070          := population_to_use_2070 * (urban_share_2070 / 100d);
+			attribute<float64> urbanpop2080          := population_to_use_2080 * (urban_share_2080 / 100d);
+			attribute<float64> urbanpop2090          := population_to_use_2090 * (urban_share_2090 / 100d);
+			attribute<float64> urbanpop2100          := population_to_use_2100 * (urban_share_2100 / 100d);
+
+			attribute<float64> urbangrowthrate2020   := urbanpop2020 / urbanpop2010;
+			attribute<float64> urbangrowthrate2030   := urbanpop2030 / urbanpop2020;
+			attribute<float64> urbangrowthrate2040   := urbanpop2040 / urbanpop2030;
+			attribute<float64> urbangrowthrate2050   := urbanpop2050 / urbanpop2040;
+			attribute<float64> urbangrowthrate2060   := urbanpop2060 / urbanpop2050;
+			attribute<float64> urbangrowthrate2070   := urbanpop2070 / urbanpop2060;
+			attribute<float64> urbangrowthrate2080   := urbanpop2080 / urbanpop2070;
+			attribute<float64> urbangrowthrate2090   := urbanpop2090 / urbanpop2080;
+			attribute<float64> urbangrowthrate2100   := urbanpop2100 / urbanpop2090;
+		}
+
+
+		unit<uint32> variable_region_M1 := SubItem_PropValues(M1,'name');
+		container export_csv_M1 := Report/WriteTable32ToCSV(M1 , AsList(variable_region_M1/name, ';'), '%LocalDataProjDir%/data/M1/' + SPPscen + '_POPULATION_2010_2100.csv');
+
+
+		unit<uint32> M3 := M1
+		{
+			attribute<string>  Region                  := M1/Region;
+			attribute<string>  Name                    := M1/Name;
+			attribute<string>  Key                     := SPPscen + "_" + string(M1/values);
+
+			attribute<float64> population_to_use_2010  := M1/population_to_use_2010;
+			attribute<float64> population_to_use_2020  := M1/population_to_use_2020;
+			attribute<float64> population_to_use_2030  := M1/population_to_use_2030;
+			attribute<float64> population_to_use_2040  := M1/population_to_use_2040;
+			attribute<float64> population_to_use_2050  := M1/population_to_use_2050;
+			attribute<float64> population_to_use_2060  := M1/population_to_use_2060;
+			attribute<float64> population_to_use_2070  := M1/population_to_use_2070;
+			attribute<float64> population_to_use_2080  := M1/population_to_use_2080;
+			attribute<float64> population_to_use_2090  := M1/population_to_use_2090;
+			attribute<float64> population_to_use_2100  := M1/population_to_use_2100;
+
+			attribute<float64> urbanpop2010          := (rjoin(Region,  /Input/administrative/Countries/Country/ISO3, /Input/Population/M3/UrbanPopulationCountry2010[float64]))/1000000d;
+			attribute<float64> urbanpop2020          := M1/urbangrowthrate2020 * urbanpop2010;
+			attribute<float64> urbanpop2030          := M1/urbangrowthrate2030 * urbanpop2020;
+			attribute<float64> urbanpop2040          := M1/urbangrowthrate2040 * urbanpop2030;
+			attribute<float64> urbanpop2050          := M1/urbangrowthrate2050 * urbanpop2040;
+			attribute<float64> urbanpop2060          := M1/urbangrowthrate2060 * urbanpop2050;
+			attribute<float64> urbanpop2070          := M1/urbangrowthrate2070 * urbanpop2060;
+			attribute<float64> urbanpop2080          := M1/urbangrowthrate2080 * urbanpop2070;
+			attribute<float64> urbanpop2090          := M1/urbangrowthrate2090 * urbanpop2080;
+			attribute<float64> urbanpop2100          := M1/urbangrowthrate2100 * urbanpop2090;
+		}
+
+		unit<uint32> variable_region_M3 := SubItem_PropValues(M3,'name');
+		container export_csv_M3 := Report/WriteTable32ToCSV(M3 , AsList(variable_region_M3/name, ';'), '%LocalDataProjDir%/data/M3/' + SPPscen + '_POPULATION_2010_2100.csv');
+	}
+}

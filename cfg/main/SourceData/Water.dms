@@ -1,0 +1,41 @@
+container Water : using = "geography"
+{
+	unit<ipoint> Water:
+		StorageName = "%MondiaalDataDir%/water/Aggr_GlobalWaterBodies.tif",
+		StorageType = "gdal.grid",
+		url = "%MondiaalDataDir%/water/Global Land Cover ESA-CCI 2014 water bodies - DataPortaal Explorer_xml.mht",
+		Source = "Dataportaal PBL: Wereld/Hydrologie/ESA_CCI_LC_2014_GlobalWaterBodies.lyr"
+				 "Y:\data\PBLbase\Data\ClimateResearchDataPackage2014\ESA_CCI_LC2014_waterbodies.gdb Raster: ESA_CCI_LC2014_wb"
+				 "Aggregated plus resampling in ArcGIS to match gridsize of other data layers"
+				 "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent",
+		StorageReadOnly = "True",
+		DialogData = "LatLong"
+	{
+		attribute<uint8> ReadData(domain);
+	}
+
+	unit<ipoint> Water_without_oceans:
+		StorageName = "%MondiaalDataDir%/water/Aggr_GlobalWaterBodies_without_oceans.tif",
+		StorageType = "gdal.grid",
+		url = "%MondiaalDataDir%/water/Global Land Cover ESA-CCI 2014 water bodies - DataPortaal Explorer_xml.mht",
+		Source = "bewerking op Input/Water/ReadData/Water"
+				 "ArcGIS 10.1: conversion to vector-formaat, selection at water, deleting of oceaan-polygon,and conversion to grid-format"
+				 "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent",
+		StorageReadOnly = "True",
+		DialogData = "LatLong"
+	{
+		attribute<uint8> ReadData(domain);
+	}
+
+	#include <rivers.dms>
+	#include <lakes.dms>
+	
+	
+	container Sweet_Water
+	{
+		attribute<float64> Sweet_Water_Distance(domain) := min_elem(Lakes/Lakesglwd/Lake_grid/glwd_3/Lake[float64],Rivers/Dist_River_km/ReadData);
+	}
+
+	#include <floodProneArea.dms>
+	// #include <AqueductFloodsHazardMaps.dms>
+}

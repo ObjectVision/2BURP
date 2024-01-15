@@ -1,0 +1,46 @@
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: read soil-map with legend
+
+container Soil
+{
+	container HarmonizedWorldSoilDatabase
+	{
+		unit<ipoint> Type:StorageName = "%MondiaalDataDir%/Physical/Soil/HarmonizedWorldSoilDatabase/hwsd.bil",//HarmonizedWorldSoilDatabasev1_2
+			StorageType               = "gdal.grid",
+			Source                    = "6 april 2020 http://www.fao.org/soils-portal/soil-survey/soil-maps-and-databases/harmonized-world-soil-database-v12/en/ Download : Download viewer & data (only soil types) ",
+			url                       = "%MondiaalDataDir%/Soil/HarmonizedWorldSoilDatabasev1_2/webpage_download_20200406.mht",
+			StorageReadOnly           = "True",
+			DialogData                = "LatLong"
+			{
+				attribute<uint16>                     ReadData(domain);
+				attribute<string>                     SU_SYMBOL(domain)  :=rjoin(ReadData,Metadata/MU_GLOBAL_uint16,Metadata/SU_SYMBOL);
+				attribute<string>                     VALUE(domain)      :=rjoin(SU_SYMBOL,D_SYMBOL/SYMBOL,D_SYMBOL/VALUE);
+				attribute<uint8>                      CODE(domain)       :=uint8(rjoin(SU_SYMBOL,D_SYMBOL/SYMBOL,D_SYMBOL/CODE));
+				attribute<Classifications/Soil/Class> CODE_class (domain):= rlookup(CODE,Classifications/Soil/Class/ek);
+			}
+
+		unit<uint32> Metadata
+			: StorageName     = "%MondiaalDataDir%/Physical/Soil/HarmonizedWorldSoilDatabase/HWSD_SMU.csv" 
+			, StorageType     = "gdal.vect"
+			, Source          = "HWSD.mdb csv table export of HWSD_SMU, semicolon delimited, with headers"
+			, StorageReadonly = "True"
+		{
+			attribute<uint16> MU_GLOBAL_uint16:=uint16(MU_GLOBAL);
+		}
+
+		unit<uint32> D_SYMBOL
+			: StorageName     = "%MondiaalDataDir%/Physical/Soil/HarmonizedWorldSoilDatabase/D_SYMBOL.csv" 
+			, StorageType     = "gdal.vect"
+			, Source          = "HWSD.mdb csv table export of D_SYMBOL, semicolon delimited, with headers"
+			, StorageReadonly = "True"
+		{
+					attribute<string> Label         := VALUE, DialogType = "LabelText";
+		}
+	}
+}

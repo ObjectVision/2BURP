@@ -1,0 +1,55 @@
+container PopulationDensity8dir
+{
+	container Y1990
+	{
+		attribute<float32> TotalPopulation1990 (domain)            := Population/Past/PastDates/Y1990;
+		attribute<Person_km2> TotalPopulationDensity1990 (domain)  := (TotalPopulation1990[Person] / domain/area);
+
+		attribute<Person_km2> North      (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (domain) := TotalPopulationDensity1990[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (domain) := TotalPopulationDensity1990[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 1w, wpoint)];
+
+		attribute<Person_km2> TotalPopulationDensity1990_8dir_org   (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /8f;
+
+		attribute<float32> TotalPopulationDensity1990_8dir (domain)    := MakeDefined(TotalPopulationDensity1990_8dir_org,0f);
+	}
+	
+	container Y2010
+	{
+		attribute<Person_km2> TotalPopulationDensity2010 (domain)  := (TotalPopulation2010[Person] / domain/area);
+
+		attribute<Person_km2> North      (domain) := TotalPopulationDensity2010[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (domain) := TotalPopulationDensity2010[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (domain) := TotalPopulationDensity2010[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (domain) := TotalPopulationDensity2010[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (domain) := TotalPopulationDensity2010[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (domain) := TotalPopulationDensity2010[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (domain) := TotalPopulationDensity2010[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (domain) := TotalPopulationDensity2010[(id(domain)) - point(1w, 1w, wpoint)];
+
+		attribute<Person_km2> TotalPopulationDensity2010_8dir_org      (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /8f;
+
+		attribute<float32> TotalPopulationDensity2010_8dir (domain)    := MakeDefined(TotalPopulationDensity2010_8dir_org,0f);
+	}
+}

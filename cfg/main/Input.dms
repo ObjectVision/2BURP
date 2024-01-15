@@ -1,0 +1,16 @@
+container Input : using = "Units"
+{
+	// #include <Griddata.dms>
+	// #include <CompactedDomain.dms>
+	// #include <Geography.dms>
+	//#include <Geography_real_distance.dms>
+	#include <Suitability.dms>
+
+	// #include <UrbanArea.dms>
+	#include <CreateIsUrbanCD.dms>
+	// #include <Population.dms>
+
+	
+
+	#include <gazetteer.dms>
+}

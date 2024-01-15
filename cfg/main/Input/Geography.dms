@@ -1,0 +1,42 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+// container Geography: Using = "Units"
+// {
+	// unit<uint32> Dist2Range;
+
+	// container Distmatrices
+	// {
+		// container Impl
+		// {
+			// container pot3km  :=Templates/potrange(value(1, km), value(  3, km));
+			// container pot5km  :=Templates/potrange(value(1, km), value(  5, km));
+			// container pot10km :=Templates/potrange(value(1, km), value(10, km));
+			// container pot15km :=Templates/potrange(value(1, km), value(15, km));
+			// container pot20km :=Templates/potrange(value(1, km), value(20, km));
+			// container pot25km :=Templates/potrange(value(1, km), value(25, km));
+			// container pot40km :=Templates/potrange(value(1, km), value(40, km));
+			// container pot50km :=Templates/potrange(value(1, km), value(50, km));
+		// }
+		// unit<spoint> pot3km  :=Impl/pot3km/PotRange;
+		// unit<spoint> pot5km  :=Impl/pot5km/PotRange;
+		// unit<spoint> pot10km :=Impl/pot10km/PotRange;
+		// unit<spoint> pot15km :=Impl/pot15km/PotRange;
+		// unit<spoint> pot20km :=Impl/pot20km/PotRange;
+		// unit<spoint> pot25km :=Impl/pot25km/PotRange;
+		// unit<spoint> pot40km :=Impl/pot40km/PotRange;
+		// unit<spoint> pot50km :=Impl/pot50km/PotRange;
+	// }
+	
+
+
+	// #include<Templates.dms>
+	// #include<Templates_real_distance.dms>
+// }

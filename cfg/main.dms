@@ -1,0 +1,28 @@
+container toBURP
+{
+	#include <Units.dms>
+	#include <Classifications.dms>
+	#include <ModelParameters.dms>
+	#include <Geography.dms>
+	#include <SourceData.dms>
+	
+	#include <Templates.dms>
+	
+	
+	
+	#include <Preprocessing.dms>
+	#include <Input.dms>
+	#include <Claims.dms>
+	#include <HYDE.dms>
+	#include <Calibration_AutoGLM.dms>
+	#include <Scenarios.dms>              //Main core of the model to calculate indicators of SSP-scenarios
+	#include <Scenarios_Past.dms>         //Main core of the model to calculate indicators of Past (Validation)
+	#include <GDP.dms>
+	#include <Validation.dms>
+	#include <Analysis.dms>
+	// #include <Analysis_Past.dms>
+	// #include <Postprocessing.dms>
+	
+	#include <ConfigSettings.dms>
+	#include <ExportSettings.dms>
+}

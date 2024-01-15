@@ -1,0 +1,105 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Population8dir
+{
+	container Y1990
+	{
+		attribute<float32> TotalPopulation1990 (domain)            := Population/Past/PastDates/Y1990;
+		attribute<float32> TotalPopulation1990Null (domain)        := Population/Past/PastDatesNull/Y1990;
+
+		attribute<Person> North      (domain) := TotalPopulation1990[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person> NorthEast  (domain) := TotalPopulation1990[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person> East       (domain) := TotalPopulation1990[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person> SouthEast  (domain) := TotalPopulation1990[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person> South      (domain) := TotalPopulation1990[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person> SouthWest  (domain) := TotalPopulation1990[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person> West       (domain) := TotalPopulation1990[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person> NorthWest  (domain) := TotalPopulation1990[(id(domain)) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (domain) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person> MeanPopulation1990_8dir_org   (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /Cells_with_data;//max 8
+
+		attribute<float32> MeanPopulation1990_8dir (domain)    := MakeDefined(MeanPopulation1990_8dir_org,0f);
+	}
+
+
+	container Y2015
+	{
+		attribute<float32> TotalPopulation2015 (domain)            := Population/Past/PastDates/Y2015;
+		attribute<float32> TotalPopulation2015Null (domain)        := Population/Past/PastDatesNull/Y2015;
+
+		attribute<Person> North      (domain) := TotalPopulation2015[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person> NorthEast  (domain) := TotalPopulation2015[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person> East       (domain) := TotalPopulation2015[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person> SouthEast  (domain) := TotalPopulation2015[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person> South      (domain) := TotalPopulation2015[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person> SouthWest  (domain) := TotalPopulation2015[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person> West       (domain) := TotalPopulation2015[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person> NorthWest  (domain) := TotalPopulation2015[(id(domain)) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (domain) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person> MeanPopulation2015_8dir_org   (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 /Cells_with_data;//max 8
+
+		//attribute<bool> IsMeanPopulation2015_8dir   (domain) := IsDefined(MeanPopulation2015_8dir_org);
+
+		attribute<float32> MeanPopulation2015_8dir (domain)    := MakeDefined(MeanPopulation2015_8dir_org,0f);
+	}
+}

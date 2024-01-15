@@ -1,0 +1,107 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container PopulationDensity8dir_2021
+{
+	container Y1990
+	{
+		attribute<float32> TotalPopulation1990 (domain)            := Population/Past/PastDates/Y1990;
+		attribute<float32> TotalPopulation1990Null (domain)        := Population/Past/PastDatesNull/Y1990;
+		attribute<Person_km2> TotalPopulationDensity1990 (domain)  := (TotalPopulation1990[Person] / domain/area);
+
+		attribute<Person_km2> North      (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (domain) := TotalPopulationDensity1990[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (domain) := TotalPopulationDensity1990[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (domain) := TotalPopulationDensity1990[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (domain) := TotalPopulationDensity1990[(id(domain)) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (domain) := IsDefined(TotalPopulation1990Null[(id(domain)) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (domain) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person_km2> MeanPopulationDensity1990_8dir_org   (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 / Cells_with_data;
+
+		attribute<float32> MeanPopulationDensity1990_8dir  (domain)    := MakeDefined(MeanPopulationDensity1990_8dir_org,0f);
+		attribute<float32> LN_MeanPopulationDensity1990_8dir (domain)  := log(MeanPopulationDensity1990_8dir + 0.1f);  //Pendula: 0 waarden --> 0.1  -->-2.30259 
+	}
+
+
+	container Y2015
+	{
+		attribute<float32> TotalPopulation2015 (domain)            := Population/Past/PastDates/Y2015;
+		attribute<float32> TotalPopulation2015Null (domain)        := Population/Past/PastDatesNull/Y2015;
+		attribute<Person_km2> TotalPopulationDensity2015 (domain)  := (TotalPopulation2015[Person] / domain/area);
+
+		attribute<Person_km2> North      (domain) := TotalPopulationDensity2015[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<Person_km2> NorthEast  (domain) := TotalPopulationDensity2015[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> East       (domain) := TotalPopulationDensity2015[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<Person_km2> SouthEast  (domain) := TotalPopulationDensity2015[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<Person_km2> South      (domain) := TotalPopulationDensity2015[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<Person_km2> SouthWest  (domain) := TotalPopulationDensity2015[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> West       (domain) := TotalPopulationDensity2015[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<Person_km2> NorthWest  (domain) := TotalPopulationDensity2015[(id(domain)) - point(1w, 1w, wpoint)];
+		
+		attribute<bool> NorthNull      (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 0w, wpoint)]);
+		attribute<bool> NorthEastNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+		attribute<bool> EastNull       (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(0w, 1w, wpoint)]);
+		attribute<bool> SouthEastNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 1w, wpoint)]);
+		attribute<bool> SouthNull      (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 0w, wpoint)]);
+		attribute<bool> SouthWestNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+		attribute<bool> WestNull       (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(0w, 1w, wpoint)]);
+		attribute<bool> NorthWestNull  (domain) := IsDefined(TotalPopulation2015Null[(id(domain)) - point(1w, 1w, wpoint)]);
+		
+		attribute<float32> Cells_with_data   (domain) := (NorthNull[float32] + 
+																	 NorthEastNull[float32] +  
+																	 EastNull[float32] + 
+																	 SouthEastNull[float32] + 
+																	 SouthNull[float32] + 
+																	 SouthWestNull[float32] + 
+																	 WestNull[float32] + 
+																	 NorthWestNull[float32]);
+
+		attribute<Person_km2> MeanPopulationDensity2015_8dir_org   (domain) := (North + 
+																	 NorthEast +  
+																	 East + 
+																	 SouthEast + 
+																	 South + 
+																	 SouthWest + 
+																	 West + 
+																	 NorthWest)
+																	 / Cells_with_data;
+
+		attribute<float32> MeanPopulationDensity2015_8dir (domain)    := MakeDefined(MeanPopulationDensity2015_8dir_org,0f);
+		attribute<float32> LN_MeanPopulationDensity2015_8dir (domain) := log(MeanPopulationDensity2015_8dir + 0.1f);  //Pendula: 0 waarden --> 0.1  -->-2.30259 
+	}
+}

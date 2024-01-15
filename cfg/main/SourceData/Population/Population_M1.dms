@@ -1,0 +1,21 @@
+container M1 : using = "geography;units;sourcedata/regionalunits"
+{
+	container Urban_pop_2010
+	{
+		attribute<float32>    PopulationData                (domain) := Population/Past/PastDates/Y2015;
+		attribute<float32>    UrbanPopulation               (domain) := Population/Past/PastDates/Y2015 * Preprocessing/UrbanArea/UrbanArea2010/ReadData[float32];
+		attribute<float32>    CorrData                      (domain) := max_elem(UrbanPopulation, 0f); // But use this, negative values present?
+		attribute<float32>    Upop_to_use        (Countries/Country) := Population/M3/UrbanPopulationCountry2010;
+
+		attribute<float32>    UPopulation2010               (domain) := Modelparameters/Method='M_1'? CorrData : scalesum(CorrData,Countries/Country_grid , Upop_to_use);
+		attribute<float32>    UrbanPopC          (Countries/Country) := sum(UPopulation2010, Countries/Country_grid);
+
+		attribute<Person>     UrbPop2010_corr               (domain) := value(IsZero(UPopulation2010)? (0f / 0f) : UPopulation2010[float32], Person);
+		attribute<Person_km2> UrbanMinPopDensity (Countries/Country) := min(UrbPop2010_corr / domain/area, Countries/Country_grid);
+		attribute<Person>     UrbanPop           (Countries/Country) := sum(UrbPop2010_corr, Countries/Country_grid);
+		attribute<Person_km2> UrbanMeanPopDensity(Countries/Country) := sum(UrbPop2010_corr, Countries/Country_grid) / UrbanArea;
+		attribute<float32>    UrbanMaxPopDensity (Countries/Country) := max(UrbPop2010_corr / domain/area, Countries/Country_grid);
+		attribute<int32>      GridCount          (Countries/Country) := count(UrbPop2010_corr, Countries/Country_grid)[int32];
+		attribute<km2>        UrbanArea          (Countries/Country) := sum(Float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData) * domain/area, Countries/Country_grid);
+	}
+}

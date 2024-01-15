@@ -1,0 +1,19 @@
+container RegionalUnits
+{
+	#include <Country.dms>
+	
+	unit<uint8> Continent := unique(Countries/Country/Continent_name)
+	{
+		attribute<uint8>  aantal := pcount(Countries/Country/Continent_id);
+		attribute<string> Label  := values, DialogType = "LabelText";
+	}
+	
+	unit<uint8> World := unique(Countries/Country/World_name)
+	{
+		attribute<uint8> aantal := pcount(Countries/Country/World_ID);
+		attribute<string> Label := values, DialogType = "LabelText";
+	}
+	
+	// #include <capital_analysis.dms>
+	// #include <Subnational.dms>
+}
