@@ -7,15 +7,15 @@ container SourceData : using = "geography;units"
 	#include <Water.dms>
 	#include <Policy.dms>
 	
-	container RestrictionsCountry 
+ 	container RestrictionsCountry 
 	{
 		template GridToDomain
 		{
-			//begin case parameters
+			// begin case parameters
 			unit<uint32> PolyUnit;
 			attribute<Input/LatLong> Geometry (poly, PolyUnit);
 			unit<wpoint> domain_country;
-			//end case parameters
+			// end case parameters
 
 			attribute<PolyUnit> grid_org   (domain_country) := poly2grid(Geometry , domain_country);
 			attribute<uint32>   grid       (domain_country) := (grid_org[int32] > -1i ? 1i : 0i)[uint32];

@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP september 2018             //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Maarten Hilferink, Bas van Bemmel
-// Function:
-
 container UrbanAccuracy
 {
 	parameter<string> prefix :='UrbanCombine\/urbanization_model_valuation_examples\/JRC_1990_2014_M2015\/';
@@ -16,12 +6,12 @@ container UrbanAccuracy
 	{
 		unit<uint8> country_uq := UrbanCombine/urbanization_model_valuation_examples/JRC_1990_2014_M2015/P
 		{
-			attribute<uint8>  id     :=SourceData/RegionalUnits/Countries/Country/ID;
+			attribute<uint8>  id     :=id(SourceData/RegionalUnits/Countries/Country);
 			attribute<string> name   :=SourceData/RegionalUnits/Countries/Country/Name_cor;
 			attribute<string> ISO3   :=SourceData/RegionalUnits/Countries/Country/ISO3;
 			attribute<uint32> InModel:=SourceData/RegionalUnits/Countries/Country/InModel;
 			attribute<int32>  eiland :=SourceData/RegionalUnits/Countries/Country/is_eiland;
-			attribute<string> con    :=Continent;
+			attribute<string> con    := Continent_name;
 	
 			attribute<Float64> nr_Cells:== prefix + 'nr_Cells';
 	
@@ -115,14 +105,14 @@ container UrbanAccuracy
 		}
 
 		unit<uint32> variable_country := SubItem_PropValues(country_uq,'Name');
-		container export_csv := Report/WriteTable8ToCSV(country_uq , AsList(variable_country/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation/country.csv');
+		container export_csv := Templates/WriteTable8ToCSV(country_uq , AsList(variable_country/Name, ';'), '%LocalDataProjDir%/results/'+Analysis/Scenarios_Past/GridName+'/validation/country.csv');
 	}
 
 	container continent 
 	{
-		unit<uint8> cont_uq := Input/administrative/Continent/cont_uq
+		unit<uint8> cont_uq := SourceData/RegionalUnits/Continent
 		{
-			attribute<string>  Name                               := Input/administrative/Continent/cont_uq/Label;
+			attribute<string>  Name                               := Label;
 
 			attribute<float32> counter_prc_producers_accuracy     := sum((Country/country_uq/counter_producers_accuracy)[float32],      SourceData/RegionalUnits/Countries/Country/Continent_id);
 			attribute<float32> denominator_prc_producers_accuracy := sum((Country/country_uq/denominator_producers_accuracy)[float32], SourceData/RegionalUnits/Countries/Country/Continent_id);
@@ -156,14 +146,14 @@ container UrbanAccuracy
 		}
 		
 		unit<uint32> variable_cont_uq_export := SubItem_PropValues(cont_uq_export,'Name');
-		container export_csv := Report/WriteTable8ToCSV(cont_uq_export , AsList(variable_cont_uq_export/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation/continent.csv');
+		container export_csv := Templates/WriteTable8ToCSV(cont_uq_export , AsList(variable_cont_uq_export/Name, ';'), '%LocalDataProjDir%/results/'+Analysis/Scenarios_Past/GridName+'/validation/continent.csv');
 	}
 	
 	container world 
 	{
-		unit<uint8> world_uq := Input/administrative/World/world_uq
+		unit<uint8> world_uq := SourceData/RegionalUnits/World
 		{
-			attribute<string>  Name                               := Input/administrative/World/world_uq/Label;
+			attribute<string>  Name                               := Label;
 
 			attribute<float32> counter_prc_producers_accuracy     := sum((Country/country_uq/counter_producers_accuracy)[float32],      SourceData/RegionalUnits/Countries/Country/World_id);
 			attribute<float32> denominator_prc_producers_accuracy := sum((Country/country_uq/denominator_producers_accuracy)[float32], SourceData/RegionalUnits/Countries/Country/World_id);
@@ -197,6 +187,6 @@ container UrbanAccuracy
 		}
 		
 		unit<uint32> variable_world_uq_export := SubItem_PropValues(world_uq_export,'Name');
-		container export_csv := Report/WriteTable8ToCSV(world_uq_export , AsList(variable_world_uq_export/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation/world.csv');
+		container export_csv := Templates/WriteTable8ToCSV(world_uq_export , AsList(variable_world_uq_export/Name, ';'), '%LocalDataProjDir%/results/'+Analysis/Scenarios_Past/GridName+'/validation/world.csv');
 	}
 }

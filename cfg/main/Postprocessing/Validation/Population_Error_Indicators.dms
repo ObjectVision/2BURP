@@ -10,10 +10,10 @@
 
 container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evaluation_of_five_multitemporal_global_gridded_population_data_sets.pdf"
 {
-	unit<uint32> CD:= Input/CompactedDomain
+	unit<uint32> CD:= CompactedDomain
 	{
-		attribute<float32> Observed       :=Input/Population/Past/PastDates/Y2015[/Input/CompactedDomain/gtopo_rel];
-		attribute<float32> Modelled       :=Past/SSPs/SSPPast/ProjectionDates/y2015/NewState/Pop;
+		attribute<float32> Observed       :=SourceData/Population/Past/PastDates/Y2015[CompactedDomain/domain_rel];
+		attribute<float32> Modelled       :=/Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDates/y2015/NewState/Pop;
 		attribute<float32> ObsMINUSMod    :=abs(Observed - Modelled);
 		attribute<float32> SqrObsMINUSMod :=Sqr(Observed - Modelled);
 	}
@@ -23,27 +23,27 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 		unit<uint8> Country:= SourceData/RegionalUnits/Countries/Country 
 		{
 			attribute<string>  Name        := SourceData/RegionalUnits/Countries/Country/Name_cor;
-			attribute<uint32>  nr          := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/Country_rel);
-			attribute<float32> ObsMINUSMod := sum(Population_Error_Indicators/CD/ObsMINUSMod,   Input/CompactedDomain/Country_rel);
-			attribute<float32> Observed    := sum(Population_Error_Indicators/CD/Observed,      Input/CompactedDomain/Country_rel);
+			attribute<uint32>  nr          := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Country_rel);
+			attribute<float32> ObsMINUSMod := sum(Population_Error_Indicators/CD/ObsMINUSMod,   CompactedDomain/Country_rel);
+			attribute<float32> Observed    := sum(Population_Error_Indicators/CD/Observed,      CompactedDomain/Country_rel);
 			attribute<float32> MAE         := ((1f/nr[float32]) * ObsMINUSMod) / (Observed / nr[float32]);
 		}
 
-		unit<uint8> Continent := Input/administrative/Continent/cont_uq
+		unit<uint8> Continent := SourceData/RegionalUnits/Continent
 		{
-			attribute<string>  Name               := Input/administrative/Continent/cont_uq/Label;
-			attribute<uint32>  nr                 := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/Continent_rel);
-			attribute<float32> ObsMINUSMod        := sum(Population_Error_Indicators/CD/ObsMINUSMod,   Input/CompactedDomain/Continent_rel);
-			attribute<float32> Observed           := sum(Population_Error_Indicators/CD/Observed,      Input/CompactedDomain/Continent_rel);
+			attribute<string>  Name               := SourceData/RegionalUnits/Continent/Label;
+			attribute<uint32>  nr                 := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Continent_rel);
+			attribute<float32> ObsMINUSMod        := sum(Population_Error_Indicators/CD/ObsMINUSMod,   CompactedDomain/Continent_rel);
+			attribute<float32> Observed           := sum(Population_Error_Indicators/CD/Observed,      CompactedDomain/Continent_rel);
 			attribute<float32> MAE                := ((1f/nr[float32]) * ObsMINUSMod) / (Observed / nr[float32]);
 		}
 
-		unit<uint8> World := Input/administrative/World/world_uq
+		unit<uint8> World := SourceData/RegionalUnits/World
 		{
-			attribute<string>  Name               := Input/administrative/World/world_uq/Label;
-			attribute<uint32>  nr                 := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/World_Rel);
-			attribute<float32> ObsMINUSMod        := sum(Population_Error_Indicators/CD/ObsMINUSMod, Input/CompactedDomain/World_Rel);
-			attribute<float32> Observed           := sum(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/World_Rel);
+			attribute<string>  Name               := SourceData/RegionalUnits/World/Label;
+			attribute<uint32>  nr                 := count(Population_Error_Indicators/CD/Observed, CompactedDomain/World_Rel);
+			attribute<float32> ObsMINUSMod        := sum(Population_Error_Indicators/CD/ObsMINUSMod, CompactedDomain/World_Rel);
+			attribute<float32> Observed           := sum(Population_Error_Indicators/CD/Observed, CompactedDomain/World_Rel);
 			attribute<float32> MAE                := ((1f/nr[float32]) * ObsMINUSMod) / (Observed / nr[float32]);
 		}
 	}
@@ -53,24 +53,24 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 		unit<uint8> Country:= SourceData/RegionalUnits/Countries/Country 
 		{
 			attribute<string>  Name           := SourceData/RegionalUnits/Countries/Country/Name_cor;
-			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/Country_rel);
-			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, Input/CompactedDomain/Country_rel);
+			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Country_rel);
+			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, CompactedDomain/Country_rel);
 			attribute<float32> RMSE           := Sqrt(((1f/nr[float32]) * SqrObsMINUSMod)) / (MAE/Country/Observed / nr[float32]);
 		}
 
-		unit<uint8> Continent := Input/administrative/Continent/cont_uq
+		unit<uint8> Continent := SourceData/RegionalUnits/Continent
 		{
-			attribute<string>  Name           := Input/administrative/Continent/cont_uq/Label;
-			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/Continent_rel);
-			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, Input/CompactedDomain/Continent_rel);
+			attribute<string>  Name           := SourceData/RegionalUnits/Continent/Label;
+			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Continent_rel);
+			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, CompactedDomain/Continent_rel);
 			attribute<float32> RMSE           := Sqrt(((1f/nr[float32]) * SqrObsMINUSMod)) / (MAE/Continent/Observed / nr[float32]);
 		}
 
-		unit<uint8> World := Input/administrative/World/world_uq
+		unit<uint8> World := SourceData/RegionalUnits/World
 		{
-			attribute<string>  Name           := Input/administrative/World/world_uq/Label;
-			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, Input/CompactedDomain/World_Rel);
-			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, Input/CompactedDomain/World_Rel);
+			attribute<string>  Name           := SourceData/RegionalUnits/World/Label;
+			attribute<uint32>  nr             := count(Population_Error_Indicators/CD/Observed, CompactedDomain/World_Rel);
+			attribute<float32> SqrObsMINUSMod := sum(Population_Error_Indicators/CD/SqrObsMINUSMod, CompactedDomain/World_Rel);
 			attribute<float32> RMSE           := Sqrt(((1f/nr[float32]) * SqrObsMINUSMod)) / (MAE/World/Observed / nr[float32]);
 		}
 	}
@@ -78,14 +78,14 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 	container Relative_Difference
 	{
 		//als named Pearson's R 
-		attribute<float32> Relative_Difference(Input/CompactedDomain)            := Population_Error_Indicators/CD/ObsMINUSMod / (Population_Error_Indicators/CD/Observed + Population_Error_Indicators/CD/Modelled);//0/0 --> null!
+		attribute<float32> Relative_Difference(CompactedDomain)            := Population_Error_Indicators/CD/ObsMINUSMod / (Population_Error_Indicators/CD/Observed + Population_Error_Indicators/CD/Modelled);//0/0 --> null!
 
-		attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := mean(Relative_Difference,   Input/CompactedDomain/Country_rel);
-		attribute<float32> Relative_DifferenceContinent(Input/administrative/Continent/cont_uq) := mean(Relative_Difference,   Input/CompactedDomain/Continent_rel);
-		attribute<float32> Relative_DifferenceWorld(Input/administrative/World/world_uq)        := mean(Relative_Difference,   Input/CompactedDomain/World_rel);
+		attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := mean(Relative_Difference,   CompactedDomain/Country_rel);
+		attribute<float32> Relative_DifferenceContinent(SourceData/RegionalUnits/Continent) := mean(Relative_Difference,   CompactedDomain/Continent_rel);
+		attribute<float32> Relative_DifferenceWorld(SourceData/RegionalUnits/World)        := mean(Relative_Difference,   CompactedDomain/World_rel);
 		
 		//not the same nr is with null values!
-		//attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := sum(Relative_Difference,   Input/CompactedDomain/Country_rel);
+		//attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := sum(Relative_Difference,   CompactedDomain/Country_rel);
 		//attribute<float32> Relative_DifferenceCountrynr(SourceData/RegionalUnits/Countries/Country ) := Relative_DifferenceCountry / nr[float32];
 	}
 	
@@ -100,27 +100,27 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 			attribute<float32> Relative_Difference := Population_Error_Indicators/Relative_Difference/Relative_DifferenceCountry;//has no real meaning
 		}
 		unit<uint32> variable_country_export := SubItem_PropValues(Country,'Name');
-		container export_country_csv := Report/WriteTable8ToCSV(Country , AsList(variable_country_export/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation_population/country.csv');
+		container export_country_csv := Templates/WriteTable8ToCSV(Country , AsList(variable_country_export/Name, ';'), '%LocalDataProjDir%/results/'+/Analysis/Scenarios_Past/GridName+'/validation_population/country.csv');
 
-		unit<uint8> Continent := Input/administrative/Continent/cont_uq
+		unit<uint8> Continent := SourceData/RegionalUnits/Continent
 		{
-			attribute<string>  Name                := Input/administrative/Continent/cont_uq/Label;
+			attribute<string>  Name                := SourceData/RegionalUnits/Continent/Label;
 			attribute<float32> MAE                 := Population_Error_Indicators/MAE/Continent/MAE;
 			attribute<float32> RMSE                := Population_Error_Indicators/RMSE/Continent/RMSE;
 			attribute<float32> Relative_Difference := Population_Error_Indicators/Relative_Difference/Relative_DifferenceContinent;//has no real meaning
 		}
 		unit<uint32> variable_continent_export := SubItem_PropValues(Continent,'Name');
-		container export_continent_csv := Report/WriteTable8ToCSV(Continent , AsList(variable_continent_export/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation_population/continent.csv');
+		container export_continent_csv := Templates/WriteTable8ToCSV(Continent , AsList(variable_continent_export/Name, ';'), '%LocalDataProjDir%/results/'+/Analysis/Scenarios_Past/GridName+'/validation_population/continent.csv');
 		
-		unit<uint8> World := Input/administrative/World/world_uq
+		unit<uint8> World := SourceData/RegionalUnits/World
 		{
-			attribute<string>  Name                := Input/administrative/World/world_uq/Label;
+			attribute<string>  Name                := SourceData/RegionalUnits/World/Label;
 			attribute<float32> MAE                 := Population_Error_Indicators/MAE/World/MAE;
 			attribute<float32> RMSE                := Population_Error_Indicators/RMSE/World/RMSE;
 			attribute<float32> Relative_Difference := Population_Error_Indicators/Relative_Difference/Relative_DifferenceWorld;//has no real meaning
 		}
 		unit<uint32> variable_world_export := SubItem_PropValues(World,'Name');
-		container export_world_csv := Report/WriteTable8ToCSV(World , AsList(variable_world_export/Name, ';'), '%LocalDataProjDir%/results/'+Past/GridName+'/validation_population/world.csv');
+		container export_world_csv := Templates/WriteTable8ToCSV(World , AsList(variable_world_export/Name, ';'), '%LocalDataProjDir%/results/'+/Analysis/Scenarios_Past/GridName+'/validation_population/world.csv');
 	}
 }
 

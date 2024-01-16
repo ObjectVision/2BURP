@@ -10,9 +10,9 @@
 
 container Export
 {
-	parameter<string> InputMethod    := Input/Method;
-	parameter<string> Variant        := Input/Variant;
-	parameter<string> InPresentUrban := Input/InPresentUrban;
+	parameter<string> InputMethod    := ModelParameters/Method;
+	parameter<string> Variant        := ModelParameters/Variant;
+	parameter<string> InPresentUrban := ModelParameters/InPresentUrban;
 
 	#include <Start_past.dms>
 	#include <../../Scenarios/export_scen/Modelled.dms>

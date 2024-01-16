@@ -8,11 +8,9 @@
 // Author:   Bas van Bemmel
 // Function: Make domain of country based at min-max-x-y
 
-container gtopoc
+container domainc
 {
 	unit<dpoint> LatLong_country_range := range(dpoint, point(MIN_Y_INT,MIN_X_INT), point(MAX_Y_INT,MAX_X_INT));
-	unit<dpoint> WorldMollweide: format = "ESRI:54009";
-	unit<dpoint> SphericalMercator: format = "EPSG:3857";
 
 	parameter<float64> SourceRasterFactor    := 30.0 / 3600.0;
 	parameter<float64> SourceRasterSubFactor := 5.0 / 3600.0;

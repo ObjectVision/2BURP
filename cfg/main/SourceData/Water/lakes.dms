@@ -57,27 +57,15 @@ container Lakes
 		,  StorageReadOnly = "True"
 		,  Source          = "item /Input/Water/Lakes/Lakesglwd/MakeFSS/Geometry geodms 7.312 PD 7616 SD 7656"
 		{
-			attribute<LatLong> Geometry (arc);
-			
-			unit<uint32> LakePointSet := sequence2points(geometry)
-			{
-				attribute<Float64> lat_deg  := pointrow(point);
-				attribute<Float64> long_deg := pointcol(point);
-				attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-				attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-				attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-				attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
-				attribute<SphericalMercator> Point_mer := point(mercator_y_deg, long_deg, SphericalMercator);
-			}
-	
-			attribute<SphericalMercator> geometry_mer (arc):= points2sequence(LakePointSet/Point_mer, LakePointSet/sequencenr);
+			attribute<LatLong>           Geometry (arc);
+			attribute<SphericalMercator> geometry_mer (arc):= Geometry[SphericalMercator];
 			
 			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
 			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 		}
 
-		attribute<Float32> Location2Lake_mer(CompactedDomain)   := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / lengthdegree / CompactedDomain/lat_factor));
-		attribute<km>      Location2Lake_km(CompactedDomain)    := (Location2Lake_mer * lengthdegree * CompactedDomain/lat_factor);
+		attribute<Float32> Location2Lake_mer(CompactedDomain)   := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+		attribute<km>      Location2Lake_km(CompactedDomain)    := (Location2Lake_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
 		attribute<km>      Location2Lake_km_domain_export (domain):= Location2Lake_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to MondiaalDataDir
 
 		container Lake_grid
@@ -89,11 +77,11 @@ container Lakes
 				,	StorageReadOnly = "True"
 				,	DialogData      = "LatLong"
 			{
-				attribute<float32> ReadData(domain);
-				attribute<float32>  Lake(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+				attribute<float32>  ReadData(domain);
+				attribute<float32>  Lake (domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
 				attribute<float32>  LakeMD (domain) := Lake;//as used in Suitability 
 				
-				unit<uint8> Country:=Countries/Country 
+				unit<uint8> Country := Countries/Country 
 				{
 					attribute<float32>  sumLake  := sum(Lake,Countries/Country_grid);
 					attribute<float32>  MeanLake := mean(Lake,Countries/Country_grid);

@@ -16,25 +16,25 @@ container Analysis_Modelled : using = "Units;Classifications;geography"
 			:=  Preprocessing/UrbanArea/UrbanArea2010/ReadData[CompactedDomain/domain_rel][uint2];
 
 			attribute<uint2> UrbanY2010 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2010/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2010/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2020 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2020/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2020/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2030 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2030/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2030/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2040 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2040/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2040/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2050 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2050/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2050/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2060 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2060/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2060/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2070 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2070/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2070/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2080 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2080/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2080/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2090 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2090/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2090/NewState/IsUrban[uint2]';
 			attribute<uint2> UrbanY2100 (CompactedDomain )
-			:==  '/Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2100/NewState/IsUrban[uint2]';
+			:==  'Scenarios/SSPs/' + Scenario + '/ProjectionDates/Y2100/NewState/IsUrban[uint2]';
 			
 			attribute<string>                                        Key                                           (CompactedDomain) := string(FieldUrbanY2014) + "_" + string(UrbanY2010) + "_" + string(UrbanY2020) + "_" + string(UrbanY2030) + "_" + string(UrbanY2040)+ "_" + string(UrbanY2050)+ "_" + string(UrbanY2060)+ "_" + string(UrbanY2070)+ "_" + string(UrbanY2080)+ "_" + string(UrbanY2090)+ "_" + string(UrbanY2100);
 			attribute<String>                                        ISO                                           (CompactedDomain) := SourceData/RegionalUnits/Countries/Country/ISO3[CompactedDomain/Country_rel];
@@ -51,7 +51,7 @@ container Analysis_Modelled : using = "Units;Classifications;geography"
 			attribute<bool>                                          Special                                       (CompactedDomain) := strcount(key, '1_0_1_1_1_1_1_1_1_1_1') > 0;
 			
 
-			attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb> CombinationUrbNotUrb_rel                      (CompactedDomain) := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb/key);
+			// attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb> CombinationUrbNotUrb_rel                      (CompactedDomain) := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb/key);
 		}
 
 		unit<uint32> ISOKey_uq := unique(OverlayGrids/ISOKey)

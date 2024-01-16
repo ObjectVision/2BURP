@@ -1,16 +1,21 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function:
-
 container Population_ANOVA
 {
-	template anova // anaysis of variance
+	container population_model_valuation_examples 
+	{
+		container JRC_1990_2015_M2015 := ANOVA_T(CompactedDomain, SourceData/RegionalUnits/Countries/Country , CompactedDomain/Country_rel,
+			units/PersonAnalysis,
+			SourceData/Population/Past/PastDates/Y1990[CompactedDomain/domain_rel],
+			SourceData/Population/Past/PastDates/Y2015[CompactedDomain/domain_rel],
+			Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
+
+		container JRC_1975_2014_M2015_coarse := ANOVA_T(CompactedDomain, SourceData/RegionalUnits/Countries/Country , CompactedDomain/Country_rel,
+			units/PersonAnalysis,
+			SourceData/Population/Past/PastDates/Y1990[CompactedDomain/domain_rel],
+			SourceData/Population/Past/PastDates/Y2015[CompactedDomain/domain_rel],
+			Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
+	}
+
+	template ANOVA_T // anaysis of variance
 	{
 		// begin of case parameters
 		unit<UInt32> sample_set;
@@ -28,7 +33,8 @@ container Population_ANOVA
 		
 		attribute<S> curr_min_pred_val(sample_set) := curr_min_past_val - (variances/curr_pred_cov / variances/pred_min_past_var)[part_rel] * pred_min_past_val;
 		
-		container variances {
+		container variances 
+		{
 			attribute<float32> past_var(P) := var(past_val, part_rel);
 			attribute<float32> curr_var(P) := var(curr_val, part_rel);
 			attribute<float32> pred_var(P) := var(pred_val, part_rel);
@@ -55,19 +61,4 @@ container Population_ANOVA
 		}
 	}
 
-	container population_model_valuation_examples {
-	
-		container JRC_1990_2015_M2015 := anova(Input/CompactedDomain, SourceData/RegionalUnits/Countries/Country , Input/CompactedDomain/Country_rel,
-			units/PersonAnalysis,
-			Input/Population/Past/PastDates/Y1990[Input/CompactedDomain/gtopo_rel],
-			Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel],
-			Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
-
-			
-		container JRC_1975_2014_M2015_coarse := anova(Input/CompactedDomain, SourceData/RegionalUnits/Countries/Country , Input/CompactedDomain/Country_rel,
-			units/PersonAnalysis,
-			Input/Population/Past/PastDates/Y1990[Input/CompactedDomain/gtopo_rel],
-			Input/Population/Past/PastDates/Y2015[Input/CompactedDomain/gtopo_rel],
-			Past/SSPs/SSPPast/ProjectionDates/Y2015/NewState/Pop);
-	}
 }

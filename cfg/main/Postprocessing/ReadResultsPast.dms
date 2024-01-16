@@ -18,12 +18,12 @@ container ReadResultsPast: Using = "Units;"
 	parameter<string> From   := 'All';
 	parameter<string> Period := 'Past';
 
-	unit<uint32> SSP_Year := combine(Past/SSP, Past/SSPs/SSPPast/ProjectionDate)
+	unit<uint32> SSP_Year := combine(Analysis/Scenarios_Past/SSP, Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDate)
 	{
-		attribute<string> SSP_c   := Past/SSP/name[nr_1]+'/';
-		attribute<string> SSP_c2  := Past/SSP/name[nr_1];
-		attribute<string> Year_c  := Past/SSPs/SSPPast/ProjectionDate/name[nr_2];
-		attribute<string> Year_c2 := string(Past/SSPs/SSPPast/ProjectionDate/Yr[nr_2]);
+		attribute<string> SSP_c   := Analysis/Scenarios_Past/SSP/name[nr_1]+'/';
+		attribute<string> SSP_c2  := Analysis/Scenarios_Past/SSP/name[nr_1];
+		attribute<string> Year_c  := Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDate/name[nr_2];
+		attribute<string> Year_c2 := string(Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDate/Yr[nr_2]);
 		attribute<string> name    := SSP_c + Year_c;
 	}
 

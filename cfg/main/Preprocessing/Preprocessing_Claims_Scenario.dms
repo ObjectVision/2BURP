@@ -87,11 +87,11 @@ container Make_Scenario : using = "units"
 
 	container SSPs: = 
 		for_each_ne(
-			/Scenarios/SSP/Name
-			,'Scenarios('+quote(string(/Scenarios/SSP/Name))+')'
+			Classifications/SSP/Name
+			,'Scenarios_T('+quote(string(Classifications/SSP/Name))+')'
 		);
 
-	template Scenarios 
+	template Scenarios_T
 	{
 		//begin case parameters
 		parameter<string> SPPscen;

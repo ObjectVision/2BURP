@@ -16,10 +16,10 @@ container Analysis: using = "units"
 
 	container SSPs := 
 		for_each_ne(Classifications/SSP/Name, 
-			'AnalysePopAllocation(Scenarios/SSPs/'+Classifications/SSP/Name+')'
+			'AnalysePopAllocation_T(Scenarios/SSPs/'+Classifications/SSP/Name+')'
 		);
 		
-	template AnalysePopAllocation 
+	template AnalysePopAllocation_T 
 	{
 		container SSPoutput;
 		

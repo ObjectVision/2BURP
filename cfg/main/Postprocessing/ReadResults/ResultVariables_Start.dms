@@ -12,7 +12,7 @@ container Start
 {
 	parameter<string> FolderFilenameprefix :==quote(folder + '/' + Method+Variant+InPresentUrban);
 
-	unit<wpoint> gtopo     :=domain
+	unit<wpoint> domain     :=geography/domain
 	{
 		attribute<Classifications/PopClass>                                tpop_classification: StorageName    = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix  +'_start_tpop_classification.tif'";
 		attribute<float32>                                                 upop: StorageName                   = "='%MondiaalDataDir%/Results/' + FolderFilenameprefix + '_start_upop.tif'";

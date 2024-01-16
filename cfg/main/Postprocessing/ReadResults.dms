@@ -19,10 +19,10 @@ container ReadResults: Using = "Units;"
 	parameter<string> From   := 'All';
 	parameter<string> Period := '';
 
-	unit<uint32> SSP_Year := combine(Scenarios/SSP, Classifications/ProjectionDate)
+	unit<uint32> SSP_Year := combine(Classifications/SSP, Classifications/ProjectionDate)
 	{
-		attribute<string> SSP_c   := Scenarios/SSP/name[nr_1]+'/';
-		attribute<string> SSP_c2  := Scenarios/SSP/name[nr_1];
+		attribute<string> SSP_c   := Classifications/SSP/name[nr_1]+'/';
+		attribute<string> SSP_c2  := Classifications/SSP/name[nr_1];
 		attribute<string> Year_c  := Classifications/ProjectionDate/name[nr_2];
 		attribute<string> Year_c2 := string(Classifications/ProjectionDate/Yr[nr_2]);
 		attribute<string> name    := SSP_c + Year_c;

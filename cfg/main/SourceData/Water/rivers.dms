@@ -21,7 +21,7 @@ container Rivers
 	}
 
 	unit<uint32> MakeFSS := HydroRIVERS_v10/River
-	, 	StorageName = "%LocalDataProjDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
+	, 	StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
 	{
 		attribute<LatLong> Geometry (arc) := HydroRIVERS_v10/River/geometry;
 	}
@@ -30,66 +30,34 @@ container Rivers
 	: 	StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
 	,  StorageReadOnly = "True"
 	{
-		attribute<LatLong> Geometry (arc);
-		
-		unit<uint32> RiverPointSet := sequence2points(geometry)
-		{
-			attribute<Float64> lat_deg  := pointrow(point);
-			attribute<Float64> long_deg := pointcol(point);
-			attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-			attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-			attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-			attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
-			attribute<SphericalMercator> Point_mer := point(mercator_y_deg, long_deg, SphericalMercator);
-		}
-
-		attribute<SphericalMercator> geometry_mer (arc):= points2sequence(RiverPointSet/Point_mer, RiverPointSet/sequencenr);
+		attribute<LatLong>           Geometry (arc);
+		attribute<SphericalMercator> geometry_mer (arc):= Geometry[SphericalMercator];
 		
 		parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
 		parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 	}
 
-	attribute<Float32> Location2River_mer(CompactedDomain)   := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / lengthdegree / CompactedDomain/lat_factor));
-	attribute<km>      Location2River_km(CompactedDomain)    := (Location2River_mer * lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2River_km_gtopo_export (domain):= Location2River_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/water/HydroRIVERSVersion1/Location2River_km.tif";
+	attribute<Float32> Location2River_mer     (CompactedDomain) := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+	attribute<km>      Location2River_km      (CompactedDomain) := (Location2River_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
+	attribute<km>      Location2River_km_domain_export (domain) := Location2River_km[CompactedDomain/BaseGrid], StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif";
 
-	unit<ipoint> Dist_River:
-		StorageName     = "%MondiaalDataDir%/water/HydroRIVERSVersion1/dist.tif",
-		StorageType     = "gdal.grid",
-		Source          = "export Location2River_km_gtopo_export 7.212 procestime 11m:19s 20210630",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
-	{
-		attribute<float64> ReadData_org (domain);
-		attribute<float64> ReadData     (domain):= MakeDefined(ReadData_org,5d);
-		
-		unit<uint8> Country := Countries/Country 
-		{
-			attribute<float64>  sumReadData_org  := sum(ReadData_org,Countries/Country_grid);
-			attribute<float64>  MeanReadData_org := mean(ReadData_org,Countries/Country_grid);
-			attribute<float64>  MinReadData_org  := min(ReadData_org,Countries/Country_grid);
-			attribute<float64>  MaxReadData_org  := max(ReadData_org,Countries/Country_grid);
-			attribute<float64>  SDReadData_org   := sd(ReadData_org,Countries/Country_grid);
-		}
-	}
-	
 	unit<ipoint> Dist_River_km:
-		StorageName     = "%MondiaalDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif",
-		StorageType     = "gdal.grid",
-		Source          = "export Location2River_km_gtopo_export 7.212 procestime 11m:19s 20210630",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
+	StorageName     = "%MondiaalDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif",
+	StorageType     = "gdal.grid",
+	Source          = "export Location2River_km_gtopo_export 7.212 procestime 11m:19s 20210630",
+	StorageReadOnly = "True",
+	DialogData      = "LatLong"
 	{
-		attribute<float64> ReadData_org(domain);
-		attribute<float64> ReadData(domain)    := min_elem(MakeDefined(ReadData_org,250d),250d);//null-->250, INF=Infinity -->250
-
-		unit<uint8> Country:= SourceData/RegionalUnits/Countries/Country 
+		attribute<km> GridData (domain);
+		attribute<km> ReadData (domain):= MakeDefined(GridData,5[km]);
+		
+		unit<uint8> Country := SourceData/RegionalUnits/Countries/Country 
 		{
-			attribute<float64>  sumReadData_org  := sum(ReadData_org,SourceData/RegionalUnits/Countries/Country_grid);
-			attribute<float64>  MeanReadData_org := mean(ReadData_org,SourceData/RegionalUnits/Countries/Country_grid);
-			attribute<float64>  MinReadData_org  := min(ReadData_org,SourceData/RegionalUnits/Countries/Country_grid);
-			attribute<float64>  MaxReadData_org  := max(ReadData_org,SourceData/RegionalUnits/Countries/Country_grid);
-			attribute<float64>  SDReadData_org   := sd(ReadData_org,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km>  sumReadData_org  := sum(ReadData,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km>  MeanReadData_org := mean(ReadData,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km>  MinReadData_org  := min(ReadData,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km>  MaxReadData_org  := max(ReadData,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km>  SDReadData_org   := sd(ReadData,SourceData/RegionalUnits/Countries/Country_grid);
 		}
 	}
 }

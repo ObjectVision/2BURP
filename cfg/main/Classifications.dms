@@ -22,21 +22,21 @@ container Classifications
 	
 	#include <classification_ProjectionDate.dms>
 	#include <classification_prc.dms>
-	#include <classification_country.dms>
+	// #include <classification_country.dms>
 	#include <classification_urban_discrete.dms>
 	#include <classification_urb.dms>
-	#include <classification_GHS_SMOD.dms>
+	// #include <classification_GHS_SMOD.dms>
 	#include <classification_GHS_SMOD_export.dms>
-	#include <classification_past.dms>
-	#include <classification_AnalysisUrbNotUrb.dms>
+	// #include <classification_past.dms>
+	// #include <classification_AnalysisUrbNotUrb.dms>
 	#include <classification_PopClass.dms>
-	#include <classification_PercGrowthUrbanArea.dms>
-	#include <classification_BuiltupareaClass.dms>
-	#include <classification_UrbanOverlayClass.dms>
-	#include <classification_Urban3OverlayClass.dms>
+	// #include <classification_PercGrowthUrbanArea.dms>
+	// #include <classification_BuiltupareaClass.dms>
+	// #include <classification_UrbanOverlayClass.dms>
+	// #include <classification_Urban3OverlayClass.dms>
 	#include <classification_suitability.dms>
-	#include <classification_GDP.dms>
-	#include <classification_soil.dms>
-	#include <classification_LULC.dms>
-	#include <classification_Blue_Marble_gray.dms>
+	// #include <classification_GDP.dms>
+	// #include <classification_soil.dms>
+	// #include <classification_LULC.dms>
+	// #include <classification_Blue_Marble_gray.dms>
 }

@@ -8,7 +8,7 @@
 // Author:   Bas van Bemmel
 // Function:
 
-container Validation
+container Validation : using = "geography"
 {
 	#include <UrbanCombine.dms>
 	#include <UrbanAccuracy.dms>

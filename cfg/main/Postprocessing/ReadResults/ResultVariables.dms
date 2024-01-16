@@ -17,7 +17,7 @@ container ResultVariables
 		parameter<string> Period;
 		//end case parameters
 
-		unit<wpoint> domainref := = domainscale="All" ? 'domain' : 'gtopoc/gtopo_country';
+		unit<wpoint> domainref := = domainscale="All" ? 'geography/domain' : 'domainc/domain_country';
 		unit<uint32> Periodref := = Period="Past" ? 'ReadResultsPast/SSP_Year' : 'ReadResults/SSP_Year';
 		
 		parameter<string> Variant              := 'var1'; // Only relevant for  M3, var1=JRC 50 percent bua, var2=GHSMOD/ Leave empty when working with M_1

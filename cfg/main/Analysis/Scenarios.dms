@@ -49,9 +49,9 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 				attribute<bool> IsRegional   (domain) := SourceData/RestrictionsCountry/IsRegional;
 
 				//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-				attribute<float32> pot_CoastLine_20km (domain) := !SourceData/Suitability/Coast/InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
-				attribute<float32> TRI (domain)                := SourceData/Suitability/TRI/Weight / 100.0f;
-				attribute<float32> TravelTime (domain)         := SourceData/Suitability/TravelTime/Weight;
+				attribute<float32> pot_CoastLine_20km (domain) := !Preprocessing/Suitability/Coast/InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
+				attribute<float32> TRI (domain)                := Preprocessing/Suitability/TRI/Weight / 100.0f;
+				attribute<float32> TravelTime (domain)         := Preprocessing/Suitability/TravelTime/Weight;
 				attribute<float32> Urban_unCali (domain)       := TRI + TravelTime;
 				//end unCalibrated code
 
@@ -128,9 +128,9 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 
 	#include <population_claimregion.dms>//known population claim imposed
 
-		attribute<Person> Initial_Rural_residence (CompactedDomain) := 
-			ProjectionDates/Y2010/landuse_allocation/IsUrban ? 0[Person] 
-			: Population/M1/Urban_pop_2010/PopulationData[CompactedDomain/org_rel][Person];//same for M1 and M3!
+		// attribute<Person> Initial_Rural_residence (CompactedDomain) := 
+			// ProjectionDates/Y2010/landuse_allocation/IsUrban ? 0[Person] 
+			// : Population/M1/Urban_pop_2010/PopulationData[CompactedDomain/org_rel][Person];//same for M1 and M3!
 		
 		container InitialState //Is used only once at the start of the DynaPop loop as CurrState.
 		{
@@ -177,15 +177,15 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 			attribute<float32> HydeIndex         (Claimregion);
 			attribute<km2>     Urban_landuse     (ClaimRegion); // urban land use claim)
 			
-			attribute<float32>  ExpPop   (Claimregion):= (ExpUrbanPop / (ExpUrbanPop + ExpRuralPop)[float32]);
+			// attribute<float32>  ExpPop   (Claimregion):= (ExpUrbanPop / (ExpUrbanPop + ExpRuralPop)[float32]);
 			
-			attribute<float32> GDPCapC(Claimregion) := = 'rjoin(Countries/Country/ISO3,GDP/Claims/' + Scenario + '/Region,Preprocessing/GDP/Claims/' + Scenario + '/GDPCap_' + ProjectionDate/name +')[float32]';
+			// attribute<float32> GDPCapC(Claimregion) := = 'rjoin(Countries/Country/ISO3,Preprocessing/GDP/Claims/' + Scenario + '/Region,Preprocessing/GDP/Claims/' + Scenario + '/GDPCap_' + ProjectionDate/name +')[float32]';
 
-			attribute<float32> UrbanDensityVU  (Claimregion):= exp(/Preprocessing/UrbanDensity/Country/CountryFixedEffectsf32C + 0.538f * log(ExpUrbanPop)+-0.1f*log(GDPCapC)+-7.247f*ExpPop+0.347f*((log(ExpUrbanPop)*ExpPop)));
-			attribute<float32> HydeIndexVU     (Claimregion):= UrbanDensityVU / Preprocessing/UrbanDensity/Country/Y2010UDf32C;
-			attribute<km2>     Urban_landuseVU (Claimregion):= = ModelParameters/InPresentUrban == 'InPresentUrban'
-																 ?  'div((MakeDefined(Y2010/ExpUrbanPop, 0[Person]) / Population/' + ModelParameters/Method + '/Urban_pop_2010/UrbanMeanPopDensity),HydeIndexVU)[km2]'
-																 :  'div((MakeDefined(ExpUrbanPop, 0[Person]) / Population/' + ModelParameters/Method + '/Urban_pop_2010/UrbanMeanPopDensity),HydeIndexVU)[km2]';
+			// attribute<float32> UrbanDensityVU  (Claimregion):= exp(/Preprocessing/UrbanDensity/Country/CountryFixedEffectsf32C + 0.538f * log(ExpUrbanPop)+-0.1f*log(GDPCapC)+-7.247f*ExpPop+0.347f*((log(ExpUrbanPop)*ExpPop)));
+			// attribute<float32> HydeIndexVU     (Claimregion):= UrbanDensityVU / Preprocessing/UrbanDensity/Country/Y2010UDf32C;
+			// attribute<km2>     Urban_landuseVU (Claimregion):= = ModelParameters/InPresentUrban == 'InPresentUrban'
+																 // ?  'div((MakeDefined(Y2010/ExpUrbanPop, 0[Person]) / Population/' + ModelParameters/Method + '/Urban_pop_2010/UrbanMeanPopDensity),HydeIndexVU)[km2]'
+																 // :  'div((MakeDefined(ExpUrbanPop, 0[Person]) / Population/' + ModelParameters/Method + '/Urban_pop_2010/UrbanMeanPopDensity),HydeIndexVU)[km2]';
 
 
 			attribute<ClaimRegion> region_rel(CompactedDomain) := CompactedDomain/Country_rel;
@@ -199,27 +199,27 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 					// -------------------- Components that are available in total suitability ------------------------ //
 
 						//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-						attribute<float32> UrbanPot (CompactedDomain) :=
-							potential((CompactedDomain/Area * float32(CurrState/IsUrban))[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/nr_OrgEntity];
+						// attribute<float32> UrbanPot (CompactedDomain) :=
+							// potential((CompactedDomain/Area * float32(CurrState/IsUrban))[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/nr_OrgEntity];
 	
 						//"alternative" method of UrbanPot based at orginal method of Frank van Rijn - PBL, only distance to urban, not a potential
 						//attribute<float32> UrbanPot (CompactedDomain) := landuse_allocation/DistanceBuildUp/PROBABILITY / 100f;
 	
-						attribute<float32> LandPot(CompactedDomain) :=
-							potential(float32(CompactedDomain/Area[CompactedDomain/BaseGrid]),                  /Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/nr_OrgEntity];
+						// attribute<float32> LandPot(CompactedDomain) :=
+							// potential(float32(CompactedDomain/Area[CompactedDomain/BaseGrid]),                  /Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/nr_OrgEntity];
 		
 						// Extra weight to high population density places: OFF because already in NeighbourhoodEnrichtment/Or represented by current urban land
-						attribute<float32> UrbanPopPot(CompactedDomain) :=
-							potential(
-								(CurrState/Pop*Float32(CurrState/IsUrban))[CompactedDomain/BaseGrid]
-							,	/Geography/Distmatrices/Impl/pot10km/potrange/RelWeightSqrt
-							)	[CompactedDomain/nr_OrgEntity];
+						// attribute<float32> UrbanPopPot(CompactedDomain) :=
+							// potential(
+								// (CurrState/Pop*Float32(CurrState/IsUrban))[CompactedDomain/BaseGrid]
+							// ,	/Geography/Distmatrices/Impl/pot10km/potrange/RelWeightSqrt
+							// )	[CompactedDomain/nr_OrgEntity];
 	
-						attribute<float32> pot_UrbanArea_5km (CompactedDomain):
-							= potential(float32(CurrState/IsUrban[CompactedDomain/BaseGrid]), /Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt)[CompactedDomain/nr_OrgEntity];
+						// attribute<float32> pot_UrbanArea_5km (CompactedDomain):
+							// = potential(float32(CurrState/IsUrban[CompactedDomain/BaseGrid]), /Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt)[CompactedDomain/nr_OrgEntity];
 	
-						attribute<float32> Coast_potential (CompactedDomain):
-							= (CompactedDomain/Suitabilities/Coast * pot_UrbanArea_5km) * 100f;
+						// attribute<float32> Coast_potential (CompactedDomain):
+							// = (CompactedDomain/Suitabilities/Coast * pot_UrbanArea_5km) * 100f;
 						
 						// ----------------------------------------------------------------------------------------------- //
 	
@@ -260,17 +260,17 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 				attribute<SuitabilityNeg> cuttingline (ClaimRegion)     := MakeDefined(nth_element_weighted(rank, urban_claim, CompactedDomain/area, region_rel), max(rank, region_rel));
 				attribute<bool>           IsUrban     (CompactedDomain) := rank < cuttingline[region_rel];
 
-				#include <DistanceBuildUp.dms>
+				// #include <DistanceBuildUp.dms>
 
 				attribute<float32> IsUrbanF32(CompactedDomain) := Float32(IsUrban);
 			}
 
-			attribute<km2>     Urban_km2       (CompactedDomain) := landuse_allocation/IsUrbanF32*CompactedDomain/Area;
+			// attribute<km2>     Urban_km2       (CompactedDomain) := landuse_allocation/IsUrbanF32*CompactedDomain/Area;
 
-			attribute<km2>     Urban_Alloc     (ClaimRegion) := sum(landuse_allocation/IsUrbanF32*CompactedDomain/Area, region_rel);
-			attribute<km2>     Urban_2010      (ClaimRegion) := sum(Float32(InitialState/IsUrban)*CompactedDomain/Area, region_rel);
-			attribute<float32> UrbanCells_Alloc(ClaimRegion) := sum(landuse_allocation/IsUrbanF32, region_rel);
-			attribute<float32> UrbanCells_2010 (ClaimRegion) := sum(Float32(InitialState/IsUrban), region_rel);
+			// attribute<km2>     Urban_Alloc     (ClaimRegion) := sum(landuse_allocation/IsUrbanF32*CompactedDomain/Area, region_rel);
+			// attribute<km2>     Urban_2010      (ClaimRegion) := sum(Float32(InitialState/IsUrban)*CompactedDomain/Area, region_rel);
+			// attribute<float32> UrbanCells_Alloc(ClaimRegion) := sum(landuse_allocation/IsUrbanF32, region_rel);
+			// attribute<float32> UrbanCells_2010 (ClaimRegion) := sum(Float32(InitialState/IsUrban), region_rel);
 
 			attribute<Float32> GrowPot  (CompactedDomain) := max_elem(Float32(landuse_allocation/CompactedSuitabilities/Urban), 0f), FreeData = "False";
 			attribute<Float32> ShrinkPot(CompactedDomain) := max_elem(max(GrowPot, Region_rel)[Region_rel] - GrowPot, 0f);
@@ -279,9 +279,9 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 				potential(Sqr(CurrState/Pop / CompactedDomain/Area)[CompactedDomain/BaseGrid] * landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel]
 			/	potential(                                               landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel];
 
-			attribute<Person_km2> local_maximum_population_density         (CompactedDomain) := Sqrt(MaxSqr);
-			attribute<Person_km2> local_MINUS_National                     (CompactedDomain) := local_maximum_population_density - ClaimRegion/mean_population_density[Region_rel];
-			attribute<bool>       maximum_population_density_local_dominant(CompactedDomain) := local_maximum_population_density > ClaimRegion/mean_population_density[Region_rel] ? true : false;
+			// attribute<Person_km2> local_maximum_population_density         (CompactedDomain) := Sqrt(MaxSqr);
+			// attribute<Person_km2> local_MINUS_National                     (CompactedDomain) := local_maximum_population_density - ClaimRegion/mean_population_density[Region_rel];
+			// attribute<bool>       maximum_population_density_local_dominant(CompactedDomain) := local_maximum_population_density > ClaimRegion/mean_population_density[Region_rel] ? true : false;
 
 			attribute<Person_km2> maximum_population_density_org(CompactedDomain) := max_elem(Sqrt(MaxSqr), ClaimRegion/mean_population_density[Region_rel]) * HydeIndex[Region_rel];
 			attribute<Person_km2> maximum_population_density(CompactedDomain)     := ModelParameters/InPresentUrban='InPresentUrban' ? maximum_population_density_org * InPresentUrban_maximum_population_density_factor : maximum_population_density_org, FreeData = "False";
@@ -299,7 +299,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 			{
 				attribute<Person> CurrPop(CompactedDomain);
 				
-				#include <AnalyseSpaceToAllocatePop.dms>
+				// #include <AnalyseSpaceToAllocatePop.dms>
 
 				attribute<Person> ExtraPop   (ClaimRegion)     := ExpUrbanPop - sum(CurrPop * landuse_allocation/IsUrbanF32, Region_rel), FreeData = "False";
 				attribute<bool>   Abandonment(CompactedDomain) :=  (ExtraPop<0f)[Region_rel];
@@ -310,7 +310,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 
 				attribute<Person> NextPop  (CompactedDomain) := CurrPop + makedefined(median(0f, Delta, float32(!Abandonment) * maximum_population - CurrPop),0f), FreeData = "False";
 
-				attribute<bool> Low_Density(CompactedDomain) := (NextPop < ClaimRegion/mean_population_density[Region_rel]);
+				// attribute<bool> Low_Density(CompactedDomain) := (NextPop < ClaimRegion/mean_population_density[Region_rel]);
 			}
 
 			container Iters := for_each_ne(Iter/name, 'IterTempl('+Iter/PrevPopName+')');
@@ -320,25 +320,25 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 			attribute<Person> Initial_Rural_residence(CompactedDomain) := landuse_allocation/IsUrban ? 0[Person] : Population/M1/Urban_pop_2010/PopulationData[Person][CompactedDomain/org_rel];//same for M1 and M3!
 			attribute<Person> RuralPop_corr (ClaimRegion) := ExpRuralPop < 0f ? 0f : ExpRuralPop;
 			attribute<Person> RuralPop(CompactedDomain) := MakeDefined(scalesum(Initial_Rural_residence, Region_rel, RuralPop_corr), 0f);
-			attribute<Person> RuralPop_not_negative(CompactedDomain) := RuralPop < 0f ? 0f : RuralPop;
-			attribute<Person_km2> RuralPopDensity(CompactedDomain) := RuralPop / CompactedDomain/area;
+			// attribute<Person> RuralPop_not_negative(CompactedDomain) := RuralPop < 0f ? 0f : RuralPop;
+			// attribute<Person_km2> RuralPopDensity(CompactedDomain) := RuralPop / CompactedDomain/area;
 	//-------------------------------------------------------------------------------------------------------------//
 
 			container NewState
 			{
 				attribute<Person> Pop (CompactedDomain)              := Last/NextPop * landuse_allocation/IsUrbanF32 + RuralPop;
-				attribute<Person> TPop (CompactedDomain)             := Pop;
-				attribute<Person> UPop (CompactedDomain)             := Last/NextPop * landuse_allocation/IsUrbanF32;
-				attribute<Person> RPop (CompactedDomain)             := RuralPop;
+				// attribute<Person> TPop (CompactedDomain)             := Pop;
+				// attribute<Person> UPop (CompactedDomain)             := Last/NextPop * landuse_allocation/IsUrbanF32;
+				// attribute<Person> RPop (CompactedDomain)             := RuralPop;
 
-				attribute<Person> Pop_not_negative(CompactedDomain) := Last/NextPop * landuse_allocation/IsUrbanF32 + RuralPop_not_negative;
+				// attribute<Person> Pop_not_negative(CompactedDomain) := Last/NextPop * landuse_allocation/IsUrbanF32 + RuralPop_not_negative;
 				attribute<bool>   IsUrban(CompactedDomain)          := landuse_allocation/IsUrban;
 
-				attribute<uint2>                           IsUrbanInCountry(CompactedDomain)     := IsUrban ? IsUrban[uint2] : (IsDefined(administrative/Countries/Country_grid[CompactedDomain/domain_rel]) ? 3u2 : 0u2);
-				attribute<uint2>                           UrbanPopCountry(CompactedDomain)      := (IsUrbanInCountry[float32] =1f && Pop > 0f) ? 2u2 : IsUrbanInCountry;
-				attribute<Classifications/Urb/UrbPopClass> UrbanRuralPopCountry(CompactedDomain) := (UrbanPopCountry[uint8] = 3b ? ((Pop > 0f) ? 4b : UrbanPopCountry[uint8]):UrbanPopCountry[uint8])[Classifications/Urb/UrbPopClass];
+				// attribute<uint2>                           IsUrbanInCountry(CompactedDomain)     := IsUrban ? IsUrban[uint2] : (IsDefined(administrative/Countries/Country_grid[CompactedDomain/domain_rel]) ? 3u2 : 0u2);
+				// attribute<uint2>                           UrbanPopCountry(CompactedDomain)      := (IsUrbanInCountry[float32] =1f && Pop > 0f) ? 2u2 : IsUrbanInCountry;
+				// attribute<Classifications/Urb/UrbPopClass> UrbanRuralPopCountry(CompactedDomain) := (UrbanPopCountry[uint8] = 3b ? ((Pop > 0f) ? 4b : UrbanPopCountry[uint8]):UrbanPopCountry[uint8])[Classifications/Urb/UrbPopClass];
 
-				#include <urb_country.dms>
+				// #include <urb_country.dms>
 
 				//begin code to prevent deurbanisation within 30 years
 //				attribute<string>   PreviousUrbanString(CompactedDomain) := CurrState/IsUrban ?  '1' : '0';
@@ -352,11 +352,11 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 				//0101 -->urbanisation, but should not occur because of first condition
 				
 				attribute<uint16> UrbanHistoryBits   (CompactedDomain) := CurrState/UrbanHistoryBits * 2w + Uint16(IsUrban);
-				attribute<bool>  HasHad1UrbanPeriod (CompactedDomain) := (UrbanHistoryBits % 2w) == 1w;   // bijvoorbeeld in 2030 de history 2010 rural -> 2020 urban 
+				// attribute<bool>  HasHad1UrbanPeriod (CompactedDomain) := (UrbanHistoryBits % 2w) == 1w;   // bijvoorbeeld in 2030 de history 2010 rural -> 2020 urban 
 				attribute<bool>  HasHad2UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 4w) == 3w;   // bijvoorbeeld in 2040 de history 2010 rural -> 2020 urban -> 2030 urban
-				attribute<bool>  HasHad3UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 8w) == 7w;   // b.v. in 2050 ...
-				attribute<bool>  HasHad4UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 16w) == 15w; // b.v. in 2060 ...
-				attribute<bool>  HasHad5UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 32w) == 31w; // b.v. in 2070 ...
+				// attribute<bool>  HasHad3UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 8w) == 7w;   // b.v. in 2050 ...
+				// attribute<bool>  HasHad4UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 16w) == 15w; // b.v. in 2060 ...
+				// attribute<bool>  HasHad5UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 32w) == 31w; // b.v. in 2070 ...
 				
 //				attribute<float32>  ExtraProb20_from_str(CompactedDomain) := Change20='01' ? 1f : 0f;                   //extra prob for first urbanisation within 20, to keep/old first urb.
 //				attribute<float32>  ExtraProb30_from_str(CompactedDomain) := Change30='0111' || Change20='01' ? 1f : 0f;//extra prob for first urbanisation within 30
@@ -365,60 +365,60 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits"
 //				attribute<float32>  ExtraProb30         (CompactedDomain) := Float32(!HasHad3UrbanPeriods); //extra prob for first urbanisation within 30
 				//end of deurbanisation code within 30 years
 				
-				attribute<Units/BuiltupareaFactor>  Builtuparea(CompactedDomain)           := IsUrban ? value(IsUrban, Units/BuiltupareaFactor) : CurrState/Builtuparea * RPop / CurrState/RPop;
+				// attribute<Units/BuiltupareaFactor>  Builtuparea(CompactedDomain)           := IsUrban ? value(IsUrban, Units/BuiltupareaFactor) : CurrState/Builtuparea * RPop / CurrState/RPop;
 				
-				attribute<Units/km2>                Builtupareakm2(CompactedDomain)        := Builtuparea * CompactedDomain/area;
+				// attribute<Units/km2>                Builtupareakm2(CompactedDomain)        := Builtuparea * CompactedDomain/area;
 
 				//attribute<Units/km2>                Builtupareakm2_DIF(CompactedDomain)        := makedefined(Builtupareakm2_oud,0f) - makedefined(Builtupareakm2,0f);
-				attribute<Units/km2>                BuiltupareaInUrbankm2(CompactedDomain) := IsUrban[float32] * CompactedDomain/area;
+				// attribute<Units/km2>                BuiltupareaInUrbankm2(CompactedDomain) := IsUrban[float32] * CompactedDomain/area;
 
-				#include <SMOD.dms>
-				#include <grid2poly.dms>
+				// #include <SMOD.dms>
+				// #include <grid2poly.dms>
 
 			}
 
-			attribute<Person_km2> PopDensity  (CompactedDomain)           := NewState/Pop / CompactedDomain/area;
-			attribute<Person_km2> PopDensity_Left_over  (CompactedDomain) := maximum_population_density - PopDensity;
-			attribute<Person>     UrbanPop    (CompactedDomain)           := NewState/Pop * landuse_allocation/IsUrbanF32;
-			attribute<Person_km2> UrbanDensity(CompactedDomain)           := UrbanPop / CompactedDomain/area;
-			attribute<Person>     Diff(CompactedDomain)                   := NewState/Pop - CurrState/Pop;
+			// attribute<Person_km2> PopDensity  (CompactedDomain)           := NewState/Pop / CompactedDomain/area;
+			// attribute<Person_km2> PopDensity_Left_over  (CompactedDomain) := maximum_population_density - PopDensity;
+			// attribute<Person>     UrbanPop    (CompactedDomain)           := NewState/Pop * landuse_allocation/IsUrbanF32;
+			// attribute<Person_km2> UrbanDensity(CompactedDomain)           := UrbanPop / CompactedDomain/area;
+			// attribute<Person>     Diff(CompactedDomain)                   := NewState/Pop - CurrState/Pop;
 
-			attribute<float32> IsTpopNegative (CompactedDomain) := Newstate/Pop < 0f ? 1f : 0f; 
+			// attribute<float32> IsTpopNegative (CompactedDomain) := Newstate/Pop < 0f ? 1f : 0f; 
 
-			attribute<Person> PopUrban(ClaimRegion)          := sum(NewState/Pop * landuse_allocation/IsUrbanF32                         , Region_rel);
-			attribute<Person> PopRural(ClaimRegion)          := sum(NewState/Pop * float32(!landuse_allocation/IsUrban)                  , Region_rel);
-			attribute<Person> PopUrbanAndRural(ClaimRegion)  := PopUrban + PopRural;
+			// attribute<Person> PopUrban(ClaimRegion)          := sum(NewState/Pop * landuse_allocation/IsUrbanF32                         , Region_rel);
+			// attribute<Person> PopRural(ClaimRegion)          := sum(NewState/Pop * float32(!landuse_allocation/IsUrban)                  , Region_rel);
+			// attribute<Person> PopUrbanAndRural(ClaimRegion)  := PopUrban + PopRural;
 			
-			attribute<float32> UrbanShare(ClaimRegion)     := PopUrban / (PopUrban + PopRural);
+			// attribute<float32> UrbanShare(ClaimRegion)     := PopUrban / (PopUrban + PopRural);
 			
-			attribute<Person> MissingUrban(ClaimRegion) := ExpUrbanPop - sum(NewState/Pop * landuse_allocation/IsUrbanF32           , Region_rel);
-			attribute<Person> MissingRural(ClaimRegion) := ExpRuralPop - sum(NewState/Pop * Float32(not(landuse_allocation/IsUrban)), Region_rel);
+			// attribute<Person> MissingUrban(ClaimRegion) := ExpUrbanPop - sum(NewState/Pop * landuse_allocation/IsUrbanF32           , Region_rel);
+			// attribute<Person> MissingRural(ClaimRegion) := ExpRuralPop - sum(NewState/Pop * Float32(not(landuse_allocation/IsUrban)), Region_rel);
 
-			container PerCell {
-				attribute<float32> Alloc_UrbanCells (CompactedDomain) := landuse_allocation/IsUrbanF32;
-				attribute<float32> UrbanPopCells    (CompactedDomain) := Float32(UrbanPop > 0f);
-				attribute<float32> MissingUrbanCells(CompactedDomain) := Alloc_UrbanCells - UrbanPopCells;
-				attribute<float32> UrbanArea_Growth (CompactedDomain) := Alloc_UrbanCells - Float32(InitialState/IsUrban);
-			}
-			container PerClaimRegion {
-				attribute<float32> Alloc_UrbanCells (Claimregion) := sum(PerCell/Alloc_UrbanCells, Region_rel);
-				attribute<float32> UrbanPopCells    (Claimregion) := sum(PerCell/UrbanPopCells   , Region_rel);
+			// container PerCell {
+				// attribute<float32> Alloc_UrbanCells (CompactedDomain) := landuse_allocation/IsUrbanF32;
+				// attribute<float32> UrbanPopCells    (CompactedDomain) := Float32(UrbanPop > 0f);
+				// attribute<float32> MissingUrbanCells(CompactedDomain) := Alloc_UrbanCells - UrbanPopCells;
+				// attribute<float32> UrbanArea_Growth (CompactedDomain) := Alloc_UrbanCells - Float32(InitialState/IsUrban);
+			// }
+			// container PerClaimRegion {
+				// attribute<float32> Alloc_UrbanCells (Claimregion) := sum(PerCell/Alloc_UrbanCells, Region_rel);
+				// attribute<float32> UrbanPopCells    (Claimregion) := sum(PerCell/UrbanPopCells   , Region_rel);
 
-				attribute<float32> MissingClaim     (Claimregion) := Urban_landuse - Urban_Alloc;
-				attribute<float32> MissingClaimAlloc(Claimregion) := landuse_allocation/urban_claim - Urban_Alloc;
-				attribute<float32> MissingClaimSpace(Claimregion) := Urban_landuse - landuse_allocation/urban_claim;
+				// attribute<float32> MissingClaim     (Claimregion) := Urban_landuse - Urban_Alloc;
+				// attribute<float32> MissingClaimAlloc(Claimregion) := landuse_allocation/urban_claim - Urban_Alloc;
+				// attribute<float32> MissingClaimSpace(Claimregion) := Urban_landuse - landuse_allocation/urban_claim;
 
-				attribute<float32> MissingUrbanCells(Claimregion) := Alloc_UrbanCells - UrbanPopCells;
-				attribute<float32> UrbanArea_Growth (Claimregion) := Alloc_UrbanCells - UrbanCells_2010;
-				attribute<float32> Negative_pop		(Claimregion) := sum(IsTpopNegative, Region_rel);
-			}
-			attribute<float32> Urban_Growth_Diff2010 (CompactedDomain) := landuse_allocation/IsUrbanF32 - float32(source/landuse[CompactedDomain/org_rel]);
+				// attribute<float32> MissingUrbanCells(Claimregion) := Alloc_UrbanCells - UrbanPopCells;
+				// attribute<float32> UrbanArea_Growth (Claimregion) := Alloc_UrbanCells - UrbanCells_2010;
+				// attribute<float32> Negative_pop		(Claimregion) := sum(IsTpopNegative, Region_rel);
+			// }
+			// attribute<float32> Urban_Growth_Diff2010 (CompactedDomain) := landuse_allocation/IsUrbanF32 - float32(source/landuse[CompactedDomain/org_rel]);
 
 		}
 
 	// #include <export_scen.dms>
 	// #include <export_scen2.dms>
-	#include <Analysis_modelled.dms>
+	// #include <Analysis_modelled.dms>
 	}
 
 #include <exportcountry.dms>

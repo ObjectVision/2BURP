@@ -11,16 +11,16 @@ container Policy : using = "geography"
 		attribute<bool>  ReadData_bool(domain) := ReadData[bool];
 	}
 
-	unit<uint32> WDPA
-	:  StorageName     = "%MondiaalDataDir%/Policy/ProtectedAreas/WDPA_WDOECM_wdpa_gdb_polygons.gdb"
-	,  StorageType     = "gdal.vect"
-	,  url             = "https://www.protectedplanet.net/en/thematic-areas/wdpa"
-	,  StorageReadOnly = "True"
-	,  Source          = "UNEP-WCMC and IUCN (2020), Protected Planet: The World Database on Protected Areas (WDPA) [Online], September 2020, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net."
-	{
-		attribute<LatLong> Geometry(polygon);
-	}
+	// unit<uint32> WDPA
+	// :  StorageName     = "%MondiaalDataDir%/Policy/ProtectedAreas/WDPA_WDOECM_wdpa_gdb_polygons.gdb"
+	// ,  StorageType     = "gdal.vect"
+	// ,  url             = "https://www.protectedplanet.net/en/thematic-areas/wdpa"
+	// ,  StorageReadOnly = "True"
+	// ,  Source          = "UNEP-WCMC and IUCN (2020), Protected Planet: The World Database on Protected Areas (WDPA) [Online], September 2020, Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net."
+	// {
+		// attribute<LatLong> Geometry(polygon);
+	// }
 
-	attribute<WDPA> WDPA_grid (domain)       := poly2grid(WDPA/Geometry , domain);
-	attribute<bool> WDPA_grid_bool (domain)  := WDPA_grid > 0;
+	// attribute<WDPA> WDPA_grid (domain)       := poly2grid(WDPA/Geometry , domain);
+	// attribute<bool> WDPA_grid_bool (domain)  := WDPA_grid > 0;
 }

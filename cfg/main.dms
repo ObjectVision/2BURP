@@ -15,9 +15,27 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy
 	#include <ConfigSettings.dms>
 	#include <ExportSettings.dms>
 
+	container Make_UnlinkedData
+	{
+		parameter<string> Claims      := 'Ready', ExplicitSuppliers = "/Preprocessing/Claims/Make_Past/export_csv/result";
+		parameter<string> Claims_Past := 'Ready', ExplicitSuppliers = "=AsList('Claims_PerSSP/'+Classifications/SSP/name, ';')";
+
+		container Claims_PerSSP :=
+			for_each_nedv(
+				Classifications/SSP/name
+				, 'Preprocessing/Claims/Make_Scenario/SSPs/'+Classifications/SSP/name+'/export_csv_M1/result + Preprocessing/Claims/Make_Scenario/SSPs/'+Classifications/SSP/name+'/export_csv_M3/result '
+				, void
+				, string
+			);
+
+	}
+
 	container Final_Items : using = "units;geography"
 	{
 		attribute<bool>     IsUrban (CompactedDomain) := Analysis/Scenarios/SSPs/SSP2/ProjectionDates/Y2020/NewState/IsUrban;
 		attribute<Person>   Pop     (CompactedDomain) := Analysis/Scenarios/SSPs/SSP2/ProjectionDates/Y2020/NewState/Pop;
+		
+		
+		// /Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result
 	}
 }
