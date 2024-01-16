@@ -1,24 +1,23 @@
 container M3 : using = "SourceData/RegionalUnits;Geography"
 {
-	unit<uint32> Tpop_claim := Claims/Scenario/M3/SSP2/FileData //2010 for all SSP's same choose just one SSP2--> BAU
+	unit<uint32> Tpop_claim := Preprocessing/Claims/Read_Scenario/M3/SSP2/FileData //2010 for all SSP's same choose just one SSP2--> BAU
 	{
-		attribute<string>            Region                      := Claims/Scenario/M3/SSP2/FileData/Region;
-		attribute<string>            SSP2_population_to_use_2010 := Claims/Scenario/M3/SSP2/FileData/population_to_use_2010;
 		attribute<Countries/Country> Country_rel                 := rlookup(Region, Countries/Country/ISO3);
 		attribute<LatLong>           geometry             (poly) := Countries/Country/Geometry[Country_rel];
 		attribute<string>            Label                       := Region;
-		attribute<float32>           population_to_use           := SSP2_population_to_use_2010[float32];
+		attribute<float32>           population_to_use           := population_to_use_2010[float32];
 	}
 
-	attribute<float32>    tpop_to_use   (Countries/Country) := Tpop_claim/population_to_use[invert(Tpop_claim/Country_rel)] * 1000000f;	//this is needed for equalization of the pop-map to SSP-pop 2010
-	attribute<float32>    TotalPopulation2010      (domain) := scalesum(Population/Past/PastDates/Y2015[float32],Countries/Country_grid , tpop_to_use);
-	attribute<float32>    Missing_pop   (Countries/Country) := tpop_to_use - sum(TotalPopulation2010, Countries/Country_grid);
-	attribute<Person>     UrbanPopulation2010      (domain) := value(TotalPopulation2010 * Preprocessing/UrbanArea/UrbanArea2010/ReadData[float32], Person); 	//this item is used in future modelling!
-
+	attribute<float32>    tpop_to_use                (Countries/Country) := Tpop_claim/population_to_use[invert(Tpop_claim/Country_rel)] * 1000000f;	//this is needed for equalization of the pop-map to SSP-pop 2010
+	attribute<float32>    TotalPopulation2010                   (domain) := scalesum(Population/Past/PastDates/Y2015[float32],Countries/Country_grid , tpop_to_use);
+	attribute<float32>    Missing_pop                (Countries/Country) := tpop_to_use - sum(TotalPopulation2010, Countries/Country_grid);
+	attribute<Person>     UrbanPopulation2010                   (domain) := value(TotalPopulation2010 * Preprocessing/UrbanArea/UrbanArea2010/ReadData[float32], Person); 	//this item is used in future modelling!
+	attribute<float32>    UrbanPopulationCountry2010 (Countries/Country) := sum(UrbanPopulation2010, Countries/Country_grid);
+	
 	container Urban_pop_2010
 	{
-		attribute<Person_km2> UrbanMeanPopDensity  (Countries/Country) := sum(UrbanPopulation2010, Countries/Country_grid) / UrbanArea;
-		attribute<km2>        UrbanArea            (Countries/Country) := sum(Float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData) * domain/area, Countries/Country_grid);
+		attribute<Person_km2> UrbanMeanPopDensity    (Countries/Country) := sum(UrbanPopulation2010, Countries/Country_grid) / UrbanArea;
+		attribute<km2>        UrbanArea              (Countries/Country) := sum(Float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData) * domain/area, Countries/Country_grid);
 	}
 
 	#include <PopulationDensity8dir.dms>

@@ -17,7 +17,7 @@ container ResultVariablesGDP
 		parameter<string> Period      := Postprocessing/Scenarios/ReadResults/All/Period;
 		//end case parameters
 
-		unit<wpoint> domainref := = domainscale="All" ? 'Input/gtopo' : 'gtopoc/gtopo_country';
+		unit<wpoint> domainref := = domainscale="All" ? 'domain' : 'gtopoc/gtopo_country';
 		unit<uint32> Periodref := = Period="Past" ? 'ReadResultsPast/SSP_Year' : 'ReadResults/SSP_Year';
 		
 		parameter<string> Variant              := Postprocessing/Scenarios/ReadResults/All/Variant;

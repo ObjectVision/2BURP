@@ -1,0 +1,16 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Definition names of projection years (Zichtjaren)
+
+unit<uint8> ProjectionDate: nrofrows = 3
+{
+	attribute<Year> Yr: [ 1990, 2000, 2015];
+	attribute<string> name:= 'Y'+string(Yr);
+	attribute<string> prevStateName := MakeDefined(name[sub_or_null(ID(.),1b)]+'/NewState', 'InitialState');
+}

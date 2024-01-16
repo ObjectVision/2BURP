@@ -34,10 +34,10 @@ container Capital
 			parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
 			parameter<float32> SymbolWorldSize := 0.05f,       DialogType = "SymbolWorldSize";
 		}
-		attribute<Input/gtopo> gtopo_rel                        := Geometry[Input/gtopo];
-		attribute<uint32>              nrCapitals (Input/gtopo) := sum(const(1,.), gtopo_rel);
+		attribute<domain> gtopo_rel                        := Geometry[domain];
+		attribute<uint32>              nrCapitals (domain) := sum(const(1,.), gtopo_rel);
 		attribute<.>                   id2                      := id(.);
-		attribute<UN>                  un_rel     (Input/gtopo) := modus(id(UN), gtopo_rel);
+		attribute<UN>                  un_rel     (domain) := modus(id(UN), gtopo_rel);
 
 		attribute<float64> X         := PointCol(Geometry);
 		attribute<float64> Y         := PointRow(Geometry);
@@ -155,8 +155,8 @@ container Capital
 				attribute<float32>popd2010t := Postprocessing/Scenarios/ReadResults/All/popd/SSP2/Y2010[nr_OrgEntity];
 				attribute<float32>popd2100t := Postprocessing/Scenarios/ReadResults/All/popd/SSP2/Y2100[nr_OrgEntity];
 				attribute<float32>popdif    := popd2100t-popd2010t;
-				attribute<uint8>  number    := Input/administrative/Countries/ClaimCountry_grid[nr_OrgEntity];
-				attribute<string> name      := Input/administrative/Countries/name[nr_OrgEntity];
+				attribute<uint8>  number    := SourceData/RegionalUnits/Countries/ClaimCountry_grid[nr_OrgEntity];
+				attribute<string> name      := SourceData/RegionalUnits/Countries/name[nr_OrgEntity];
 			}
 		}
 }

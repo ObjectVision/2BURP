@@ -1,0 +1,70 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+// 2010 GDP_Cell based at sourcedata not at modelled 2010 population
+// ******************************************** R1 2010 calculations **********************************************************
+container base_2010 {
+
+	container R_1
+	{
+		attribute<kUSD>    GDPCap_Country_2010 (SourceData/RegionalUnits/Countries/Country ) := MakeDefined(GDPclaim/GDPCap_Y2010[invert(GDPclaim/Country_rel)], 0[kUSD]);
+		attribute<float32> Total_pop_2010_corr (domain)   := IsNegative(Input/Population/M1/Urban_pop_2010/PopulationData)? (0f / 0f) : Input/Population/M1/Urban_pop_2010/PopulationData[float32];
+		attribute<kUSD>    GDP_Cell_R1_2010 (domain)      := GDPCap_Country_2010[SourceData/RegionalUnits/Countries/Country_grid]* Total_pop_2010_corr;
+		attribute<kUSD>    GDP_Cell_R1_2010_f (domain)    := MakeDefined(GDP_Cell_R1_2010, -9999f), StorageName = "%LocalDataProjDir%/results/GDP_Cell_R1_2010_kUSD.tif";
+	}
+// ********************************************* R2 2010 calculations **********************************************************
+
+// GDPcap per region (calibrated to SSP database) 2010
+// This GDP cap * Total_pop_2010_corr
+// Make sure null is set to -9999f
+
+	container R_2
+	{
+		attribute<Person>  InitTPopGrid(domain) := convert(R_1/Total_pop_2010_corr, Person);
+		attribute<Person>  TPop_2010  (CompactedDomain) := InitTPopGrid[CompactedDomain/nr_OrgEntity]; 
+
+		//FOUT// sommeren via Region_rel geeft afwijking in totale populatie ivm SSP database
+		attribute<float32> pop_region_2010_F(Data/GDPregions) := sum(TPop_2010, Region_rel);
+		attribute<float32> pop_region_ceck_sum_F (SourceData/RegionalUnits/Countries/Country ) := sum(pop_region_2010,Data/GDPregions/Region_Country_rel);
+
+		//GOED// sommeren via GDPregion grid gaat wel goed ivm totale populatie SSP database
+		attribute<float32> pop_region_2010(Data/GDPregions) := sum(R_1/Total_pop_2010_corr, GDPregion_grid);
+		attribute<float32> pop_region_check_sum(SourceData/RegionalUnits/Countries/Country ) := sum(pop_region_2010,Data/GDPregions/Region_Country_rel);
+
+
+		attribute<float32> populatieCountry_2010(SourceData/RegionalUnits/Countries/Country ):= sum(R_1/Total_pop_2010_corr, SourceData/RegionalUnits/Countries/Country_grid);
+
+		attribute<float32> GDPCap_Gowth_Region_claim_2010(Data/GDPregions) := (GDPclaim/GDPCap_Y2010[invert(GDPclaim/Country_rel)] 
+																			 / GDPclaim/GDPCap_Y2010[invert(GDPclaim/Country_rel)])[Data/GDPregions/Region_Country_rel];
+		attribute<kUSD>    GDPCap_Region_cor_2010(Data/GDPregions) := InitialState/GDPCap_Region_cor[kUSD] * GDPCap_Gowth_Region_claim_2010;	
+		attribute<float32> GDPCap_Region_Ratio_2010(Data/GDPregions):= InitialState/GDPCap_Region_cor[kUSD] <> 0f ? (InitialState/GDPCap_Region_cor / (GDPclaim/GDPCap_Y2010[invert(GDPclaim/Country_rel)][Data/GDPregions/Region_Country_rel])/1000f) : 1f;
+		
+		attribute<kUSD>    GDP_Region_2010(Data/GDPregions)       := GDPCap_Region_Ratio_2010[float32] * pop_region_2010[float32] * (GDPclaim/GDPCap_Y2010[invert(GDPclaim/Country_rel)][Data/GDPregions/Region_Country_rel]);	
+		attribute<kUSD>    GDP_Country_2010(SourceData/RegionalUnits/Countries/Country ):= R_1/GDPCap_Country_2010 * populatieCountry_2010[float32];
+
+		attribute<kUSD>    GDP_SumRegion_2010(SourceData/RegionalUnits/Countries/Country ):= sum(GDP_Region_2010,Data/GDPregions/Region_Country_rel);
+
+		attribute<float32> Correctionfactor_Country_2010(SourceData/RegionalUnits/Countries/Country ):= GDP_Country_2010 / GDP_SumRegion_2010;
+		attribute<float32> Correctionfactor_Region_2010 (Data/GDPregions)      := Correctionfactor_Country_2010[Data/GDPregions/Region_Country_rel];
+
+		attribute<kUSDClass> GDP_Region_cor_2010(Data/GDPregions)         := Correctionfactor_Region_2010 * GDP_Region_2010;
+		attribute<kUSDCapClass> GDPCap_Region_cor_2010_f(Data/GDPregions) := GDP_Region_cor_2010[kUSD] / pop_region_2010[float32];
+
+		attribute<kUSD> GDPcap_Cell_R2_2010 (domain)   := GDPCap_Region_cor_2010_f[GDPregion_grid];
+		attribute<kUSD> GDP_Cell_R2_2010 (domain)      := GDPcap_Cell_R2_2010 * R_1/Total_pop_2010_corr;
+		//exported by means of menu instead of StorageName like R1
+		attribute<float32> GDP_Cell_R2_2010_f (domain) := MakeDefined(GDP_Cell_R2_2010, -9999f), StorageName = "%LocalDataProjDir%/results/GDP_Cell_R2_2010_kUSD.tif";
+
+		attribute<float32> check_sum (SourceData/RegionalUnits/Countries/Country )       := sum(GDP_Region_cor_2010, Data/GDPregions/Region_Country_rel);
+		attribute<float32> check_sum_cells (SourceData/RegionalUnits/Countries/Country ) := sum (GDP_Cell_R2_2010, SourceData/RegionalUnits/Countries/Country_grid);
+		attribute<float32> check_diff (SourceData/RegionalUnits/Countries/Country )      := (sum(R_1/GDP_Cell_R1_2010, SourceData/RegionalUnits/Countries/Country_grid)) - check_sum_cells;
+
+	}
+}

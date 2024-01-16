@@ -1,0 +1,177 @@
+container Claims
+{
+//GDP marker projections by the OECD: Rob Dellink, Jean Chateau, Elisa Lanzi, Bertrand Magné, Long-term economic growth projections in the Shared Socioeconomic Pathways, Global Environmental Change, Volume 42, 2017, Pages 200-214,
+//ISSN 0959-3780, DOI:10.1016/j.gloenvcha.2015.06.004
+
+	unit<uint32> SSP1
+		: StorageName = "%projdir%/data/GDP/SSP1_OECDEnvGrowth_2005_USDB.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
+	{
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+		attribute<LatLong> Geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+		attribute<string> Label := Region;
+
+		attribute<BUSD> GDP_Y2010 := Y2010[BUSD];
+		attribute<BUSD> GDP_Y2020 := Y2020[BUSD];
+		attribute<BUSD> GDP_Y2030 := Y2030[BUSD];
+		attribute<BUSD> GDP_Y2040 := Y2040[BUSD];
+		attribute<BUSD> GDP_Y2050 := Y2050[BUSD];
+		attribute<BUSD> GDP_Y2060 := Y2060[BUSD];
+		attribute<BUSD> GDP_Y2070 := Y2070[BUSD];
+		attribute<BUSD> GDP_Y2080 := Y2080[BUSD];
+		attribute<BUSD> GDP_Y2090 := Y2090[BUSD];
+		attribute<BUSD> GDP_Y2100 := Y2100[BUSD];
+		
+		attribute<kUSD> GDPCap_Y2010 := div(GDP_Y2010[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2010[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2020 := div(GDP_Y2020[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2020[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2030 := div(GDP_Y2030[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2030[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2040 := div(GDP_Y2040[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2040[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2050 := div(GDP_Y2050[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2050[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2060 := div(GDP_Y2060[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2060[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2070 := div(GDP_Y2070[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2070[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2080 := div(GDP_Y2080[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2080[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2090 := div(GDP_Y2090[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2090[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2100 := div(GDP_Y2100[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP1/FileData/population_to_use_2100[float32])*1000000f));
+
+		parameter<string> Name := 'SSP1';
+	}
+	
+	
+	unit<uint32> SSP2
+	: StorageName = "%projdir%/data/GDP/SSP2_OECDEnvGrowth_2005_USDB.csv"
+	, StorageType = "gdal.vect"
+	, StorageReadonly = "True"
+	{
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+		attribute<LatLong> geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+		attribute<string> Label := Region;
+
+		attribute<BUSD> GDP_Y2010 := Y2010[BUSD];
+		attribute<BUSD> GDP_Y2020 := Y2020[BUSD];
+		attribute<BUSD> GDP_Y2030 := Y2030[BUSD];
+		attribute<BUSD> GDP_Y2040 := Y2040[BUSD];
+		attribute<BUSD> GDP_Y2050 := Y2050[BUSD];
+		attribute<BUSD> GDP_Y2060 := Y2060[BUSD];
+		attribute<BUSD> GDP_Y2070 := Y2070[BUSD];
+		attribute<BUSD> GDP_Y2080 := Y2080[BUSD];
+		attribute<BUSD> GDP_Y2090 := Y2090[BUSD];
+		attribute<BUSD> GDP_Y2100 := Y2100[BUSD];
+		
+		attribute<kUSD> GDPCap_Y2010 := div(GDP_Y2010[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2010[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2020 := div(GDP_Y2020[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2020[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2030 := div(GDP_Y2030[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2030[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2040 := div(GDP_Y2040[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2040[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2050 := div(GDP_Y2050[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2050[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2060 := div(GDP_Y2060[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2060[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2070 := div(GDP_Y2070[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2070[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2080 := div(GDP_Y2080[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2080[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2090 := div(GDP_Y2090[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2090[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2100 := div(GDP_Y2100[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP2/FileData/population_to_use_2100[float32])*1000000f));
+
+		parameter<string> Name := 'SSP2';
+	}
+	
+	unit<uint32> SSP3
+		: StorageName = "%projdir%/data/GDP/SSP3_OECDEnvGrowth_2005_USDB.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
+	{
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+		attribute<LatLong> geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+		attribute<string> Label := Region;
+
+		attribute<BUSD> GDP_Y2010 := Y2010[BUSD];
+		attribute<BUSD> GDP_Y2020 := Y2020[BUSD];
+		attribute<BUSD> GDP_Y2030 := Y2030[BUSD];
+		attribute<BUSD> GDP_Y2040 := Y2040[BUSD];
+		attribute<BUSD> GDP_Y2050 := Y2050[BUSD];
+		attribute<BUSD> GDP_Y2060 := Y2060[BUSD];
+		attribute<BUSD> GDP_Y2070 := Y2070[BUSD];
+		attribute<BUSD> GDP_Y2080 := Y2080[BUSD];
+		attribute<BUSD> GDP_Y2090 := Y2090[BUSD];
+		attribute<BUSD> GDP_Y2100 := Y2100[BUSD];
+		
+		attribute<kUSD> GDPCap_Y2010 := div(GDP_Y2010[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2010[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2020 := div(GDP_Y2020[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2020[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2030 := div(GDP_Y2030[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2030[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2040 := div(GDP_Y2040[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2040[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2050 := div(GDP_Y2050[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2050[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2060 := div(GDP_Y2060[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2060[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2070 := div(GDP_Y2070[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2070[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2080 := div(GDP_Y2080[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2080[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2090 := div(GDP_Y2090[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2090[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2100 := div(GDP_Y2100[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP3/FileData/population_to_use_2100[float32])*1000000f));
+
+		parameter<string> Name := 'SSP3';
+	}
+	
+	unit<uint32> SSP4
+		: StorageName = "%projdir%/data/GDP/SSP4_OECDEnvGrowth_2005_USDB.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
+	{
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+		attribute<LatLong> Geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+		attribute<string> Label := Region;
+
+		attribute<BUSD> GDP_Y2010 := Y2010[BUSD];
+		attribute<BUSD> GDP_Y2020 := Y2020[BUSD];
+		attribute<BUSD> GDP_Y2030 := Y2030[BUSD];
+		attribute<BUSD> GDP_Y2040 := Y2040[BUSD];
+		attribute<BUSD> GDP_Y2050 := Y2050[BUSD];
+		attribute<BUSD> GDP_Y2060 := Y2060[BUSD];
+		attribute<BUSD> GDP_Y2070 := Y2070[BUSD];
+		attribute<BUSD> GDP_Y2080 := Y2080[BUSD];
+		attribute<BUSD> GDP_Y2090 := Y2090[BUSD];
+		attribute<BUSD> GDP_Y2100 := Y2100[BUSD];
+		
+		attribute<kUSD> GDPCap_Y2010 := div(GDP_Y2010[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2010[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2020 := div(GDP_Y2020[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2020[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2030 := div(GDP_Y2030[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2030[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2040 := div(GDP_Y2040[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2040[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2050 := div(GDP_Y2050[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2050[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2060 := div(GDP_Y2060[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2060[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2070 := div(GDP_Y2070[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2070[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2080 := div(GDP_Y2080[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2080[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2090 := div(GDP_Y2090[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2090[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2100 := div(GDP_Y2100[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP4/FileData/population_to_use_2100[float32])*1000000f));
+
+		parameter<string> Name := 'SSP4';
+	}
+	
+	unit<uint32> SSP5
+	: StorageName = "%projdir%/data/GDP/SSP5_OECDEnvGrowth_2005_USDB.csv"
+	, StorageType = "gdal.vect"
+	, StorageReadonly = "True"
+	{
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+		attribute<LatLong> Geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+		attribute<string> Label := Region;
+
+		attribute<BUSD> GDP_Y2010 := Y2010[BUSD];
+		attribute<BUSD> GDP_Y2020 := Y2020[BUSD];
+		attribute<BUSD> GDP_Y2030 := Y2030[BUSD];
+		attribute<BUSD> GDP_Y2040 := Y2040[BUSD];
+		attribute<BUSD> GDP_Y2050 := Y2050[BUSD];
+		attribute<BUSD> GDP_Y2060 := Y2060[BUSD];
+		attribute<BUSD> GDP_Y2070 := Y2070[BUSD];
+		attribute<BUSD> GDP_Y2080 := Y2080[BUSD];
+		attribute<BUSD> GDP_Y2090 := Y2090[BUSD];
+		attribute<BUSD> GDP_Y2100 := Y2100[BUSD];
+		
+		attribute<kUSD> GDPCap_Y2010 := div(GDP_Y2010[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2010[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2020 := div(GDP_Y2020[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2020[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2030 := div(GDP_Y2030[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2030[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2040 := div(GDP_Y2040[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2040[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2050 := div(GDP_Y2050[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2050[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2060 := div(GDP_Y2060[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2060[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2070 := div(GDP_Y2070[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2070[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2080 := div(GDP_Y2080[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2080[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2090 := div(GDP_Y2090[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2090[float32])*1000000f));
+		attribute<kUSD> GDPCap_Y2100 := div(GDP_Y2100[kUSD],(rjoin(Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/Region,Preprocessing/Claims/Read_Scenario/M1/SSP5/FileData/population_to_use_2100[float32])*1000000f));
+
+		parameter<string> Name := 'SSP5';
+	}
+
+}

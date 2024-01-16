@@ -10,10 +10,13 @@
 
 container Analysis: using = "units"
 {
+	#include <Calibration_AutoGLM.dms>
+	#include <Scenarios.dms>              //Main core of the model to calculate indicators of SSP-scenarios
+	#include <Scenarios_Past.dms>         //Main core of the model to calculate indicators of Past (Validation)
 
 	container SSPs := 
-		for_each_ne(Scenarios/SSP/Name, 
-			'AnalysePopAllocation(Scenarios/SSPs/'+Scenarios/SSP/Name+')'
+		for_each_ne(Classifications/SSP/Name, 
+			'AnalysePopAllocation(Scenarios/SSPs/'+Classifications/SSP/Name+')'
 		);
 		
 	template AnalysePopAllocation 
@@ -30,7 +33,7 @@ container Analysis: using = "units"
 		
 			container OverlayGrids
 			{
-				attribute<uint8> UrbanY2010(Input/gtopo)                         :=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
+				attribute<uint8> UrbanY2010(domain)                         :=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
 				attribute<uint8> UrbanY2100(Scenarios/SSPs/SSP2/CompactedDomain) :=  SSPoutput/ProjectionDates/Y2100/NewState/IsUrban[uint8];
 			}
 			
@@ -55,7 +58,7 @@ container Analysis: using = "units"
 
 			container OverlayGrids
 			{
-				attribute<uint8> InputUrbanY2010 (Input/gtopo)             :=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
+				attribute<uint8> InputUrbanY2010 (domain)             :=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
 				attribute<uint8> UrbanY2010  (Scenarios/SSPs/SSP2/CompactedDomain) :=  SSPoutput/InitialState/IsUrban[uint8];
 			}
 

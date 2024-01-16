@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function:
-
 container NLD
 {
 	unit<uint32> natura2000
@@ -23,5 +13,5 @@ container NLD
 		attribute<int32>         hulp;
 	}
 
-	container make_gtopo_rel := GridToGTopo(natura2000, natura2000/Geometry, Postprocessing/Scenarios/ReadResultsPerCountry/All/Countries/nr_158_Netherlands/gtopoc/gtopo_country);
+	container make_domain_rel := GridToDomain(natura2000, natura2000/Geometry, Postprocessing/Scenarios/ReadResultsPerCountry/All/Countries/nr_158_Netherlands/domainc/domain_country);
 }

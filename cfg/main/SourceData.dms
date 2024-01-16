@@ -1,4 +1,4 @@
-container SourceData
+container SourceData : using = "geography;units"
 {
 	#include<population.dms>
 	#include<RegionalUnits.dms>
@@ -7,6 +7,22 @@ container SourceData
 	#include <Water.dms>
 	#include <Policy.dms>
 	
-	#include <RestrictionsCountry.dms>
+	container RestrictionsCountry 
+	{
+		template GridToDomain
+		{
+			//begin case parameters
+			unit<uint32> PolyUnit;
+			attribute<Input/LatLong> Geometry (poly, PolyUnit);
+			unit<wpoint> domain_country;
+			//end case parameters
+
+			attribute<PolyUnit> grid_org   (domain_country) := poly2grid(Geometry , domain_country);
+			attribute<uint32>   grid       (domain_country) := (grid_org[int32] > -1i ? 1i : 0i)[uint32];
+			attribute<uint32>   grid_domain (domain)   := MakeDefined(grid[invert(domain_country/domain_rel)],0);
+		}
+		attribute <bool>  IsRegional (domain) := const(false,domain);
+	}	
+	
 	#include <Socioeconomic.dms>
 }

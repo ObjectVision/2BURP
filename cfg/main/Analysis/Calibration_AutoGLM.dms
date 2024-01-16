@@ -1,0 +1,27 @@
+container Calibration_AutoGLM: using = "geography"
+{
+	unit <uint32> CD := geography/CompactedDomain
+	{
+		attribute<uint32>                          Number                                  := domain/number[org_rel];
+		attribute<SourceData/RegionalUnits/Countries/Country > Country_grid                    := SourceData/RegionalUnits/Countries/Country_grid[Input/CompactedDomain/nr_OrgEntity];
+		attribute<Input/administrative/Continent/cont_uq> Continent_grid                   := SourceData/RegionalUnits/Countries/Country/Continent_id_grid[Input/CompactedDomain/nr_OrgEntity];
+
+		attribute<float32>                         TotalPopulationDensity2010_8dir         := Input/Population/M3/PopulationDensity8dir/Y2010/TotalPopulationDensity2010[Input/CompactedDomain/nr_OrgEntity];
+		attribute<float32>                         Coastline_Distance                      := Input/Physical/Coast/Coastline_Distance/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<float64>                         Distance2River                          := Input/Water/Rivers/Location2River/dist;
+		attribute<float32>                         Lake_Distance                           := Input/Water/Lakes/Lake/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<int16>                           Elevation                               := Input/Physical/Elevation/Elevation[Input/CompactedDomain/nr_OrgEntity];
+		attribute<float32>                         Slope                                   := Input/Physical/Slope/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<float32>                         TRImean                                 := Input/Physical/TerrainRoughnessIndex/mean[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint8>                           IsProtected                             := Input/Policy/ProtectedAreas/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint8>                           FloodProneArea_RP100                    := Input/Water/FloodProneArea/RP100/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint8>                           Earthquakes_Modified_Mercalli_Intensity := Input/Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint8>                           Landslides_Precipitation                := Input/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint8>                           Landslides_Earthquakes                  := Input/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint32>                          Road123_Distance                        := Input/Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[Input/CompactedDomain/nr_OrgEntity];
+		attribute<uint32>                          Road45_Distance                         := Input/Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[Input/CompactedDomain/nr_OrgEntity];
+	}
+
+	#include <Coefficients.dms>
+	#include <Coefficients_UrbanChange_1990_2014.dms>
+}

@@ -26,11 +26,11 @@ container Analysis_Past : using = "Units;Classifications"
 
 			container OverlayGrids
 			{
-				attribute<uint8> UrbanY1975 (Input/gtopo)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
-				attribute<uint8> UrbanY2014 (Input/gtopo)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
+				attribute<uint8> UrbanY1975 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
+				attribute<uint8> UrbanY2014 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
 			}
 
-			unit<uint16> UrbanOverlay_14_75	:= overlay(OverlayRegios/namen, Input/gtopo, OverlayGrids);
+			unit<uint16> UrbanOverlay_14_75	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
 		}
 		
 		container UrbanDif1990_2010 
@@ -42,11 +42,11 @@ container Analysis_Past : using = "Units;Classifications"
 
 			container OverlayGrids
 			{
-				attribute<uint8> UrbanY1990 (Input/gtopo)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
-				attribute<uint8> UrbanY2010 (Input/gtopo)	:=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
+				attribute<uint8> UrbanY1990 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
+				attribute<uint8> UrbanY2010 (domain)	:=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
 			}
 
-			unit<uint16> UrbanOverlay_1990_2010	:= overlay(OverlayRegios/namen, Input/gtopo, OverlayGrids);
+			unit<uint16> UrbanOverlay_1990_2010	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
 		}
 
 		container UrbanDif1975_2014_steps 
@@ -59,23 +59,23 @@ container Analysis_Past : using = "Units;Classifications"
 
 			container OverlayGrids
 			{
-				attribute<uint8> UrbanY1975 (Input/gtopo)
+				attribute<uint8> UrbanY1975 (domain)
 				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
-				attribute<uint8> UrbanY1990 (Input/gtopo)
+				attribute<uint8> UrbanY1990 (domain)
 				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
-				attribute<uint8> UrbanY2000 (Input/gtopo)
+				attribute<uint8> UrbanY2000 (domain)
 				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2000[uint8];
-				attribute<uint8> UrbanY2014 (Input/gtopo)
+				attribute<uint8> UrbanY2014 (domain)
 				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
 			}
 
-			unit<uint16> UrbanOverlay_75_90_00_14 := overlay(OverlayRegios/namen_rev, Input/gtopo, OverlayGrids)
+			unit<uint16> UrbanOverlay_75_90_00_14 := overlay(OverlayRegios/namen_rev, domain, OverlayGrids)
 			{
-				attribute<.>                            UnionData_copy(Input/gtopo)    := UnionData, Descr = "AtomaireRegioMap";
+				attribute<.>                            UnionData_copy(domain)    := UnionData, Descr = "AtomaireRegioMap";
 				attribute<string>                       Key                                    := string(UrbanY1975) + "_" + string(UrbanY1990) + "_" + string(UrbanY2000) + "_" + string(UrbanY2014);
 				attribute<string>                       Label                                  := MakeDefined(rjoin(Key, Classifications/Past/UrbanAreaReeksClass/Key,Classifications/Past/UrbanAreaReeksClass/Label), Key), DialogType = "LabelText";
-				attribute<Past/UrbanAreaReeksClass_new> UnionData_Class (Input/gtopo)  := classify(UnionData_copy, Classifications/Past/UrbanAreaReeksClass_new/ClassBreak);
-				//attribute<uint32>                       Test2 (Input/administrative/Countries/Country ):= count(UnionData_Class,GDP/Results/SSPs/SSP1/Country_rel[Scenarios/SSPs/SSP1/CompactedDomain/BaseGrid]); /// UnionData_Class; 
+				attribute<Past/UrbanAreaReeksClass_new> UnionData_Class (domain)  := classify(UnionData_copy, Classifications/Past/UrbanAreaReeksClass_new/ClassBreak);
+				//attribute<uint32>                       Test2 (SourceData/RegionalUnits/Countries/Country ):= count(UnionData_Class,GDP/Results/SSPs/SSP1/Country_rel[Scenarios/SSPs/SSP1/CompactedDomain/BaseGrid]); /// UnionData_Class; 
 			}
 
 			unit<uint8> OverlayRegios2: nrofrows = 2
@@ -86,19 +86,19 @@ container Analysis_Past : using = "Units;Classifications"
 			// per country
 			container OverlayGrids2
 			{
-				attribute<uint8> UnionData_Class2 (Input/gtopo) :=  UrbanDif1975_2014_steps/UrbanOverlay_75_90_00_14/UnionData_Class[uint8];
-				attribute<uint8> Country_grid (Input/gtopo)     :=  /Input/administrative/Countries/Country_grid[uint8];
+				attribute<uint8> UnionData_Class2 (domain) :=  UrbanDif1975_2014_steps/UrbanOverlay_75_90_00_14/UnionData_Class[uint8];
+				attribute<uint8> Country_grid (domain)     :=  /SourceData/RegionalUnits/Countries/Country_grid[uint8];
 			}
 
-			unit<uint32> combine_class_country := combine(UrbanOverlay_75_90_00_14, Input/administrative/Countries/Country )
+			unit<uint32> combine_class_country := combine(UrbanOverlay_75_90_00_14, SourceData/RegionalUnits/Countries/Country )
 			{
 				attribute<string> name_class   := UrbanOverlay_75_90_00_14/label[nr_1];
-				attribute<string> name_country := Input/administrative/Countries/Country/name[nr_2];
+				attribute<string> name_country := SourceData/RegionalUnits/Countries/Country/name[nr_2];
 
-				attribute<.>      combine_class_country_rel(Input/gtopo) :=  combine_data(., UrbanOverlay_75_90_00_14/UnionData_copy, OverlayGrids2/Country_grid);
+				attribute<.>      combine_class_country_rel(domain) :=  combine_data(., UrbanOverlay_75_90_00_14/UnionData_copy, OverlayGrids2/Country_grid);
 				attribute<UInt32> count(.)                                       := pcount(combine_class_country_rel);
 
-				attribute<UInt32>  sumc(Input/administrative/Countries/Country ) := sum(count, nr_2);
+				attribute<UInt32>  sumc(SourceData/RegionalUnits/Countries/Country ) := sum(count, nr_2);
 				attribute<Float64> share(.)                              := Float64(count) / Float64(sumc[nr_2]);
 
 				attribute<uint16> start(.) := nr_1 ==0[uint16] ? 1[uint16] : 0[uint16];
@@ -119,7 +119,7 @@ container Analysis_Past : using = "Units;Classifications"
 				attribute<Float64> share(.) := combine_class_country/share[Nr_OrgEntity];
 				attribute<uint32>  count(.) := combine_class_country/count[Nr_OrgEntity];
 
-				attribute<float64> sumshare(Input/administrative/Countries/Country ) := sum(share,nr_2);
+				attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
 			}
 
 			//unit<uint32> Test := subset((combine_class_country/nr_1 <> 0[uint16]) && (combine_class_country/nr_1 <> 2[uint16]) && (combine_class_country/nr_1 <> 4[uint16]) && (combine_class_country/nr_1 <> 6[uint16]))
@@ -133,12 +133,12 @@ container Analysis_Past : using = "Units;Classifications"
 				attribute<Float64> share(.)    := combine_class_country/share[Nr_OrgEntity];
 				attribute<uint32> count(.)     := combine_class_country/count[Nr_OrgEntity];
 
-				attribute<float64> sumshare(Input/administrative/Countries/Country ) := sum(share,nr_2);
+				attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
 				//multiplicationfactor compared to start 1970
 
-				attribute<float64> divideshares(Input/administrative/Countries/Country )                   := sumshare / Start/sumshare;
-				attribute<PercGrowthUrbanArea> PercUrbanArea70_14(Input/administrative/Countries/Country ) := (100[Percent] * float32(divideshares))[PercGrowthUrbanArea];
-				//attribute<Classifications/PercGrowthUrbanArea>  multi(Input/administrative/Countries/Country ) := classify(divideshares100, Classifications/PercGrowthUrbanArea/ClassBreaks);
+				attribute<float64> divideshares(SourceData/RegionalUnits/Countries/Country )                   := sumshare / Start/sumshare;
+				attribute<PercGrowthUrbanArea> PercUrbanArea70_14(SourceData/RegionalUnits/Countries/Country ) := (100[Percent] * float32(divideshares))[PercGrowthUrbanArea];
+				//attribute<Classifications/PercGrowthUrbanArea>  multi(SourceData/RegionalUnits/Countries/Country ) := classify(divideshares100, Classifications/PercGrowthUrbanArea/ClassBreaks);
 			}
 
 	}

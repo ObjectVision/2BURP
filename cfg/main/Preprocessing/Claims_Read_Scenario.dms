@@ -1,0 +1,51 @@
+container Read_Scenario : using = "SourceData/RegionalUnits;geography"
+{
+	container M1 := 
+		for_each_ne(Classifications/SSP/name, 
+			'ReadFiles/MetaInfo('
+				+quote(Classifications/SSP/name+'_POPULATION_2010_2100.csv')+
+				','+string(Classifications/SSP/id)+
+				','+quote('M1')+
+			')'
+		);
+
+	container M3 := 
+		for_each_ne(Classifications/SSP/name, 
+			'ReadFiles/MetaInfo('
+				+quote(Classifications/SSP/name+'_POPULATION_2010_2100_'+ModelParameters/Variant+'.csv')+
+				','+string(Classifications/SSP/id)+
+				','+quote('M3')+
+			')'
+		);
+
+	container ReadFiles
+	{
+		template MetaInfo
+		{
+			// begin of caseparameters
+			parameter<String> FileName;
+			parameter<uint32> ScenId;
+			parameter<string> Method;
+			// end of caseparameters
+
+			unit<uint32> FileData
+			: StorageName     = "='%projdir%/data/Claim/'+Method+'/'+FileName"
+			, StorageType     = "gdal.vect"
+			, StorageReadOnly = "True"
+			{
+				parameter<string>            Name            := Classifications/SSP/name[ScenId[uint8]];
+				attribute<Countries/Country> Country_rel     := rlookup(Region, Countries/Country/ISO3);
+				attribute<LatLong>           geometry (poly) := Countries/Country/Geometry[Country_rel];
+
+				attribute<float32> population_to_use_2010_f                     :=population_to_use_2010[float32];
+				attribute<float32> urbanpop2010_f                               :=urbanpop2010[float32];
+				attribute<float32> urbanpop2010_f_c_org (Countries/Country) :=1000000f * rjoin(Countries/Country/ISO3,Region,urbanpop2010_f);
+				attribute<float32> urbanpop2010_f_c (Countries/Country)     :=MakeDefined(1000000f * rjoin(Countries/Country/ISO3,Region,urbanpop2010_f),0f);
+				attribute<string>  Label       := Region;
+				attribute<uint32>  grid_count  := Countries/Country/grid_count[Country_rel] ;
+				attribute<float32> area        := Countries/Country/area [Country_rel];
+				attribute<float32> pop_density := 1000000f * Float32(population_to_use_2010) / area; //This density is urban population divided by total country area!
+			}
+		}
+	}
+}

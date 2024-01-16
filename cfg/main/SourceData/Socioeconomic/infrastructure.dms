@@ -8,22 +8,12 @@
 // Author:   Maarten Hilferink, Bas van Bemmel
 // Function: Make distance-grids to roads
 
-container Infrastructure
+container Infrastructure : using = "Geography"
 {
 	container Road
 	{
-		parameter<String> Generate_RoadFSS := 'Ready',
-		ExplicitSuppliers = "MakeFSS/geometry";
-	
-		//GRIP4_AttributeDescription.xlsx field-description: RoadType
-		//						gp_rtp	name			//number of records
-		//						1		Highways        //573396  --> lacking in many countries of Africa
-		//						2		Primary roads   //788727
-		//						3		Secondary roads //1386948
-		//						4		Tertiary roads  // 3460269
-		//						5		Local roads     //19549113
-		//						0		Unspecified     //0
-		//total: 25758453 records
+		// parameter<String> Generate_RoadFSS := 'Ready',
+		// ExplicitSuppliers = "MakeFSS/geometry";
 
 		container GRIP4 
 		:  StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads.gdb"
@@ -35,54 +25,40 @@ container Infrastructure
 		DialogData         = "Geometry"
 		{
 			unit<uint32> Roads123
-				:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP =1 OR GP_RTP =2 OR GP_RTP =3"
-				{
-					attribute<Input/LatLong> Geometry (arc);
-					parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
-					parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
-				}
+			:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP =1 OR GP_RTP =2 OR GP_RTP =3"
+			{
+				attribute<LatLong> Geometry (arc);
+				parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+				parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+			}
 				
 			unit<uint32> Roads45
-				:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP  > 3"
-				{
-					attribute<Input/LatLong> Geometry (arc);
-					parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
-					parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
-				}
+			:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP  > 3"
+			{
+				attribute<LatLong> Geometry (arc);
+				parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+				parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+			}
 		}
 
 		unit<uint32> MakeFSS123 := GRIP4/Roads123
 		, 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
 		{
-			attribute<Input/LatLong> Geometry (arc) := GRIP4/Roads123/geometry;
+			attribute<LatLong> Geometry (arc) := GRIP4/Roads123/geometry;
 		}
 
 		unit<uint32> MakeFSS45 := GRIP4/Roads45
 		, 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
 		{
-			attribute<Input/LatLong> Geometry (arc) := GRIP4/Roads45/geometry;
+			attribute<LatLong> Geometry (arc) := GRIP4/Roads45/geometry;
 		}
 
 		unit<uint32> Roads123
 		: 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
 		,  StorageReadOnly = "True"
 		{
-			attribute<Input/LatLong> Geometry (arc);
-			unit<uint32> RoadPointSet := sequence2points(geometry)
-			{
-				attribute<Float64> lat_deg  := pointrow(point);
-				attribute<Float64> long_deg := pointcol(point);
-				attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-//				attribute<float64> sinlat   := sin(lat_rad);
-				attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-				attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-
-				attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
-				
-				attribute<Input/Mercator> Point_mer := point(mercator_y_deg, long_deg, Input/Mercator);
-			}
-
-			attribute<Input/Mercator> geometry_mer (arc):= points2sequence(RoadPointSet/Point_mer, RoadPointSet/sequencenr);
+			attribute<LatLong>               Geometry (arc);
+			attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
 			
 			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
 			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
@@ -92,76 +68,62 @@ container Infrastructure
 		: 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
 		,  StorageReadOnly = "True"
 		{
-			attribute<Input/LatLong> Geometry (arc);
-			unit<uint32> RoadPointSet := sequence2points(geometry)
-			{
-				attribute<Float64> lat_deg  := pointrow(point);
-				attribute<Float64> long_deg := pointcol(point);
-				attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-//				attribute<float64> sinlat   := sin(lat_rad);
-				attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-				attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-
-				attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
-
-				attribute<Input/Mercator> Point_mer := point(mercator_y_deg, long_deg, Input/Mercator);
-			}
-
-			attribute<Input/Mercator> geometry_mer (arc):= points2sequence(RoadPointSet/Point_mer, RoadPointSet/sequencenr);
+			attribute<LatLong>               Geometry (arc);
+			attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
 			
 			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
 			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 		}
 
-		attribute<Float32> Location2Road123_mer(Input/CompactedDomain)   := dist_info(Roads123/geometry_mer, Input/CompactedDomain/Geometry_mer, Sqr(250[km] / Input/lengthdegree / Input/CompactedDomain/lat_factor));
-		attribute<km>      Location2Road123_km(Input/CompactedDomain)    := (Location2Road123_mer * Input/lengthdegree * Input/CompactedDomain/lat_factor);
-		attribute<km>      Location2Road123_km_gtopo_export (input/gtopo):= Location2Road123_km[Input/CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif";
+		attribute<Float32> Location2Road123_mer     (CompactedDomain) := dist_info(Roads123/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+		attribute<km>      Location2Road123_km      (CompactedDomain) := (Location2Road123_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
+		attribute<km>      Location2Road123_km_domain_export (domain) := Location2Road123_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif";
 
-		attribute<Float32> Location2Road45_mer(Input/CompactedDomain)   := dist_info(Roads45/geometry_mer, Input/CompactedDomain/Geometry_mer, Sqr(250[km] / Input/lengthdegree / Input/CompactedDomain/lat_factor));
-		attribute<km>      Location2Road45_km(Input/CompactedDomain)    := Location2Road45_mer * Input/lengthdegree * Input/CompactedDomain/lat_factor;
-		attribute<km>      Location2Road45_km_gtopo_export (input/gtopo):= Location2Road45_km[Input/CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif";
+		attribute<Float32> Location2Road45_mer      (CompactedDomain) := dist_info(Roads45/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+		attribute<km>      Location2Road45_km       (CompactedDomain) := Location2Road45_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor;
+		attribute<km>      Location2Road45_km_domain_export  (domain) := Location2Road45_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif";
 
 		container GRIP4_grid
 		{
 			unit<ipoint> Road123
-				:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif"
-				,	StorageType     = "gdal.grid"
-				,	Source          = "item /Input/Socioeconomic/Infrastructure/Road/Location2Road123_km_gtopo_export geodms 7.312 PD 7602 SD 7537"
-				,	StorageReadOnly = "True"
-				,	DialogData      = "LatLong"
+			:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif"
+			,	StorageType     = "gdal.grid"
+			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road123_km_domain_export geodms 7.312 PD 7602 SD 7537"
+			,	StorageReadOnly = "True"
+			,	DialogData      = "LatLong"
 			{
-				attribute<float32> ReadData(gtopo);
-				attribute<float32>  Road123(gtopo)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-				attribute<float32>  Road123MD (gtopo) := Road123;
+				attribute<float32>  ReadData  (domain);
+				attribute<float32>  Road123   (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+				attribute<float32>  Road123MD (domain) := Road123;
 				
-				unit<uint8> Country:=Input/administrative/Countries/Country 
+				unit<uint8> Country := SourceData/RegionalUnits/Countries/Country 
 				{
-					attribute<uint32>  sumRoad123  := sum(Road123,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MeanRoad123 := mean(Road123,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MinRoad123  := min(Road123,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MaxRoad123  := max(Road123,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  SDRoad123   := sd(Road123,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  sumRoad123  := sum(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MeanRoad123 := mean(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MinRoad123  := min(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MaxRoad123  := max(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  SDRoad123   := sd(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
 				}
 			}
 
 			unit<ipoint> Road45
-				:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif"
-				,	StorageType     = "gdal.grid"
-				,	Source          = "item /Input/Socioeconomic/Infrastructure/Road/Location2Road45_km_gtopo_export geodms 7.312 PD 7602 SD 7537"
-				,	StorageReadOnly = "True"
-				,	DialogData      = "LatLong"
+			:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif"
+			,	StorageType     = "gdal.grid"
+			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road45_km_domain_export geodms 7.312 PD 7602 SD 7537"
+			,	StorageReadOnly = "True"
+			,	DialogData      = "LatLong"
 			{
-				attribute<float32> ReadData(gtopo);
-				attribute<float32>  Road45(gtopo)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-				attribute<float32>  Road45MD (gtopo) := Road45;
+				attribute<float32> ReadData(domain);
+				attribute<float32>  Road45(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+				attribute<float32>  Road45MD (domain) := Road45;
 
-				unit<uint8> Country:=Input/administrative/Countries/Country 
+				unit<uint8> Country:=SourceData/RegionalUnits/Countries/Country 
 				{
-					attribute<uint32>  sumRoad45  := sum(Road45,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MeanRoad45 := mean(Road45,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MinRoad45  := min(Road45,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  MaxRoad45  := max(Road45,Input/administrative/Countries/Country_grid);
-					attribute<uint32>  SDRoad45   := sd(Road45,Input/administrative/Countries/Country_grid);
+					attribute<uint32>  sumRoad45  := sum(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MeanRoad45 := mean(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MinRoad45  := min(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  MaxRoad45  := max(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+					attribute<uint32>  SDRoad45   := sd(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
 				}
 			}
 		}

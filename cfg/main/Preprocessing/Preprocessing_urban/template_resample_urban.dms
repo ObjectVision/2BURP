@@ -25,7 +25,7 @@ template resample
 	{
 		// Read in GridData as float32 instead of uint32! otherwise only mean on zeros and ones
 		attribute<float32> GridData;
-		attribute<.> per_gtopo_sub(Input/gtopo_sub)    := mapping(Input/gtopo_sub, .);
-		attribute<Float32> var_per_gtopo (Input/gtopo) := mean(GridData[per_gtopo_sub], Input/gtopo_sub/gtopo_rel);
+		attribute<.> per_gtopo_sub(domain_sub)    := mapping(domain_sub, .);
+		attribute<Float32> var_per_gtopo (domain) := mean(GridData[per_gtopo_sub], domain_sub/gtopo_rel);
 	}
 }

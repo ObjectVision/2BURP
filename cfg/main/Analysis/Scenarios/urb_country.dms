@@ -1,0 +1,30 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Generate more meaningfull results cartographically seen. Comnine of Isurban Results with Country-grid
+
+container UrbCountry
+{
+	unit<uint8> OverlayRegios: nrofrows = 2
+	{
+		attribute<string> names: ['urb', 'country'];
+	}
+
+	container OverlayGrids
+	{
+		attribute<uint8> urb     (CompactedDomain)      := IsUrban[uint8];
+		attribute<uint8> country (CompactedDomain)      := SourceData/RegionalUnits/Countries/Country_grid[Input/CompactedDomain/gtopo_rel];
+	}
+
+	unit<uint32> urbcombine:= overlay32(OverlayRegios/names, CompactedDomain, OverlayGrids)
+	{
+		attribute<uint32> ID                               := ID(.);
+		attribute<string> urb_country                      := string(urb) + "_" + string(country);
+		attribute<string> urb_country_CD(CompactedDomain)  := urb_country[UnionData];
+	}
+}

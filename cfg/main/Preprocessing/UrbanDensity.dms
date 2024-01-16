@@ -1,7 +1,7 @@
 container UrbanDensity : using = "sourcedata/regionalunits"
 {
 	unit<uint32> Country
-		: StorageName       = "='%projdir%/data/UrbanDensity/' + Input/Method + '/UrbanDensity.csv'"
+		: StorageName       = "='%projdir%/data/UrbanDensity/' + ModelParameters/Method + '/UrbanDensity.csv'"
 		, StorageType     = "gdal.vect"
 		, Source          = "estimated density EK.xlsx: orginal delivered file by VU at 3 april 2023"
 							"accompanying email:  Bijgaand de excel waarin we schattingen omzetten naar dichtheden. Per jaar een tabblad, estimated is de schatting, urban density the observation"

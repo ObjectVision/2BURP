@@ -18,30 +18,30 @@ container CreateResultsPastPerCountry: Using = "Units;"
 	parameter<string> InPresentUrban := ''; //growth only inside present urban contour: InPresentUrban, otherwise Leave empty
 
 	container Per_Country_grid:= for_each_nednv(
-		Input/administrative/Countries/Country/Name_from_utf_cor,
+		SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor,
 			replace(
 				'poly2grid(Claims/Scenario/M1/SSP2/FileData/PolyData, ReadResultsPastPerCountry/all/Countries/@nr1@/gtopoc/gtopo_country)'
-				,'@nr1@', Input/administrative/Countries/Country/Name_from_utf_cor
+				,'@nr1@', SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor
 				)
 		,ReadResultsPastPerCountry
 		,	replace(
 				'ReadResultsPastPerCountry/all/Countries/@nr1@/gtopoc/gtopo_country'
-				,'@nr1@', Input/administrative/Countries/Country/Name_from_utf_cor
+				,'@nr1@', SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor
 				)
 		,Claims/Scenario/M1/SSP2/FileData
 		);
 
 	container Per_Country_grid_bool := for_each_nednv(
-		Input/administrative/Countries/Country/Name_from_utf_cor,
+		SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor,
 			replace(
 				'(Per_Country_grid/@nr1@==@nr2@[uint32]) ? 1.0f : (0/0)[float32]'
-				,'@nr1@', Input/administrative/Countries/Country/Name_from_utf_cor
-				,'@nr2@', string(Input/administrative/Countries/Country/claimnumber)
+				,'@nr1@', SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor
+				,'@nr2@', string(SourceData/RegionalUnits/Countries/Country/claimnumber)
 				)
 		,ReadResultsPastPerCountry
 		,	replace(
 				'ReadResultsPastPerCountry/all/Countries/@nr3@/gtopoc/gtopo_country'
-				,'@nr3@', Input/administrative/Countries/Country/Name_from_utf_cor
+				,'@nr3@', SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor
 				)
 		,float32
 		);
@@ -69,9 +69,9 @@ container CreateResultsPastPerCountry: Using = "Units;"
 		attribute<string> orgunityvar : [''    ,     '',     '',           '[uint8]',     '',                  '[uint8]',  '[uint8]',               '[uint8]',   '[uint32]',       '',    '', '[uint32]'];
 	}
 
-		unit<uint32> var_ssp_year := combine(/Input/administrative/Countries/Country ,calcmaps, ReadResultsPast/SSP_Year)
+		unit<uint32> var_ssp_year := combine(/SourceData/RegionalUnits/Countries/Country ,calcmaps, ReadResultsPast/SSP_Year)
 		{
-			attribute<string> country_name         := Input/administrative/Countries/Country/Name_from_utf_cor[nr_1];
+			attribute<string> country_name         := SourceData/RegionalUnits/Countries/Country/Name_from_utf_cor[nr_1];
 			attribute<string> calcmaps_name        := calcmaps/name[nr_2];
 			attribute<string> calcmaps_unityvar    := calcmaps/unityvar[nr_2];
 			attribute<string> calcmaps_orgunityvar := calcmaps/orgunityvar[nr_2];

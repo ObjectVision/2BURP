@@ -30,6 +30,6 @@ container gtopoc
 
 	unit<wpoint> gtopo_country := TiledUnit(point(1024w, 43200w, gtopo_country_untiled))
 	{
-		attribute<input/gtopo> gtopo_rel := id(.)[input/gtopo];
+		attribute<domain> gtopo_rel := id(.)[domain];
 	}
 }

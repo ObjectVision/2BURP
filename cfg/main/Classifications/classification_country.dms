@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Author:   Bas van Bemmel
-// Function: Countries in gray-scale for visualisation used in /Input/administrative/Countries/Country_grid_Carto
+// Function: Countries in gray-scale for visualisation used in /SourceData/RegionalUnits/Countries/Country_grid_Carto
 
 unit<uint8> Country: nrofrows = 250
 {

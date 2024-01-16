@@ -1,0 +1,16 @@
+Bas van Bemmel
+10 maart 2021
+
+GeoDSM 7.308
+item
+open stam.dms
+/GlobalLandUse/JRC_population_series/export_csv/Result
+copy from LD to SD
+
+revision PD 7341: https://pbl.sliksvn.com/ruimtescanner/PBL/ProjDir/branches/TowardsAnUrbanPreview
+revision SD 7340: https://pbl.sliksvn.com/ruimtescanner/PBL/SourceData/Trunk/2UP
+
+options menu
+2000000000 90%
+PP1+PP2
+runtijd: 3 minuten, 16 seconden

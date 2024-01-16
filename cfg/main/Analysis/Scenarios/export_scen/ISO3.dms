@@ -1,0 +1,378 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function: Reports of totals per Country
+
+	//reports at ISO3 (Country)-level
+	container ISO3: KeepData = "True"
+	{
+		unit<uint8> Country:= SourceData/RegionalUnits/Countries/Country 
+		{
+			attribute<string> countryname   := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3          := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel       :=SourceData/RegionalUnits/Countries/Country/InModel;
+			attribute<km2>Urb_Observed_km2  :=sum(Source/landuse_km2,SourceData/RegionalUnits/Countries/Country_grid);
+			attribute<km2>Urb_Observed_Cell :=sum(Source/landuse[km2],SourceData/RegionalUnits/Countries/Country_grid);
+		}
+
+		unit<uint32> variable_Country := SubItem_PropValues(Country,'name');
+		container Urb_Observed_csv := Templates/WriteTable8ToCSV(Country , AsList(variable_Country/name, ';'), '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Urb_Observed.csv');
+
+
+
+		//begin Urban variables
+		container Urban_claim := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/landuse_allocation/Urban_claim'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container Urban_Alloc_km2 := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/Urban_Alloc'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container Urban_Alloc_km2_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'Urban_Alloc_km2/'+ProjectionDate/name+' / Urban_Alloc_km2/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container Check_ClaimRealisation_km2 := 
+			for_each_nedv(ProjectionDate/name,
+				'Urban_Alloc_km2/'+ProjectionDate/name+' - Urban_claim/'+ProjectionDate/name
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		
+		container PRC_ClaimRealisation := 
+			for_each_nedv(ProjectionDate/name,
+				'((Urban_Alloc_km2/'+ProjectionDate/name+' / Urban_claim/'+ProjectionDate/name+')*100f)[int32]'
+				, SourceData/RegionalUnits/Countries/Country 
+				,int32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container Report_ClaimRealisation := 
+			for_each_nedv(ProjectionDate/name,
+				'PRC_ClaimRealisation/'+ProjectionDate/name+' > 101i ? "error over" : (PRC_ClaimRealisation/'+ProjectionDate/name+' < 99i ? "error under" : "OK")'
+				, SourceData/RegionalUnits/Countries/Country 
+				,string
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+	
+		container UrbanCells_Alloc := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/UrbanCells_Alloc'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container UrbanShare := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/UrbanShare'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container UrbanCluster := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/NewState/grid2poly/IsUrban_pol/urbancluster/nrurbancluster'
+				, SourceData/RegionalUnits/Countries/Country 
+				,uint32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container UrbanCluster_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'UrbanCluster/'+ProjectionDate/name+'[float32] / UrbanCluster/Y2010[float32]'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		//end Urban variables
+
+
+
+		//begin Pop Variables
+		container PopUrban := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/PopUrban'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		
+		container PopUrban_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'PopUrban/'+ProjectionDate/name+' / PopUrban/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container PopUrbanAndRural := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/PopUrbanAndRural'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container PopUrbanAndRural_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'PopUrbanAndRural/'+ProjectionDate/name+' / PopUrbanAndRural/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container MissingUrban := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/MissingUrban'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		
+		container MissingRural := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/MissingRural'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string> countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string> ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32> InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		//end Urban variables
+
+
+
+		//begin density variables
+		container UPopDensityIn2010contour := 
+			for_each_nedv(ProjectionDate/name,
+				'Projectiondates/'+ProjectionDate/name+'/PopUrbanIn2010contour / Urban_Alloc_km2/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+
+		container UPopDensityIn2010contour_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'UPopDensityIn2010contour/'+ProjectionDate/name+' / UPopDensityIn2010contour/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		//end density variables
+
+		//all 1
+		container UrbanPop_Density := 
+			for_each_nedv(ProjectionDate/name,
+				'PopUrban/'+ProjectionDate/name+' / Urban_Alloc_km2/' + ProjectionDate/name
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		
+		container UrbanPop_Density_Index := 
+			for_each_nedv(ProjectionDate/name,
+				'UrbanPop_Density/'+ProjectionDate/name+' / UrbanPop_Density/Y2010'
+				, SourceData/RegionalUnits/Countries/Country 
+				,Float32
+			)
+		{
+			attribute<string>  countryname (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  ISO3        (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<uint32>  InModel     (SourceData/RegionalUnits/Countries/Country ) := SourceData/RegionalUnits/Countries/Country/InModel;
+		}
+		//
+
+
+		container Urban_claim_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			Urban_claim
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Urban_claim.csv');
+	
+		container Urban_Alloc_km2_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			Urban_Alloc_km2
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Urban_Alloc_km2.csv');
+
+		container Urban_Alloc_km2_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			Urban_Alloc_km2_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Urban_Alloc_km2_Index.csv');
+
+		container Check_ClaimRealisation_km2_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			Check_ClaimRealisation_km2
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Check_ClaimRealisation_km2.csv');
+			
+		container PRC_ClaimRealisation_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			PRC_ClaimRealisation
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_PRC_ClaimRealisation.csv');
+
+		container Report_ClaimRealisation_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			Report_ClaimRealisation
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;' + 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_Report_ClaimRealisation.csv');
+
+
+		container UrbanCells_Alloc_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UrbanCells_Alloc
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UrbanCells_Alloc.csv');
+
+		container UrbanShareCSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UrbanShare
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UrbanShare.csv');
+
+		container UrbanClusterCSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UrbanCluster
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UrbanCluster.csv');
+			
+		container UrbanCluster_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UrbanCluster_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UrbanCluster_Index.csv');
+			
+		container PopUrban_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			PopUrban_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_PopUrban_Index.csv');
+			
+		container PopUrbanAndRural_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			PopUrbanAndRural_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_PopUrbanAndRural_Index.csv');
+			
+		container UPopDensityIn2010contour_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UPopDensityIn2010contour_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UPopDensityIn2010contour_Index.csv');
+			
+		container UrbanPop_Density_Index_CSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			UrbanPop_Density_Index
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_UrbanPop_Density_Index.csv');
+
+
+		container MissingUrbanCSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			MissingUrban
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_MissingUrban.csv');
+			
+		container MissingRuralCSV := Templates/WriteTable8ToCSVTableDoesNotContainFields(
+			MissingUrban
+			, SourceData/RegionalUnits/Countries/Country 
+			, 'ISO3;' + 'countryname;'+ 'InModel;' + AsList(ProjectionDate/name, ';')
+			, '%LocalDataProjDir%/results/'+GridName+'/Check/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_MissingRural.csv');
+	}

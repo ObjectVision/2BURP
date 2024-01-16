@@ -30,7 +30,7 @@ container  SMOD: Using = "Units;"
 	{
 		container PastDates_imp: = for_each_ndvat(
 				PastDate/name,
-				Input/gtopo,
+				domain,
 				Units/SMOD,
 				'%MondiaalDataDir%/Preprocessing/GHSSMOD/resample/SMODgtopo_'+string(PastDate/name)+'_WGS84.tif',
 				'gdal.grid')

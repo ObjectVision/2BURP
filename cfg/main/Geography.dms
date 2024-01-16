@@ -1,30 +1,36 @@
-container Geography : using = "units;SourceData/RegionalUnits"
+container Geography : using = "units"
 {
-	unit<dpoint> LatLong := ='subextent/LatLong_'+ModelParameters/StudyArea;
-	unit<dpoint> LatLong_Base: SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong"
+	unit<dpoint> LatLong       := ='subextent/LatLong_'+ModelParameters/StudyArea;
+	unit<dpoint> LatLong_Base  : SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong"
 	{
-		parameter<float32> ViewPortMinSize := 100f / 3600f;
-		parameter<float32> PenWorldWidth   := 10f / 3600f, DialogType = "PenWorldWidth";
-		parameter<float32> LabelWorldSize  := 10f / 3600f, DialogType = "LabelWorldSize";
+		parameter<float32> ViewPortMinSize       := 100f / 3600f;
+		parameter<float32> PenWorldWidth         := 10f / 3600f, DialogType = "PenWorldWidth";
+		parameter<float32> LabelWorldSize        := 10f / 3600f, DialogType = "LabelWorldSize";
+		parameter<km>      lengthdegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
 	}
 	
-	unit<dpoint> WorldMollweide    : SpatialReference = "ESRI:54009";
+	unit<dpoint> WorldMollweide         : SpatialReference = "ESRI:54009";
 	Unit<dpoint> SphericalMercator_base : SpatialReference = "EPSG:3857", DialogData = "tms_layer_osm_webmercator";
-	Unit<dpoint> SphericalMercator := range(SphericalMercator_base, point(-16000000.0, -20000000.0),  point(16000000.0, 20000000.0));
-	
-	
-	unit<ipoint> web_mercator_cell := gridset(SphericalMercator, point(SourceRasterFactor_in_eq_m, SourceRasterFactor_in_eq_m), point(-16000000.0, -20000000.0), ipoint)
+	Unit<dpoint> SphericalMercator      := range(SphericalMercator_base, point(-16000000.0, -20000000.0),  point(16000000.0, 20000000.0))
 	{
-		attribute<LatLong>            ll_rel_rev := mapping(., LatLong);
-		attribute<LatLong>            ll_rel     := point(pointcol(ll_rel_rev), pointrow(ll_rel_rev), LatLong);
-		attribute<domain>              domain_rel := value(ll_rel, domain);
-		attribute<km2>                Area    := domain_rel->area;
+		parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
 	}
 	
-	parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
-	parameter<float64> SourceRasterFactor    := 0.00833333333333333333333333333333333333333333333333333333333;
 	parameter<float64> SourceRasterSubFactor := 5.0 / 3600.0;
-	parameter<km> lengthdegree := 40000km / 360f; // 40075.017d/360d;//at Equator
+	parameter<float64> SourceRasterFactor    := 0.00833333333333333333333333333333333333333333333333333333333;
+	
+	unit<ipoint> WebMercator_grid := 
+		gridset(
+			SphericalMercator
+			, point_xy(SphericalMercator/SourceRasterFactor_in_eq_m, SphericalMercator/SourceRasterFactor_in_eq_m)
+			, point_xy(-16000000.0, -20000000.0)
+			, ipoint
+		)
+	{
+		attribute<LatLong>            ll_rel     := mapping(., LatLong);
+		attribute<domain>             domain_rel := value(ll_rel, domain);
+		// attribute<km2>                Area       := domain_rel -> area;
+	}
 	
 	unit<ipoint> LatLong_mdegrees := gridset(LatLong, point(0.0000001, 0.0000001), point(0.0,0.0), ipoint);
 
@@ -60,11 +66,11 @@ container Geography : using = "units;SourceData/RegionalUnits"
 	unit<wpoint> domain :=
 		gridset(
 			range(LatLong, 
-				LowerBound(LatLong) + point(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong), 
-				UpperBound(LatLong) - point(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong)
+				LowerBound(LatLong) + point_xy(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong), 
+				UpperBound(LatLong) - point_xy(0.5 * SourceRasterFactor, 0.5 * SourceRasterFactor, LatLong)
 			)
-			, point(-SourceRasterFactor, SourceRasterFactor, LatLong)
-			, point(90d, -180d, LatLong)
+			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong)
+			, point_yx(90d, -180d, LatLong)
 			, wpoint
 		)
 	{
@@ -73,35 +79,31 @@ container Geography : using = "units;SourceData/RegionalUnits"
 
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
-			attribute<float64> lat_top := pointrow( point(ID(rowset), const(0w, rowset), domain)[LatLong] );
-			attribute<float64> lat_mid := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
-
+			attribute<float64> lat_top    := pointrow( point(ID(rowset), const(0w, rowset), domain)[LatLong] );
+			attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
 			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-			attribute<km2> area := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * lengthdegree));
+			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree));
 		}
 
-		unit<uint16>colset := range(uint16, pointcol(Lowerbound(domain)), pointcol(Upperbound(domain)))
+		unit<uint16> colset := range(uint16, pointcol(Lowerbound(domain)), pointcol(Upperbound(domain)))
 		{
 			attribute<float64> long_top := pointcol( point(const(0w, colset),ID(colset), domain)[LatLong] );
 			attribute<float64> long_mid := long_top  + 0.5 * pointcol(getprojectionfactor(domain)[LatLong]);
 		}
+		
+		attribute<LatLong> geometry     := id(.)[LatLong];
 
-		// parameter<uint32> boundrange_c := uint32(PointCol(boundrange(domain)));
-
-		attribute<rowset> row        := pointrow(ID(domain));
-		attribute<colset> col_colset := pointcol(ID(domain));
-
-		// attribute<uint32> col      := uint32(pointcol(ID(domain)));
-		// attribute<uint32> rowcol   := uint32(row) * boundrange_c;
-		// attribute<uint32> number   := (rowcol +col) + 1;
-		// attribute<uint8>  one_grid := number > 0 ? 1b : 0b;
-
-		attribute<Float32> lat_factor := rowset/lat_factor[row];
-
-		attribute<Float64> lat   := rowset/lat_mid[row];
-		attribute<Float64> long  := colset/long_mid[col_colset];
-
-		attribute<km2> area           := rowset/area[row]; //use rowset area
+		parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
+		attribute<rowset>  row          := pointrow(ID(.));
+		attribute<colset>  col          := pointcol(ID(.));
+		// attribute<uint32>  col          := uint32(pointcol(ID(.)));
+		attribute<uint32>  rowcol       := uint32(row) * boundrange_c;
+		attribute<uint32>  number       := (rowcol + uint32(col)) + 1;
+		// attribute<uint8>   one_grid     := number > 0 ? 1b : 0b;
+		attribute<Float32> lat_factor   := rowset/lat_factor[row];
+		attribute<Float64> lat          := rowset/lat_mid[row];
+		attribute<Float64> long         := colset/long_mid[col_colset];
+		attribute<km2>     area         := rowset/area[row]; //use rowset area
 	}
 
 	unit<ipoint> domain_sub :=
@@ -120,11 +122,11 @@ container Geography : using = "units;SourceData/RegionalUnits"
 	
 	container GridData : using = "SourceData/RegionalUnits"
 	{
-		attribute<Person> InitPopGrid         (domain) := ModelParameters/Method='M3' ? convert(SourceData/Population/M3/UrbanPopulation2010, Person) : convert(SourceData/Population/M1/Urban_pop_2010/UPopulation2010, Person);
-		attribute<Person> InitPopGrid1990     (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 * Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[float32] :0f/0f;
+		attribute<Person> InitPopGrid         (domain) := ModelParameters/Method = 'M3' ? convert(SourceData/Population/M3/UrbanPopulation2010, Person) : convert(SourceData/Population/M1/Urban_pop_2010/UPopulation2010, Person);
+		attribute<Person> InitPopGrid1990     (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 * Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[float32] : null_f;
 
-		attribute<Person> InitTpopGrid        (domain) := ModelParameters/Method='M3' ? convert(SourceData/Population/M3/TotalPopulation2010, Person) : convert(SourceData/Population/M1/Urban_pop_2010/PopulationData, Person);
-		attribute<Person> InitTpopGrid1990    (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 :0f/0f;
+		attribute<Person> InitTpopGrid        (domain) := ModelParameters/Method = 'M3' ? convert(SourceData/Population/M3/TotalPopulation2010, Person) : convert(SourceData/Population/M1/Urban_pop_2010/PopulationData, Person);
+		attribute<Person> InitTpopGrid1990    (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 : null_f;
 
 		attribute<Bool> InRegion              (domain) := IsDefined(Countries/Country_grid);
 		attribute<Bool> HasPop                (domain) := InitTpopGrid > 0[Person];
@@ -137,32 +139,45 @@ container Geography : using = "units;SourceData/RegionalUnits"
 		attribute<Bool> FreeLand              (domain) := InRegionHasPopHasUrb && (IsNotLake || HasUrb || HasPop) && (IsNotIce || HasUrb || HasPop), FreeData = "False";
 	}
 	
-	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid"
+	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
-		attribute<uint32>       CD                    := const(1,.);
-		attribute<domain>       domain_rel            := org_rel;
-		attribute<.>            BaseGrid (domain)     := invert(domain_rel);
-		attribute<int64>        ISCDint64 (domain)    := MakeDefined(BaseGrid[int64],-1[int64]);
-		attribute<bool>         ISCD (domain)         := ISCDint64 = -1[int64] ? false : true;
-		attribute<domain/rowset> row                  := domain/row[domain_rel];
-		attribute<float32>      lat_factor           := domain/lat_factor[domain_rel];
-		attribute<km2>          area                 := domain/rowset/area[row];
-
-		attribute<Float64> lat_deg  := domain/lat [domain_rel];
-		attribute<Float64> long_deg := domain/long[domain_rel];
-		attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-		attribute<float64> sinlat   := sin(lat_rad);
-		attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-		attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-		
-		attribute<SphericalMercator> geometry_mer:= point(mercator_y_deg, long_deg, SphericalMercator);
-		
+		// attribute<uint32>            CD                    := const(1,.);
+		attribute<domain>            domain_rel            := org_rel;
+		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
+		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
+		attribute<domain/rowset>     row                   := domain/row[domain_rel];
+		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
+		attribute<km2>               area                  := domain/rowset/area[row];
+		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 
 		attribute<Countries/Country> Country_rel   := Countries/Country_grid[domain_rel];
-		attribute<Continent> Continent_rel := Countries/Country/Continent_id_grid[domain_rel];
-		attribute<World> World_rel     := Countries/Country/World_id_grid[domain_rel];
+		attribute<Continent>         Continent_rel := Countries/Country/Continent_id_grid[domain_rel];
+		attribute<World>             World_rel     := Countries/Country/World_id_grid[domain_rel];
 
-		attribute<LatLong> geometry_not_as_feature := org_rel[LatLong];
+		attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
+	}
+	
+	container Distmatrices
+	{
+		container Impl
+		{
+			container pot3km  :=Templates/potrange_T(value(1, km), value(  3, km));
+			container pot5km  :=Templates/potrange_T(value(1, km), value(  5, km));
+			container pot10km :=Templates/potrange_T(value(1, km), value(10, km));
+			container pot15km :=Templates/potrange_T(value(1, km), value(15, km));
+			container pot20km :=Templates/potrange_T(value(1, km), value(20, km));
+			container pot25km :=Templates/potrange_T(value(1, km), value(25, km));
+			container pot40km :=Templates/potrange_T(value(1, km), value(40, km));
+			container pot50km :=Templates/potrange_T(value(1, km), value(50, km));
+		}
+		unit<spoint> pot3km  :=Impl/pot3km/PotRange;
+		unit<spoint> pot5km  :=Impl/pot5km/PotRange;
+		unit<spoint> pot10km :=Impl/pot10km/PotRange;
+		unit<spoint> pot15km :=Impl/pot15km/PotRange;
+		unit<spoint> pot20km :=Impl/pot20km/PotRange;
+		unit<spoint> pot25km :=Impl/pot25km/PotRange;
+		unit<spoint> pot40km :=Impl/pot40km/PotRange;
+		unit<spoint> pot50km :=Impl/pot50km/PotRange;
 	}
 	
 	#include <wms_layer_latlong.dms>

@@ -53,7 +53,7 @@ container Countries : using = "units;geography"
 	unit<ipoint> IsCountryWorld
 	: StorageName = "%MondiaalDataDir%/administrative/countries/IsCountry_v10.tif",
 	StorageType     = "gdal.grid",
-	Source          = "export of item /Input/administrative/Countries/IsCountry GeoDMS 7.308 PD 7354 TowardsAnUrbanPreview SD 7353 2UP",
+	Source          = "export of item /SourceData/RegionalUnits/Countries/IsCountry GeoDMS 7.308 PD 7354 TowardsAnUrbanPreview SD 7353 2UP",
 	StorageReadOnly = "True",
 	DialogData      = "LatLong"
 	{
@@ -87,13 +87,13 @@ container Countries : using = "units;geography"
 	// }
 
 	//	This grid is used for the compacted domain definition in Scenarios.dms
-	attribute<uint8>   ClaimCountry_grid (domain)     := poly2grid(Claims/Scenario/M1/SSP2/Filedata/geometry, domain)[uint8];
+	attribute<uint8>   ClaimCountry_grid (domain)     := poly2grid(Preprocessing/Claims/Read_Scenario/M1/SSP2/Filedata/geometry, domain)[uint8];
 	// attribute<bool>    IsClaimCountry (domain)        := ClaimCountry_grid[int16] > -1s;
 	// attribute<bool>    IsNotClaimCountry (domain)     := !IsClaimCountry;
 	// attribute<float32> IsNotClaimCountryNull (domain) := IsClaimCountry ? 0f/0f : 1f;
 
-	// attribute<string>  Name(domain):=rjoin(ClaimCountry_grid, Input/administrative/Countries/Country/claimnumber[uint8], Input/administrative/Countries/Country/name);
-	// attribute<string>  ISO3(domain):=rjoin(ClaimCountry_grid, Input/administrative/Countries/Country/claimnumber[uint8], Input/administrative/Countries/Country/ISO3);
+	// attribute<string>  Name(domain):=rjoin(ClaimCountry_grid, SourceData/RegionalUnits/Countries/Country/claimnumber[uint8], SourceData/RegionalUnits/Countries/Country/name);
+	// attribute<string>  ISO3(domain):=rjoin(ClaimCountry_grid, SourceData/RegionalUnits/Countries/Country/claimnumber[uint8], SourceData/RegionalUnits/Countries/Country/ISO3);
 
 	attribute<bool>        IsCountry (domain)        := Country_grid[int16] > -1s;
 	// attribute</Units/km2>  IsCountrykm2 (domain)     := IsCountry[float32] * /Input/domain/area;

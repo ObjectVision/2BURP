@@ -11,6 +11,15 @@
 
 container Classifications
 {
+	unit<uint8> SSP: nrofrows = 5
+	{
+		attribute<uint8>   id    :=id(.);
+		attribute<string>  Name  : ['SSP1','SSP2', 'SSP3', 'SSP4', 'SSP5'];
+		attribute<string>  Label := Name;
+
+		container V := for_each_nedv(Name, 'value('+string(ID(.))+',..)', void, .);
+	}
+	
 	#include <classification_ProjectionDate.dms>
 	#include <classification_prc.dms>
 	#include <classification_country.dms>

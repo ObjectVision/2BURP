@@ -1,0 +1,124 @@
+container UrbanCombine : using = "geography"
+{
+	template entropy_reduction_calculation 
+	{
+		unit<UInt32> sample_set;
+		
+		unit<uint8> P;
+		attribute<P> part_rel(sample_set);
+		
+		attribute<A> past_rel(sample_set);
+		attribute<B> curr_rel(sample_set);
+		attribute<C> pred_rel(sample_set);
+		
+		unit<bool> A;
+		unit<bool> B;
+		unit<bool> C;
+	
+		unit<uint32> past_curr_combi := combine(A, B);
+		unit<uint32> value_combi := combine(past_curr_combi, C);
+		unit<uint32> part_value_combi := combine(value_combi, P)
+		{				
+			attribute<uint32> count := pcount(sample_set2/per_sample);
+		}
+		unit<uint32> sample_set2 := sample_set 
+		{
+			attribute<past_curr_combi>  past_curr_rel     (sample_set) := combine_data(past_curr_combi,    past_rel, curr_rel);
+			attribute<value_combi>      past_curr_pred_rel(sample_set) := combine_data(value_combi, past_curr_rel,	pred_rel);
+			attribute<part_value_combi> per_sample        (sample_set) := combine_data(part_value_combi, past_curr_pred_rel, part_rel);
+		}
+			
+		attribute<uint32> nr_RemainingRural          (P):= part_value_combi/count[combine_data(part_value_combi, 0, ID(P))]; // R->R modelled as R
+		attribute<uint32> nr_BadPredictedUrbanisation(P):= part_value_combi/count[combine_data(part_value_combi, 1, ID(P))]; // R->R modelled as U
+		attribute<uint32> nr_UrbanisationNotPredicted(P):= part_value_combi/count[combine_data(part_value_combi, 2, ID(P))]; // R->U modelled as R
+		attribute<uint32> nr_GoodPredicedUrbanisation(P):= part_value_combi/count[combine_data(part_value_combi, 3, ID(P))]; // R->U modelled as U
+		
+		attribute<uint32> nr_GoodPredictedAbandonment(P):= part_value_combi/count[combine_data(part_value_combi, 4, ID(P))]; // U->R modelled as R
+		attribute<uint32> nr_NonPredicedAbandonment  (P):= part_value_combi/count[combine_data(part_value_combi, 5, ID(P))]; // U->R modelled as U
+		attribute<uint32> nr_BadPredictedAbandonment (P):= part_value_combi/count[combine_data(part_value_combi, 6, ID(P))]; // U->U modelled as R
+		attribute<uint32> nr_RemainingUrban          (P):= part_value_combi/count[combine_data(part_value_combi, 7, ID(P))]; // U->U modelled as U
+		
+		attribute<Float64> nr_RuralRural(P) := Float64(nr_RemainingRural           + nr_BadPredictedUrbanisation);
+		attribute<Float64> nr_RuralUrban(P) := Float64(nr_UrbanisationNotPredicted + nr_GoodPredicedUrbanisation);
+		attribute<Float64> nr_UrbanRural(P) := Float64(nr_GoodPredictedAbandonment + nr_NonPredicedAbandonment);
+		attribute<Float64> nr_UrbanUrban(P) := Float64(nr_BadPredictedAbandonment  + nr_RemainingUrban);
+		
+		attribute<Float64> nr_PastRural(P) := nr_RuralRural + nr_RuralUrban;
+		attribute<Float64> nr_PastUrban(P) := nr_UrbanRural + nr_UrbanUrban;
+		
+		attribute<Float64> nr_CurrRural(P) := nr_RuralRural + nr_UrbanRural;
+		attribute<Float64> nr_CurrUrban(P) := nr_RuralUrban + nr_UrbanUrban;
+		
+		attribute<Float64> nr_Cells(P) := Float64(pcount(part_rel)), IntegrityCheck = "(nr_PastRural + nr_PastUrban == nr_Cells) && (nr_CurrRural + nr_CurrUrban == nr_Cells)";
+		
+		attribute<Float64> prc_PastRural(P) := (nr_PastRural / nr_Cells) * 100d;
+		attribute<Float64> prc_PastUrban(P) := (nr_PastUrban / nr_Cells) * 100d;
+	
+		attribute<Float64> prc_CurrRural(P) := (nr_CurrRural / nr_Cells) * 100d;
+		attribute<Float64> prc_CurrUrban(P) := (nr_CurrUrban / nr_Cells) * 100d;
+		
+		attribute<Float64> prc_DifCurrPastRural(P) := prc_CurrRural - prc_PastRural;
+		attribute<Float64> prc_DifCurrPastUrban(P) := prc_CurrUrban - prc_PastUrban;
+	
+		container withoutModel 
+		{
+			attribute<Float64> org_Entropy(P) := -(plogp(nr_CurrRural / nr_Cells) + plogp(nr_CurrUrban / nr_Cells));// https://en.wikipedia.org/wiki/Information_theory#Entropy_of_an_information_source
+			attribute<Float64> org_Entropy_given_past(P) := // https://en.wikipedia.org/wiki/Information_theory#Conditional_entropy_(equivocation)
+				-(	(nr_PastRural / nr_Cells)*(plogp(nr_RuralRural / nr_PastRural) + plogp(nr_RuralUrban / nr_PastRural)) 
+				+	(nr_PastUrban / nr_Cells)*(plogp(nr_UrbanRural / nr_PastUrban) + plogp(nr_UrbanUrban / nr_PastUrban))
+				);
+			attribute<Float64> information_value_past  (P) := org_Entropy - org_Entropy_given_past;
+		}
+		container PastRural 
+		{
+			attribute<Float64> nr_PredRural(P) := Float64(nr_RemainingRural           + nr_UrbanisationNotPredicted);
+			attribute<Float64> nr_PredUrban(P) := Float64(nr_BadPredictedUrbanisation + nr_GoodPredicedUrbanisation);
+			attribute<Float64> org_Entropy(P) := -(plogp(nr_RuralRural / nr_PastRural) + plogp(nr_RuralUrban / nr_PastRural));// https://en.wikipedia.org/wiki/Information_theory#Entropy_of_an_information_source
+			attribute<Float64> org_Entropy_given_modelresult(P) := // https://en.wikipedia.org/wiki/Information_theory#Conditional_entropy_(equivocation)
+				-(	(nr_PredRural / nr_PastRural)*(plogp(Float64(nr_RemainingRural          ) / nr_PredRural) + plogp(Float64(nr_UrbanisationNotPredicted) / nr_PredRural)) 
+				+	(nr_PredUrban / nr_PastRural)*(plogp(Float64(nr_BadPredictedUrbanisation) / nr_PredUrban) + plogp(Float64(nr_GoodPredicedUrbanisation) / nr_PredUrban))
+				);
+			
+			attribute<Float64> information_value_past  (P) := org_Entropy - org_Entropy_given_modelresult;
+		}
+		container PastUrban 
+		{
+			attribute<Float64> nr_PredRural(P) := Float64(nr_GoodPredictedAbandonment + nr_BadPredictedAbandonment);
+			attribute<Float64> nr_PredUrban(P) := Float64(nr_NonPredicedAbandonment   + nr_RemainingUrban);
+			attribute<Float64> org_Entropy (P) := -(plogp(nr_UrbanRural / nr_PastUrban) + plogp(nr_UrbanUrban / nr_PastUrban));// https://en.wikipedia.org/wiki/Information_theory#Entropy_of_an_information_source
+			attribute<Float64> org_Entropy_given_modelresult(P) := // https://en.wikipedia.org/wiki/Information_theory#Conditional_entropy_(equivocation)
+				-(	(nr_PredRural / nr_PastUrban)*(plogp(Float64(nr_GoodPredictedAbandonment) / nr_PredRural) + plogp(Float64(nr_BadPredictedAbandonment) / nr_PredRural)) 
+				+	(nr_PredUrban / nr_PastUrban)*(plogp(Float64(nr_NonPredicedAbandonment  ) / nr_PredUrban) + plogp(Float64(nr_RemainingUrban         ) / nr_PredUrban))
+				);
+			
+			attribute<Float64> information_value_past  (P) := org_Entropy - org_Entropy_given_modelresult;
+		}
+		
+		attribute<Float64> org_Entropy           (P) := withoutModel/org_Entropy;
+		attribute<Float64> org_Entropy_given_past(P) := (nr_PastRural * PastRural/org_Entropy + nr_PastUrban * PastUrban/org_Entropy) / nr_Cells;
+		attribute<Float64> org_Entropy_given_modelresult(P) := (nr_PastRural * PastRural/org_Entropy_given_modelresult + nr_PastUrban * PastUrban/org_Entropy_given_modelresult) / nr_Cells;
+		
+		container information_value 
+		{
+			attribute<Float64> past  (P) := org_Entropy - org_Entropy_given_past;
+			attribute<Float64> model (P) := org_Entropy_given_past - org_Entropy_given_modelresult;
+			
+			attribute<Float64> indicator1(P) := model / past;
+			attribute<Float64> indicator2(P) := model / org_Entropy_given_past; // reduction of entropy related to original entropy without model, 0.0 is worthless projection, 1.0 is perfect projection.
+		}
+	}
+	
+	//User Input --> 3e variable for 3way test: Past/SSPs/SSPPast/ProjectionDates/Y2015/landuse_allocation/IsUrban
+	container urbanization_model_valuation_examples
+	{
+		container JRC_1990_2014_M2015 := 
+			entropy_reduction_calculation(
+				CompactedDomain
+				, SourceData/RegionalUnits/Countries/Country 
+				, CompactedDomain/Country_rel
+				, Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[CompactedDomain/domain_rel]
+				, Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[CompactedDomain/domain_rel]
+				, Preprocessing/Scenarios_Past/SSPs/SSPPast/ProjectionDates/Y2015/landuse_allocation/IsUrban
+			);
+	}
+}

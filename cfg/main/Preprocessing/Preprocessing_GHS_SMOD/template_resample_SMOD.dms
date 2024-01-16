@@ -42,34 +42,34 @@ template resample
 			attribute<float32> VERYLOWDENSITYRURALGRIDCELL11   :=GridData=11f ? 1.0f : 0.0f;
 			attribute<float32> WATERGRIDCELL10                 :=GridData=10f ? 1.0f : 0.0f;
 
-			attribute<.> per_gtopo_sub(Input/gtopo_sub) := mapping(Input/gtopo_sub, .);
+			attribute<.> per_gtopo_sub(domain_sub) := mapping(domain_sub, .);
 			attribute<uint64> nr_sub := pcount(per_gtopo_sub);
 
-			attribute<Float32> var_per_gtopo_30 (Input/gtopo) := mean(URBANCENTREGRIDCELL30[per_gtopo_sub],           Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_23 (Input/gtopo) := mean(DENSEURBANCLUSTERGRIDCELL23[per_gtopo_sub],     Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_22 (Input/gtopo) := mean(SEMIDENSEURBANCLUSTERGRIDCELL22[per_gtopo_sub], Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_21 (Input/gtopo) := mean(SUBURBANORPERIURBANGRIDCELL21[per_gtopo_sub],   Input/gtopo_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_30 (domain) := mean(URBANCENTREGRIDCELL30[per_gtopo_sub],           domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_23 (domain) := mean(DENSEURBANCLUSTERGRIDCELL23[per_gtopo_sub],     domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_22 (domain) := mean(SEMIDENSEURBANCLUSTERGRIDCELL22[per_gtopo_sub], domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_21 (domain) := mean(SUBURBANORPERIURBANGRIDCELL21[per_gtopo_sub],   domain_sub/gtopo_rel);
 
-			attribute<Float32> var_per_gtopo_13 (Input/gtopo) := mean(RURALCLUSTERGRIDCELL13[per_gtopo_sub],          Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_12 (Input/gtopo) := mean(LOWDENSITYRURALGRIDCELL12[per_gtopo_sub],       Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_11 (Input/gtopo) := mean(VERYLOWDENSITYRURALGRIDCELL11[per_gtopo_sub],   Input/gtopo_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_10 (Input/gtopo) := mean(WATERGRIDCELL10[per_gtopo_sub],                 Input/gtopo_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_13 (domain) := mean(RURALCLUSTERGRIDCELL13[per_gtopo_sub],          domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_12 (domain) := mean(LOWDENSITYRURALGRIDCELL12[per_gtopo_sub],       domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_11 (domain) := mean(VERYLOWDENSITYRURALGRIDCELL11[per_gtopo_sub],   domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_10 (domain) := mean(WATERGRIDCELL10[per_gtopo_sub],                 domain_sub/gtopo_rel);
 
-			attribute<Float32> var_per_gtopo (Input/gtopo)    := mean(UrbanGridCell[per_gtopo_sub],                    Input/gtopo_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo (domain)    := mean(UrbanGridCell[per_gtopo_sub],                    domain_sub/gtopo_rel);
 
-			attribute<bool>    urban (Input/gtopo)         := var_per_gtopo >0f ? 1[bool] : 0[bool],	StorageName = "='%LocalDataProjDir%/Results/'+OnlyNameFile+'_21_22_23_30_WGS84.tif'";
+			attribute<bool>    urban (domain)         := var_per_gtopo >0f ? 1[bool] : 0[bool],	StorageName = "='%LocalDataProjDir%/Results/'+OnlyNameFile+'_21_22_23_30_WGS84.tif'";
 			
-			attribute<Units/SMOD>    urban_30 (Input/gtopo)         := var_per_gtopo_30 >0f ? 30[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    urban_23 (Input/gtopo)         := var_per_gtopo_23 >0f ? 23[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    urban_22 (Input/gtopo)         := var_per_gtopo_22 >0f ? 22[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    urban_21 (Input/gtopo)         := var_per_gtopo_21 >0f ? 21[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    urban_30 (domain)         := var_per_gtopo_30 >0f ? 30[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    urban_23 (domain)         := var_per_gtopo_23 >0f ? 23[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    urban_22 (domain)         := var_per_gtopo_22 >0f ? 22[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    urban_21 (domain)         := var_per_gtopo_21 >0f ? 21[Units/SMOD] : 0u;
 			
-			attribute<Units/SMOD>    rural_13 (Input/gtopo)         := var_per_gtopo_13 >0f ? 13[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    rural_12 (Input/gtopo)         := var_per_gtopo_12 >0f ? 12[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    rural_11 (Input/gtopo)         := var_per_gtopo_11 >0f ? 11[Units/SMOD] : 0u;
-			attribute<Units/SMOD>    water_10 (Input/gtopo)         := var_per_gtopo_10 >0f ? 10[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    rural_13 (domain)         := var_per_gtopo_13 >0f ? 13[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    rural_12 (domain)         := var_per_gtopo_12 >0f ? 12[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    rural_11 (domain)         := var_per_gtopo_11 >0f ? 11[Units/SMOD] : 0u;
+			attribute<Units/SMOD>    water_10 (domain)         := var_per_gtopo_10 >0f ? 10[Units/SMOD] : 0u;
 
-			attribute<Units/SMOD>    SMODgtopo (Input/gtopo)    := urban_30 =30u ? 
+			attribute<Units/SMOD>    SMODgtopo (domain)    := urban_30 =30u ? 
 																	urban_30 : (urban_23 =23u ? 
 																	urban_23 : (urban_22 =22u ? 
 																	urban_22 : (urban_21 =21u ? 
@@ -79,6 +79,6 @@ template resample
 																	rural_11 : (water_10 =10u ? 
 																	water_10 : 0u)))))));
 
-			attribute<bool> rural (Input/gtopo) := !urban;
+			attribute<bool> rural (domain) := !urban;
 		}
 }

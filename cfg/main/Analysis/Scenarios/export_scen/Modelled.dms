@@ -1,0 +1,250 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Author:   Bas van Bemmel
+// Function:
+
+container Modelled
+{
+	container Pop := 
+		for_each_nedva(ProjectionDate/name,
+			'MakeDefined('
+				'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/Pop), '
+				'-9999f'
+			')'
+			, domain
+			,Float32
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_tpop.tif'
+		);
+
+	//-9999 ignored in this classification
+	container Pop_Classify := 
+		for_each_nedv(ProjectionDate/name,
+			'MakeDefined(classify((!SourceData/RegionalUnits/Countries/IsCountryWorld/IsCountryWorld_bool) ? -1f : 
+			(!SourceData/RegionalUnits/Countries/IsClaimCountry ? 2000000000f: 
+			Pop/'+ProjectionDate/name+'), Classifications/PopClass/ClassBreak),13b)'
+			, domain
+			,Classifications/PopClass
+		);
+
+
+	container Pop_Classification: = 
+		for_each_ne(
+			ProjectionDate/name,
+			'PaletteDataPop('+quote('Pop_Classify/'+string(ProjectionDate/name))+','+quote(string(ProjectionDate/Yr))+')'
+		);
+
+	template PaletteDataPop
+	{
+		// template parameters
+		parameter<String> PopItemName;
+		parameter<String> ProjectionDateYr;
+		// end case parameters
+	
+		attribute<Classifications/PopClass> Pop_Classification (domain)
+		:	StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+ProjectionDateYr+'_tpop_classification.tif'"
+		,	Expr              = "='MakeDefined('+PopItemName+'[uint8],/SourceData/RegionalUnits/Countries/IsCountryNotCD ? 13b : 0b)'"
+		{
+				attribute<UInt32> PaletteData(Classifications/PopClass): = Classifications/PopClass/BrushColor[uint32];
+		}
+	}
+
+	container UrbanPop := 
+	for_each_nedva(ProjectionDate/name,
+		'MakeDefined('
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/UrbanPop), '
+			'-9999f'
+		')'
+		, domain
+		,Float32
+		,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_upop.tif'
+	);
+
+	
+//	container UrbanPopReadWrite := 
+//		for_each_nedva(ProjectionDate/name,
+//			 'Pop/'+ProjectionDate/name+' * IsUrban/' + ProjectionDate/name + '[float32]'
+//			, domain
+//			,Float32
+//			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_upoprw.tif'
+//		);
+
+	container RuralPop := 
+	for_each_nedva(ProjectionDate/name,
+		'MakeDefined('
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/RuralPop), '
+			'-9999f'
+		')'
+		, domain
+		,Float32
+		,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_rpop.tif'
+	);
+
+	container IsUrban := 
+		for_each_nedva(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/IsUrban)'
+			, domain
+			,bool
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_urb.tif'
+		);
+
+	container IsUrban_Classify := 
+		for_each_nedv(ProjectionDate/name,
+			'SourceData/RegionalUnits/Countries/IsCountryNotCD ? 3[Classifications/Urb/IsUrbClassSea] : classify((!SourceData/RegionalUnits/Countries/IsCountryWorld/IsCountryWorld_bool) ? 2f : 
+			(!SourceData/RegionalUnits/Countries/IsClaimCountry ? 4f: 
+			IsUrban/'+ProjectionDate/name+'[float32]), Classifications/Urb/IsUrbClassSea/ClassBreak)'
+			, domain
+			,Classifications/Urb/IsUrbClassSea
+		);
+
+	container IsUrban_Classification: = 
+		for_each_ne(
+			ProjectionDate/name,
+			'PaletteDataIsUrban('+quote('IsUrban_Classify/'+string(ProjectionDate/name))+','+quote(string(ProjectionDate/Yr))+')'
+		);
+
+	template PaletteDataIsUrban
+	{
+		// template parameters
+		parameter<String> IsUrbanItemName;
+		parameter<String> ProjectionDateYr;
+		// end case parameters
+	
+		attribute<Classifications/Urb/IsUrbClassSea> IsUrban_Classification (domain)
+		:	StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+ProjectionDateYr+'_urb_classification.tif'"
+		,	Expr              = "= IsUrbanItemName+'[uint8]'"
+		{
+				attribute<UInt32> PaletteData(Classifications/Urb/IsUrbClassSea): = Classifications/Urb/IsUrbClassSea/BrushColor[uint32];
+		}
+	}
+
+	container UrbCountry := 
+		for_each_nedva(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/UrbCountry/urbcombine/UnionData)'
+			, domain
+			,uint32
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_urbCountry.tif'
+		);
+
+	container UrbCountryTable := 
+		for_each_ne(ProjectionDate/name,
+				'UrbCountryTableT('+quote(+string(ProjectionDate/name))+')'
+		);
+
+	container Urbankm2 := 
+		for_each_nedva(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/Urban_km2)'
+			, domain
+			,Float32
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_urbkm2.tif'
+		);
+
+	container Builtuparea := 
+		for_each_nedva(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/Builtuparea)'
+			, domain
+			,Float32
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_bua_fraction.tif'
+		);
+		
+	container Builtupareakm2 := 
+		for_each_nedva(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/Builtupareakm2)'
+			, domain
+			,km2
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_buakm2.tif'
+		);
+
+	container PopDensity := 
+		for_each_nedva(ProjectionDate/name,
+			'MakeDefined('
+				'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/PopDensity), '
+				'-9999f'
+			')'
+			, domain
+			,Float32
+			,'%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(ProjectionDate/Yr)+'_popd.tif'
+		);
+
+	container PopDensity_Classify := 
+		for_each_nedv(ProjectionDate/name,
+			'MakeDefined(classify((!SourceData/RegionalUnits/Countries/IsCountryWorld/IsCountryWorld_bool) ? -1f : 
+			(!SourceData/RegionalUnits/Countries/IsClaimCountry ? 2000000000f: 
+			PopDensity/'+ProjectionDate/name+'), Classifications/PopClass/ClassBreak),13b)'
+			, domain
+			,Classifications/PopClass
+		);
+
+	container PopDensity_Classification: = 
+		for_each_ne(
+			ProjectionDate/name,
+			'PaletteDataPopDensity('+quote('PopDensity_Classify/'+string(ProjectionDate/name))+','+quote(string(ProjectionDate/Yr))+')'
+		);
+
+	template PaletteDataPopDensity
+	{
+		// template parameters
+		parameter<String> PopDensityItemName;
+		parameter<String> ProjectionDateYr;
+		// end case parameters
+	
+		attribute<Classifications/PopClass> PopDensity_Classification (domain)
+		:	StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+ProjectionDateYr+'_popd_classification.tif'"
+		,	Expr              = "=PopDensityItemName+'[uint8]'"
+		{
+				attribute<UInt32> PaletteData(Classifications/PopClass): = Classifications/PopClass/BrushColor[uint32];
+		}
+	}
+
+	container SMOD_org := 
+		for_each_nedv(ProjectionDate/name,
+			'lookup(CompactedDomain/BaseGrid, Projectiondates/'+ProjectionDate/name+'/NewState/SMOD/SMODgtopo)'
+			, domain
+			, Units/SMOD
+		);
+
+	template UrbCountryTableT
+	{
+		parameter<string> Year;
+
+		unit<uint32> UrbCountryTable :== 'ProjectionDates/' + Year + '/NewState/UrbCountry/urbcombine'
+		///Scenarios/SSPs/SSP1/ProjectionDates/Y2010/NewState/UrbCountry/urbcombine
+		{
+			attribute<uint32>  ID             :=='ProjectionDates/' + Year + '/NewState/UrbCountry/urbcombine/ID';
+			attribute<uint8>   urb            :=='ProjectionDates/' + Year + '/NewState/UrbCountry/urbcombine/urb';
+			attribute<uint8>   country        :=='ProjectionDates/' + Year + '/NewState/UrbCountry/urbcombine/country';
+			attribute<string>  ISO3           := SourceData/RegionalUnits/Countries/Country/ISO3[country];
+			attribute<string>  Name_cor       := SourceData/RegionalUnits/Countries/Country/Name_cor[country];
+		}
+
+		unit<uint32> variable_UrbCountryTable_export := SubItem_PropValues(UrbCountryTable,'Name');
+		container export_UrbCountryTable_csv := Templates/WriteTable32ToCSV(UrbCountryTable , AsList(variable_UrbCountryTable_export/Name, ';'), '%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+string(Year)+'_UrbCountry.csv');
+	}
+
+	container SMOD: = 
+		for_each_ne(
+			ProjectionDate/name,
+			'PaletteDataSMOD('+quote('SMOD_org/'+string(ProjectionDate/name))+','+quote(string(ProjectionDate/Yr))+')'
+		);
+
+	template PaletteDataSMOD
+	{
+		// template parameters
+		parameter<String> SMODItemName;
+		parameter<String> ProjectionDateYr;
+		// end case parameters
+	
+		attribute<Classifications/Settlement_Model_L2_nomenclature_export> SMOD (domain)
+		:	StorageName       = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_'+Scenario+'_'+ProjectionDateYr+'_smod.tif'"
+		,	Expr              = "='MakeDefined(!SourceData/RegionalUnits/Countries/IsCountryWorld/IsCountryWorld_bool ? 0b : (!SourceData/RegionalUnits/Countries/IsClaimCountry ? 1b : '+SMODItemName+'[uint8]),10b)'"
+		{
+				attribute<UInt32> PaletteData(/Classifications/Settlement_Model_L2_nomenclature_export): = /Classifications/Settlement_Model_L2_nomenclature_export/BrushColor[uint32];
+		}
+	}
+	
+	#include <stats.dms>
+}

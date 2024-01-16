@@ -28,7 +28,22 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	#include <Preprocessing_UrbanM1.dms>
 	#include <Preprocessing_Urban.dms>
 	#include <Preprocessing_urban2023.dms>
-	#include <Preprocessing_Claims.dms>
 	#include <Preprocessing_GHS_SMOD.dms>
 	#include <UrbanDensity.dms>
+	
+	container Claims
+	{
+		#include <Claims_Read_Past.dms>
+		#include <Claims_Read_Scenario.dms>
+		
+		
+		#include <Preprocessing_Claims_Past.dms>
+		#include <Preprocessing_Claims_Scenario.dms>
+	} 
+	
+	#include <HYDE.dms>
+	#include <GDP.dms>
+	#include <Suitability.dms>
+	
+	
 }

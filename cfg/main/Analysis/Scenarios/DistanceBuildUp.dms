@@ -1,0 +1,43 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
+//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
+//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
+//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+//Author:   Bas van Bemmel
+//Function: PROBABILITY in CompactedDomain for distance to urban according to found relation by Frank van Rijn - PBL
+
+container DistanceBuildUp
+{
+		unit<uint32> Urban := subset(CurrState/IsUrban)
+		{
+			attribute<domain>   gtopo_rel := Input/CompactedDomain/gtopo_rel[nr_OrgEntity];
+		}
+
+		attribute<float32> resistance (domain) := CurrState/IsUrban[invert(Input/CompactedDomain/gtopo_rel)] ? 0f : 1f;
+
+		attribute<float32>               DistTo    (domain):= 
+			GridDist(
+				 resistance
+				, Urban/gtopo_rel
+				, const(0f,urban)
+			);
+		//attribute<Input/LatLong_mdegrees> geometry(CompactedDomain)                  := Input/CompactedDomain/gtopo_rel[Input/LatLong_mdegrees ];
+		//attribute<domain>   grid_rel(CompactedDomain)                           := geometry[domain];
+		
+		attribute<float32> DistToCD (CompactedDomain) := DistTo[Input/CompactedDomain/gtopo_rel];
+
+		parameter<Meter> LengthCell :=926.00000001[Meter];//max north-south: https://opendem.info/arc2meters.html 30 arc, 0 LAT
+
+		attribute<Meter> Distmax  (CompactedDomain) :=(DistToCD * LengthCell)[Meter] ;
+		attribute<Meter> Distmin  (CompactedDomain) :=(DistToCD * LengthCell)[Meter] * Input/CompactedDomain/lat_factor;//min west-east
+
+		attribute<Meter> DistmaxRound (CompactedDomain):=  ((uint32(Distmax/100f))*100u)[Meter];
+		attribute<Meter> DistminRound (CompactedDomain):=  ((uint32(Distmin/100f))*100u)[Meter];
+
+		//PROBABILITYMAX OR PROBABILITYMIN nog much spatial difference (in Scenarios/SSPs/%SSP%/ProjectionDates/%Y%/NewState/IsUrban)
+		attribute<float32> PROBABILITYMAX (CompactedDomain) :=  makedefined(rjoin(DistmaxRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
+		attribute<float32> PROBABILITYMIN (CompactedDomain) :=  makedefined(rjoin(DistminRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
+		attribute<float32> PROBABILITY    (CompactedDomain) :=  (PROBABILITYMAX + PROBABILITYMIN) / 2f;
+}
