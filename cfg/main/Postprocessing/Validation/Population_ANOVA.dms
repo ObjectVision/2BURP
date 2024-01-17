@@ -30,7 +30,6 @@ container Population_ANOVA
 		
 		attribute<S> curr_min_past_val(sample_set) := curr_val -  (variances/curr_past_cov / variances/past_var)[part_rel] * past_val;
 		attribute<S> pred_min_past_val(sample_set) := pred_val -  (variances/pred_past_cov / variances/past_var)[part_rel] * past_val;
-		
 		attribute<S> curr_min_pred_val(sample_set) := curr_min_past_val - (variances/curr_pred_cov / variances/pred_min_past_var)[part_rel] * pred_min_past_val;
 		
 		container variances 
@@ -52,13 +51,10 @@ container Population_ANOVA
 			attribute<float32> curr_min_pred_ortho_check(P) := cov(pred_min_past_val, curr_min_pred_val, part_rel);		
 			attribute<float32> curr_min_pred_var  (P) := var(curr_min_pred_val, part_rel);
 			
-	//			attribute<float32>  curr_min_past_check(P) := curr_var - curr_min_past_var - sqrt(curr_past_cov * past_var);
-						
 			// model quality factors: 0.0 is bad, 1.0 is perfect.
 			attribute<float32> past_var_reduction_factor(P) := 1f - curr_min_past_var / curr_var;
 			attribute<float32> pred_var_reduction_factor(P) := 1f - curr_min_pred_var / curr_min_past_var; // given past
 			attribute<float32> combined_var_reduction_factor(P) := 1f - curr_min_pred_var / curr_var;
 		}
 	}
-
 }

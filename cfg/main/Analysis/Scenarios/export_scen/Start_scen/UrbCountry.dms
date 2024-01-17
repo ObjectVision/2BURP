@@ -18,7 +18,7 @@ container UrbCountryCombine
 	container OverlayGrids
 	{
 		attribute<uint8> urb     (CompactedDomain)      := InitialState/IsUrban[uint8];
-		attribute<uint8> country (CompactedDomain)      := SourceData/RegionalUnits/Countries/Country_grid[Input/CompactedDomain/gtopo_rel];
+		attribute<uint8> country (CompactedDomain)      := SourceData/RegionalUnits/Countries/Country_grid[CompactedDomain/domain_rel];
 	}
 
 	unit<uint32> urbcombine:= overlay32(OverlayRegios/names, CompactedDomain, OverlayGrids)

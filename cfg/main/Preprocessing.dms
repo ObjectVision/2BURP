@@ -8,13 +8,10 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			:	StorageName     = "='%MondiaalDataDir%/Urban/'+MethodVar+'/IsUrban.tif'"
 			,	StorageType     = "gdal.grid"
 			,	StorageReadOnly = "True"
-			,	DialogData      = "LatLong"
-
 		{
 			attribute<Classifications/urb/IsUrbClass> ReadData                  (domain);
 			attribute<Units/km2>                      ReadDatakm2               (domain) := ReadData[float32] * domain/area;
 			attribute<uint2>                          IsUrbanInCountry          (domain) := ReadData[bool] ? ReadData[uint2] : (IsDefined(RegionalUnits/Countries/Country_grid) ? 3u2 : 0u2);
-
 			attribute<Classifications/urb/IsUrbClass> ReadDataCD       (CompactedDomain) := ReadData[CompactedDomain/domain_rel];
 			attribute<Units/km2>                      ReadDataCDkm2    (CompactedDomain) := ReadDataCD[float32] * domain/area[CompactedDomain/domain_rel];
 		}
@@ -25,9 +22,7 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		}
 	}
 	
-	// #include <Preprocessing_UrbanM1.dms>
 	#include <Preprocessing_Urban.dms>
-	// #include <Preprocessing_urban2023.dms>
 	#include <Preprocessing_GHS_SMOD.dms>
 	#include <UrbanDensity.dms>
 	
@@ -35,8 +30,6 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	{
 		#include <Claims_Read_Past.dms>
 		#include <Claims_Read_Scenario.dms>
-		
-		
 		#include <Preprocessing_Claims_Past.dms>
 		#include <Preprocessing_Claims_Scenario.dms>
 	} 
@@ -44,6 +37,4 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	#include <HYDE.dms>
 	#include <GDP.dms>
 	#include <Suitability.dms>
-	
-	
 }

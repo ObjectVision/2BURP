@@ -12,32 +12,32 @@ container DistanceBuildUp
 {
 		unit<uint32> Urban := subset(CurrState/IsUrban)
 		{
-			attribute<domain>   gtopo_rel := Input/CompactedDomain/gtopo_rel[nr_OrgEntity];
+			attribute<domain>   domain_rel := CompactedDomain/domain_rel[nr_OrgEntity];
 		}
 
-		attribute<float32> resistance (domain) := CurrState/IsUrban[invert(Input/CompactedDomain/gtopo_rel)] ? 0f : 1f;
+		attribute<float32> resistance (domain) := CurrState/IsUrban[invert(CompactedDomain/domain_rel)] ? 0f : 1f;
 
 		attribute<float32>               DistTo    (domain):= 
 			GridDist(
 				 resistance
-				, Urban/gtopo_rel
+				, Urban/domain_rel
 				, const(0f,urban)
 			);
-		//attribute<Input/LatLong_mdegrees> geometry(CompactedDomain)                  := Input/CompactedDomain/gtopo_rel[Input/LatLong_mdegrees ];
+		//attribute<Input/LatLong_mdegrees> geometry(CompactedDomain)                  := CompactedDomain/domain_rel[Input/LatLong_mdegrees ];
 		//attribute<domain>   grid_rel(CompactedDomain)                           := geometry[domain];
 		
-		attribute<float32> DistToCD (CompactedDomain) := DistTo[Input/CompactedDomain/gtopo_rel];
+		attribute<float32> DistToCD (CompactedDomain) := DistTo[CompactedDomain/domain_rel];
 
 		parameter<Meter> LengthCell :=926.00000001[Meter];//max north-south: https://opendem.info/arc2meters.html 30 arc, 0 LAT
 
 		attribute<Meter> Distmax  (CompactedDomain) :=(DistToCD * LengthCell)[Meter] ;
-		attribute<Meter> Distmin  (CompactedDomain) :=(DistToCD * LengthCell)[Meter] * Input/CompactedDomain/lat_factor;//min west-east
+		attribute<Meter> Distmin  (CompactedDomain) :=(DistToCD * LengthCell)[Meter] * CompactedDomain/lat_factor;//min west-east
 
 		attribute<Meter> DistmaxRound (CompactedDomain):=  ((uint32(Distmax/100f))*100u)[Meter];
 		attribute<Meter> DistminRound (CompactedDomain):=  ((uint32(Distmin/100f))*100u)[Meter];
 
 		//PROBABILITYMAX OR PROBABILITYMIN nog much spatial difference (in Scenarios/SSPs/%SSP%/ProjectionDates/%Y%/NewState/IsUrban)
-		attribute<float32> PROBABILITYMAX (CompactedDomain) :=  makedefined(rjoin(DistmaxRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
-		attribute<float32> PROBABILITYMIN (CompactedDomain) :=  makedefined(rjoin(DistminRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
-		attribute<float32> PROBABILITY    (CompactedDomain) :=  (PROBABILITYMAX + PROBABILITYMIN) / 2f;
+		// attribute<float32> PROBABILITYMAX (CompactedDomain) :=  makedefined(rjoin(DistmaxRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
+		// attribute<float32> PROBABILITYMIN (CompactedDomain) :=  makedefined(rjoin(DistminRound,value(/Input/Suitability/DistanceBuildUp/Class/Distance_meter,meter),Float32(/Input/Suitability/DistanceBuildUp/Class/PROBABILITY)),0f);
+		// attribute<float32> PROBABILITY    (CompactedDomain) :=  (PROBABILITYMAX + PROBABILITYMIN) / 2f;
 }

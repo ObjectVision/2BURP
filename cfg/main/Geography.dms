@@ -1,6 +1,6 @@
 container Geography : using = "units"
 {
-	unit<dpoint> LatLong       := ='subextent/LatLong_'+ModelParameters/StudyArea;
+	unit<dpoint> LatLong       := ='StudyAreas/LatLong_'+ModelParameters/StudyArea;
 	unit<dpoint> LatLong_Base  : SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong"
 	{
 		parameter<float32> ViewPortMinSize       := 100f / 3600f;
@@ -29,13 +29,12 @@ container Geography : using = "units"
 	{
 		attribute<LatLong>            ll_rel     := mapping(., LatLong);
 		attribute<domain>             domain_rel := value(ll_rel, domain);
-		// attribute<km2>                Area       := domain_rel -> area;
 	}
 	
 	unit<ipoint> LatLong_mdegrees := gridset(LatLong, point(0.0000001, 0.0000001), point(0.0,0.0), ipoint);
 
 
-	container subextent
+	container StudyAreas
 	{
 		unit<dpoint> LatLong_World                    := range(LatLong_Base, point(-90.0,-180.0), point(90.0, 180.0));
 
@@ -59,9 +58,6 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point( 51.8,  4.7), point(52.3, 5.7));
 		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point( 45.0, -2.0), point(54.0,11.0));
 	}
-	// #include <Subextent_Special.dms>
-	// #include <Subextent_ISO3.dms>
-
 
 	unit<wpoint> domain :=
 		gridset(
@@ -74,9 +70,6 @@ container Geography : using = "units"
 			, wpoint
 		)
 	{
-		// attribute<uint8> aidgrid              := const(1b,domain);
-		// attribute<bool>  BaseGridBool         := IsDefined(CompactedDomain/BaseGrid);
-
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
 			attribute<float64> lat_top    := pointrow( point(ID(rowset), const(0w, rowset), domain)[LatLong] );
@@ -96,10 +89,8 @@ container Geography : using = "units"
 		parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
 		attribute<rowset>  row          := pointrow(ID(.));
 		attribute<colset>  col          := pointcol(ID(.));
-		// attribute<uint32>  col          := uint32(pointcol(ID(.)));
 		attribute<uint32>  rowcol       := uint32(row) * boundrange_c;
 		attribute<uint32>  number       := (rowcol + uint32(col)) + 1;
-		// attribute<uint8>   one_grid     := number > 0 ? 1b : 0b;
 		attribute<Float32> lat_factor   := rowset/lat_factor[row];
 		attribute<Float64> lat          := rowset/lat_mid[row];
 		attribute<Float64> long         := colset/long_mid[col_colset];
@@ -141,7 +132,6 @@ container Geography : using = "units"
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
-		// attribute<uint32>            CD                    := const(1,.);
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
 		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
@@ -149,11 +139,9 @@ container Geography : using = "units"
 		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
 		attribute<km2>               area                  := domain/rowset/area[row];
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
-
 		attribute<Countries/Country> Country_rel   := Countries/Country_grid[domain_rel];
 		attribute<Continent>         Continent_rel := Countries/Country/Continent_id_grid[domain_rel];
 		attribute<World>             World_rel     := Countries/Country/World_id_grid[domain_rel];
-
 		attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
 	}
 	

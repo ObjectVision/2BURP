@@ -83,6 +83,7 @@ container UrbanCombine : using = "geography"
 				);
 			attribute<Float64> information_value_past  (P) := org_Entropy - org_Entropy_given_past;
 		}
+		
 		container PastRural 
 		{
 			attribute<Float64> nr_PredRural(P) := Float64(nr_RemainingRural           + nr_UrbanisationNotPredicted);
@@ -95,6 +96,7 @@ container UrbanCombine : using = "geography"
 			
 			attribute<Float64> information_value_past  (P) := org_Entropy - org_Entropy_given_modelresult;
 		}
+		
 		container PastUrban 
 		{
 			attribute<Float64> nr_PredRural(P) := Float64(nr_GoodPredictedAbandonment + nr_BadPredictedAbandonment);
@@ -121,5 +123,4 @@ container UrbanCombine : using = "geography"
 			attribute<Float64> indicator2(P) := model / org_Entropy_given_past; // reduction of entropy related to original entropy without model, 0.0 is worthless projection, 1.0 is perfect projection.
 		}
 	}
-	
 }

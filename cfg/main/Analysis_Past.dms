@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function:
-
 container Analysis_Past : using = "Units;Classifications"
 {
 	unit<uint32> Jaartal: nrofrows = 4
@@ -16,130 +6,121 @@ container Analysis_Past : using = "Units;Classifications"
 		attribute<int16>  dc2:    [1975,1990,2000,2015];
 		attribute<String> name:= 'y'+String(dc);
 	}
-
-		container UrbanDif1975_2014 
-		{	
-			unit<uint8> OverlayRegios: nrofrows = 2
-			{
-				attribute<string> namen: ['UrbanY1975', 'UrbanY2014'];
-			}
-
-			container OverlayGrids
-			{
-				attribute<uint8> UrbanY1975 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
-				attribute<uint8> UrbanY2014 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
-			}
-
-			unit<uint16> UrbanOverlay_14_75	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
-		}
-		
-		container UrbanDif1990_2010 
+	container UrbanDif1975_2014 
+	{	
+		unit<uint8> OverlayRegios: nrofrows = 2
 		{
-			unit<uint8> OverlayRegios: nrofrows = 2
-			{
-				attribute<string> namen: ['UrbanY1990', 'UrbanY2010'];
-			}
-
-			container OverlayGrids
-			{
-				attribute<uint8> UrbanY1990 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
-				attribute<uint8> UrbanY2010 (domain)	:=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
-			}
-
-			unit<uint16> UrbanOverlay_1990_2010	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
+			attribute<string> namen: ['UrbanY1975', 'UrbanY2014'];
 		}
 
-		container UrbanDif1975_2014_steps 
-		{	
-			unit<uint8> OverlayRegios: nrofrows = 4
-			{
-				attribute<string> namen: ['UrbanY1975','UrbanY1990','UrbanY2000', 'UrbanY2014'];
-				attribute<string> namen_rev := namen[uint8(#.)-ID(.)-1b];
-			}
+		container OverlayGrids
+		{
+			attribute<uint8> UrbanY1975 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
+			attribute<uint8> UrbanY2014 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
+		}
 
-			container OverlayGrids
-			{
-				attribute<uint8> UrbanY1975 (domain)
-				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
-				attribute<uint8> UrbanY1990 (domain)
-				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
-				attribute<uint8> UrbanY2000 (domain)
-				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2000[uint8];
-				attribute<uint8> UrbanY2014 (domain)
-				:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
-			}
+		unit<uint16> UrbanOverlay_14_75	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
+	}
+	
+	container UrbanDif1990_2010 
+	{
+		unit<uint8> OverlayRegios: nrofrows = 2
+		{
+			attribute<string> namen: ['UrbanY1990', 'UrbanY2010'];
+		}
 
-			unit<uint16> UrbanOverlay_75_90_00_14 := overlay(OverlayRegios/namen_rev, domain, OverlayGrids)
-			{
-				attribute<.>                            UnionData_copy(domain)    := UnionData, Descr = "AtomaireRegioMap";
-				attribute<string>                       Key                                    := string(UrbanY1975) + "_" + string(UrbanY1990) + "_" + string(UrbanY2000) + "_" + string(UrbanY2014);
-				attribute<string>                       Label                                  := MakeDefined(rjoin(Key, Classifications/Past/UrbanAreaReeksClass/Key,Classifications/Past/UrbanAreaReeksClass/Label), Key), DialogType = "LabelText";
-				attribute<Past/UrbanAreaReeksClass_new> UnionData_Class (domain)  := classify(UnionData_copy, Classifications/Past/UrbanAreaReeksClass_new/ClassBreak);
-				//attribute<uint32>                       Test2 (SourceData/RegionalUnits/Countries/Country ):= count(UnionData_Class,GDP/Results/SSPs/SSP1/Country_rel[Scenarios/SSPs/SSP1/CompactedDomain/BaseGrid]); /// UnionData_Class; 
-			}
+		container OverlayGrids
+		{
+			attribute<uint8> UrbanY1990 (domain)	:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
+			attribute<uint8> UrbanY2010 (domain)	:=  Input/UrbanArea/UrbanArea2010/ReadData[uint8];
+		}
 
-			unit<uint8> OverlayRegios2: nrofrows = 2
-			{
-				attribute<string> namen: ['UnionData_Class2','Country_grid'];
-			}
+		unit<uint16> UrbanOverlay_1990_2010	:= overlay(OverlayRegios/namen, domain, OverlayGrids);
+	}
 
-			// per country
-			container OverlayGrids2
-			{
-				attribute<uint8> UnionData_Class2 (domain) :=  UrbanDif1975_2014_steps/UrbanOverlay_75_90_00_14/UnionData_Class[uint8];
-				attribute<uint8> Country_grid (domain)     :=  /SourceData/RegionalUnits/Countries/Country_grid[uint8];
-			}
+	container UrbanDif1975_2014_steps 
+	{	
+		unit<uint8> OverlayRegios: nrofrows = 4
+		{
+			attribute<string> namen: ['UrbanY1975','UrbanY1990','UrbanY2000', 'UrbanY2014'];
+			attribute<string> namen_rev := namen[uint8(#.)-ID(.)-1b];
+		}
 
-			unit<uint32> combine_class_country := combine(UrbanOverlay_75_90_00_14, SourceData/RegionalUnits/Countries/Country )
-			{
-				attribute<string> name_class   := UrbanOverlay_75_90_00_14/label[nr_1];
-				attribute<string> name_country := SourceData/RegionalUnits/Countries/Country/name[nr_2];
+		container OverlayGrids
+		{
+			attribute<uint8> UrbanY1975 (domain)			:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1975[uint8];
+			attribute<uint8> UrbanY1990 (domain)			:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
+			attribute<uint8> UrbanY2000 (domain)			:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2000[uint8];
+			attribute<uint8> UrbanY2014 (domain)			:=  Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[uint8];
+		}
 
-				attribute<.>      combine_class_country_rel(domain) :=  combine_data(., UrbanOverlay_75_90_00_14/UnionData_copy, OverlayGrids2/Country_grid);
-				attribute<UInt32> count(.)                                       := pcount(combine_class_country_rel);
+		unit<uint16> UrbanOverlay_75_90_00_14 := overlay(OverlayRegios/namen_rev, domain, OverlayGrids)
+		{
+			attribute<.>                            UnionData_copy(domain)    := UnionData, Descr = "AtomaireRegioMap";
+			attribute<string>                       Key                                    := string(UrbanY1975) + "_" + string(UrbanY1990) + "_" + string(UrbanY2000) + "_" + string(UrbanY2014);
+			attribute<string>                       Label                                  := MakeDefined(rjoin(Key, Classifications/Past/UrbanAreaReeksClass/Key,Classifications/Past/UrbanAreaReeksClass/Label), Key), DialogType = "LabelText";
+			attribute<Past/UrbanAreaReeksClass_new> UnionData_Class (domain)  := classify(UnionData_copy, Classifications/Past/UrbanAreaReeksClass_new/ClassBreak);
+		}
 
-				attribute<UInt32>  sumc(SourceData/RegionalUnits/Countries/Country ) := sum(count, nr_2);
-				attribute<Float64> share(.)                              := Float64(count) / Float64(sumc[nr_2]);
+		unit<uint8> OverlayRegios2: nrofrows = 2
+		{
+			attribute<string> namen: ['UnionData_Class2','Country_grid'];
+		}
 
-				attribute<uint16> start(.) := nr_1 ==0[uint16] ? 1[uint16] : 0[uint16];
-			}
+		// per country
+		container OverlayGrids2
+		{
+			attribute<uint8> UnionData_Class2 (domain) :=  UrbanDif1975_2014_steps/UrbanOverlay_75_90_00_14/UnionData_Class[uint8];
+			attribute<uint8> Country_grid (domain)     :=  /SourceData/RegionalUnits/Countries/Country_grid[uint8];
+		}
 
-			// 155	'0_0_0_0: no urban area in series'	'Netherlands'	64608	0.899920605	155	0
-			// 406	'0_0_0_1: urban area from 2014'	'Netherlands'	1588	0.022119148	155	1
-			// 657	'0_0_1_0: no urban area from 2014'	'Netherlands'	12	0.000167147	155	2
-			// 908	'0_0_1_1: urban area from 2000'	'Netherlands'	1149	0.016004346	155	3
-			// 1159	'0_1_1_0: 0_1_1_0'	'Netherlands'	3	4.18E-05	155	4
-			// 1410	'0_1_1_1: urban area from 1990'	'Netherlands'	2245	0.031270458	155	5
-			// 1661	'1_1_1_0: urban area - not in 2014'	'Netherlands'	0	0	155	6
-			// 1912	'1_1_1_1: urban area in all series'	'Netherlands'	2188	0.030476509	155	7
+		unit<uint32> combine_class_country := combine(UrbanOverlay_75_90_00_14, SourceData/RegionalUnits/Countries/Country )
+		{
+			attribute<string> name_class   := UrbanOverlay_75_90_00_14/label[nr_1];
+			attribute<string> name_country := SourceData/RegionalUnits/Countries/Country/name[nr_2];
 
-			unit<uint32> Start := subset(combine_class_country/nr_1 == 7[uint16])
-			{
-				attribute<uint8>   nr_2     := combine_class_country/nr_2[Nr_OrgEntity];
-				attribute<Float64> share(.) := combine_class_country/share[Nr_OrgEntity];
-				attribute<uint32>  count(.) := combine_class_country/count[Nr_OrgEntity];
+			attribute<.>      combine_class_country_rel(domain) :=  combine_data(., UrbanOverlay_75_90_00_14/UnionData_copy, OverlayGrids2/Country_grid);
+			attribute<UInt32> count(.)                                       := pcount(combine_class_country_rel);
 
-				attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
-			}
+			attribute<UInt32>  sumc(SourceData/RegionalUnits/Countries/Country ) := sum(count, nr_2);
+			attribute<Float64> share(.)                              := Float64(count) / Float64(sumc[nr_2]);
 
-			//unit<uint32> Test := subset((combine_class_country/nr_1 <> 0[uint16]) && (combine_class_country/nr_1 <> 2[uint16]) && (combine_class_country/nr_1 <> 4[uint16]) && (combine_class_country/nr_1 <> 6[uint16]))
-			unit<uint32> New := subset((combine_class_country/nr_1 ==1[uint16]) || (combine_class_country/nr_1 ==3[uint16]) || (combine_class_country/nr_1 ==5[uint16]))
-			{
-				attribute<string> name_class   := combine_class_country/name_class[Nr_OrgEntity];
-				attribute<string> name_country := combine_class_country/name_country[Nr_OrgEntity];
+			attribute<uint16> start(.) := nr_1 ==0[uint16] ? 1[uint16] : 0[uint16];
+		}
 
-				attribute<uint8> nr_2          := combine_class_country/nr_2[Nr_OrgEntity];
+		// 155	'0_0_0_0: no urban area in series'	'Netherlands'	64608	0.899920605	155	0
+		// 406	'0_0_0_1: urban area from 2014'	'Netherlands'	1588	0.022119148	155	1
+		// 657	'0_0_1_0: no urban area from 2014'	'Netherlands'	12	0.000167147	155	2
+		// 908	'0_0_1_1: urban area from 2000'	'Netherlands'	1149	0.016004346	155	3
+		// 1159	'0_1_1_0: 0_1_1_0'	'Netherlands'	3	4.18E-05	155	4
+		// 1410	'0_1_1_1: urban area from 1990'	'Netherlands'	2245	0.031270458	155	5
+		// 1661	'1_1_1_0: urban area - not in 2014'	'Netherlands'	0	0	155	6
+		// 1912	'1_1_1_1: urban area in all series'	'Netherlands'	2188	0.030476509	155	7
 
-				attribute<Float64> share(.)    := combine_class_country/share[Nr_OrgEntity];
-				attribute<uint32> count(.)     := combine_class_country/count[Nr_OrgEntity];
+		unit<uint32> Start := subset(combine_class_country/nr_1 == 7[uint16])
+		{
+			attribute<uint8>   nr_2     := combine_class_country/nr_2[Nr_OrgEntity];
+			attribute<Float64> share(.) := combine_class_country/share[Nr_OrgEntity];
+			attribute<uint32>  count(.) := combine_class_country/count[Nr_OrgEntity];
 
-				attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
-				//multiplicationfactor compared to start 1970
+			attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
+		}
 
-				attribute<float64> divideshares(SourceData/RegionalUnits/Countries/Country )                   := sumshare / Start/sumshare;
-				attribute<PercGrowthUrbanArea> PercUrbanArea70_14(SourceData/RegionalUnits/Countries/Country ) := (100[Percent] * float32(divideshares))[PercGrowthUrbanArea];
-				//attribute<Classifications/PercGrowthUrbanArea>  multi(SourceData/RegionalUnits/Countries/Country ) := classify(divideshares100, Classifications/PercGrowthUrbanArea/ClassBreaks);
-			}
+		unit<uint32> New := subset((combine_class_country/nr_1 ==1[uint16]) || (combine_class_country/nr_1 ==3[uint16]) || (combine_class_country/nr_1 ==5[uint16]))
+		{
+			attribute<string> name_class   := combine_class_country/name_class[Nr_OrgEntity];
+			attribute<string> name_country := combine_class_country/name_country[Nr_OrgEntity];
 
+			attribute<uint8> nr_2          := combine_class_country/nr_2[Nr_OrgEntity];
+
+			attribute<Float64> share(.)    := combine_class_country/share[Nr_OrgEntity];
+			attribute<uint32> count(.)     := combine_class_country/count[Nr_OrgEntity];
+
+			attribute<float64> sumshare(SourceData/RegionalUnits/Countries/Country ) := sum(share,nr_2);
+			//multiplicationfactor compared to start 1970
+
+			attribute<float64> divideshares(SourceData/RegionalUnits/Countries/Country )                   := sumshare / Start/sumshare;
+			attribute<PercGrowthUrbanArea> PercUrbanArea70_14(SourceData/RegionalUnits/Countries/Country ) := (100[Percent] * float32(divideshares))[PercGrowthUrbanArea];
+		}
 	}
 }

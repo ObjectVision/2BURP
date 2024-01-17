@@ -8,7 +8,7 @@
 // Author:   Bas van Bemmel
 // Function: Suitability classifications of variables
 
-container Suitability
+container Suitabilities
 {
 	unit<uint16> TravelTimeClass: nrofrows = 10
 	{

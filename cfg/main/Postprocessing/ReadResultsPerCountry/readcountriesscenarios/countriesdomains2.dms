@@ -28,6 +28,6 @@ container domainc
 
 	unit<wpoint> gtopo_country := TiledUnit(point(1024w, 43200w, gtopo_country_untiled))
 	{
-		attribute<domain> gtopo_rel := id(.)[domain];
+		attribute<domain> domain_rel := id(.)[domain];
 	}
 }

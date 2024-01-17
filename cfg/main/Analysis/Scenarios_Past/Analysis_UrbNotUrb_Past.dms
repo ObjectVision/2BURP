@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function:
-
 container Analysis_UrbNotUrb_Past : using = "Units;Classifications"
 {
 	container UrbanDif1990_2014_steps 
@@ -22,27 +12,27 @@ container Analysis_UrbNotUrb_Past : using = "Units;Classifications"
 		{
 			//uint8-->http://mantis.objectvision.nl/view.php?id=1372
 			
-			attribute<uint2> FieldUrbanY1990 (Input/CompactedDomain )
-			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[Input/CompactedDomain/gtopo_rel][uint2];
+			attribute<uint2> FieldUrbanY1990 (CompactedDomain )
+			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[CompactedDomain/domain_rel][uint2];
 			
-			attribute<uint2> FieldUrbanY2000 (Input/CompactedDomain )
-			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y2000[Input/CompactedDomain/gtopo_rel][uint2];
+			attribute<uint2> FieldUrbanY2000 (CompactedDomain )
+			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y2000[CompactedDomain/domain_rel][uint2];
 			
-			attribute<uint2> FieldUrbanY2014 (Input/CompactedDomain )
-			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[Input/CompactedDomain/gtopo_rel][uint2];
+			attribute<uint2> FieldUrbanY2014 (CompactedDomain )
+			:=  /Preprocessing/urban/BuiltUpBoolJRC_50prc/y2014[CompactedDomain/domain_rel][uint2];
 
-			attribute<string>                                        Key                                           (Input/CompactedDomain) := string(FieldUrbanY1990) + "_" + string(FieldUrbanY2000) + "_" + string(FieldUrbanY2014);
-			attribute<String>                                        ISO                                           (Input/CompactedDomain) := rjoin(Input/CompactedDomain/Country_rel,/SourceData/RegionalUnits/Countries/Country/id,/SourceData/RegionalUnits/Countries/Country/ISO3);
-			attribute<String>                                        Continent                                     (Input/CompactedDomain) := rjoin(Input/CompactedDomain/Country_rel,/SourceData/RegionalUnits/Countries/Country/id,/SourceData/RegionalUnits/Countries/Country/Continent_cor);
+			attribute<string>                                        Key                                           (CompactedDomain) := string(FieldUrbanY1990) + "_" + string(FieldUrbanY2000) + "_" + string(FieldUrbanY2014);
+			attribute<String>                                        ISO                                           (CompactedDomain) := SourceData/RegionalUnits/Countries/Country/ISO3[CompactedDomain/Country_rel];
+			attribute<String>                                        Continent                                     (CompactedDomain) := SourceData/RegionalUnits/Countries/Country/Continent_name[CompactedDomain/Country_rel];
 
-			attribute<String>                                        ISOKey                                        (Input/CompactedDomain) := ISO + '_' + Key;
-			attribute<ISOKey_uq>                                     ISOKey_id                                     (Input/CompactedDomain) := rlookup(ISOKey, ISOKey_uq/Values);
+			attribute<String>                                        ISOKey                                        (CompactedDomain) := ISO + '_' + Key;
+			attribute<ISOKey_uq>                                     ISOKey_id                                     (CompactedDomain) := rlookup(ISOKey, ISOKey_uq/Values);
 
-			attribute<bool>                                          DeUrbanization                                (Input/CompactedDomain) := strcount(key, '1_0') > 0;
-			attribute<bool>                                          DeUrbanizationUrbanizationWithin10            (Input/CompactedDomain) := strcount(key, '1_0_1') > 0;
+			attribute<bool>                                          DeUrbanization                                (CompactedDomain) := strcount(key, '1_0') > 0;
+			attribute<bool>                                          DeUrbanizationUrbanizationWithin10            (CompactedDomain) := strcount(key, '1_0_1') > 0;
 
 
-			attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3> CombinationUrbNotUrb_rel                      (Input/CompactedDomain) := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/key);
+			// attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3> CombinationUrbNotUrb_rel                      (CompactedDomain) := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/key);
 		}
 
 		unit<uint32> ISOKey_uq := unique(OverlayGrids/ISOKey)
@@ -51,7 +41,7 @@ container Analysis_UrbNotUrb_Past : using = "Units;Classifications"
 				attribute<string>                          Label       := values, DialogType = "LabelText";
 				attribute<string>                          Key         := right(Label, strlen(Label)-4);
 				attribute<string>                          ISO3        := left(Label, 3);
-				attribute<string>                          Continent   := rjoin(ISO3,SourceData/RegionalUnits/Countries/Country/ISO3,SourceData/RegionalUnits/Countries/Country/Continent_cor);
+				attribute<string>                          Continent   := SourceData/RegionalUnits/Countries/Country/Continent_name[Country_rel];
 				attribute<SourceData/RegionalUnits/Countries/Country > Country_rel := rlookup(ISO3,SourceData/RegionalUnits/Countries/Country/ISO3);
 
 				attribute<ISOKey_uq_key_uq>                ISOKey_uq_key_uq_rel := rlookup(key, ISOKey_uq_key_uq/values);
@@ -63,34 +53,34 @@ container Analysis_UrbNotUrb_Past : using = "Units;Classifications"
 				attribute<uint32> nrISO3        := pcount(ISOKey_uq/ISOKey_uq_key_uq_rel);
 		}
 
-		unit<uint32> CombinationUrbNotUrb := Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3
-		{
-			attribute<uint32>                                        nroccurrence  := pcount(OverlayGrids/CombinationUrbNotUrb_rel);
-			attribute<string>                                        Key           :=Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/Key;
-			attribute<string>                                        Value         :=Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/Value;
-		}
+		// unit<uint32> CombinationUrbNotUrb := Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3
+		// {
+			// attribute<uint32>                                        nroccurrence  := pcount(OverlayGrids/CombinationUrbNotUrb_rel);
+			// attribute<string>                                        Key           :=Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/Key;
+			// attribute<string>                                        Value         :=Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/Value;
+		// }
 
-		unit<uint32> CombinationUrbNotUrbOccurring := subset(CombinationUrbNotUrb/nroccurrence > 0)
-		{
-			attribute<string>  Key           := CombinationUrbNotUrb/Key[nr_OrgEntity];
-			attribute<string>  ISO3          := rjoin(Key,ISOKey_uq_key_uq/Values,ISOKey_uq_key_uq/ISO3list);
-			attribute<uint32>  nrISO3        := rjoin(Key,ISOKey_uq_key_uq/Values,ISOKey_uq_key_uq/nrISO3);
-			attribute<uint32>  nroccurrence  := CombinationUrbNotUrb/nroccurrence[nr_OrgEntity];
-			attribute<float32> prcoccurrence := (nroccurrence[float32] / UrbanDif1990_2014_steps/Sumnroccurrencep[float32]) *100f;
-			attribute<string>  Value         := CombinationUrbNotUrb/Value[nr_OrgEntity];
-		}
+		// unit<uint32> CombinationUrbNotUrbOccurring := subset(CombinationUrbNotUrb/nroccurrence > 0)
+		// {
+			// attribute<string>  Key           := CombinationUrbNotUrb/Key[nr_OrgEntity];
+			// attribute<string>  ISO3          := rjoin(Key,ISOKey_uq_key_uq/Values,ISOKey_uq_key_uq/ISO3list);
+			// attribute<uint32>  nrISO3        := rjoin(Key,ISOKey_uq_key_uq/Values,ISOKey_uq_key_uq/nrISO3);
+			// attribute<uint32>  nroccurrence  := CombinationUrbNotUrb/nroccurrence[nr_OrgEntity];
+			// attribute<float32> prcoccurrence := (nroccurrence[float32] / UrbanDif1990_2014_steps/Sumnroccurrencep[float32]) *100f;
+			// attribute<string>  Value         := CombinationUrbNotUrb/Value[nr_OrgEntity];
+		// }
 		
-		parameter<uint32>  Sumnroccurrencep          := sum(CombinationUrbNotUrbOccurring/nroccurrence);
+		// parameter<uint32>  Sumnroccurrencep          := sum(CombinationUrbNotUrbOccurring/nroccurrence);
 		
-		unit<uint32> variable_CombinationUrbNotUrbOccurring_export := SubItem_PropValues(CombinationUrbNotUrbOccurring,'Name');
-		container export_csv := Report/WriteTable32ToCSV(CombinationUrbNotUrbOccurring , AsList(variable_CombinationUrbNotUrbOccurring_export/Name, ';'), '%LocalDataProjDir%/results/'+/Past/GridName+'/analysis_modelled/CombinationUrbNotUrbOccurring_Past.csv');
+		// unit<uint32> variable_CombinationUrbNotUrbOccurring_export := SubItem_PropValues(CombinationUrbNotUrbOccurring,'Name');
+		// container export_csv := Report/WriteTable32ToCSV(CombinationUrbNotUrbOccurring , AsList(variable_CombinationUrbNotUrbOccurring_export/Name, ';'), '%LocalDataProjDir%/results/'+/Past/GridName+'/analysis_modelled/CombinationUrbNotUrbOccurring_Past.csv');
 
-		unit<uint16> UrbanOverlay := overlay(OverlayRegios/namen_rev, Input/CompactedDomain, OverlayGrids)
+		unit<uint16> UrbanOverlay := overlay(OverlayRegios/namen_rev, CompactedDomain, OverlayGrids)
 		{
-			attribute<.>                                                      UnionData_copy(Input/CompactedDomain)                        := UnionData, Descr = "AtomaireRegioMap";
+			attribute<.>                                                      UnionData_copy(CompactedDomain)                        := UnionData, Descr = "AtomaireRegioMap";
 			attribute<string>                                                 Key                                                                  := string(FieldUrbanY1990) + "_" + string(FieldUrbanY2000) + "_" + string(FieldUrbanY2014);
-			attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3> CombinationUrbNotUrb_rel                                             := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/key);
-			attribute<uint16>                                                 nroccurrence (Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3):= pcount(CombinationUrbNotUrb_rel);
+			// attribute<Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3> CombinationUrbNotUrb_rel                                             := rlookup(Key, Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3/key);
+			// attribute<uint16>                                                 nroccurrence (Classifications/AnalysisUrbNotUrb/CombinationUrbNotUrb3):= pcount(CombinationUrbNotUrb_rel);
 		}
 	}
 }

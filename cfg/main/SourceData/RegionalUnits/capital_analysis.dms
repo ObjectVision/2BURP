@@ -34,10 +34,10 @@ container Capital
 			parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
 			parameter<float32> SymbolWorldSize := 0.05f,       DialogType = "SymbolWorldSize";
 		}
-		attribute<domain> gtopo_rel                        := Geometry[domain];
-		attribute<uint32>              nrCapitals (domain) := sum(const(1,.), gtopo_rel);
+		attribute<domain> domain_rel                        := Geometry[domain];
+		attribute<uint32>              nrCapitals (domain) := sum(const(1,.), domain_rel);
 		attribute<.>                   id2                      := id(.);
-		attribute<UN>                  un_rel     (domain) := modus(id(UN), gtopo_rel);
+		attribute<UN>                  un_rel     (domain) := modus(id(UN), domain_rel);
 
 		attribute<float64> X         := PointCol(Geometry);
 		attribute<float64> Y         := PointRow(Geometry);

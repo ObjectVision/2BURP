@@ -39,8 +39,8 @@ container Generic
 		
 		attribute<uint32>     urbCountry    := lookup(CompactedDomain/BaseGrid, UrbCountryCombine/urbcombine/UnionData)                , StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urbCountry.tif'";
 		attribute<float32>    urbkm2        := lookup(CompactedDomain/BaseGrid, (InitialState/IsUrban[float32] * CompactedDomain/Area)), StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_urbkm2.tif'";
-		attribute<float32>    bua_fraction  := Input/CompactedDomain/ISCD ? (IsUrban ? value(IsUrban,float32) : Preprocessing/urban/Builtuparea) :0f/0f,                       StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_bua_fraction.tif'";
-		attribute<float32>    buakm2        := bua_fraction * lookup(CompactedDomain/BaseGrid,Input/CompactedDomain/area),               StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_buakm2.tif'";
+		attribute<float32>    bua_fraction  := CompactedDomain/ISCD ? (IsUrban ? value(IsUrban,float32) : Preprocessing/urban/Builtuparea) :0f/0f,                       StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_bua_fraction.tif'";
+		attribute<float32>    buakm2        := bua_fraction * lookup(CompactedDomain/BaseGrid,CompactedDomain/area),               StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_buakm2.tif'";
 	
 		attribute<float32>    popd          := MakeDefined(tpop / lookup(CompactedDomain/BaseGrid,CompactedDomain/area),-9999f),         StorageName = "='%LocalDataProjDir%/results/'+GridName+'/'+InputMethod+Variant+InPresentUrban+'_start_popd.tif'";
 		

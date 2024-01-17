@@ -94,9 +94,6 @@ container UrbanAccuracy
 			attribute<Float32> prc_total_unchanged           := (counter_total_unchanged[Float32] / denominator_total_unchanged[Float32]) * 100f;
 			attribute<Float32> prc_good_predicted_of_changed := (counter_good_predicted_of_changed[Float32] / denominator_good_predicted_of_changed[Float32]) * 100f;
 			attribute<Float32> prc_correct_landuse           := (counter_correct_landuse[Float32] / denominator_correct_landuse[Float32]) * 100f;
-	
-			//attribute<float32> rank_prc_total_unchanged_rev           := reverse(prc_total_unchanged));//mantis http://mantis.objectvision.nl/view.php?id=1461
-	
 			attribute<uint8> rank_producers_accuracy            := rlookup(id,index(prc_producers_accuracy * -1f));
 			attribute<uint8> rank_users_accuracy                := rlookup(id,index(prc_users_accuracy * -1f));
 			attribute<uint8> rank_prc_total_unchanged           := rlookup(id,index(prc_total_unchanged * -1f));

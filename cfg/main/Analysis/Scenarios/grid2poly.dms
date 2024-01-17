@@ -1,78 +1,63 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function:
-
-container grid2poly
+container grid2poly : using = "geography"
 {
-	unit<uint32> compactdomain := Input/CompactedDomain
+	unit<uint32> compactdomain := Geography/CompactedDomain
 	{
-		attribute<Input/LatLong> point_LT    := Input/CompactedDomain/gtopo_rel[Input/LatLong];
+		attribute<LatLong> point_LT    := CompactedDomain/domain_rel[LatLong];
 		attribute<bool>                  IsUrban     := NewState/IsUrban;
 	}
 
 	unit<uint32> IsUrban_pol := subset(compactdomain/IsUrban)
-	,	DialogType = "Map"
-	,	DialogData = "poly"
-	,	FreeData   = "False"
 	{
-		attribute<Input/LatLong> poly (poly) := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
+		attribute<LatLong> geometry (poly) := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
 		
 		unit<uint32> pointset := union_unit(.,.,.,.,.)
 		{
-
 			//clockwise order starting from northwest
-			attribute<Input/LatLong> point :=
+			attribute<LatLong> point :=
 				union_data(
 					.
 					, compactdomain/point_LT[nr_OrgEntity]
-					, compactdomain/point_LT[nr_OrgEntity] - point(                             0.0, -Input/SourceRasterFactor, Input/LatLong)
-					, compactdomain/point_LT[nr_OrgEntity] - point(Input/SourceRasterFactor, -Input/SourceRasterFactor, Input/LatLong)
-					, compactdomain/point_LT[nr_OrgEntity] - point(Input/SourceRasterFactor,                               0.0, Input/LatLong)
+					, compactdomain/point_LT[nr_OrgEntity] - point(                             0.0, -SourceRasterFactor, LatLong)
+					, compactdomain/point_LT[nr_OrgEntity] - point(SourceRasterFactor, -SourceRasterFactor, LatLong)
+					, compactdomain/point_LT[nr_OrgEntity] - point(SourceRasterFactor,                               0.0, LatLong)
 					, compactdomain/point_LT[nr_OrgEntity]
 				);
 			attribute<..>     sequence :=  union_data(., id(..), id(..), id(..), id(..), id(..))[uint32];
 			attribute<uint32> ordinal  :=  union_data(., const(0,..), const(1,..), const(2,..), const(3,..), const(4,..));
 		}
 
-		attribute<Input/LatLong_mdegrees> poly_mdegrees (poly) := poly[Input/LatLong_mdegrees];
-		parameter<Input/LatLong_mdegrees> poly_m (poly)        := union_polygon(poly_mdegrees);
+		attribute<LatLong_mdegrees> poly_mdegrees (poly) := geometry[LatLong_mdegrees];
+		parameter<LatLong_mdegrees> poly_m (poly)        := union_polygon(poly_mdegrees);
 
 
 		unit<uint32> multi_polygons : nrofrows = 1
 		{
-			attribute<Input/LatLong_mdegrees> geometry (poly) := union_data(., poly_m);
+			attribute<LatLong_mdegrees> geometry (poly) := union_data(., poly_m);
 		}
 
 		unit<uint32> urbancluster := split_polygon(multi_polygons/geometry)
-			, DialogType = "Map"
-			, DialogData = "Geometry"
+		, DialogType = "Map"
+		, DialogData = "Geometry"
+		{
+			attribute<LatLong> centroid_or_mid  := centroid_or_mid(Geometry[LatLong])
 			{
-				attribute<uint32> id:=id(.);
-				attribute<Input/LatLong> centroid_or_mid  := centroid_or_mid(Geometry[/Input/LatLong])
-				{
-					parameter<uint32>  SymbolColor     := rgb(255,0,0),DialogType = "SymbolColor";
-					parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
-					parameter<float32> SymbolWorldSize := 0.02f,       DialogType = "SymbolWorldSize";
-				}
-
-				attribute<uint8>  countryrel := point_in_polygon(centroid_or_mid, /SourceData/RegionalUnits/Countries/Country/Geometry);
-				attribute<uint32> One        := SourceData/RegionalUnits/Countries/Country/one[countryrel];
-				attribute<string> Name_cor   := SourceData/RegionalUnits/Countries/Country/Name_cor[countryrel];
-				attribute<string> ISO3       := SourceData/RegionalUnits/Countries/Country/ISO3[countryrel];
-				
-				attribute<uint32> nrurbancluster(SourceData/RegionalUnits/Countries/Country )       := sum(One,countryrel);
+				parameter<uint32>  SymbolColor     := rgb(255,0,0),DialogType = "SymbolColor";
+				parameter<int16>   SymbolIndex     := 169[int16],  DialogType = "SymbolIndex";
+				parameter<float32> SymbolWorldSize := 0.02f,       DialogType = "SymbolWorldSize";
 			}
+
+			attribute<uint8>  countryrel := point_in_polygon(centroid_or_mid, /SourceData/RegionalUnits/Countries/Country/Geometry);
+			attribute<uint32> One        := SourceData/RegionalUnits/Countries/Country/one[countryrel];
+			attribute<string> Name_cor   := SourceData/RegionalUnits/Countries/Country/Name_cor[countryrel];
+			attribute<string> ISO3       := SourceData/RegionalUnits/Countries/Country/ISO3[countryrel];
+			
+			attribute<uint32> nrurbancluster(SourceData/RegionalUnits/Countries/Country )       := sum(One,countryrel);
+		}
 
 		attribute<urbancluster> split_polygon_grid (domain) := poly2grid(urbancluster/Geometry, domain);
 
 		//result already 4-connectivity cluster!
-		attribute<urbancluster> urbancluster_rel (CompactedDomain)   := split_polygon_grid[/Input/CompactedDomain/gtopo_rel];
+		attribute<urbancluster> urbancluster_rel (CompactedDomain)   := split_polygon_grid[CompactedDomain/domain_rel];
 
 	// “Urban Centre” (also “High Density Cluster” - HDC) - An Urban Centre consists of contiguous grid
 	//  cells (4-connectivity cluster) with a density of at least 1,500 inhabitants per km2
@@ -81,13 +66,13 @@ container grid2poly
 
 		//https://ghsl.jrc.ec.europa.eu/ghs_smod2019.php
 		attribute<Person>     PopInPol        (urbancluster)   := sum(NewState/Pop,urbancluster_rel);
-		attribute<Person_km2> PopDensityInPol (urbancluster)   := PopInPol / (sum(Input/CompactedDomain/area ,urbancluster_rel));
+		attribute<Person_km2> PopDensityInPol (urbancluster)   := PopInPol / (sum(CompactedDomain/area ,urbancluster_rel));
 
 		attribute<Person>     PopInPol_c        (CompactedDomain) := PopInPol[urbancluster_rel];
 		attribute<Person_km2> PopDensityInPol_c (CompactedDomain) := PopDensityInPol[urbancluster_rel];
 
 
-		attribute<Input/LatLong> unioned_geometry_rd (urbancluster , poly) := urbancluster/geometry[Input/LatLong];
+		attribute<LatLong> unioned_geometry_rd (urbancluster , poly) := urbancluster/geometry[LatLong];
 
 		parameter<uint32> NrUrbanPol := count(urbancluster/nr_OrgEntity);
 

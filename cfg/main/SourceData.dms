@@ -2,10 +2,10 @@ container SourceData : using = "geography;units"
 {
 	#include<population.dms>
 	#include<RegionalUnits.dms>
-
-	#include <Physical.dms>
-	#include <Water.dms>
-	#include <Policy.dms>
+	#include<Physical.dms>
+	#include<Water.dms>
+	#include<Policy.dms>
+	#include<Socioeconomic.dms>
 	
  	container RestrictionsCountry 
 	{
@@ -24,5 +24,4 @@ container SourceData : using = "geography;units"
 		attribute <bool>  IsRegional (domain) := const(false,domain);
 	}	
 	
-	#include <Socioeconomic.dms>
 }

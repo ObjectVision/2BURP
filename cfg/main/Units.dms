@@ -1,48 +1,14 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Maarten Hilferink, Bas van Bemmel
-// Function: defintion of units https://www.geodms.nl/BaseUnit
-
-container Units: isHidden = "True"
+container Units
 {
-	unit<Float32> Meter := BaseUnit('m', float32);
-	unit<Float32> km    := 1000.0 * Meter;
-	unit<Float32> Meter2:= Meter * Meter;
-	unit<float32> km2   := km * km;
-
-	unit<Float32> year  := BaseUnit('Yr', float32);
-
+	unit<Float32> Meter          := BaseUnit('m', float32);
+	unit<Float32> km             := 1000.0 * Meter;
+	unit<float32> km2            := km * km;
+	unit<Float32> year           := BaseUnit('Yr', float32);
 	unit<float32> Person         := BaseUnit('p', float32), cdf = "classifications/PopClass/ClassBreak";
 	unit<float32> MPerson        := 1000000.0 * Person;
-	unit<float32> PersonDif      := BaseUnit('p', float32), cdf = "classifications/PopDifClass/ClassBreak";
-	unit<float32> PersonAnalysis := BaseUnit('p', float32), cdf = "classifications/PopClassAnalysis/ClassBreak";
-
-	unit<Float32> Person_km2 := Person / km2;
-	
-	unit<Float32> USD          : = BaseUnit('USD', float32);
-	unit<Float32> kUSD         : = 1000.0 * USD;
-	unit<Float32> BUSD         : = 1000000000.0 * USD;
-	unit<Float32> kUSDClass    : = 1000.0 * USD, cdf = "classifications/GDP/GDPRegionClass/ClassBreak";
-	unit<Float32> kUSDCapClass : = 1000.0 * USD, cdf = "classifications/GDP/GDPCapClass/ClassBreak";
-
-	unit<float32> Percent              := 0.01 * (Meter / Meter);
-	unit<float32> MultiplicationFactor : cdf = "classifications/Prc/MultiplicationFactor/ClassBreak";
-	unit<float32> Difprc               : cdf = "classifications/Prc/Difprc/ClassBreak";
-	unit<float32> PercGrowthUrbanArea  := Percent, cdf = "classifications/PercGrowthUrbanArea/ClassBreak";
-	
-	unit<float32> BuiltupAreaFactor    : cdf = "classifications/BuiltupareaClass/ClassBreak";
-	unit<uint32>  SMOD                 : cdf = "Classifications/Settlement_Model_L2_nomenclature/ClassBreak";
-	unit<float32> UrbanOverlay         : cdf = "classifications/UrbanOverlayClass/ClassBreak";
-
-	unit<float32> TRIweight            : cdf = "classifications/Suitability/TRIclass/ClassBreak";
-	unit<float32> Suitability          : cdf = "classifications/Suitability/UrbSuitclass/ClassBreak";
-	unit<float32> SuitabilityNeg       : cdf = "classifications/Suitability/UrbSuitNegclass/ClassBreak";
-	unit<float32> TravelTime           := BaseUnit('h', float32), 	 cdf = "classifications/Suitability/TravelTimeClass/ClassBreak";
-	
-	unit<float32> Blue_Marble_Gray     : cdf = "classifications/Blue_Marble_Gray/Blue_Marble_Gray_Class/ClassBreak";
+	unit<Float32> Person_km2     := Person / km2;
+	unit<Float32> USD            := BaseUnit('USD', float32);
+	unit<Float32> kUSDCapClass   := 1000.0 * USD, cdf = "classifications/GDP/GDPCapClass/ClassBreak";
+	unit<float32> Suitability    : cdf = "classifications/Suitability/UrbSuitclass/ClassBreak";
+	unit<float32> SuitabilityNeg : cdf = "classifications/Suitability/UrbSuitNegclass/ClassBreak";
 }

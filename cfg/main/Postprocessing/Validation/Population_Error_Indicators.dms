@@ -79,14 +79,9 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 	{
 		//als named Pearson's R 
 		attribute<float32> Relative_Difference(CompactedDomain)            := Population_Error_Indicators/CD/ObsMINUSMod / (Population_Error_Indicators/CD/Observed + Population_Error_Indicators/CD/Modelled);//0/0 --> null!
-
 		attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := mean(Relative_Difference,   CompactedDomain/Country_rel);
 		attribute<float32> Relative_DifferenceContinent(SourceData/RegionalUnits/Continent) := mean(Relative_Difference,   CompactedDomain/Continent_rel);
 		attribute<float32> Relative_DifferenceWorld(SourceData/RegionalUnits/World)        := mean(Relative_Difference,   CompactedDomain/World_rel);
-		
-		//not the same nr is with null values!
-		//attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := sum(Relative_Difference,   CompactedDomain/Country_rel);
-		//attribute<float32> Relative_DifferenceCountrynr(SourceData/RegionalUnits/Countries/Country ) := Relative_DifferenceCountry / nr[float32];
 	}
 	
 	container result

@@ -88,7 +88,7 @@ container Countries : using = "units;geography"
 
 	//	This grid is used for the compacted domain definition in Scenarios.dms
 	attribute<uint8>   ClaimCountry_grid (domain)     := poly2grid(Preprocessing/Claims/Read_Scenario/M1/SSP2/Filedata/geometry, domain)[uint8];
-	// attribute<bool>    IsClaimCountry (domain)        := ClaimCountry_grid[int16] > -1s;
+	attribute<bool>    IsClaimCountry (domain)        := ClaimCountry_grid[int16] > -1s;
 	// attribute<bool>    IsNotClaimCountry (domain)     := !IsClaimCountry;
 	// attribute<float32> IsNotClaimCountryNull (domain) := IsClaimCountry ? 0f/0f : 1f;
 
@@ -103,8 +103,8 @@ container Countries : using = "units;geography"
 	attribute<bool>    IsNotCountry (domain)     := !IsCountry;
 	// attribute<float32> IsNotCountryNull (domain) := IsCountry ? 0f/0f : 1f;
 
-	// attribute<string> key             (domain) := string(IsCountry[uint2]) + "_" + string(CompactedDomain/IsCD[uint2]);
-	// attribute<bool>   IsCountryNotCD  (domain) := strcount(key, '1_0') > 0;//lakes (but also ice!)
+	attribute<string> key             (domain) := string(IsCountry[uint2]) + "_" + string(CompactedDomain/IsCD[uint2]);
+	attribute<bool>   IsCountryNotCD  (domain) := strcount(key, '1_0') > 0;//lakes (but also ice!)
 	// attribute<bool>   NotCountryNotCD (domain) := strcount(key, '0_0') > 0;//oceans-sea, but only with SQLString deactived
 	
 	// unit<uint32> NotCountry := Subset(IsNotCountry)

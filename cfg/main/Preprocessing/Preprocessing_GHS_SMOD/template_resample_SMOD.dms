@@ -45,17 +45,17 @@ template resample
 			attribute<.> per_gtopo_sub(domain_sub) := mapping(domain_sub, .);
 			attribute<uint64> nr_sub := pcount(per_gtopo_sub);
 
-			attribute<Float32> var_per_gtopo_30 (domain) := mean(URBANCENTREGRIDCELL30[per_gtopo_sub],           domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_23 (domain) := mean(DENSEURBANCLUSTERGRIDCELL23[per_gtopo_sub],     domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_22 (domain) := mean(SEMIDENSEURBANCLUSTERGRIDCELL22[per_gtopo_sub], domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_21 (domain) := mean(SUBURBANORPERIURBANGRIDCELL21[per_gtopo_sub],   domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_30 (domain) := mean(URBANCENTREGRIDCELL30[per_gtopo_sub],           domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_23 (domain) := mean(DENSEURBANCLUSTERGRIDCELL23[per_gtopo_sub],     domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_22 (domain) := mean(SEMIDENSEURBANCLUSTERGRIDCELL22[per_gtopo_sub], domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_21 (domain) := mean(SUBURBANORPERIURBANGRIDCELL21[per_gtopo_sub],   domain_sub/domain_rel);
 
-			attribute<Float32> var_per_gtopo_13 (domain) := mean(RURALCLUSTERGRIDCELL13[per_gtopo_sub],          domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_12 (domain) := mean(LOWDENSITYRURALGRIDCELL12[per_gtopo_sub],       domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_11 (domain) := mean(VERYLOWDENSITYRURALGRIDCELL11[per_gtopo_sub],   domain_sub/gtopo_rel);
-			attribute<Float32> var_per_gtopo_10 (domain) := mean(WATERGRIDCELL10[per_gtopo_sub],                 domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo_13 (domain) := mean(RURALCLUSTERGRIDCELL13[per_gtopo_sub],          domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_12 (domain) := mean(LOWDENSITYRURALGRIDCELL12[per_gtopo_sub],       domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_11 (domain) := mean(VERYLOWDENSITYRURALGRIDCELL11[per_gtopo_sub],   domain_sub/domain_rel);
+			attribute<Float32> var_per_gtopo_10 (domain) := mean(WATERGRIDCELL10[per_gtopo_sub],                 domain_sub/domain_rel);
 
-			attribute<Float32> var_per_gtopo (domain)    := mean(UrbanGridCell[per_gtopo_sub],                    domain_sub/gtopo_rel);
+			attribute<Float32> var_per_gtopo (domain)    := mean(UrbanGridCell[per_gtopo_sub],                    domain_sub/domain_rel);
 
 			attribute<bool>    urban (domain)         := var_per_gtopo >0f ? 1[bool] : 0[bool],	StorageName = "='%LocalDataProjDir%/Results/'+OnlyNameFile+'_21_22_23_30_WGS84.tif'";
 			

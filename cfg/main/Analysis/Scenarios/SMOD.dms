@@ -38,7 +38,7 @@ container SMOD: url="%projdir%/doc/Table_8_Settlement_Model_L2_synthetic_explana
 	attribute<bool> URBANCENTREGRIDCELL30 (CompactedDomain):= PopDensity1500 && Inhabitants50000;
 
 	attribute<float32> Within3km_30 (CompactedDomain) :
-		= ((potential(float32(URBANCENTREGRIDCELL30[invert(Input/CompactedDomain/gtopo_rel)]), /Input/Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)))[Input/CompactedDomain/gtopo_rel];
+		= ((potential(float32(URBANCENTREGRIDCELL30[invert(CompactedDomain/domain_rel)]), Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)))[CompactedDomain/domain_rel];
 	attribute<bool> Within3km_30_filter (CompactedDomain) := Within3km_30 > 30f;
 
 	//23'DENSE URBAN CLUSTER GRID CELL
@@ -50,7 +50,7 @@ container SMOD: url="%projdir%/doc/Table_8_Settlement_Model_L2_synthetic_explana
 	attribute<bool> GRIDCELL30_23(CompactedDomain):= URBANCENTREGRIDCELL30 || DENSEURBANCLUSTERGRIDCELL23;
 
 	attribute<bool> Within3km (CompactedDomain) :
-		= ((potential(float32(GRIDCELL30_23[invert(Input/CompactedDomain/gtopo_rel)]), /Input/Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)) > 0f)[Input/CompactedDomain/gtopo_rel];
+		= ((potential(float32(GRIDCELL30_23[invert(CompactedDomain/domain_rel)]), Geography/Distmatrices/Impl/pot3km/potrange/EuclideanDistMatr)) > 0f)[CompactedDomain/domain_rel];
 
 	attribute<bool> SEMIDENSEURBANCLUSTERGRIDCELL22 (CompactedDomain) := (PopDensity300 && Inhabitants5000) && (!URBANCENTREGRIDCELL30 && !DENSEURBANCLUSTERGRIDCELL23) && !Within3km;
 
@@ -80,5 +80,5 @@ container SMOD: url="%projdir%/doc/Table_8_Settlement_Model_L2_synthetic_explana
 																	rural_13 : (rural_12 =12u ? 
 																	rural_12 : (rural_11 =11u ? 
 																	rural_11 : 10u))))));
-																	//rural_11 : Preprocessing/SMOD/SMOD_generator/PastDates/Y2015/JRC_GHS/water_10[Input/CompactedDomain/gtopo_rel]))))));
+																	//rural_11 : Preprocessing/SMOD/SMOD_generator/PastDates/Y2015/JRC_GHS/water_10[CompactedDomain/domain_rel]))))));
 }
