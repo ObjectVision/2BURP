@@ -1,7 +1,21 @@
 container ExportSettings
 {
 	parameter<String> FileNameBase: ='results/result';
+	
+	container GitImpl
+	{
+		parameter<string> PD               := expand(., '%projDir%');
+		parameter<string> DOS_PD           := replace(PD, '/', '\\');
 
+		parameter<string> SwitchDriveCmd   := substr(DOS_PD, 0, 2);
+		parameter<string> CdCmd            := 'cd '+DOS_PD;
+		parameter<string> DescrCmd         := 'git describe --all > git.txt';
+		parameter<string> StatusCmd        := 'git status >> git.txt';
+		parameter<string> HashCmd          := 'git rev-parse HEAD >> git.txt';
+		parameter<string> RevisionInfoCmds := SwitchDriveCmd + ' && ' + CdCmd + ' && ' + DescrCmd + ' && ' + StatusCmd + ' && ' + HashCmd;
+		parameter<uint32> WriterCode       := exec_ec(Expand(., '%env:ComSpec%'), '/c ' + RevisionInfoCmds, PD);
+	}	
+	
 	container MetaInfo 
 	{
 		parameter<string> FileName : ='%storageBaseName%.xml';
@@ -11,18 +25,35 @@ container ExportSettings
 		{
 			container Software
 			{
-				parameter<string> GeoDmsVersion: [ '=string(GeoDmsVersion())' ];
+				parameter<string> GeoDMSVersion := string(GeoDmsMajorVersionNumber()) + '.' +  string(GeoDmsMinorVersionNumber())  +'.'  +  string(GeoDmsPatchNumber());
 			}
+			
 			container Config
 			{
 				parameter<string> FullName := '=PropValue(this, '+Quote('FullName')+')';
 				parameter<string> Expr     := '=PropValue(this, '+Quote('Expr'    )+')';
+				parameter<string> RunFile  := expand(.,'%configDir%')+'.dms';
 			}
+			
 			container Environment
 			{
 				parameter<string> Processor    := expand(., '%env:PROCESSOR_IDENTIFIER%');
 				parameter<string> User         := expand(., '%env:USERNAME%');
 				parameter<string> ComputerName := expand(., '%env:COMPUTERNAME%');
+			}
+			
+			container Git
+			{
+				parameter<string> RevisionInfo : Storagename = "=(GitImpl/WriterCode==0)?'%projDir%/git.txt':'Error '+String(GitImpl/WriterCode)+' while producing %projDir%/git.txt'", StorageType = "str";
+			}
+			
+			container Parameters
+			{
+				parameter<string> StudyArea             := ModelParameters/StudyArea;
+				parameter<string> Method                := ModelParameters/Method;
+				parameter<string> Variant               := ModelParameters/Variant;
+				parameter<string> InPresentUrban        := ModelParameters/InPresentUrban;
+				parameter<string> Calibration           := ModelParameters/Calibration;
 			}
 		}
 	}
