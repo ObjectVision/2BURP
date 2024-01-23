@@ -1,17 +1,17 @@
 container UrbanDensity : using = "sourcedata/regionalunits"
 {
 	unit<uint32> Country
-		: StorageName       = "='%projdir%/data/UrbanDensity/' + ModelParameters/Method + '/UrbanDensity.csv'"
-		, StorageType     = "gdal.vect"
-		, Source          = "estimated density EK.xlsx: orginal delivered file by VU at 3 april 2023"
-							"accompanying email:  Bijgaand de excel waarin we schattingen omzetten naar dichtheden. Per jaar een tabblad, estimated is de schatting, urban density the observation"
-							"estimated_density_EK_bewerk_BVB.xlsx in %cfg%\data\UrbanDensity is leading"
-							"2015 tab is used as it is 2010"
-							"ISO3:                own added field to join to orginal tab 2015 with only country-names"
-							"CountryFixedEffects: the relevant variabele"
-							"GDPCapita:           not used at this time but calculated by VU, use GDPCap from SSP see for example /Scenarios/SSPs/SSP2/ProjectionDates/Y2010/GDPCapC"
-							"Y2010UD:             initial calc of item /Scenarios/SSPs/SSP2/ProjectionDates/Y2010/UrbanDensityVU with version 9977"
-		, StorageReadonly = "True"
+	: StorageName       = "='%projdir%/data/UrbanDensity/m3/UrbanDensity.csv'"
+	, StorageType     = "gdal.vect"
+	, Source          = "estimated density EK.xlsx: orginal delivered file by VU at 3 april 2023"
+						"accompanying email:  Bijgaand de excel waarin we schattingen omzetten naar dichtheden. Per jaar een tabblad, estimated is de schatting, urban density the observation"
+						"estimated_density_EK_bewerk_BVB.xlsx in %cfg%\data\UrbanDensity is leading"
+						"2015 tab is used as it is 2010"
+						"ISO3:                own added field to join to orginal tab 2015 with only country-names"
+						"CountryFixedEffects: the relevant variabele"
+						"GDPCapita:           not used at this time but calculated by VU, use GDPCap from SSP see for example /Scenarios/SSPs/SSP2/ProjectionDates/Y2010/GDPCapC"
+						"Y2010UD:             initial calc of item /Scenarios/SSPs/SSP2/ProjectionDates/Y2010/UrbanDensityVU with version 9977"
+	, StorageReadonly = "True"
 	{
 		attribute<Countries/Country> Country_rel        := rlookup(ISO3, Countries/Country/ISO3);
 		attribute<LatLong>           geometry (poly)    := Countries/Country/Geometry[Country_rel];

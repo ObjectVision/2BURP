@@ -6,9 +6,9 @@ container GDP : using = "units;sourcedata/regionalunits"
 	container Data
 	{
 		unit<uint16> GDPregions
-		: StorageName     = "%MondiaalDataDir%/GDP/GDPCap_Region_v5.shp"
+		: StorageName     = "%ToBURPDataDir%/GDP/GDPCap_Region_v5.shp"
 		, StorageType     = "gdal.vect"
-		, url             = "%MondiaalDataDir%/GDP/GDPregion_grid_v5.txt"
+		, url             = "%ToBURPDataDir%/GDP/GDPregion_grid_v5.txt"
 		, StorageReadOnly = "True"
 		{
 			attribute<uint16>   ID          := id(.);

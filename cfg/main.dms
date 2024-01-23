@@ -36,4 +36,6 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy
 		parameter<string>   Validation_Pop_Error      := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result";
 		parameter<string>   Validation_Urban_Accuracy := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/UrbanAccuracy/Country/export_csv/result";
 	}
+	
+	container Desktops;
 }

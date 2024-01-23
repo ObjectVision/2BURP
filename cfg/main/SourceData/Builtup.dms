@@ -1,0 +1,34 @@
+container Builtup : using = "units;classifications;sourcedata/regionalunits"
+{
+	container PerYear := 
+		for_each_ne(
+			GHS_years/name
+			, 'BuiltUpPresence_T('+string(GHS_years/year)+'w)'
+		);
+	
+	template BuiltUpPresence_T : using = "units"
+	{
+		parameter<uint16> Year;
+		////
+		parameter<string> FileName          := '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(Year)+'_GLOBE_R2023A_54009_'+string(ModelParameters/MW_Gridsize)+'_V1_0';
+		
+		unit<ipoint> big_raster := Mollweide_grid
+		,	StorageName     = "= FileName+'.tif'"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "WorldMollweide"
+		, 	LazyCalculated  = "true"
+		{
+			attribute<uint32>  GridData; // don't read this; memory will explode
+			attribute<bool>    IsAboveThreshold     := MakeDefined(GridData,0) >= uint32(ModelParameters/BuiltUp_threshold);
+		}
+		
+		attribute<float32> Builtup_MW (Mollweide_grid) := big_raster/GridData[float32] / 1000000f;
+		attribute<float32> Builtup_LL (domain)         := sum_float32(Builtup_MW, invert(domain/mollweide_rel));
+
+		// attribute<uint64>      BuiltUp               (Countries)          := sum_uint64(big_raster/GridData, Big_raster_domain/Country_rel);
+		// attribute<uint64>      BuiltUp_threshold     (Countries)          := sum_uint64(big_raster/GridData >= uint32(ModelParameters/BuiltUp_threshold) ? uint32(ModelParameters/MW_Gridsize * 1000d) : 0, Big_raster_domain/Country_rel);
+		
+		// attribute<km2>         BuiltUp_km2           (Countries)          := convert(value(BuiltUp, m2), km2);
+		// attribute<km2>         BuiltUp_threshold_km2 (Countries)          := convert(value(BuiltUp_threshold, m2), km2);
+	}
+}

@@ -1,7 +1,7 @@
 container Physical : using = "geography"
 {
 	unit<ipoint> Elevation
-	:	StorageName     = "%MondiaalDataDir%/physical/Elevation/gtopo30_NOAA_NGDC.tif"
+	:	StorageName     = "%ToBURPDataDir%/physical/Elevation/gtopo30_NOAA_NGDC.tif"
 	,	StorageType     = "gdal.grid"
 	,	url             = "https://en.wikipedia.org/wiki/GTOPO30"
 	,	Source          = "National Geophysical Data Center - NOAA Data Type:File Geodatabase Raster Dataset, Database: Y:\\data\\PBLbase\\Data\\MondiaalRelief.gdb, Raster: gtopo30_NOAA_NGDC"
@@ -15,9 +15,9 @@ container Physical : using = "geography"
 	}	
 	
 	// unit<ipoint> Slope
-	// :	StorageName = "%MondiaalDataDir%/physical/Slope/GMTED_SLOPE_30ASec.tif"
+	// :	StorageName = "%ToBURPDataDir%/physical/Slope/GMTED_SLOPE_30ASec.tif"
 	// ,	StorageType = "gdal.grid"
-	// ,	url         = "%MondiaalDataDir%/physical/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010)" //https://topotools.cr.usgs.gov/gmted_viewer/viewer.htm"//
+	// ,	url         = "%ToBURPDataDir%/physical/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010)" //https://topotools.cr.usgs.gov/gmted_viewer/viewer.htm"//
 	// ,	Source      = "original Global Terrain Elevation Data 2010 GMTED (USGS)"
 					  // "Frank van Rijn - PBL: Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\Basisdata.gdb GMTED_SLOPE_30ASec"
 					  // "original: 43203 c, 20641 r;GCS_WGS_1984"
@@ -32,9 +32,9 @@ container Physical : using = "geography"
 	// }	
 	
 	unit<ipoint> Slope_2021
-	:	StorageName = "%MondiaalDataDir%/physical/Slope/gtopo30_degree_planar_zfactor1_ag1061_exportgeodms.tif"
+	:	StorageName = "%ToBURPDataDir%/physical/Slope/gtopo30_degree_planar_zfactor1_ag1061_exportgeodms.tif"
 	,	StorageType = "gdal.grid"
-	,	url         = "%MondiaalDataDir%/physical/slope/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010).html"
+	,	url         = "%ToBURPDataDir%/physical/slope/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010).html"
 	,	Source      = "DEM: Database: 	Y:\data\PBLbase\Data\MondiaalRelief.gdb Raster: 	gtopo30_NOAA_NGDC"
 					  "Slope genereated in ArcGIS 10.6.1 from Slope-syntax DEM in degrees, planar, zfactor1  --> gtopo30_degree_planar_zfactor1_ag1061.tif"
 					  "GeoDMS -3.40282E+38f has been given value 0 --> exported as tif"
@@ -47,9 +47,9 @@ container Physical : using = "geography"
 	#include <TRI.dms>
 	
 	unit<ipoint> SnowIceCover
-	:	StorageName     = "%MondiaalDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2.tif"
+	:	StorageName     = "%ToBURPDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2.tif"
 	,	StorageType     = "gdal.grid"
-	,	url             = "%MondiaalDataDir%/physical/MCD12Q1_UserGuide_07302013.pdf"//MODIS Web
+	,	url             = "%ToBURPDataDir%/physical/MCD12Q1_UserGuide_07302013.pdf"//MODIS Web
 	,	Source          = "Database: Y:\Data\PBLbase\Data\MODIS_BOS.gdb\MODIS_2001_BOS"
 						  "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent"
 	,	StorageReadOnly = "True"

@@ -20,7 +20,7 @@ container  SMOD: Using = "Units;"
 	{
 		container PastDates: = for_each_ne(
 				PastDate/name,
-				'resample('+quote('%MondiaalDataDir%/Preprocessing/GHSSMOD/GHS_SMOD_POP'+string(PastDate/Yr)+'_GLOBE_R2019A_54009_1K_V2_0.tif')+')'
+				'resample('+quote('%ToBURPDataDir%/Preprocessing/GHSSMOD/GHS_SMOD_POP'+string(PastDate/Yr)+'_GLOBE_R2019A_54009_1K_V2_0.tif')+')'
 			);
 
 		#include<template_resample_SMOD.dms>
@@ -32,7 +32,7 @@ container  SMOD: Using = "Units;"
 				PastDate/name,
 				domain,
 				Units/SMOD,
-				'%MondiaalDataDir%/Preprocessing/GHSSMOD/resample/SMODgtopo_'+string(PastDate/name)+'_WGS84.tif',
+				'%ToBURPDataDir%/Preprocessing/GHSSMOD/resample/SMODgtopo_'+string(PastDate/name)+'_WGS84.tif',
 				'gdal.grid')
 			,	StorageReadOnly = "True"
 			,	DialogData = "LatLong"

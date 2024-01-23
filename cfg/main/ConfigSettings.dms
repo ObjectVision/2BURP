@@ -2,6 +2,6 @@ container ConfigSettings
 {
 	container Overridable
 	{
-		parameter<String> MondiaalDataDir         := '%sourceDataDir%/2UP';
+		parameter<String> ToBURPDataDir         := '%SourceDataDir%/2BURP';
 	}
 }

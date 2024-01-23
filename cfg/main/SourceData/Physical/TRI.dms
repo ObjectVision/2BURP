@@ -10,7 +10,7 @@
 
 container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, unsigned integer 8 Bit, LZW-compression with correct extent"
 {
-	unit<ipoint> TRI1:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI1.tif",
+	unit<ipoint> TRI1:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI1.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -19,7 +19,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI2:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI2.tif",
+	unit<ipoint> TRI2:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI2.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -28,7 +28,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI3:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI3.tif",
+	unit<ipoint> TRI3:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI3.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -37,7 +37,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI4:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI4.tif",
+	unit<ipoint> TRI4:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI4.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -46,7 +46,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI5:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI5.tif",
+	unit<ipoint> TRI5:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI5.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -55,7 +55,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI6:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI6.tif",
+	unit<ipoint> TRI6:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI6.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
@@ -64,7 +64,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 
-	unit<ipoint> TRI7:StorageName = "%MondiaalDataDir%/Physical/TerrainRoughnessIndex/TRI7.tif",
+	unit<ipoint> TRI7:StorageName = "%ToBURPDataDir%/Physical/TerrainRoughnessIndex/TRI7.tif",
 	StorageType = "gdal.grid",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"

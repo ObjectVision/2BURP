@@ -12,7 +12,7 @@ container Make_Scenario : using = "units"
 		}
 	}
 	unit<uint32> UrbanShare
-	: StorageName     = "%MondiaalDataDir%/Preprocessing/Claims/Scenario/iamc_db_countries_IIASA_WIC_population_NCAR_urbanization.csv"//xlsx-->copy range from excel to editor, replace years-fields with prefix Y string
+	: StorageName     = "%ToBURPDataDir%/Preprocessing/Claims/Scenario/iamc_db_countries_IIASA_WIC_population_NCAR_urbanization.csv"//xlsx-->copy range from excel to editor, replace years-fields with prefix Y string
 	, SQLString       = "SELECT * FROM iamc_db_countries_IIASA_WIC_population_NCAR_urbanization WHERE Variable='Population|Urban|Share'"//965 records (5x 193)
 	, StorageType     = "gdal.vect"
 	, url             = "https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=10#"
@@ -56,7 +56,7 @@ container Make_Scenario : using = "units"
 	}
 	
 	unit<uint32> Population
-	: StorageName     = "%MondiaalDataDir%/Preprocessing/Claims/Scenario/iamc_db_countries_IIASA_WIC_population_NCAR_urbanization.csv"//xlsx-->copy range from excel to editor, replace years-fields with prefix Y string
+	: StorageName     = "%ToBURPDataDir%/Preprocessing/Claims/Scenario/iamc_db_countries_IIASA_WIC_population_NCAR_urbanization.csv"//xlsx-->copy range from excel to editor, replace years-fields with prefix Y string
 	, SQLString       = "SELECT * FROM iamc_db_countries_IIASA_WIC_population_NCAR_urbanization WHERE Model='IIASA-WiC POP' AND Variable='Population'"//965 records (5x 193)
 	, StorageType     = "gdal.vect"
 	, url             = "https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=10#"

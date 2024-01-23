@@ -1,7 +1,7 @@
 container BEL
 {
 	unit<uint32> natuurreservaat
-		:  StorageName = "%MondiaalDataDir%/Policy/Country/BEL/Vlaamse_natuurreservaten_20201222.shp"
+		:  StorageName = "%ToBURPDataDir%/Policy/Country/BEL/Vlaamse_natuurreservaten_20201222.shp"
 		,  StorageType     = "gdal.vect"
 		,  url             = "https://data.gov.be/en/search/site/%2520Natuurreservaat"
 		,  StorageReadOnly = "True"

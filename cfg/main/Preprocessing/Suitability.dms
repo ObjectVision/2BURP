@@ -14,7 +14,7 @@ container Suitability : using = "Units"
 		}
 
 		container Data := for_each_nedv(Class/name, 'SourceData/Physical/TerrainRoughnessIndex/'+Class/name+'/ReadData', domain, uint8);
-		attribute<TRIweight> Weight(domain) := ='add('+AsItemList('Float32(Data/'+Class/name+') * Class/RelOccurence[Class/V/'+Class/Name+']')+')';
+		// attribute<TRIweight> Weight(domain) := ='add('+AsItemList('Float32(Data/'+Class/name+') * Class/RelOccurence[Class/V/'+Class/Name+']')+')';
 	}
 
 	container DistanceBuildUp

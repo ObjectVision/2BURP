@@ -1,5 +1,24 @@
 container Classifications : using = "units"
 {
+	unit<uint8> PopulationSrcYears : nrofrows = 4
+	{
+		attribute<Year>   Yr   : [1975, 1990, 2000, 2015];
+		attribute<string> name := 'Y'+string(Yr);
+	}
+	
+	unit<uint8>  GHS_years  : nrofrows = 10 
+	{
+		attribute<uint16> year: [ 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]; 
+		attribute<string> name := 'Y'+string(year); 
+	}
+	
+	unit<uint8> Continents : nrofrows = 6
+	{
+		attribute<string> name : ['Africa','Asia','Australia_Oceania','Europe','North_America','South_America'];
+		attribute<string> label := name;
+		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
+	}
+	
 	unit<uint32> Iter : nrofrows = 8
 	{
 		attribute<string> name := 'I'+string(id(.));

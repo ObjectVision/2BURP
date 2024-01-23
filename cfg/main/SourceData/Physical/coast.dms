@@ -1,105 +1,26 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel, Eric Oudejans
-// Function: Calculate distance to coast in km (max 250km)
-
 container Coast
 {
-	unit<ipoint> Coastline:
-		StorageName     = "%MondiaalDataDir%/physical/Coast/coastline_GADM_2012.tif",
-		StorageType     = "gdal.grid",
-		url             = "%MondiaalDataDir%/landen/Mondiale landsgrenzen 2013 (ESRI-PBL) - DataPortaal Explorer_xml.mht",
-		Source          = "countries_GADM_2012_UCD uit config"
-						  "step 1: conversion to: polyline-file with split line at vertices"
-						  "step 2: conversion to: inverse polygon-file of countries (with aid of erase and hulppolygon"
-						  "step 3: intersect (tool) step 1 with 2"
-						  "step 4: remove line-parts of square framework world (Sout-pole, East-Siberia/Alaska)",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
-	{
-		attribute<uint8> ReadData(domain);
-	}
-
-	unit<ipoint> Coastline_Distance
-	:	StorageName = "%MondiaalDataDir%/physical/Coast/coastline_grid_ed_arcmap1031_1000_INT.tif"
-	,	StorageType = "gdal.grid"
-	,	url         = ""
-	,	Source      = "countries_GADM_2012_UCD_v4.shp without inner borders, convert tot tif-grid, ArcMap 10.3.1 Euclidean Distance with 1 grid as cellsize, convert to tif Times 1000, Integer"
-	,	StorageReadOnly = "True"
-	,	DialogData = "LatLong"
-	{
-		attribute<float32> ReadData(domain);
-	}
-
 	unit<uint32> Coastline_from_Countries
-		:  StorageName      = "%MondiaalDataDir%/physical/Coast/DISSOLVE_countries_GADM_2012_UCD_v10_union_no_gaps_single_part.shp"
-		,  StorageType      = "gdal.vect"
-		,  url              = ""
-		,  StorageReadOnly  = "True"
-		,  Source           = ""
-		,  DialogType       = "Map"
-		,  DialogData       = "Geometry"
+	:  StorageName      = "%ToBURPDataDir%/physical/Coast/DISSOLVE_countries_GADM_2012_UCD_v10_union_no_gaps_single_part.shp"
+	,  StorageType      = "gdal.vect"
+	,  StorageReadOnly  = "True"
 	{
-		attribute<LatLong> Geometry(polygon);
-	}
-	
-	unit<uint32> MakeFSS := Coastline_from_Countries
-	, 	StorageName = "%LocalDataProjDir%/physical/Coast/Coastline.fss"
-	{
-		attribute<LatLong> Geometry (arc) := Coastline_from_Countries/Geometry;
-	}
+		attribute<LatLong>           Geometry(poly);
+		attribute<SphericalMercator> Geometry_mer (arc):= convert(Geometry, SphericalMercator);
 
-	unit<uint32> Coastline_Distance_GeoDMS
-	: 	StorageName = "%MondiaalDataDir%/physical/Coast/Coastline.fss"
-	,  StorageReadOnly = "True"
-	{
-		attribute<LatLong> Geometry (arc);
-		
-		unit<uint32> CoastPointSet := sequence2points(geometry)
+		unit<uint32> CoastArcSet := arc2segm(Geometry_mer)
 		{
-			attribute<Float64> lat_deg  := pointrow(point);
-			attribute<Float64> long_deg := pointcol(point);
-			attribute<Float64> lat_rad  := lat_deg * ( pi() / 180.0);
-//				attribute<float64> sinlat   := sin(lat_rad);
-			attribute<float64> mercator_y_rad := log(tan(0.25 * pi() + 0.5 * lat_rad));
-			attribute<float64> mercator_y_deg := mercator_y_rad * (180.0 / pi());
-
-			attribute<float32> lat_factor := float32(cos(pointrow(point) * (pi() / 180.0)));
-			
-			attribute<SphericalMercator> Point_mer := point(mercator_y_deg, long_deg, SphericalMercator);
-
-			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
-			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
-		}
-
-		attribute<SphericalMercator> geometry_mer_full (arc):= points2sequence(CoastPointSet/Point_mer, CoastPointSet/sequencenr);
-
-		unit<uint32> CoastArcSet := arc2segm(Geometry)
-		{
-			container point_mer     := LatLonPointsToMercator(., CoastArcSet/point);
-			container nextpoint_mer := LatLonPointsToMercator(., CoastArcSet/nextpoint);
-
 			unit<uint32> pointset := union_unit(.,.)
 			{
-				attribute<SphericalMercator> point    := union_data(., CoastArcSet/point_mer/points_mer, CoastArcSet/nextpoint_mer/points_mer);
-				attribute<uint32>         ordinal  := union_data(., const(0,CoastArcSet), const(1,CoastArcSet));
-				attribute<CoastArcSet>    sequence := union_data(., id(CoastArcSet), id(CoastArcSet));
+				attribute<SphericalMercator> point    := union_data(., CoastArcSet/point, CoastArcSet/nextpoint);
+				attribute<uint32>            ordinal  := union_data(., const(0,CoastArcSet), const(1,CoastArcSet));
+				attribute<CoastArcSet>       sequence := union_data(., id(CoastArcSet), id(CoastArcSet));
 			}
-
 			attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(CoastArcSet/pointset/point, CoastArcSet/pointset/sequence, CoastArcSet/pointset/ordinal);
-
-			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
-			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 		}
 	}
-
-	attribute<Float32> Location2Coast_mer_segm   (CompactedDomain) := dist_info(Coastline_Distance_GeoDMS/CoastArcSet/geometry_mer_segm, CompactedDomain/Geometry_mer, Sqr(250[km] / lengthdegree / CompactedDomain/lat_factor));    
-	attribute<Float32> Location2Coast_mer_full   (CompactedDomain) := dist_info(Coastline_Distance_GeoDMS/geometry_mer_full, CompactedDomain/Geometry_mer, Sqr(250[km] / lengthdegree / CompactedDomain/lat_factor));
+	
+	attribute<Float32> Location2Coast_mer_segm   (CompactedDomain) := dist_info(Coastline_from_Countries/CoastArcSet/geometry_mer_segm, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));    
 	attribute<km>      Location2Coast_km         (CompactedDomain) := (Location2Coast_mer_segm * lengthdegree * CompactedDomain/lat_factor);
 	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/physical/Coast/Location2Coast_km.tif";
 
@@ -107,7 +28,7 @@ container Coast
 	container Coastline_Distance_grid
 	{
 		unit<ipoint> Coastline
-		:	StorageName     = "%MondiaalDataDir%/physical/Coast/Location2Coast_km.tif"
+		:	StorageName     = "%ToBURPDataDir%/physical/Coast/Location2Coast_km.tif"
 		,	StorageType     = "gdal.grid"
 		,	Source          = "item /Input/Physical/Coast/Location2Coast_km_domain_export geodms 7.312 PD 7677 SD 7670 (before the commit of this file itself) caltime 3 hours 22 minutes"
 		,	StorageReadOnly = "True"
@@ -125,23 +46,5 @@ container Coast
 				attribute<uint32>  SDCoastline   := sd(Coastline,SourceData/RegionalUnits/Countries/Country_grid);
 			}
 		}
-	}
-
-	Template LatLonPointsToMercator
-	{
-		unit<uint32> rowset;
-		attribute<LatLong> point(rowset);
-
-		attribute<Float64> lat_deg (rowset)           := pointrow(point);
-		attribute<Float64> lon_deg (rowset)           := pointcol(point);
-		attribute<Float64> lat_rad (rowset)           := lat_deg * ( pi() / 180.0);
-		attribute<float64> mercator_y_rad (rowset)    := log(tan(0.25 * pi() + 0.5 * lat_rad));
-		attribute<float64> mercator_y_deg (rowset)    := mercator_y_rad * (180.0 / pi());
-		attribute<float32> lat_factor (rowset)        := float32(cos(pointrow(point) * (pi() / 180.0)));
-
-		parameter<float64> max_lat := max(abs(mercator_y_deg));
-		parameter<float64> max_lon := max(abs(lon_deg));
-
-		attribute<SphericalMercator> points_mer (rowset) := point(mercator_y_deg, lon_deg, SphericalMercator);
 	}
 }

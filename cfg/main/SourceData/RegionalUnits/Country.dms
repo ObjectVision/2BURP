@@ -1,7 +1,10 @@
-container Countries : using = "units;geography"
+container Countries2 : using = "units;geography"
 {	
-	unit<uint8> Country
-		:  StorageName = "%MondiaalDataDir%/administrative/countries/countries_GADM_2012_UCD_v10.shp"
+
+
+
+	unit<uint8> Country_old
+		:  StorageName = "%ToBURPDataDir%/administrative/countries/countries_GADM_2012_UCD_v10.shp"
 		,  StorageType     = "gdal.vect"
 		,  StorageReadOnly = "True"
 	{
@@ -21,13 +24,11 @@ container Countries : using = "units;geography"
 		attribute<string>  Label            := Name;
 		attribute<string>  ISO3;
 		attribute<string>  ISO3_cor         :=replace(ISO3,"-","_");
-		// attribute<uint32>  claimnumber      := rlookup(id(.),Claims/Scenario/M1/SSP2/FileData/Country_rel);
 		attribute<uint32>  grid_count       := pcount(Country_grid);
 		attribute<km2>     area             := sum(domain/area ,Country_grid);
 		attribute<km2>     km2WCEA;         //surface area according to World_Cylindrical_Equal_Area in ArcGIS 10.3.1
 		attribute<km>      perikmWCEA;      //perimeter according to World_Cylindrical_Equal_Area in ArcGIS 10.3.1
 		attribute<km2>     dif_km2WCEA_area :=km2WCEA - area;
-		// attribute<string>  Continent_name        := contv2;
 		attribute<string>  Continent_name    := replace(contv2,'-','_');
 		attribute<bool>    IsIsland         := is_eiland[bool];
 		attribute<uint32>  InModel;
@@ -44,22 +45,19 @@ container Countries : using = "units;geography"
 		parameter<float64>               PenWorldWidth := 0.0000001[float64],  DialogType = "PenWorldWidth";
 	}
 	
-	unit<uint8> mainland := unique(Country/one)
-	{
-		attribute<LatLong_mdegrees> mainland_1pol (polygon) := partitioned_union_polygon(ipolygon(Country/Geometry_mdegrees), Country/mainland_rel)[LatLong_mdegrees];
-	}
+	
 
 	//necassary for some classifications if working with smaller extent as world (distingush not modelled countries and sea)
-	unit<ipoint> IsCountryWorld
-	: StorageName = "%MondiaalDataDir%/administrative/countries/IsCountry_v10.tif",
-	StorageType     = "gdal.grid",
-	Source          = "export of item /SourceData/RegionalUnits/Countries/IsCountry GeoDMS 7.308 PD 7354 TowardsAnUrbanPreview SD 7353 2UP",
-	StorageReadOnly = "True",
-	DialogData      = "LatLong"
-	{
-		attribute<uint8> ReadData (domain);
-		attribute<bool>  IsCountryWorld_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
-	}
+	// unit<ipoint> IsCountryWorld
+	// : StorageName = "%ToBURPDataDir%/administrative/countries/IsCountry_v10.tif",
+	// StorageType     = "gdal.grid",
+	// Source          = "export of item /SourceData/RegionalUnits/Countries/IsCountry GeoDMS 7.308 PD 7354 TowardsAnUrbanPreview SD 7353 2UP",
+	// StorageReadOnly = "True",
+	// DialogData      = "LatLong"
+	// {
+		// attribute<uint8> ReadData (domain);
+		// attribute<bool>  IsCountryWorld_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
+	// }
 
 	unit<uint32> single_polygons := split_polygon(Country/Geometry_mdegrees_clean)
 	{

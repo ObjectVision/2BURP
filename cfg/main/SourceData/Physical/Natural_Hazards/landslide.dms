@@ -1,10 +1,10 @@
 container Landslide
 {
 	//expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000
-	unit<ipoint> Frequency_of_landslides_triggered_by_earthquakes:StorageName = "%MondiaalDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ls_eq.tif",
+	unit<ipoint> Frequency_of_landslides_triggered_by_earthquakes:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ls_eq.tif",
 		StorageType     = "gdal.grid",
 		Source          = "International Centre for Geohazards / NGI",
-		url             = "%MondiaalDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/Global Risk Data Platform_ls_eq.mht",
+		url             = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/Global Risk Data Platform_ls_eq.mht",
 		StorageReadOnly = "True",
 		DialogData      = "LatLong"
 	{
@@ -23,10 +23,10 @@ container Landslide
 	}
 
 	//Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000.
-	unit<ipoint> Frequency_of_landslides_triggered_by_precipitations:StorageName = "%MondiaalDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ls_pr.tif",
+	unit<ipoint> Frequency_of_landslides_triggered_by_precipitations:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ls_pr.tif",
 		StorageType     = "gdal.grid",
 		Source          = "International Centre for Geohazards / NGI",
-		url             = "%MondiaalDataDir%/physical/Landslide/Frequency_of_landslides_triggered_by_precipitations/Natural_Hazards/Global Risk Data Platform_ls_pr.mht",
+		url             = "%ToBURPDataDir%/physical/Landslide/Frequency_of_landslides_triggered_by_precipitations/Natural_Hazards/Global Risk Data Platform_ls_pr.mht",
 		StorageReadOnly = "True",
 		DialogData      = "LatLong"
 		{

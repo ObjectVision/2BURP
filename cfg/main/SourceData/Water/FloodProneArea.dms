@@ -1,6 +1,6 @@
 container FloodProneArea
 {
-	unit<ipoint> RP100:StorageName = "%MondiaalDataDir%/Water/FloodProneArea/GLOFRIS/inun_oecd_2010_RP100_area.tif",
+	unit<ipoint> RP100:StorageName = "%ToBURPDataDir%/Water/FloodProneArea/GLOFRIS/inun_oecd_2010_RP100_area.tif",
 	StorageType = "gdal.grid",
 	Source = "conversion to tif-format in ArcGIS, unsigned integer 8 Bit, LZW-compression with correct extent",
 	StorageReadOnly = "True",
@@ -11,7 +11,7 @@ container FloodProneArea
 	}
 
 	unit<ipoint> RP1000:
-	StorageName = "%MondiaalDataDir%/Water/FloodProneArea/GLOFRIS/inun_oecd_2010_RP1000_area.tif",
+	StorageName = "%ToBURPDataDir%/Water/FloodProneArea/GLOFRIS/inun_oecd_2010_RP1000_area.tif",
 	StorageType = "gdal.grid",
 	Source = "Provided by Arno Bouwman"
 			 "conversion to tif-format in ArcGIS, LZW-compression with correct extent",

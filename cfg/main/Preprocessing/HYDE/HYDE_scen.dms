@@ -1,6 +1,6 @@
 container HYDEScen : using = "sourcedata/regionalunits"
 {
-	container Import: url="%MondiaalDataDir%/HYDE/HYDE32.txt"
+	container Import: url="%ToBURPDataDir%/HYDE/HYDE32.txt"
 	{
 		unit<uint32> SSP1
 			: StorageName = "%projdir%/data/HYDE/HYDE_SSP1_popdens.csv"

@@ -10,10 +10,10 @@
 
 container Earthquake
 {
-	unit<ipoint> Earthquakes_Modified_Mercalli_Intensity:StorageName = "%MondiaalDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif",
+	unit<ipoint> Earthquakes_Modified_Mercalli_Intensity:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif",
 		StorageType     = "gdal.grid",
 		Source          = "Earthquakes Modified Mercalli Intensity  UNEP/DEWA/GRID-Europe",
-		url             = "%MondiaalDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht",
+		url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht",
 		StorageReadOnly = "True",
 		DialogData      = "LatLong"
 		{
@@ -27,9 +27,9 @@ container Earthquake
 		}
 
 	unit<uint16> EQUAGEO
-		:  StorageName     = "%MondiaalDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
+		:  StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
 		,  StorageType     = "gdal.vect"
-		,  url             = "%MondiaalDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.txt"
+		,  url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.txt"
 		,  StorageReadOnly = "True"
 		,  Source          = "",
 		DialogType         = "Map",

@@ -3,7 +3,7 @@ container Rivers
 	parameter<String> Generate_RiverFSS := 'Ready', 	ExplicitSuppliers = "MakeFSS/geometry";
 	
 	container HydroRIVERS_v10
-	:  StorageName     = "%MondiaalDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.gdb"
+	:  StorageName     = "%ToBURPDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.gdb"
 	,  StorageType     = "gdal.vect"
 	,  StorageReadOnly = "True"
 	{
@@ -21,13 +21,13 @@ container Rivers
 	}
 
 	unit<uint32> MakeFSS := HydroRIVERS_v10/River
-	, 	StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
+	, 	StorageName = "%ToBURPDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
 	{
 		attribute<LatLong> Geometry (arc) := HydroRIVERS_v10/River/geometry;
 	}
 
 	unit<uint32> River
-	: 	StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
+	: 	StorageName = "%ToBURPDataDir%/water/HydroRIVERSVersion1/HydroRIVERS_v10.fss"
 	,  StorageReadOnly = "True"
 	{
 		attribute<LatLong>           Geometry (arc);
@@ -39,10 +39,10 @@ container Rivers
 
 	attribute<Float32> Location2River_mer     (CompactedDomain) := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
 	attribute<km>      Location2River_km      (CompactedDomain) := (Location2River_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2River_km_domain_export (domain) := Location2River_km[CompactedDomain/BaseGrid], StorageName = "%MondiaalDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif";
+	attribute<km>      Location2River_km_domain_export (domain) := Location2River_km[CompactedDomain/BaseGrid], StorageName = "%ToBURPDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif";
 
 	unit<ipoint> Dist_River_km:
-	StorageName     = "%MondiaalDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif",
+	StorageName     = "%ToBURPDataDir%/water/HydroRIVERSVersion1/Location2River_km.tif",
 	StorageType     = "gdal.grid",
 	Source          = "export Location2River_km_gtopo_export 7.212 procestime 11m:19s 20210630",
 	StorageReadOnly = "True",

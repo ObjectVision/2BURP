@@ -35,7 +35,7 @@ container HYDEPast
 		{
 			container HYDEclaim;
 			parameter<string> Scenario:= HYDEclaim/Name;
-			parameter<string> PopulationInput := Modelparameters/Method;
+			// parameter<string> PopulationInput := Modelparameters/Method;
 
 			unit<uint8> ProjectionDate: nrofrows = 3
 			{

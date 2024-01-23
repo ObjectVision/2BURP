@@ -9,7 +9,7 @@ container Urban : using = "geography;sourcedata/regionalunits"
 		unit<ipoint> big_raster
 		:	StorageName     = "= FileName+'.tif'"
 		,	StorageType     = "gdal.grid"
-		,	url             = "%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/Global_Human_Settlement_GHS_BUILT_UP_GRID_European_Commission.htm"
+		,	url             = "%ToBURPDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/Global_Human_Settlement_GHS_BUILT_UP_GRID_European_Commission.htm"
 		,	Source          = "JRC"
 		,	StorageReadOnly = "True"
 		,	DialogData      = "SphericalMercator"
@@ -58,8 +58,8 @@ container Urban : using = "geography;sourcedata/regionalunits"
 	{
 		parameter<uint16> Year;
 
-		container P1 := UrbanAreaJRC_T('%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p1');
-		container P2 := UrbanAreaJRC_T('%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p2');
+		container P1 := UrbanAreaJRC_T('%ToBURPDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p1');
+		container P2 := UrbanAreaJRC_T('%ToBURPDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/GHS_BUILT_LDS'+string(Year)+'_GLOBE_R2016A_3857_38_v1_0_p2');
 
 		attribute<uint32> TotalGridData(domain) := max_elem(P1/TotalGridData, P2/TotalGridData);
 		attribute<uint16> cell_count   (domain) := max_elem(P1/LIGHT_cell_count, P2/LIGHT_cell_count);
@@ -73,7 +73,7 @@ container Urban : using = "geography;sourcedata/regionalunits"
 
 	container BuiltUpPresenceJRC_Read := for_each_ndvat(JrcDataset/name, 
 		domain, /Classifications/Prc/Prc_0_100, 
-		'%MondiaalDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/output/BuiltUpPresenceJRC_'+string(JrcDataset/year)+'.tif', 'gdal.grid'),
+		'%ToBURPDataDir%/Preprocessing/urban/JRC/BuiltUpPresence/2016/output/BuiltUpPresenceJRC_'+string(JrcDataset/year)+'.tif', 'gdal.grid'),
 		Source = "export van /Urban/UrbanAreaJRC_yyyy/LIGHT_urban_density in GeoDMS 7.159",
 		url = "";
 

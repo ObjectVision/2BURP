@@ -1,7 +1,7 @@
 container TravelTime
 {
 	unit<ipoint> TravelTimeGRIP:
-		StorageName     = "%MondiaalDataDir%/Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime_minutes_int.tif",
+		StorageName     = "%ToBURPDataDir%/Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime_minutes_int.tif",
 		StorageType     = "gdal.grid",
 		Source          = "PBL Database: 	Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\TravelTime.gdb"
 						  "Raster: 	tt_pop50k_30sec"
@@ -11,8 +11,8 @@ container TravelTime
 		StorageReadOnly = "True",
 		DialogData      = "Geography/LatLong"
 	{
-		attribute<uint8>   ReadData   (Geography/domain);
-		attribute<float32> ReadData32 (Geography/domain) :=  value(ReadData,float32);
-		attribute<uint8>   TravelTime (Geography/domain) :=  MakeDefined(ReadData,60b);
+		attribute<uint8>   GridData   (Geography/domain);
+		attribute<float32> ReadData32 (Geography/domain) :=  value(GridData,float32);
+		attribute<uint8>   TravelTime (Geography/domain) :=  MakeDefined(GridData,60b);
 	}
 }

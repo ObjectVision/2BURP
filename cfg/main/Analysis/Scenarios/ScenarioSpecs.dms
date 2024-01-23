@@ -1,4 +1,4 @@
-container ScenarioSpecs : url ="%MondiaalDataDir%/SSP/The_roads_ahead__Narratives_for_shared_socioeconomic_pathways.pdf"// USER INPUT
+container ScenarioSpecs : url ="%ToBURPDataDir%/SSP/The_roads_ahead__Narratives_for_shared_socioeconomic_pathways.pdf"// USER INPUT
 {
 	container ProtectionLevel //Protected & Natural areas
 	{

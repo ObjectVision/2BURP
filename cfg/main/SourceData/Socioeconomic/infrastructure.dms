@@ -16,9 +16,9 @@ container Infrastructure : using = "Geography"
 		// ExplicitSuppliers = "MakeFSS/geometry";
 
 		container GRIP4 
-		:  StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads.gdb"
+		:  StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads.gdb"
 		,  StorageType     = "gdal.vect"
-		,  url             = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Global Roads Inventory Project 2018 GRIP4 (PBL) - DataPortaal Explorer_xml.mht"
+		,  url             = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Global Roads Inventory Project 2018 GRIP4 (PBL) - DataPortaal Explorer_xml.mht"
 		,  StorageReadOnly = "True"
 		,  Source          = "PBL GRIP4_GlobalRoads_NL",
 		DialogType         = "Map",
@@ -42,19 +42,19 @@ container Infrastructure : using = "Geography"
 		}
 
 		unit<uint32> MakeFSS123 := GRIP4/Roads123
-		, 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
+		, 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
 		{
 			attribute<LatLong> Geometry (arc) := GRIP4/Roads123/geometry;
 		}
 
 		unit<uint32> MakeFSS45 := GRIP4/Roads45
-		, 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
+		, 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
 		{
 			attribute<LatLong> Geometry (arc) := GRIP4/Roads45/geometry;
 		}
 
 		unit<uint32> Roads123
-		: 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
+		: 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
 		,  StorageReadOnly = "True"
 		{
 			attribute<LatLong>               Geometry (arc);
@@ -65,7 +65,7 @@ container Infrastructure : using = "Geography"
 		}
 
 		unit<uint32> Roads45
-		: 	StorageName = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
+		: 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
 		,  StorageReadOnly = "True"
 		{
 			attribute<LatLong>               Geometry (arc);
@@ -86,7 +86,7 @@ container Infrastructure : using = "Geography"
 		container GRIP4_grid
 		{
 			unit<ipoint> Road123
-			:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif"
+			:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif"
 			,	StorageType     = "gdal.grid"
 			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road123_km_domain_export geodms 7.312 PD 7602 SD 7537"
 			,	StorageReadOnly = "True"
@@ -107,7 +107,7 @@ container Infrastructure : using = "Geography"
 			}
 
 			unit<ipoint> Road45
-			:	StorageName     = "%MondiaalDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif"
+			:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif"
 			,	StorageType     = "gdal.grid"
 			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road45_km_domain_export geodms 7.312 PD 7602 SD 7537"
 			,	StorageReadOnly = "True"

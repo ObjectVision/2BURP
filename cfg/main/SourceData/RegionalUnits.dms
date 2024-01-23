@@ -2,18 +2,65 @@ container RegionalUnits
 {
 	#include <Country.dms>
 	
-	unit<uint8> Continent := unique(Countries/Country/Continent_name)
+	unit<uint32> GADM 
+	: StorageName = "%ToBURPDataDir%/Regions/gadm_410.gpkg"
+	, StorageType = "gdal.vect"
+	, StorageReadOnly = "true"
 	{
-		attribute<uint8>  aantal := pcount(Countries/Country/Continent_id);
-		attribute<string> Label  := values, DialogType = "LabelText";
+		attribute<LatLong>           Geometry (poly);
+		attribute<string>            ISO3                     := GID_0;
+		attribute<store_Countries>   store_countries_rel      := rlookup(Country, store_Countries/values);
+		attribute<Continents>        continents_rel           := rlookup(AsItemName(continent_name), Continents/name);
+		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);
 	}
 	
-	unit<uint8> World := unique(Countries/Country/World_name)
+	unit<uint32> store_Countries := unique(GADM/Country)
+	, storagename = "%ToBURPDataDir%/Regions/fss/Countries.fss"
 	{
-		attribute<uint8> aantal := pcount(Countries/Country/World_ID);
-		attribute<string> Label := values, DialogType = "LabelText";
+		attribute<string>            Label                    := Values;
+		attribute<string>            ISO3                     := first(GADM/GID_0, GADM/store_countries_rel);
+		attribute<LatLong>           Geometry_LL       (poly) := partitioned_union_polygon(GADM/geometry[LatLong_ip], GADM/store_countries_rel)[LatLong];
+		attribute<WorldMollweide>    Geometry_MW       (poly) := convert(Geometry_LL, WorldMollweide);
+		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
+		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
+		attribute<Continents>        Continents_rel           := first(GADM/Continents_rel, GADM/store_countries_rel);
 	}
 	
-	// #include <capital_analysis.dms>
-	// #include <Subnational.dms>
+	unit<uint32> Countries
+	: storagename = "= propvalue(store_Countries, 'StorageName')"
+	, StorageReadOnly = "True"
+	{
+		attribute<string>            Label; 
+		attribute<string>            ISO3; 
+		attribute<LatLong>           geometry_LL (poly);
+		attribute<SphericalMercator> Geometry_WM (poly); 
+		attribute<WorldMollweide>    Geometry_MW (poly); 
+		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly);
+		attribute<Continents>        Continents_rel;
+		attribute<mainland>          mainland_rel                := rlookup(const(1u,.), mainland/values);
+		attribute<.>                 Country_grid       (domain) := poly2grid(geometry_LL , domain);
+		
+		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
+	}
+	
+	unit<uint8> Continents := Classifications/Continents
+	{
+		attribute<LatLong>  geometry (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong];
+		attribute<string>   name            := Classifications/Continents/name;
+		attribute<string>   label           := Classifications/Continents/label;
+		
+		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
+	}
+	
+	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
+	{
+		attribute<LatLong> geometry (poly) := partitioned_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
+	}
+	
+	unit<uint8> World : nrofrows = 1
+	{
+		attribute<string> Label  := const('World',.);
+		
+		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
+	}
 }

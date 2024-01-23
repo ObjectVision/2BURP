@@ -1,7 +1,7 @@
 container NLD
 {
 	unit<uint32> natura2000
-		:  StorageName = "%MondiaalDataDir%/Policy/Country/NLD/natura2000.shp"
+		:  StorageName = "%ToBURPDataDir%/Policy/Country/NLD/natura2000.shp"
 		,  StorageType     = "gdal.vect"
 		,  url             = "Het featuretype 'natura2000' is gepubliceerd in de Web Feature Service https://geodata.nationaalgeoregister.nl/natura2000/wfs?request=GetCapabilities"
 		,  StorageReadOnly = "True"
