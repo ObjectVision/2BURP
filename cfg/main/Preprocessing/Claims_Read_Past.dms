@@ -1,9 +1,9 @@
-unit<uint32> Read_Past
+unit<uint32> Past
 : StorageName = "%projdir%/data/Past/Past_Claim_1990_2015_validation.csv"
 , StorageType = "gdal.vect"
 , StorageReadonly = "True"
 {
-	attribute<SourceData/RegionalUnits/Countries/Country> Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
+	attribute<SourceData/RegionalUnits/Countries> Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/ISO3);
 
 	attribute<float32> population_to_use_1990 := SSPPast_population_to_use_1990[float32];
 	attribute<float32> population_to_use_2000 := SSPPast_population_to_use_2000[float32];

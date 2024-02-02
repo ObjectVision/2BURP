@@ -12,26 +12,26 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 {
 	unit<uint32> CD:= CompactedDomain
 	{
-		attribute<float32> Observed       :=SourceData/Population/Past/PastDates/Y2015[CompactedDomain/domain_rel];
-		attribute<float32> Modelled       :=/Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDates/y2015/NewState/Pop;
+		attribute<float32> Observed       := ='SourceData/Population/Past/PerYear/'+ModelParameters/StartYear+'/Population_LL[CompactedDomain/domain_rel]';
+		attribute<float32> Modelled       := Analysis/Scenarios_Past/SSPs/SSPPast/ProjectionDates/y2015/NewState/Pop;
 		attribute<float32> ObsMINUSMod    :=abs(Observed - Modelled);
 		attribute<float32> SqrObsMINUSMod :=Sqr(Observed - Modelled);
 	}
 
 	container MAE
 	{
-		unit<uint8> Country:= SourceData/RegionalUnits/Countries/Country 
+		unit<uint32> Country := SourceData/RegionalUnits/Countries 
 		{
-			attribute<string>  Name        := SourceData/RegionalUnits/Countries/Country/Name_cor;
+			attribute<string>  Name        := SourceData/RegionalUnits/Countries/label;
 			attribute<uint32>  nr          := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Country_rel);
 			attribute<float32> ObsMINUSMod := sum(Population_Error_Indicators/CD/ObsMINUSMod,   CompactedDomain/Country_rel);
 			attribute<float32> Observed    := sum(Population_Error_Indicators/CD/Observed,      CompactedDomain/Country_rel);
 			attribute<float32> MAE         := ((1f/nr[float32]) * ObsMINUSMod) / (Observed / nr[float32]);
 		}
 
-		unit<uint8> Continent := SourceData/RegionalUnits/Continent
+		unit<uint8> Continent := SourceData/RegionalUnits/Continents
 		{
-			attribute<string>  Name               := SourceData/RegionalUnits/Continent/Label;
+			attribute<string>  Name               := SourceData/RegionalUnits/Continents/Label;
 			attribute<uint32>  nr                 := count(Population_Error_Indicators/CD/Observed, CompactedDomain/Continent_rel);
 			attribute<float32> ObsMINUSMod        := sum(Population_Error_Indicators/CD/ObsMINUSMod,   CompactedDomain/Continent_rel);
 			attribute<float32> Observed           := sum(Population_Error_Indicators/CD/Observed,      CompactedDomain/Continent_rel);
@@ -79,23 +79,23 @@ container Population_Error_Indicators: url = "%projdir%/doc/A_pixel_level_evalua
 	{
 		//als named Pearson's R 
 		attribute<float32> Relative_Difference(CompactedDomain)            := Population_Error_Indicators/CD/ObsMINUSMod / (Population_Error_Indicators/CD/Observed + Population_Error_Indicators/CD/Modelled);//0/0 --> null!
-		attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries/Country )   := mean(Relative_Difference,   CompactedDomain/Country_rel);
+		attribute<float32> Relative_DifferenceCountry(SourceData/RegionalUnits/Countries )   := mean(Relative_Difference,   CompactedDomain/Country_rel);
 		attribute<float32> Relative_DifferenceContinent(SourceData/RegionalUnits/Continent) := mean(Relative_Difference,   CompactedDomain/Continent_rel);
 		attribute<float32> Relative_DifferenceWorld(SourceData/RegionalUnits/World)        := mean(Relative_Difference,   CompactedDomain/World_rel);
 	}
 	
 	container result
 	{
-		unit<uint8> Country:=SourceData/RegionalUnits/Countries/Country 
+		unit<uint32> Country := SourceData/RegionalUnits/Countries 
 		{
-			attribute<string>  Name                := SourceData/RegionalUnits/Countries/Country/Name_cor;
-			attribute<string>  ISO3                := SourceData/RegionalUnits/Countries/Country/ISO3;
+			attribute<string>  Name                := SourceData/RegionalUnits/Countries/label;
+			attribute<string>  ISO3                := SourceData/RegionalUnits/Countries/ISO3;
 			attribute<float32> MAE                 := Population_Error_Indicators/MAE/Country/MAE;
 			attribute<float32> RMSE                := Population_Error_Indicators/RMSE/Country/RMSE;
 			attribute<float32> Relative_Difference := Population_Error_Indicators/Relative_Difference/Relative_DifferenceCountry;//has no real meaning
 		}
 		unit<uint32> variable_country_export := SubItem_PropValues(Country,'Name');
-		container export_country_csv := Templates/WriteTable8ToCSV(Country , AsList(variable_country_export/Name, ';'), '%LocalDataProjDir%/results/'+/Analysis/Scenarios_Past/GridName+'/validation_population/country.csv');
+		container export_country_csv := Templates/WriteTable32ToCSV(Country , AsList(variable_country_export/Name, ';'), '%LocalDataProjDir%/results/'+/Analysis/Scenarios_Past/GridName+'/validation_population/country.csv');
 
 		unit<uint8> Continent := SourceData/RegionalUnits/Continent
 		{

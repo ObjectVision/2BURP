@@ -22,7 +22,7 @@ container Scenarios_Past: using = "units;geography;classifications"
 	
 	container SSPs := 
 		for_each_ne(SSP_Past/Name, 
-			'RunScenarios_T(Preprocessing/Claims/Read_Past, ProjectionDate_Past)'
+			'RunScenarios_T(Preprocessing/Claims/Past, ProjectionDate_Past)'
 		);
 
 	Template RunScenarios_T
@@ -34,7 +34,7 @@ container Scenarios_Past: using = "units;geography;classifications"
 
 		container source
 		{
-			attribute<Classifications/urban_discrete/lu_type> landuse (domain)    := /Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[uint8];
+			attribute<Classifications/urban_discrete/lu_type> landuse (domain)    := /Preprocessing/UrbanArea/UrbanArea_Y1990/GridData[uint8];
 
 			container SuitabilityMaps // Static Suitabilities
 			{
@@ -54,13 +54,13 @@ container Scenarios_Past: using = "units;geography;classifications"
 				//end unCalibrated code
 
 				// --------------------------- Application of Calibration coefficients calculated by VU - Pendula Ferdinand (oktober 2021) -------------------- //
-				attribute<float32> Urban_Cali (domain) := (SourceData/Population/M3/PopulationDensity8dir_2021/Y1990/LN_MeanPopulationDensity1990_8dir[float32] * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(SourceData/Physical/Coast/Coastline_Distance_grid/Coastline/Coastline[float32]  * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/DistanceToCoast_coef_grid) + 
+				attribute<float32> Urban_Cali (domain) := (SourceData/Population/M3/PopulationDensity8dir/Y1990/LN_Mean_Pop_Density_8dir[float32] * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/TotalPopulationDensity1990_8dir_coef_grid) + 
+																		(Physical/Coast/Location2Coast_km/Coastline[float32]  * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/DistanceToCoast_coef_grid) + 
 																		(SourceData/Water/Sweet_Water/Sweet_Water_Distance[float32]                      * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/SweetWater_coef_grid) + 
 																		(SourceData/Physical/Elevation/Elevation[float32]                                * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/Elevation_coef_grid) + 
 																		(SourceData/Physical/Slope_2021/ReadData[float32]                                * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/Slope_coef_grid) + 
 																		(SourceData/Physical/TerrainRoughnessIndex/mean                                  * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/TRI_coef_grid) + 
-																		(SourceData/Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime[float32]          * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/TravelTime_coef_grid) + 
+																		(SourceData/Socioeconomic/TravelTime/TravelTime[float32]          * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/TravelTime_coef_grid) + 
 																		(IsProtected[float32]                                                       * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/ProtectedArea_coef_grid) + 
 																		(SourceData/Water/FloodProneArea/RP100/RP100_bool[float32]                       * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/FloodProneArea_coef_grid) + 
 																		(SourceData/Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32] * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/Earthquake_coef_grid) + 
@@ -70,13 +70,13 @@ container Scenarios_Past: using = "units;geography;classifications"
 																		(SourceData/Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/DistanceSecondaryRoads_coef_grid) + 
 																		Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain/Constant_coef_grid;
 
-				attribute<float32> UrbanChange_Cali (domain) := (SourceData/Population/M3/PopulationDensity8dir_2021/Y1990/LN_MeanPopulationDensity1990_8dir[float32] * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(SourceData/Physical/Coast/Coastline_Distance_grid/Coastline/Coastline[float32]  * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/DistanceToCoast_coef_grid) + 
+				attribute<float32> UrbanChange_Cali (domain) := (SourceData/Population/M3/PopulationDensity8dir/Y1990/LN_Mean_Pop_Density_8dir[float32] * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/TotalPopulationDensity1990_8dir_coef_grid) + 
+																		(Physical/Coast/Location2Coast_km/Coastline[float32]  * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/DistanceToCoast_coef_grid) + 
 																		(SourceData/Water/Sweet_Water/Sweet_Water_Distance[float32]                      * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/SweetWater_coef_grid) + 
 																		(SourceData/Physical/Elevation/Elevation[float32]                                * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/Elevation_coef_grid) + 
 																		(SourceData/Physical/Slope_2021/ReadData[float32]                                * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/Slope_coef_grid) + 
 																		(SourceData/Physical/TerrainRoughnessIndex/mean                                  * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/TRI_coef_grid) + 
-																		(SourceData/Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime[float32]          * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/TravelTime_coef_grid) + 
+																		(SourceData/Socioeconomic/TravelTime/TravelTime[float32]          * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/TravelTime_coef_grid) + 
 																		(IsProtected[float32]                                                       * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/ProtectedArea_coef_grid) + 
 																		(SourceData/Water/FloodProneArea/RP100/RP100_bool[float32]                       * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/FloodProneArea_coef_grid) + 
 																		(SourceData/Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32] * Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/Earthquake_coef_grid) + 
@@ -87,6 +87,7 @@ container Scenarios_Past: using = "units;geography;classifications"
 																		Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain/Constant_coef_grid;
 
 				// -------------------------------------------------------------------------------------------------------------------- //
+				
 				
 				attribute<float32> UrbanProb (domain) := rescale(UrbanChange_Cali,0f,1f);//option Urban_Cali or UrbanChange_Cali
 			}
@@ -110,10 +111,10 @@ container Scenarios_Past: using = "units;geography;classifications"
 		}
 
 		//Declare Country as region to distribute population in
-		unit<uint8> ClaimRegion := SourceData/RegionalUnits/Countries/Country 
+		unit<uint32> ClaimRegion := SourceData/RegionalUnits/Countries 
 		{
-			attribute<Person_km2> minimum_population_density := SourceData/Population/M1/Urban_pop_2010/UrbanMinPopDensity;
-			attribute<Person_km2> mean_population_density    := SourceData/Population/M1/Urban_pop_2010/UrbanMeanPopDensity;//although named M1 also calculated for M3 in this code
+			// attribute<Person_km2> minimum_population_density := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Min_Pop_Density;
+			attribute<Person_km2> mean_population_density    := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Mean_Pop_Density;//although named M1 also calculated for M3 in this code
 		}
 
 		//----------------------------------DYNAMIC POPULATION ALLOCATION-----------------------------------------------//

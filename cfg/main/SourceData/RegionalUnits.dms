@@ -24,6 +24,7 @@ container RegionalUnits
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
 		attribute<Continents>        Continents_rel           := first(GADM/Continents_rel, GADM/store_countries_rel);
+		attribute<string>            continent_name           := first(GADM/continent_name, GADM/store_countries_rel);
 	}
 	
 	unit<uint32> Countries
@@ -37,8 +38,11 @@ container RegionalUnits
 		attribute<WorldMollweide>    Geometry_MW (poly); 
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly);
 		attribute<Continents>        Continents_rel;
-		attribute<mainland>          mainland_rel                := rlookup(const(1u,.), mainland/values);
-		attribute<.>                 Country_grid       (domain) := poly2grid(geometry_LL , domain);
+		attribute<string>            continent_name;
+		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
+		attribute<.>                 per_grid              (domain) := poly2grid(geometry_LL , domain);
+		attribute<uint8>             per_ClaimCountry_grid (domain) := poly2grid(Preprocessing/Claims/Scenario/ReadFiles/SSP2/Filedata/geometry, domain)[uint8];
+		attribute<bool>              IsClaimCountry        (domain) := per_ClaimCountry_grid[int16] > -1s;
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
@@ -48,6 +52,8 @@ container RegionalUnits
 		attribute<LatLong>  geometry (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong];
 		attribute<string>   name            := Classifications/Continents/name;
 		attribute<string>   label           := Classifications/Continents/label;
+		
+		attribute<.>        per_grid        (domain) := poly2grid(geometry , domain);
 		
 		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
 	}

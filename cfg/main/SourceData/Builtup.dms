@@ -1,5 +1,14 @@
 container Builtup : using = "units;classifications;sourcedata/regionalunits"
 {
+	container PerYear_attr := //works
+		for_each_ndvat(
+			GHS_years/name
+			, domain
+			, float64
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			,'gdal.grid'
+		);
+
 	container PerYear := 
 		for_each_ne(
 			GHS_years/name
@@ -10,20 +19,37 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 	{
 		parameter<uint16> Year;
 		////
-		parameter<string> FileName          := '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(Year)+'_GLOBE_R2023A_54009_'+string(ModelParameters/MW_Gridsize)+'_V1_0';
+		// parameter<string> FileName          := '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(Year)+'_GLOBE_R2023A_54009_'+string(ModelParameters/MW_Gridsize)+'_V1_0';
+		parameter<string> FileName_wgs      := '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(Year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0';
+
+		// unit<ipoint> big_raster := Mollweide_grid
+		// ,	StorageName     = "= FileName+'.tif'"
+		// ,	StorageReadOnly = "True"
+		// ,	DialogData      = "WorldMollweide"
+		// , 	LazyCalculated  = "true"
+		// {
+			// attribute<uint32>  GridData; // don't read this; memory will explode
+			// attribute<bool>    IsAboveThreshold     := MakeDefined(GridData,0) >= uint32(ModelParameters/BuiltUp_threshold);
+		// }
 		
-		unit<ipoint> big_raster := Mollweide_grid
-		,	StorageName     = "= FileName+'.tif'"
+		unit<wpoint> big_raster_wgs := domain // doesnt work
+		,	StorageName     = "= FileName_wgs+'.tif'"
+		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
-		,	DialogData      = "WorldMollweide"
-		, 	LazyCalculated  = "true"
-		{
-			attribute<uint32>  GridData; // don't read this; memory will explode
-			attribute<bool>    IsAboveThreshold     := MakeDefined(GridData,0) >= uint32(ModelParameters/BuiltUp_threshold);
-		}
+		,	DialogData      = "LatLong"
+		, 	LazyCalculated  = "true";
 		
-		attribute<float32> Builtup_MW (Mollweide_grid) := big_raster/GridData[float32] / 1000000f;
-		attribute<float32> Builtup_LL (domain)         := sum_float32(Builtup_MW, invert(domain/mollweide_rel));
+		attribute<float64> BuiltUpPresence (domain)  //works
+		: StorageName     = "= FileName_wgs+'.tif'"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "LatLong"
+		, 	LazyCalculated  = "true";
+		
+		// attribute<float32> Builtup_MW  (Mollweide_grid) := big_raster/GridData[float32] / 1000000f;
+		// attribute<float32> Builtup_LL          (domain) := sum_float32(Builtup_MW, invert(domain/mollweide_rel));
+		
+		// attribute<bool>    IsAboveThreshold_LL (domain) := Builtup_LL >= float32(ModelParameters/BuiltUp_threshold);
 
 		// attribute<uint64>      BuiltUp               (Countries)          := sum_uint64(big_raster/GridData, Big_raster_domain/Country_rel);
 		// attribute<uint64>      BuiltUp_threshold     (Countries)          := sum_uint64(big_raster/GridData >= uint32(ModelParameters/BuiltUp_threshold) ? uint32(ModelParameters/MW_Gridsize * 1000d) : 0, Big_raster_domain/Country_rel);

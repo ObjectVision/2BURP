@@ -1,9 +1,9 @@
-container Read_Scenario : using = "SourceData/RegionalUnits;geography"
+container Scenario : using = "SourceData/RegionalUnits;geography"
 {
 	container ReadFiles := //fka M3
 		for_each_ne(Classifications/SSP/name, 
 			'ReadFiles_T('
-				+quote(Classifications/SSP/name+'_POPULATION_2010_2100_'+ModelParameters/Variant+'.csv')+
+				+quote(Classifications/SSP/name+'_POPULATION_2010_2100_var1.csv')+
 				','+string(Classifications/SSP/id)+
 			')'
 		);

@@ -10,25 +10,25 @@
 
 container Lakes
 {
-	unit<ipoint> Lake
-	:	StorageName = "%ToBURPDataDir%/Water/lakes/glwd_3_lake_1_ed_arcmap1031_1000_INT.tif"
-	,	StorageType = "gdal.grid"
-	,	url        = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
-	,	Source     = "ArcMap 10.3.1 Euclidean Distance with 1 grid as cellsize, convert to tif Times 1000, Integer"
-					 "Y:\Kennisbasis\WRI_GlobalCities\ontwapps_WRI_GlobalCities\toUP_Global\SD_config\lakes\glwd_3_lake_1_ed_arcmap1031.gdb"
-	,	StorageReadOnly = "True"
-	,	DialogData = "LatLong"
-	{
-		attribute<float32> ReadData(domain);
-	}
+	// unit<ipoint> Lake
+	// :	StorageName = "%ToBURPDataDir%/Physical/Water/glwd_3_lake_1_ed_arcmap1031_1000_INT.tif"
+	// ,	StorageType = "gdal.grid"
+	// ,	url        = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
+	// ,	Source     = "ArcMap 10.3.1 Euclidean Distance with 1 grid as cellsize, convert to tif Times 1000, Integer"
+					 // "Y:\Kennisbasis\WRI_GlobalCities\ontwapps_WRI_GlobalCities\toUP_Global\SD_config\lakes\glwd_3_lake_1_ed_arcmap1031.gdb"
+	// ,	StorageReadOnly = "True"
+	// ,	DialogData = "LatLong"
+	// {
+		// attribute<float32> ReadData(domain);
+	// }
 
 	container Lakesglwd
 	{
-		parameter<String> Generate_LakeFSS := 'Ready',
-		ExplicitSuppliers = "MakeFSS/geometry";
+		// parameter<String> Generate_LakeFSS := 'Ready',
+		// ExplicitSuppliers = "MakeFSS/geometry";
 	
 		container WWF
-		:  StorageName     = "%ToBURPDataDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.gdb"
+		:  StorageName     = "%ToBURPDataDir%/Physical/Water/glwd_3_gridcode1_union_no_holes_sp.gdb"
 		,  StorageType     = "gdal.vect"
 		,  url             = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
 		,  StorageReadOnly = "True"
@@ -53,9 +53,8 @@ container Lakes
 		}
 	
 		unit<uint32> glwd_3
-		: 	StorageName = "%ToBURPDataDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.fss"
+		: 	StorageName = "%ToBURPDataDir%/Physical/Water/glwd_3_gridcode1_union_no_holes_sp.fss"
 		,  StorageReadOnly = "True"
-		,  Source          = "item /Input/Water/Lakes/Lakesglwd/MakeFSS/Geometry geodms 7.312 PD 7616 SD 7656"
 		{
 			attribute<LatLong>           Geometry (arc);
 			attribute<SphericalMercator> geometry_mer (arc):= Geometry[SphericalMercator];
@@ -64,31 +63,27 @@ container Lakes
 			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 		}
 
-		attribute<Float32> Location2Lake_mer(CompactedDomain)   := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-		attribute<km>      Location2Lake_km(CompactedDomain)    := (Location2Lake_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-		attribute<km>      Location2Lake_km_domain_export (domain):= Location2Lake_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to ToBURPDataDir
+		attribute<Float32> Location2Lake_mer     (CompactedDomain) := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+		attribute<km>      Location2Lake_km_CD   (CompactedDomain) := (Location2Lake_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
+		attribute<km>      Location2Lake_km_domain_export (domain) := Location2Lake_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to ToBURPDataDir
 
-		container Lake_grid
+		unit<ipoint> Location2Lake_km
+		:	StorageName     = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "LatLong"
 		{
-			unit<ipoint> glwd_3
-				:	StorageName     = "%ToBURPDataDir%/Water/lakes/Location2Lake_km.tif"
-				,	StorageType     = "gdal.grid"
-				,	Source          = "item /Input/Water/Lakes/Lakesglwd/Location2Lake_km_domain_export geodms 7.312 PD 7612 SD 7611"
-				,	StorageReadOnly = "True"
-				,	DialogData      = "LatLong"
+			attribute<float32>  ReadData(domain);
+			attribute<float32>  Lake (domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+			attribute<float32>  LakeMD (domain) := Lake;//as used in Suitability 
+			
+			unit<uint32> Country := RegionalUnits/Countries 
 			{
-				attribute<float32>  ReadData(domain);
-				attribute<float32>  Lake (domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-				attribute<float32>  LakeMD (domain) := Lake;//as used in Suitability 
-				
-				unit<uint8> Country := Countries/Country 
-				{
-					attribute<float32>  sumLake  := sum(Lake,Countries/Country_grid);
-					attribute<float32>  MeanLake := mean(Lake,Countries/Country_grid);
-					attribute<float32>  MinLake  := min(Lake,Countries/Country_grid);
-					attribute<float32>  MaxLake  := max(Lake,Countries/Country_grid);
-					attribute<float32>  SDLake   := sd(Lake,Countries/Country_grid);
-				}
+				attribute<float32>  sumLake  := sum(Lake,per_grid);
+				attribute<float32>  MeanLake := mean(Lake,per_grid);
+				attribute<float32>  MinLake  := min(Lake,per_grid);
+				attribute<float32>  MaxLake  := max(Lake,per_grid);
+				attribute<float32>  SDLake   := sd(Lake,per_grid);
 			}
 		}
 	}

@@ -78,7 +78,8 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point(-66.0, 170.0), point(85.0, 75.0));
 		
 		//continents
-		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point( 29.0, -11.0), point(61.0, 30.0));
+		//unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point( 29.0, -11.0), point(61.0, 30.0));
+		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
 		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point(-47.0, -26.0), point( 38.0, 64.0));
 		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point(-90.0,-180.0), point(-11.0,180.0));
 		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point(-13.0,-180.0), point( 82.0,180.0));
@@ -98,7 +99,7 @@ container Geography : using = "units"
 			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong) 
 			, point_yx(90d, -180d, LatLong) //top left
 			, wpoint
-		)
+		), spatialReference = "EPSG:4326"
 	{
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
@@ -126,7 +127,7 @@ container Geography : using = "units"
 		attribute<Float32> lat_factor   := rowset/lat_factor[pointrow(ID(.))];
 		// attribute<Float64> lat          := rowset/lat_mid[row];
 		// attribute<Float64> long         := colset/long_mid[col_colset];
-		attribute<km2>     area         := rowset/area[row]; //use rowset area
+		attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
 	}
 
 	unit<ipoint> domain_sub :=
@@ -146,14 +147,14 @@ container Geography : using = "units"
 	container GridData : using = "SourceData/RegionalUnits"
 	{
 		attribute<Person> InitPopGrid         (domain) := convert(SourceData/Population/M3/Urban_Pop_StartYear, Person);
-		attribute<Person> InitPopGrid1990     (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 * Preprocessing/urban/BuiltUpBoolJRC_50prc/y1990[float32] : null_f;
+		attribute<Person> InitPopGrid1990     (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PerYear/Y1990/Population_LL * SourceData/Builtup/PerYear/Y1990/IsAboveThreshold_LL[float32] : null_f[Person];
 
 		attribute<Person> InitTpopGrid        (domain) := convert(SourceData/Population/M3/Total_Pop_StartYear, Person);
-		attribute<Person> InitTpopGrid1990    (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PastDates/Y1990 : null_f;
+		attribute<Person> InitTpopGrid1990    (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PerYear/Y1990/Population_LL : null_f[Person];
 
-		attribute<Bool> InRegion              (domain) := IsDefined(Countries/Country_grid);
+		attribute<Bool> InRegion              (domain) := IsDefined(Countries/per_grid);
 		attribute<Bool> HasPop                (domain) := InitTpopGrid > 0[Person];
-		attribute<Bool> HasUrb                (domain) := IsDefined(Countries/Country_grid) ? ((Preprocessing/UrbanArea/UrbanArea2010/ReadData) > 0b) : false;
+		attribute<Bool> HasUrb                (domain) := IsDefined(Countries/per_grid) ? ((Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData) > 0f) : false;
 
 		attribute<bool> IsNotLake             (domain) := not(Water/Water_without_oceans/ReadData);
 		attribute<bool> IsNotIce              (domain) := not(Physical/SnowIceCover/ReadData);
@@ -167,14 +168,14 @@ container Geography : using = "units"
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
 		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
-		attribute<domain/rowset>     row                   := domain/row[domain_rel];
+		// attribute<domain/rowset>     row                   := domain/row[domain_rel];
 		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
-		attribute<km2>               area                  := domain/rowset/area[row];
+		attribute<km2>               area                  := domain/area[domain_rel];
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
-		attribute<Countries/Country> Country_rel   := Countries/Country_grid[domain_rel];
-		attribute<Continent>         Continent_rel := Countries/Country/Continent_id_grid[domain_rel];
-		attribute<World>             World_rel     := Countries/Country/World_id_grid[domain_rel];
-		attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
+		attribute<Countries>         Country_rel   := Countries/per_grid[domain_rel];
+		attribute<Continents>        Continent_rel := Continents/per_grid[domain_rel];
+		// attribute<World>             World_rel     := Countries/World_id_grid[domain_rel];
+		// attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
 	}
 	
 	container Distmatrices

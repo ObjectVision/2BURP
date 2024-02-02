@@ -16,6 +16,8 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy
 
 	container Make_UnlinkedData
 	{
+		parameter<string> Coastline   := 'Ready', ExplicitSuppliers = "/SourceData/Physical/Coast/Location2Coast_km_domain_export";
+		
 		parameter<string> Claims      := 'Ready', ExplicitSuppliers = "/Preprocessing/Claims/Make_Past/export_csv/result";
 		parameter<string> Claims_Past := 'Ready', ExplicitSuppliers = "=AsList('Claims_PerSSP/'+Classifications/SSP/name, ';')";
 

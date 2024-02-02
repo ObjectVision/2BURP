@@ -8,8 +8,8 @@ container HYDEPast
 		, StorageType = "gdal.vect"
 		, StorageReadonly = "True"
 		{
-			attribute<SourceData/RegionalUnits/Countries/Country> Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/Country/ISO3);
-			attribute<LatLong> geometry (polygon) := SourceData/RegionalUnits/Countries/Country/Geometry[Country_rel];
+			attribute<SourceData/RegionalUnits/Countries> Country_rel := rlookup(Region, SourceData/RegionalUnits/Countries/ISO3);
+			attribute<LatLong> geometry (polygon) := SourceData/RegionalUnits/Countries/Geometry_LL[Country_rel];
 			attribute<string> Label := Region;
 
 			parameter<string> Name := 'SSPPast';
@@ -47,7 +47,7 @@ container HYDEPast
 			{
 				container NewState
 				{
-					attribute<km2> UrbanArea (SourceData/RegionalUnits/Countries/Country ) := SourceData/Population/M1/Urban_pop_2010/UrbanArea;
+					attribute<km2> UrbanArea (SourceData/RegionalUnits/Countries) := SourceData/Population/M1/Urban_pop_2010/UrbanArea;
 				}
 			}
 
@@ -59,12 +59,12 @@ container HYDEPast
 					,	'@SSP@', Scenario
 					,	'@YR@', string(ProjectionDate/Yr)
 					)
-				,	SourceData/RegionalUnits/Countries/Country , float32
+				,	SourceData/RegionalUnits/Countries , float32
 				);
 
 			container Evaluation
 			{
-				attribute<float32> Diff_2015_1990 (SourceData/RegionalUnits/Countries/Country ) := Indices/Y2015 - Indices/Y1990;
+				attribute<float32> Diff_2015_1990 (SourceData/RegionalUnits/Countries ) := Indices/Y2015 - Indices/Y1990;
 			}
 		}
 	}

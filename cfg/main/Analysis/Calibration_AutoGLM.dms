@@ -1,6 +1,6 @@
 container Calibration_AutoGLM: using = "geography"
 {
-	unit <uint32> CD := geography/CompactedDomain
+	unit <uint32> CD := CompactedDomain
 	{
 		attribute<uint32>                                      Number                           := domain/number[org_rel];
 		attribute<SourceData/RegionalUnits/Countries/Country>  Country_grid                     := SourceData/RegionalUnits/Countries/Country_grid[CompactedDomain/org_rel];

@@ -3,71 +3,61 @@ container HYDEScen : using = "sourcedata/regionalunits"
 	container Import: url="%ToBURPDataDir%/HYDE/HYDE32.txt"
 	{
 		unit<uint32> SSP1
-			: StorageName = "%projdir%/data/HYDE/HYDE_SSP1_popdens.csv"
-			, StorageType = "gdal.vect"
-			, StorageReadonly = "True"
-			, DialogType  = "Map"
-			, DialogData  = "PolyData"
+		: StorageName = "%projdir%/data/HYDE/HYDE_SSP1_popdens.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
 		{
-			attribute<Countries/Country > Country_rel := rlookup(Region, Countries/Country/ISO3);
-			attribute<LatLong> PolyData (polygon) := Countries/Country/Geometry[ Country_rel ];
-			attribute<string> Label := Region;
+			attribute<Countries> Country_rel     := rlookup(Region, Countries/ISO3);
+			attribute<LatLong>   geometry (poly) := Countries/Geometry_LL[Country_rel];
+			attribute<string>    Label           := Region;
 	
 			parameter<string> Name := 'SSP1';
 		}
 	
 		unit<uint32> SSP2
-			: StorageName = "%projdir%/data/HYDE/HYDE_SSP2_popdens.csv"
-			, StorageType = "gdal.vect"
-			, StorageReadonly = "True"
-			, DialogType  = "Map"
-			, DialogData  = "PolyData"
+		: StorageName = "%projdir%/data/HYDE/HYDE_SSP2_popdens.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
 		{
-			attribute<Countries/Country > Country_rel := rlookup(Region, Countries/Country/ISO3);
-			attribute<LatLong> PolyData (polygon) := Countries/Country/Geometry[ Country_rel ];
-			attribute<string> Label := Region;
+			attribute<Countries> Country_rel     := rlookup(Region, Countries/ISO3);
+			attribute<LatLong>   geometry (poly) := Countries/Geometry_LL[Country_rel];
+			attribute<string>    Label           := Region;
 			
 			parameter<string> Name := 'SSP2';
 		}
 	
 		unit<uint32> SSP3
-			: StorageName = "%projdir%/data/HYDE/HYDE_SSP3_popdens.csv" 
-			, StorageType = "gdal.vect"
-			, StorageReadonly = "True"
-			, DialogType  = "Map"
-			, DialogData  = "PolyData"
+		: StorageName = "%projdir%/data/HYDE/HYDE_SSP3_popdens.csv" 
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
 		{
-			attribute<Countries/Country > Country_rel := rlookup(Region, Countries/Country/ISO3);
-			attribute<LatLong> PolyData (polygon) := Countries/Country/Geometry[Country_rel];
-			attribute<string> Label := Region;
+			attribute<Countries> Country_rel     := rlookup(Region, Countries/ISO3);
+			attribute<LatLong>   geometry (poly) := Countries/Geometry_LL[Country_rel];
+			attribute<string>    Label           := Region;
 			
 			parameter<string> Name := 'SSP3';
 		}
 	
 		unit<uint32> SSP4
-			: StorageName = "%projdir%/data/HYDE/HYDE_SSP4_popdens.csv"
-			, StorageType = "gdal.vect"
-			, StorageReadonly = "True"
-			, DialogType  = "Map"
-			, DialogData  = "PolyData"
+		: StorageName = "%projdir%/data/HYDE/HYDE_SSP4_popdens.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
 		{
-			attribute<Countries/Country > Country_rel := rlookup(Region, Countries/Country/ISO3);
-			attribute<LatLong> PolyData (polygon) := Countries/Country/Geometry[ Country_rel ];
-			attribute<string> Label := Region;
+			attribute<Countries> Country_rel     := rlookup(Region, Countries/ISO3);
+			attribute<LatLong>   geometry (poly) := Countries/Geometry_LL[Country_rel];
+			attribute<string>    Label           := Region;
 			
 			parameter<string> Name := 'SSP4';
 		}
 	
 		unit<uint32> SSP5
-			: StorageName = "%projdir%/data/HYDE/HYDE_SSP5_popdens.csv"
-			, StorageType = "gdal.vect"
-			, StorageReadonly = "True"
-			, DialogType  = "Map"
-			, DialogData  = "PolyData"
+		: StorageName = "%projdir%/data/HYDE/HYDE_SSP5_popdens.csv"
+		, StorageType = "gdal.vect"
+		, StorageReadonly = "True"
 		{
-			attribute<Countries/Country > Country_rel := rlookup(Region, Countries/Country/ISO3);
-			attribute<LatLong> PolyData (polygon) := Countries/Country/Geometry[ Country_rel ];
-			attribute<string> Label := Region;
+			attribute<Countries> Country_rel     := rlookup(Region, Countries/ISO3);
+			attribute<LatLong>   geometry (poly) := Countries/Geometry_LL[Country_rel];
+			attribute<string>    Label           := Region;
 			
 			parameter<string> Name := 'SSP5';
 		}
@@ -88,13 +78,12 @@ container HYDEScen : using = "sourcedata/regionalunits"
 			container HYDEclaim;
 			
 			parameter<string> Scenario:= HYDEclaim/Name;
-			parameter<string> PopulationInput := ModelParameters/Method;
 
 			container Start 
 			{
 				container NewState
 				{
-					attribute<km2> UrbanArea (Countries/Country ) := SourceData/Population/M1/Urban_pop_2010/UrbanArea;
+					// attribute<km2> UrbanArea (Countries) := SourceData/Population/M3/Urban_pop_2010/UrbanArea;
 				}
 			}
 
@@ -107,7 +96,7 @@ container HYDEScen : using = "sourcedata/regionalunits"
 						,	'@SSP@', Scenario
 						,	'@YR@', string(Classifications/ProjectionDate/Yr)
 						)
-					, Countries/Country
+					, Countries
 					, float32
 				);
 	
@@ -115,30 +104,28 @@ container HYDEScen : using = "sourcedata/regionalunits"
 				for_each_nedv(
 					Classifications/ProjectionDate/name
 					, ModelParameters/InPresentUrban = 'InPresentUrban' 
-						? replace('(MakeDefined(Preprocessing/Claims/Read_Scenario/@Input@/@SSP@/Filedata/URBANPOP2010[float32][invert(Preprocessing/Claims/Read_Scenario/@Input@/@SSP@/Filedata/Country_rel)] * 1000000[Person], 0[Person]) / SourceData/Population/@Input@/Urban_pop_2010/UrbanMeanPopDensity)'
+						? replace('(MakeDefined(Preprocessing/Claims/Scenario/ReadFiles/@SSP@/Filedata/URBANPOP2010[float32][invert(Preprocessing/Claims/Scenario/ReadFiles/@SSP@/Filedata/Country_rel)] * 1000000[Person], 0[Person]) / SourceData/Population/M3/Urban_Pop_StartYear_Country/Urban_Mean_Pop_Density)'
 									'/ Indices/@YRN@'
 								,	'@SSP@', Scenario
 								,	'@YR@', string(Classifications/ProjectionDate/Yr)
 								,	'@YRN@', Classifications/ProjectionDate/Name
-								,	'@Input@', PopulationInput
 							)
 						: replace(
-								'(MakeDefined(Preprocessing/Claims/Read_Scenario/@Input@/@SSP@/Filedata/URBANPOP@YR@[float32][invert(Preprocessing/Claims/Read_Scenario/@Input@/@SSP@/Filedata/Country_rel)] * 1000000[Person], 0[Person]) '
-										'/ SourceData/Population/@Input@/Urban_pop_2010/UrbanMeanPopDensity)'
+								'(MakeDefined(Preprocessing/Claims/Scenario/ReadFiles/@SSP@/Filedata/URBANPOP@YR@[float32][invert(Preprocessing/Claims/Scenario/ReadFiles/@SSP@/Filedata/Country_rel)] * 1000000[Person], 0[Person]) '
+										'/ SourceData/Population/M3/Urban_Pop_StartYear_Country/Urban_Mean_Pop_Density)'
 									'/ Indices/@YRN@'
 								,	'@SSP@', Scenario
 								,	'@YR@', string(Classifications/ProjectionDate/Yr)
 								,	'@YRN@', Classifications/ProjectionDate/Name
-								,	'@Input@', PopulationInput
 							)
-					, SourceData/RegionalUnits/Countries/Country 
+					, SourceData/RegionalUnits/Countries 
 					, km2
 				);
 
 	
 			container Evaluation
 			{
-				attribute<km2> Diff_2050_2010 (Countries/Country ) := ProjectionDates/Y2050 - ProjectionDates/Y2010;
+				attribute<km2> Diff_2050_2010 (Countries) := ProjectionDates/Y2050 - ProjectionDates/Y2010;
 			}
 			
 		}

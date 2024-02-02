@@ -11,7 +11,7 @@
 container Scenarios : using = "units;geography;sourcedata/regionalunits;classifications"
 {
 	//--------------------------------------- User specs ------------------------------------------------------//
-	parameter<string> InputMethod    := Modelparameters/Method;
+	// parameter<string> InputMethod    := Modelparameters/Method;
 	parameter<string> Calibration_On := Modelparameters/Calibration;
 	//---------------------------------------------------------------------------------------------------------//
 
@@ -24,7 +24,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 
 	container SSPs := 
 		for_each_ne(Classifications/SSP/Name, 
-			'RunScenarios_T(Preprocessing/Claims/Read_Scenario/ReadFiles/'+Classifications/SSP/Name+'/FileData, ProjectionDate)'
+			'RunScenarios_T(Preprocessing/Claims/Scenario/ReadFiles/'+Classifications/SSP/Name+'/FileData, ProjectionDate)'
 		);
 
 	template RunScenarios_T
@@ -36,7 +36,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 
 		container Source
 		{
-			attribute<Classifications/urban_discrete/lu_type> landuse     (domain) := Preprocessing/UrbanArea/UrbanArea2010/ReadData[uint8];
+			attribute<Classifications/urban_discrete/lu_type> landuse     (domain) := Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[uint8];
 
 			container SuitabilityMaps // Static Suitabilities
 			{
@@ -49,7 +49,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 				attribute<bool>    IsRegional   (domain) := RestrictionsCountry/IsRegional;
 
 				//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-				attribute<float32> pot_CoastLine_20km (domain) := !Preprocessing/Suitability/Coast/InRegion ? 0f : potential(float32(Physical/Coast/Coastline/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
+				attribute<float32> pot_CoastLine_20km (domain) := !Preprocessing/Suitability/Coast/InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Location2Coast_km/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
 				// attribute<float32> TRI (domain)                := Preprocessing/Suitability/TRI/Weight / 100.0f;
 				attribute<float32> TravelTime (domain)         := Preprocessing/Suitability/TravelTime/Weight;
 				// attribute<float32> Urban_unCali (domain)       := TRI + TravelTime;
@@ -59,13 +59,13 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 				unit<wpoint> AutoGLM_Coeffs           := Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain;
 				unit<wpoint> AutoGLM_UrbChange_Coeffs := Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain;
 				
-				attribute<float32> Urban_Cali (domain) := (Population/M3/PopulationDensity8dir_2021/Y2015/LN_MeanPopulationDensity2015_8dir[float32]                                 * AutoGLM_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(Physical/Coast/Coastline_Distance_grid/Coastline/Coastline[float32]                                         * AutoGLM_Coeffs/DistanceToCoast_coef_grid) + 
+				attribute<float32> Urban_Cali (domain) := (Population/M3/PopulationDensity8dir/StartYear/LN_Mean_Pop_Density_8dir[float32]                                 * AutoGLM_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
+																		(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_Coeffs/DistanceToCoast_coef_grid) + 
 																		(Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_Coeffs/SweetWater_coef_grid) + 
 																		(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_Coeffs/Elevation_coef_grid) + 
 																		(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_Coeffs/Slope_coef_grid) + 
 																		(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_Coeffs/TRI_coef_grid) + 
-																		(Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime[float32]                                                 * AutoGLM_Coeffs/TravelTime_coef_grid) + 
+																		(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_Coeffs/TravelTime_coef_grid) + 
 																		(IsProtected[float32]                                                                                        * AutoGLM_Coeffs/ProtectedArea_coef_grid) + 
 																		(Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_Coeffs/FloodProneArea_coef_grid) + 
 																		(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_Coeffs/Earthquake_coef_grid) + 
@@ -75,13 +75,13 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 																		(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_Coeffs/DistanceSecondaryRoads_coef_grid) + 
 																		AutoGLM_Coeffs/Constant_coef_grid;
 
-				attribute<float32> UrbanChange_Cali (domain) := (Population/M3/PopulationDensity8dir_2021/Y2015/LN_MeanPopulationDensity2015_8dir[float32]                           * AutoGLM_UrbChange_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(Physical/Coast/Coastline_Distance_grid/Coastline/Coastline[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceToCoast_coef_grid) + 
+				attribute<float32> UrbanChange_Cali (domain) := (Population/M3/PopulationDensity8dir/StartYear/LN_Mean_Pop_Density_8dir[float32]                           * AutoGLM_UrbChange_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
+																		(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceToCoast_coef_grid) + 
 																		(Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_UrbChange_Coeffs/SweetWater_coef_grid) + 
 																		(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Elevation_coef_grid) + 
 																		(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Slope_coef_grid) + 
 																		(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_UrbChange_Coeffs/TRI_coef_grid) + 
-																		(Socioeconomic/TravelTime/TravelTimeGRIP/TravelTime[float32]                                                 * AutoGLM_UrbChange_Coeffs/TravelTime_coef_grid) + 
+																		(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_UrbChange_Coeffs/TravelTime_coef_grid) + 
 																		(IsProtected[float32]                                                                                        * AutoGLM_UrbChange_Coeffs/ProtectedArea_coef_grid) + 
 																		(Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_UrbChange_Coeffs/FloodProneArea_coef_grid) + 
 																		(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_UrbChange_Coeffs/Earthquake_coef_grid) + 
@@ -112,10 +112,10 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 		}
 
 		//Declare Country as region to distribute population in
-		unit<uint8> ClaimRegion := Countries/Country 
+		unit<uint32> ClaimRegion := Countries 
 		{
-			attribute<Person_km2> minimum_population_density := SourceData/Population/M1/Urban_pop_2010/UrbanMinPopDensity;
-			attribute<Person_km2> mean_population_density    := SourceData/Population/M1/Urban_pop_2010/UrbanMeanPopDensity;//although named M1 also calculated for M3 in this code
+			// attribute<Person_km2> minimum_population_density := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Min_Pop_Density;
+			attribute<Person_km2> mean_population_density    := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Mean_Pop_Density;//although named M1 also calculated for M3 in this code
 		}
 
 		//----------------------------------DYNAMIC POPULATION ALLOCATION-----------------------------------------------//
@@ -187,7 +187,7 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 					attribute<float32> pot_Total (CompactedDomain) := =(Calibration_On == 'yes') ? 'pot_Combined_Calibrated * pot_factor' : 'pot_Combined * pot_factor';
 					// -------------------- Dynamic suitability ------------------------------------------------------ //
 					attribute<float32> Urban_float32 (CompactedDomain) := =Calibration_On == 'yes' 
-																				? '(Preprocessing/UrbanArea/UrbanArea2010/ReadData[CompactedDomain/domain_rel][float32] + pot_Total + CurrState/NewlyBuilt)'
+																				? '(Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[CompactedDomain/domain_rel][float32] + pot_Total + CurrState/NewlyBuilt)'
 																				: '(CurrState/IsUrban ? 600000f : 0f) + (pot_Total* 1000f)[float32]';
 					attribute<Suitability> Urban (CompactedDomain) := Urban_float32[Suitability];
 					// ----------------------------------------------------------------------------------------------- //
@@ -222,9 +222,9 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 			container Last := =Last('Iters/'+Iter/name); 
 
 			//-----------------------------------Rural population distribution---------------------------------------------//
-			attribute<Person> Initial_Rural_residence(CompactedDomain) := landuse_allocation/IsUrban ? 0[Person] : Population/M1/Urban_pop_2010/PopulationData[Person][CompactedDomain/org_rel];//same for M1 and M3!
-			attribute<Person> RuralPop_corr (ClaimRegion) := ExpRuralPop < 0f ? 0f : ExpRuralPop;
-			attribute<Person> RuralPop(CompactedDomain) := MakeDefined(scalesum(Initial_Rural_residence, Region_rel, RuralPop_corr), 0f);
+			attribute<Person> Initial_Rural_residence (CompactedDomain) := ='landuse_allocation/IsUrban ? 0[Person] : SourceData/Population/Past/PerYear/'+ModelParameters/StartYear+'/Population_LL[Person][CompactedDomain/org_rel]';//same for M1 and M3!
+			attribute<Person> RuralPop_corr               (ClaimRegion) := ExpRuralPop < 0f ? 0f : ExpRuralPop;
+			attribute<Person> RuralPop                (CompactedDomain) := MakeDefined(scalesum(Initial_Rural_residence, Region_rel, RuralPop_corr), 0f);
 			//-------------------------------------------------------------------------------------------------------------//
 
 			container NewState

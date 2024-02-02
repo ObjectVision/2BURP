@@ -10,21 +10,22 @@
 
 container Earthquake
 {
-	unit<ipoint> Earthquakes_Modified_Mercalli_Intensity:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif",
-		StorageType     = "gdal.grid",
-		Source          = "Earthquakes Modified Mercalli Intensity  UNEP/DEWA/GRID-Europe",
-		url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
-		{
-			attribute<uint8> ReadData_org(domain);
-			attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);
-			attribute<bool> EQ_5 (domain): = (ReadData[uint32]==5 ? 1 :0)[bool];
-			attribute<bool> EQ_6 (domain): = (ReadData[uint32]==6 ? 1 :0)[bool];
-			attribute<bool> EQ_7 (domain): = (ReadData[uint32]==7 ? 1 :0)[bool];
-			attribute<bool> EQ_8 (domain): = (ReadData[uint32]==8 ? 1 :0)[bool];
-			attribute<bool> EQ_9 (domain): = (ReadData[uint32]==9 ? 1 :0)[bool];
-		}
+	unit<ipoint> Earthquakes_Modified_Mercalli_Intensity
+	: StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif",
+	StorageType     = "gdal.grid",
+	Source          = "Earthquakes Modified Mercalli Intensity  UNEP/DEWA/GRID-Europe",
+	url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht",
+	StorageReadOnly = "True",
+	DialogData      = "LatLong"
+	{
+		attribute<uint8> ReadData_org(domain);
+		attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);
+		attribute<bool> EQ_5 (domain): = (ReadData[uint32]==5 ? 1 :0)[bool];
+		attribute<bool> EQ_6 (domain): = (ReadData[uint32]==6 ? 1 :0)[bool];
+		attribute<bool> EQ_7 (domain): = (ReadData[uint32]==7 ? 1 :0)[bool];
+		attribute<bool> EQ_8 (domain): = (ReadData[uint32]==8 ? 1 :0)[bool];
+		attribute<bool> EQ_9 (domain): = (ReadData[uint32]==9 ? 1 :0)[bool];
+	}
 
 	unit<uint16> EQUAGEO
 		:  StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
