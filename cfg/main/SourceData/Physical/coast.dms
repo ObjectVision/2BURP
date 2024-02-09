@@ -1,12 +1,13 @@
 container Coast
 {
-	unit<uint32> Coastline_from_Countries
-	:  StorageName      = "%ToBURPDataDir%/physical/Coast/DISSOLVE_countries_GADM_2012_UCD_v10_union_no_gaps_single_part.shp"
+	unit<uint32> Coastline
+	:  StorageName      = "%ToBURPDataDir%/physical/Coast/Coastline.shp"
 	,  StorageType      = "gdal.vect"
 	,  StorageReadOnly  = "True"
 	{
-		attribute<LatLong>           Geometry(poly);
-		attribute<SphericalMercator> Geometry_mer (arc):= convert(Geometry, SphericalMercator);
+		attribute<LatLong>           Geometry     (poly);
+		attribute<SphericalMercator> Geometry_mer (arc)    := convert(Geometry, SphericalMercator);
+		attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
 
 		unit<uint32> CoastArcSet := arc2segm(Geometry_mer)
 		{
@@ -20,7 +21,7 @@ container Coast
 		}
 	}
 	
-	attribute<Float32> Location2Coast_mer_segm   (CompactedDomain) := dist_info(Coastline_from_Countries/CoastArcSet/geometry_mer_segm, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));    
+	attribute<Float32> Location2Coast_mer_segm   (CompactedDomain) := dist_info(Coastline/CoastArcSet/geometry_mer_segm, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
 	attribute<km>      Location2Coast_km_CD      (CompactedDomain) := (Location2Coast_mer_segm * latlong_base/lengthdegree * CompactedDomain/lat_factor);
 	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/physical/Coast/Location2Coast_km.tif";
 
@@ -31,8 +32,9 @@ container Coast
 	,	StorageReadOnly = "True"
 	,	DialogData      = "LatLong"
 	{
-		attribute<float32> ReadData(domain);
-		attribute<float32> Coastline(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+		attribute<km>      GridData (domain);
+		attribute<km>      ReadData (domain) := MakeDefined(GridData,250[km]);
+		attribute<float32> Coastline(domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
 
 		unit<uint32> Country:= SourceData/RegionalUnits/Countries 
 		{

@@ -1,45 +1,44 @@
 container Preprocessing : using = "Geography;Units;SourceData;SourceData/RegionalUnits"
 {
-	container UrbanArea
-	{
-		attribute<float32> Store_UrbanArea_Y1990 (domain) := SourceData/Builtup/PerYear/Y1990/Builtup_LL, 
-			StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_Y1990_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
-			StorageType      = "gdalwrite.grid";
-		attribute<float32> Store_UrbanArea_StartYear (domain) := SourceData/Builtup/PerYear/Y2020/Builtup_LL, 
-			StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_'+ModelParameters/StartYear+'_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
-			StorageType     = "gdalwrite.grid";
+	// container UrbanArea
+	// {
+		// attribute<float32> Store_UrbanArea_Y1990 (domain) := SourceData/Builtup/PerYear/Y1990/Builtup_LL, 
+			// StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_Y1990_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
+			// StorageType      = "gdalwrite.grid";
 			
-		unit<ipoint> UrbanArea_Y1990
-		: storagename = "= propvalue(Store_UrbanArea_Y1990, 'StorageName')"
-		, StorageType     = "gdal.grid"
-		, StorageReadOnly = "True"
-		{
-			attribute<float32> GridData(domain);
-		}
+		// attribute<float32> Store_UrbanArea_StartYear (domain) := SourceData/Builtup/PerYear/Y2020/Builtup_LL, 
+			// StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_'+ModelParameters/StartYear+'_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
+			// StorageType     = "gdalwrite.grid";
+			
+		// unit<ipoint> UrbanArea_Y1990
+		// : storagename = "= propvalue(Store_UrbanArea_Y1990, 'StorageName')"
+		// , StorageType     = "gdal.grid"
+		// , StorageReadOnly = "True"
+		// {
+			// attribute<float32> GridData(domain);
+		// }
 		
-		unit<ipoint> UrbanArea_StartYear
-		: storagename = "= propvalue(Store_UrbanArea_StartYear, 'StorageName')"
-		, StorageType     = "gdal.grid"
-		, StorageReadOnly = "True"
-		//, LazyCalculated  = "true"
-		//, DialogData = "domain"
-		, DialogType = "map"
-		{
-			attribute<float32> GridData;
-			attribute<float32> ReadData (domain);
+		// unit<ipoint> UrbanArea_StartYear
+		// : storagename = "= propvalue(Store_UrbanArea_StartYear, 'StorageName')"
+		// , StorageType     = "gdal.grid"
+		// , StorageReadOnly = "True"
+		// , DialogType = "map"
+		// {
+			// attribute<float32> GridData;
+			// attribute<float32> ReadData (domain);
 			
 			
 			// attribute<Units/km2>                      ReadDatakm2               (domain) := ReadData[float32] * domain/area;
 			// attribute<uint2>                          IsUrbanInCountry          (domain) := ReadData[bool] ? ReadData[uint2] : (IsDefined(RegionalUnits/Countries/Country_grid) ? 3u2 : 0u2);
 			// attribute<Classifications/urb/IsUrbClass> ReadDataCD       (CompactedDomain) := ReadData[CompactedDomain/domain_rel];
 			// attribute<Units/km2>                      ReadDataCDkm2    (CompactedDomain) := ReadDataCD[float32] * domain/area[CompactedDomain/domain_rel];
-		}
+		// }
 
 		// unit<ipoint> RuralArea2010
 		// {
 			// attribute<bool> RuralArea2010 (domain):= !IsDefined(RegionalUnits/Countries/ClaimCountry_grid) ? false : !UrbanArea2010/ReadData;
 		// }
-	}
+	// }
 	
 	// #include <Preprocessing_Urban.dms>
 	// #include <Preprocessing_GHS_SMOD.dms>
@@ -56,4 +55,44 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	#include <HYDE.dms>
 	#include <GDP.dms>
 	#include <Suitability.dms>
+	
+	container Population
+	{
+		container Population_8dir_Y1990            := Create_8dir_T(SourceData/Population/PerYear/Y1990);
+		container Population_8dir_StartYear        := ='Create_8dir_T(SourceData/Population/PerYear/'+ModelParameters/StartYear+')';
+		
+		container PopulationDensity_8dir_Y1990     := Create_8dir_T(SourceData/Population/PerYear/Y1990  / domain/area[float64]);
+		container PopulationDensity_8dir_StartYear := ='Create_8dir_T(SourceData/Population/PerYear/'+ModelParameters/StartYear+' / domain/area[float64])';
+
+		Template Create_8dir_T
+		{
+			attribute<float64> ItemOfInterest      (domain);
+			//
+			
+			attribute<float64> ItemOfInterest_Null (domain) := ItemOfInterest > 0d ? ItemOfInterest : null_d;
+
+			attribute<float64> N                   (domain) := ItemOfInterest[(id(domain)) - point(1w, 0w, wpoint)];
+			attribute<float64> NE                  (domain) := ItemOfInterest[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+			attribute<float64> E                   (domain) := ItemOfInterest[(id(domain)) + point(0w, 1w, wpoint)];
+			attribute<float64> SE                  (domain) := ItemOfInterest[(id(domain)) + point(1w, 1w, wpoint)];
+			attribute<float64> S                   (domain) := ItemOfInterest[(id(domain)) + point(1w, 0w, wpoint)];
+			attribute<float64> SW                  (domain) := ItemOfInterest[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+			attribute<float64> W                   (domain) := ItemOfInterest[(id(domain)) - point(0w, 1w, wpoint)];
+			attribute<float64> NW                  (domain) := ItemOfInterest[(id(domain)) - point(1w, 1w, wpoint)];
+			
+			attribute<bool>    N_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point(1w, 0w, wpoint)]);
+			attribute<bool>    NE_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)]);
+			attribute<bool>    E_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point(0w, 1w, wpoint)]);
+			attribute<bool>    SE_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point(1w, 1w, wpoint)]);
+			attribute<bool>    S_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point(1w, 0w, wpoint)]);
+			attribute<bool>    SW_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)]);
+			attribute<bool>    W_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point(0w, 1w, wpoint)]);
+			attribute<bool>    NW_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point(1w, 1w, wpoint)]);
+			
+			attribute<float64> Cells_with_data     (domain) := (N_Null[float64] + NE_Null[float64] + E_Null[float64] + SE_Null[float64] + S_Null[float64] + SE_Null[float64] + W_Null[float64] + NW_Null[float64]);
+			attribute<float64> Mean_8dir_org       (domain) := (N + NE + E + SE + S + SW + W + NW) / Cells_with_data; //max 8
+			attribute<float64> Mean_8dir           (domain) := MakeDefined(Mean_8dir_org,0d);
+			attribute<float64> Ln_mean_8dir        (domain) := log(Mean_8dir + 0.1d);  //Pendula: 0 waarden --> 0.1  -->-2.30259 
+		}
+	}
 }

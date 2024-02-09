@@ -62,4 +62,27 @@ container Physical : using = "geography"
 	// #include <nature.dms>
 	// #include <soil.dms>
 	#include <natural_hazards.dms>
+	
+	container Water : using = "geography"
+	{
+		unit<uint32> Inland_Water
+		:  StorageName      = "%ToBURPDataDir%/physical/Water/InlandWater.shp"
+		,  StorageType      = "gdal.vect"
+		,  StorageReadOnly  = "True"
+		{
+			attribute<LatLong>           Geometry(poly);
+			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "%ToBURPDataDir%/physical/Water/IsInlandWater.tif";
+			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
+		}
+
+		#include <rivers.dms>
+		#include <lakes.dms>
+		
+		container Sweet_Water
+		{
+			attribute<float64> Sweet_Water_Distance(domain) := min_elem(Lakes/Location2Lake_km/Lake[float64],Rivers/Dist_River_km/ReadData[float64]);
+		}
+
+		#include <floodProneArea.dms>
+	}
 }

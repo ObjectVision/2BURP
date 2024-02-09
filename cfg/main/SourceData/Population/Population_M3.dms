@@ -10,17 +10,14 @@ container M3 : using = "SourceData/RegionalUnits;Geography"
 
 	attribute<float32>    Total_Pop_to_use_Country              (Countries) := Total_Pop_Claim/population_to_use[invert(Total_Pop_Claim/Country_rel)] * 1000000f;	//this is needed for equalization of the pop-map to SSP-pop 2010
 	// attribute<float32>    Missing_pop                           (Countries) := Total_Pop_to_use_Country - sum(Total_Pop_StartYear, Countries/per_grid);
-	attribute<float32>    Urban_Pop_Urban_Pop_StartYear_Country (Countries) := sum(Urban_Pop_StartYear, Countries/per_grid);
-	attribute<float32>    Total_Pop_StartYear                      (domain) := ='scalesum(Population/Past/PerYear/'+ModelParameters/StartYear+'/population_ll[float32], Countries/per_grid , Total_Pop_to_use_Country)';
-	attribute<Person>     Urban_Pop_StartYear                      (domain) := value(Total_Pop_StartYear * Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[float32], Person); 	//this item is used in future modelling!
+	// attribute<float32>    Urban_Pop_Urban_Pop_StartYear_Country (Countries) := sum(Urban_Pop_StartYear, Countries/per_grid);
+	attribute<float32>    Total_Pop_StartYear                      (domain) := ='scalesum(Population/Past/PerYear/'+ModelParameters/StartYear+'[float32], Countries/per_grid , Total_Pop_to_use_Country)';
+	// attribute<Person>     Urban_Pop_StartYear                      (domain) := value(Total_Pop_StartYear * Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[float32], Person); 	//this item is used in future modelling!
 	
-	container Urban_Pop_StartYear_Country
-	{
-		attribute<Person_km2> Urban_Mean_Pop_Density    (Countries) := sum(Urban_Pop_StartYear, Countries/per_grid) / UrbanArea;
-		attribute<km2>        UrbanArea                 (Countries) := sum(Float32(Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData) * domain/area, Countries/per_grid);
-	}
+	// container Urban_Pop_StartYear_Country
+	// {
+		// attribute<Person_km2> Urban_Mean_Pop_Density    (Countries) := sum(Urban_Pop_StartYear, Countries/per_grid) / UrbanArea;
+		// attribute<km2>        UrbanArea                 (Countries) := sum(Float32(Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData) * domain/area, Countries/per_grid);
+	// }
 
-	// #include <PopulationDensity8dir.dms>
-	#include <PopulationDensity8dir_2021.dms>
-	#include <Population8dir.dms>
 }

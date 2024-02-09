@@ -1,6 +1,16 @@
 container RegionalUnits
 {
-	#include <Country.dms>
+	// #include <Country.dms>
+	
+	unit<uint32> CIESIN 
+	: StorageName = "%ToBURPDataDir%/Regions/Global_admin0.shp"
+	, StorageType = "gdal.vect"
+	, StorageReadOnly = "true"
+	{
+		attribute<LatLong>           Geometry (poly);
+		attribute<string>            ISO3                     := FIRST_ISOA;
+		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
+	}
 	
 	unit<uint32> GADM 
 	: StorageName = "%ToBURPDataDir%/Regions/gadm_410.gpkg"
@@ -9,22 +19,22 @@ container RegionalUnits
 	{
 		attribute<LatLong>           Geometry (poly);
 		attribute<string>            ISO3                     := GID_0;
-		attribute<store_Countries>   store_countries_rel      := rlookup(Country, store_Countries/values);
-		attribute<Continents>        continents_rel           := rlookup(AsItemName(continent_name), Continents/name);
+		attribute<Store_Continents>  continents_rel           := rlookup(AsItemName(continent_name), Store_Continents/name);
 		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);
 	}
 	
-	unit<uint32> store_Countries := unique(GADM/Country)
+	unit<uint32> store_Countries := unique(CIESIN/ISO3)
 	, storagename = "%ToBURPDataDir%/Regions/fss/Countries.fss"
 	{
 		attribute<string>            Label                    := Values;
-		attribute<string>            ISO3                     := first(GADM/GID_0, GADM/store_countries_rel);
-		attribute<LatLong>           Geometry_LL       (poly) := partitioned_union_polygon(GADM/geometry[LatLong_ip], GADM/store_countries_rel)[LatLong];
+		attribute<string>            ISO3                     := first(CIESIN/ISO3, CIESIN/store_countries_rel);
+		attribute<LatLong>           Geometry_LL       (poly) := partitioned_union_polygon(CIESIN/geometry[LatLong_ip], CIESIN/store_countries_rel)[LatLong];
 		attribute<WorldMollweide>    Geometry_MW       (poly) := convert(Geometry_LL, WorldMollweide);
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
-		attribute<Continents>        Continents_rel           := first(GADM/Continents_rel, GADM/store_countries_rel);
-		attribute<string>            continent_name           := first(GADM/continent_name, GADM/store_countries_rel);
+		attribute<string>            values                   : DisableStorage = "true";
+		attribute<Continents>        Continents_rel           := first(CIESIN/Continents_rel, CIESIN/store_countries_rel);
+		attribute<string>            continent_name           := first(CIESIN/continent_name, CIESIN/store_countries_rel);
 	}
 	
 	unit<uint32> Countries
@@ -41,17 +51,26 @@ container RegionalUnits
 		attribute<string>            continent_name;
 		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
 		attribute<.>                 per_grid              (domain) := poly2grid(geometry_LL , domain);
-		attribute<uint8>             per_ClaimCountry_grid (domain) := poly2grid(Preprocessing/Claims/Scenario/ReadFiles/SSP2/Filedata/geometry, domain)[uint8];
-		attribute<bool>              IsClaimCountry        (domain) := per_ClaimCountry_grid[int16] > -1s;
+		// attribute<uint8>             per_ClaimCountry_grid (domain) := poly2grid(Preprocessing/Claims/Future/ReadFiles/SSP2/Filedata/geometry, domain)[uint8];
+		// attribute<bool>              IsClaimCountry        (domain) := per_ClaimCountry_grid[int16] > -1s;
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
 	
-	unit<uint8> Continents := Classifications/Continents
+	unit<uint8> store_Continents := Classifications/Continents
+	, storagename = "%ToBURPDataDir%/Regions/fss/Continents.fss"
 	{
-		attribute<LatLong>  geometry (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong];
+		attribute<LatLong>  geometry (poly) := partitioned_union_polygon(GADM/geometry[LatLong_ip], GADM/continents_rel)[LatLong];
 		attribute<string>   name            := Classifications/Continents/name;
-		attribute<string>   label           := Classifications/Continents/label;
+	}
+	
+	unit<uint8> Continents
+	: storagename = "= propvalue(store_Continents, 'StorageName')"
+	, StorageReadOnly = "True"
+	{
+		attribute<LatLong>  geometry (poly);
+		attribute<string>   name;
+		// attribute<string>   label           := Classifications/Continents/label;
 		
 		attribute<.>        per_grid        (domain) := poly2grid(geometry , domain);
 		

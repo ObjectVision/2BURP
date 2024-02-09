@@ -1,20 +1,20 @@
-container Calibration_AutoGLM: using = "geography"
+container Create_CalibrationOutput : using = "geography"
 {
 	unit <uint32> CD := CompactedDomain
 	{
-		attribute<uint32>                                      Number                           := domain/number[org_rel];
-		attribute<SourceData/RegionalUnits/Countries/Country>  Country_grid                     := SourceData/RegionalUnits/Countries/Country_grid[CompactedDomain/org_rel];
-		attribute<SourceData/RegionalUnits/Continent>          Continent_grid                   := SourceData/RegionalUnits/Countries/Country/Continent_id_grid[CompactedDomain/org_rel];
+		// attribute<uint32>                                      Number                           := domain/number[org_rel];
+		attribute<SourceData/RegionalUnits/Countries>  Country_grid                     := SourceData/RegionalUnits/Countries/per_grid[CompactedDomain/org_rel];
+		// attribute<SourceData/RegionalUnits/Continent>  Continent_grid                   := SourceData/RegionalUnits/Countries/Country/Continent_id_grid[CompactedDomain/org_rel];
 
-		attribute<float32>                         TotalPopulationDensity2010_8dir         := SourceData/Population/M3/PopulationDensity8dir/Y2010/TotalPopulationDensity2010[CompactedDomain/org_rel];
-		attribute<float32>                         Coastline_Distance                      := SourceData/Physical/Coast/Coastline_Distance/ReadData[CompactedDomain/org_rel];
-		attribute<float32>                         Distance2River                          := SourceData/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
-		attribute<float32>                         Lake_Distance                           := SourceData/Water/Lakes/Lake/ReadData[CompactedDomain/org_rel];
+		attribute<float64>                         TotalPopulationDensity2010_8dir         := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float32>                         Coastline_Distance                      := SourceData/Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
+		attribute<float32>                         Distance2River                          := SourceData/Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
+		attribute<float32>                         Lake_Distance                           := SourceData/Physical/Water/Lakes/Location2Lake_km/Lake[CompactedDomain/org_rel];
 		attribute<int16>                           Elevation                               := SourceData/Physical/Elevation/Elevation[CompactedDomain/org_rel];
 		attribute<float32>                         Slope                                   := SourceData/Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
 		attribute<float32>                         TRImean                                 := SourceData/Physical/TerrainRoughnessIndex/mean[CompactedDomain/org_rel];
 		attribute<uint8>                           IsProtected                             := SourceData/Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>                           FloodProneArea_RP100                    := SourceData/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
+		attribute<uint8>                           FloodProneArea_RP100                    := SourceData/Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
 		attribute<uint8>                           Earthquakes_Modified_Mercalli_Intensity := SourceData/Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
 		attribute<uint8>                           Landslides_Precipitation                := SourceData/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
 		attribute<uint8>                           Landslides_Earthquakes                  := SourceData/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];

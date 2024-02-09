@@ -3,9 +3,10 @@ container Geography : using = "units"
 	unit<dpoint> LatLong       := ='StudyAreas/LatLong_'+ModelParameters/StudyArea;
 	unit<dpoint> LatLong_Base  : SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong"
 	{
-		parameter<float32> ViewPortMinSize       := 100f / 3600f;
-		parameter<float32> PenWorldWidth         := 10f / 3600f, DialogType = "PenWorldWidth";
+		parameter<float32> ViewPortMinSize       := 1f / 3600f;
+		parameter<float32> PenWorldWidth         := 100f / 3600f, DialogType = "PenWorldWidth";
 		parameter<float32> LabelWorldSize        := 10f / 3600f, DialogType = "LabelWorldSize";
+		
 		parameter<km>      lengthdegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
 	}
 	unit<ipoint> LatLong_ip             := gridset(LatLong,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
@@ -33,38 +34,38 @@ container Geography : using = "units"
 	
 	unit<ipoint> LatLong_mdegrees := gridset(LatLong, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
 
-	unit<ipoint> Mollweide_grid_base := /SourceData/population/Past/Big_raster_domain
-	{
-		parameter<float64> x_min := -18040095.7d;
-		parameter<float64> x_max := 18040095.7d;
-		parameter<float64> y_min := -9020047.85d;
-		parameter<float64> y_max := 9020047.85d;
+	// unit<ipoint> Mollweide_grid_base := /SourceData/population/Past/Big_raster_domain
+	// {
+		// parameter<float64> x_min := -18040095.7d;
+		// parameter<float64> x_max := 18040095.7d;
+		// parameter<float64> y_min := -9020047.85d;
+		// parameter<float64> y_max := 9020047.85d;
 		
-		parameter<int32> nr_cols := int32((x_max - x_min) / ModelParameters/MW_Gridsize);
-		parameter<int32> nr_rows := int32((y_max - y_min) / ModelParameters/MW_Gridsize);
-	}
+		// parameter<int32> nr_cols := int32((x_max - x_min) / ModelParameters/MW_Gridsize);
+		// parameter<int32> nr_rows := int32((y_max - y_min) / ModelParameters/MW_Gridsize);
+	// }
 	
-	unit<ipoint> Mollweide_grid :=
-		range(
-			 gridset(
-				 WorldMollweide
-				,point_xy(ModelParameters/MW_Gridsize, -ModelParameters/MW_Gridsize, WorldMollweide)
-				,point_xy(Mollweide_grid_base/x_min, Mollweide_grid_base/y_max, WorldMollweide) //topleft
-				,ipoint
-			)
-			,point_xy(0i, 0i)
-			,point_xy(Mollweide_grid_base/nr_cols, Mollweide_grid_base/nr_rows)
-		),	DialogData = "mollweide_grid_base"
-	{
-		attribute<WorldMollWeide> point       := mapping(., WorldMollWeide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, WorldMollWeide);
-		attribute<LatLong>        domain_rel  := convert(point, LatLong);
+	// unit<ipoint> Mollweide_grid :=
+		// range(
+			 // gridset(
+				 // WorldMollweide
+				// ,point_xy(ModelParameters/MW_Gridsize, -ModelParameters/MW_Gridsize, WorldMollweide)
+				// ,point_xy(Mollweide_grid_base/x_min, Mollweide_grid_base/y_max, WorldMollweide) //topleft
+				// ,ipoint
+			// )
+			// ,point_xy(0i, 0i)
+			// ,point_xy(Mollweide_grid_base/nr_cols, Mollweide_grid_base/nr_rows)
+		// ),	DialogData = "mollweide_grid_base"
+	// {
+		// attribute<WorldMollWeide> point       := mapping(., WorldMollWeide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, WorldMollWeide);
+		// attribute<LatLong>        domain_rel  := convert(point, LatLong);
 		
-		unit<uint64> points := select_with_org_rel(isDefined(point))
-		{
-			attribute<WorldMollWeide>            geometry  := org_rel -> point;
-			attribute<Mollweide_grid>            grid_rel  := geometry[Mollweide_grid];	
-		}
-	}
+		// unit<uint64> points := select_with_org_rel(isDefined(point))
+		// {
+			// attribute<WorldMollWeide>            geometry  := org_rel -> point;
+			// attribute<Mollweide_grid>            grid_rel  := geometry[Mollweide_grid];	
+		// }
+	// }
 
 
 	container StudyAreas
@@ -146,21 +147,18 @@ container Geography : using = "units"
 	
 	container GridData : using = "SourceData/RegionalUnits"
 	{
-		attribute<Person> InitPopGrid         (domain) := convert(SourceData/Population/M3/Urban_Pop_StartYear, Person);
-		attribute<Person> InitPopGrid1990     (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PerYear/Y1990/Population_LL * SourceData/Builtup/PerYear/Y1990/IsAboveThreshold_LL[float32] : null_f[Person];
+		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
+		attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 
-		attribute<Person> InitTpopGrid        (domain) := convert(SourceData/Population/M3/Total_Pop_StartYear, Person);
-		attribute<Person> InitTpopGrid1990    (domain) := CompactedDomain/ISCD  ? SourceData/Population/Past/PerYear/Y1990/Population_LL : null_f[Person];
+		attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_grid);
+		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
+		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_grid) ? (SourceData/Builtup/PerYear/'+ModelParameters/StartYear+' > 0[m2]) : false';
 
-		attribute<Bool> InRegion              (domain) := IsDefined(Countries/per_grid);
-		attribute<Bool> HasPop                (domain) := InitTpopGrid > 0[Person];
-		attribute<Bool> HasUrb                (domain) := IsDefined(Countries/per_grid) ? ((Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData) > 0f) : false;
+		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
+		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 
-		attribute<bool> IsNotLake             (domain) := not(Water/Water_without_oceans/ReadData);
-		attribute<bool> IsNotIce              (domain) := not(Physical/SnowIceCover/ReadData);
-
-		attribute<Bool> InRegionHasPopHasUrb  (domain) := (InRegion || HasPop || HasUrb);//at file-level already present in country file 
-		attribute<Bool> FreeLand              (domain) := InRegionHasPopHasUrb && (IsNotLake || HasUrb || HasPop) && (IsNotIce || HasUrb || HasPop), FreeData = "False";
+		attribute<Bool>   InRegionHasPopHasUrb   (domain) := (InRegion || HasPop || HasBuiltup);
+		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
 	}
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
@@ -173,7 +171,7 @@ container Geography : using = "units"
 		attribute<km2>               area                  := domain/area[domain_rel];
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel   := Countries/per_grid[domain_rel];
-		attribute<Continents>        Continent_rel := Continents/per_grid[domain_rel];
+		// attribute<Continents>        Continent_rel := Continents/per_grid[domain_rel];
 		// attribute<World>             World_rel     := Countries/World_id_grid[domain_rel];
 		// attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
 	}
@@ -182,6 +180,8 @@ container Geography : using = "units"
 	{
 		container Impl
 		{
+			container pot1km  :=Templates/potrange_T(value(1, km), value(  1, km));
+			container pot2km  :=Templates/potrange_T(value(1, km), value(  2, km));
 			container pot3km  :=Templates/potrange_T(value(1, km), value(  3, km));
 			container pot5km  :=Templates/potrange_T(value(1, km), value(  5, km));
 			container pot10km :=Templates/potrange_T(value(1, km), value(10, km));
@@ -191,6 +191,8 @@ container Geography : using = "units"
 			container pot40km :=Templates/potrange_T(value(1, km), value(40, km));
 			container pot50km :=Templates/potrange_T(value(1, km), value(50, km));
 		}
+		unit<spoint> pot1km  :=Impl/pot1km/PotRange;
+		unit<spoint> pot2km  :=Impl/pot2km/PotRange;
 		unit<spoint> pot3km  :=Impl/pot3km/PotRange;
 		unit<spoint> pot5km  :=Impl/pot5km/PotRange;
 		unit<spoint> pot10km :=Impl/pot10km/PotRange;

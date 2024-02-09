@@ -37,43 +37,33 @@ container Suitability : using = "Units"
 		attribute<float32> Weight (domain) := MakeDefined(lookup(SourceData/Socioeconomic/TravelTime/GridData, Class/RelOccurence), 0.0f);
 	}
 	
-	container Distance_UrbanArea1990
-	{
-		attribute<float32> UrbanPot (domain) :
-		= potential(float32(/Preprocessing/urban/BuiltUpBoolJRC_50prc/Y1990), Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr);
-	}
+	// container Distance_UrbanArea1990
+	// {
+		// attribute<float32> UrbanPot (domain) :
+		// = potential(float32(/Preprocessing/urban/BuiltUpBoolJRC_50prc/Y1990), Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr);
+	// }
 
-	container Distance_UrbanArea2010
-	{
-		attribute<float32> UrbanPot (domain) :
-		= potential(float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData), Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr);
-	}
+	// container Distance_UrbanArea2010
+	// {
+		// attribute<float32> UrbanPot (domain) :
+		// = potential(float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData), Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr);
+	// }
 
 	container Coast
 	{
-		attribute<Bool> InRegion (domain): = IsDefined(SourceData/RegionalUnits/Countries/per_ClaimCountry_grid);
-
-		attribute<float32> buffer_25km (domain):
-			= !InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/ReadData), float32(Geography/Distmatrices/Impl/pot25km/potrange/buffer));
+		attribute<Bool>    InRegion    (domain) := IsDefined(SourceData/RegionalUnits/Countries/per_grid);
+		attribute<float32> buffer_25km (domain) := !InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/IsCoastline), float32(Geography/Distmatrices/Impl/pot25km/potrange/buffer));
 
 		attribute<bool> Zone (domain) := buffer_25km > 0f;
 		
 		container Potential
 		{
-			attribute<float32> pot_UrbanArea_5km (domain):
-			= !InRegion ? 0f : potential(float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData), Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt)
-			,cdf = "classifications/Input/Suitability/CoastPotClass/ClassBreak";
-
-			attribute<float32> pot_CoastLine_20km (domain) :=
-			!InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt)
-			,	cdf = "classifications/Input/Suitability/CoastPotClass/ClassBreak";
-
-			attribute<float32> UrbanCoastPot (domain):
-			= (pot_CoastLine_20km * pot_UrbanArea_5km) * 100f;
+			// attribute<float32> pot_UrbanArea_5km  (domain)  := !InRegion ? 0f : potential(float32(Preprocessing/UrbanArea/UrbanArea2010/ReadData), Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt);
+			attribute<float32> pot_CoastLine_20km (domain)  := !InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Coastline/IsCoastline), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
+			// attribute<float32> UrbanCoastPot      (domain)  := (pot_CoastLine_20km * pot_UrbanArea_5km) * 100f;
 
 			//rescaled version
-			attribute<float32> combination_UrbanCoast (domain):
-			= rescale((pot_CoastLine_20km * pot_UrbanArea_5km) * 100f, 0.0f, 100f);
+			// attribute<float32> combination_UrbanCoast (domain) := rescale((pot_CoastLine_20km * pot_UrbanArea_5km) * 100f, 0.0f, 100f);
 		}
 		
 	}

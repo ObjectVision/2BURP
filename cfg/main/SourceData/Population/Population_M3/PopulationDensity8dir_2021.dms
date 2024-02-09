@@ -2,8 +2,8 @@ container PopulationDensity8dir
 {
 	container Y1990
 	{
-		attribute<float32>    Total_Pop         (domain) := Population/Past/PerYear/Y1990/Population_LL;
-		attribute<float32>    Total_Pop_Null    (domain) := Total_Pop > 0f ? Total_Pop : null_f;
+		attribute<float64>    Total_Pop         (domain) := Population/Past/PerYear/Y1990;
+		attribute<float64>    Total_Pop_Null    (domain) := Total_Pop > 0d ? Total_Pop : null_d;
 		attribute<Person_km2> Total_Pop_Density (domain) := Total_Pop[Person] / domain/area;
 
 		attribute<Person_km2> North             (domain) := Total_Pop_Density[(id(domain)) - point(1w, 0w, wpoint)];
@@ -49,8 +49,8 @@ container PopulationDensity8dir
 
 	container StartYear
 	{
-		attribute<float32>    Total_Pop         (domain) := ='Population/Past/PerYear/'+ModelParameters/StartYear+'/Population_LL';
-		attribute<float32>    Total_Pop_Null    (domain) := Total_Pop > 0f ? Total_Pop : null_f;
+		attribute<float64>    Total_Pop         (domain) := ='Population/Past/PerYear/'+ModelParameters/StartYear;
+		attribute<float64>    Total_Pop_Null    (domain) := Total_Pop > 0d ? Total_Pop : null_d;
 		attribute<Person_km2> Total_Pop_Density (domain) := (Total_Pop[Person] / domain/area);
 
 		attribute<Person_km2> North             (domain) := Total_Pop_Density[(id(domain)) - point(1w, 0w, wpoint)];

@@ -8,7 +8,7 @@ container Templates
 		//end of case parameters
 		unit<Float32> Potential;
 		
-		parameter<Float32> AspectRatio         := cos(Float32(pi()) * 30f / 180f);
+		parameter<Float32> AspectRatio         := cos(Float32(pi()) * 30f / 180f); //assumption in LatLong: we expect most people live around 30 degrees. So this should be a representive grid 
 		parameter<km>      horizontal_gridsize := vertical_gridsize * AspectRatio;
 		parameter<float32> vertical_radius     := borderRadius / vertical_gridsize;
 		parameter<float32> horizontal_radius   := borderRadius / horizontal_gridsize;
@@ -25,7 +25,9 @@ container Templates
 			attribute<Potential> RelWeight         := scalesum(     AbsWeight , 1f );
 			attribute<Potential> RelWeightSqrt     := scalesum(Sqrt(AbsWeight), 1f );
 			attribute<Potential> Conal             := scalesum(max_elem(vertical_radius - Sqrt(distMatr), 0f), 1f );
-
+			
+			attribute<Float32>   flat2             := Float32(distMatr <= uint32(straal * straal));
+			
 			attribute<uint8>      buffer            := iif(distMatr <= vertical_radius * vertical_radius, 1b, 0b);
 		}
 	}

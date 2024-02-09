@@ -32,7 +32,7 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy
 
 	container Final_Items : using = "units;geography"
 	{
-		attribute<bool>     IsUrban (CompactedDomain) := Analysis/Scenarios/SSPs/SSP2/ProjectionDates/Y2020/NewState/IsUrban;
+		attribute<bool>     IsBuiltup (CompactedDomain) := Analysis/Future/ProjectionDates/Y2030/NewState/IsUrban;
 		attribute<Person>   Pop     (CompactedDomain) := Analysis/Scenarios/SSPs/SSP2/ProjectionDates/Y2020/NewState/Pop;
 		
 		parameter<string>   Validation_Pop_Error      := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result";

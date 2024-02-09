@@ -3,7 +3,6 @@ container ScenarioSpecs : url ="%ToBURPDataDir%/SSP/The_roads_ahead__Narratives_
 	container ProtectionLevel //Protected & Natural areas
 	{
 		parameter<float32> Factor_SSP1 := 0.00001f; //Restricted
-		parameter<float32> Factor_SSP2 := 1.0f; //Unrestricted
 		parameter<float32> Factor_SSP3 := 1.0f; //Unrestricted
 		parameter<float32> Factor_SSP4 := 1.0f; //UnRestricted
 		parameter<float32> Factor_SSP5 := 0.00001f; //Restricted
@@ -12,11 +11,10 @@ container ScenarioSpecs : url ="%ToBURPDataDir%/SSP/The_roads_ahead__Narratives_
 
 	container FloodArea //Floodprone areas
 	{
-		parameter<float32> Factor_SSP1 := 0.00001f;	//Restricted
-		parameter<float32> Factor_SSP2 := 1.0f; //Unrestricted
-		parameter<float32> Factor_SSP3 := 1.0f; //Unrestricted
-		parameter<float32> Factor_SSP4 := 1.0f;	//UnRestricted
-		parameter<float32> Factor_SSP5 := 0.00001f;	//Restricted
-		parameter<float32> Factor_SSPP := 1.0f; //UnRestricted
+		// parameter<float32> Factor_SSP1 := 0.00001f;	//Restricted
+		// parameter<float32> Factor_SSP3 := 1.0f; //Unrestricted
+		// parameter<float32> Factor_SSP4 := 1.0f;	//UnRestricted
+		// parameter<float32> Factor_SSP5 := 0.00001f;	//Restricted
+		// parameter<float32> Factor_SSPP := 1.0f; //UnRestricted
 	}
 }

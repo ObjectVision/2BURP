@@ -1,6 +1,24 @@
-container Population 
+container Population  : using = "units;geography;classifications;sourcedata/regionalunits"
 {
-	#include <Past.dms>
+	// #include <Past.dms>
 	// #include <Population_M1.dms>
-	#include <Population_M3.dms>
+	// #include <Population_M3.dms>
+	
+	container Import_PerYear := 
+		for_each_ndvat(
+			GHS_years/name
+			, domain
+			, float64
+			, '%ToBURPDataDir%/Population/GHS_POP_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			,'gdal.grid'
+		);
+
+	container PerYear := 
+		for_each_nedv(
+			GHS_years/name
+			, 'Import_PerYear/'+GHS_years/name+' > 0d ? Import_PerYear/'+GHS_years/name+' : 0d'
+			, domain
+			, float64
+		);
+		
 }

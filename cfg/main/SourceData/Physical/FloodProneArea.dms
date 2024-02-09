@@ -1,6 +1,7 @@
 container FloodProneArea
 {
-	unit<ipoint> RP100:StorageName = "%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP100_area.tif",
+	unit<ipoint> RP100 
+	: StorageName = "%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP100_area.tif",
 	StorageType = "gdal.grid",
 	Source = "conversion to tif-format in ArcGIS, unsigned integer 8 Bit, LZW-compression with correct extent",
 	StorageReadOnly = "True",

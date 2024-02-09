@@ -2,15 +2,17 @@ container Rivers
 {
 	parameter<String> Generate_RiverFSS := 'Ready', 	ExplicitSuppliers = "MakeFSS/geometry";
 	
-	container HydroRIVERS_v10
+	container HydroRIVERS_v10 //as of february 2024 is this still the latest version.
 	:  StorageName     = "%ToBURPDataDir%/physical/water/HydroRIVERSVersion1/HydroRIVERS_v10.gdb"
 	,  StorageType     = "gdal.vect"
+	,  URL             = "https://www.hydrosheds.org/products/hydrorivers#downloads"
 	,  StorageReadOnly = "True"
 	{
 		//Indicator of river order using river flow to distinguish logarithmic size classes: order 1 represents river reaches with a long-term average discharge . 100,000 m3/s;
 		//order 2 represents river reaches with a long-term average discharge . 10,000 m3/s and < 100,000 m3/s;
 		// c order 9 represents river reaches with a long-term average discharge . 0.001 m3/s and < 0.01 m3/s; 
 		// and order 10 represents river reaches with a long-term average discharge < 0.001 m3/s (i.e., 0 in the provided data due to rounding to 3 digits).
+		
 		unit<uint32> River
 		:	SQLString  = "SELECT * FROM HydroRIVERS_v10 WHERE ORD_FLOW < 6"
 		{

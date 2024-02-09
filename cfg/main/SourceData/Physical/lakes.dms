@@ -1,0 +1,62 @@
+container Lakes
+{
+	container WWF
+	:  StorageName     = "%ToBURPDataDir%/Physical/Water/glwd_3_gridcode1_union_no_holes_sp.gdb"
+	,  StorageType     = "gdal.vect"
+	,  url             = "https://www.worldwildlife.org/publications/global-lakes-and-wetlands-database-lakes-and-wetlands-grid-level-3"
+	,  StorageReadOnly = "True"
+	,  Source          = "Step 1: org: arcinfo-file glwd_3, Raster to Polygon 10.6.1, field gridcode No simplify polygons no ceate multipart features"
+						 "Step 2 ArcMap 10.6.1: glwd_3.gdb: select gridcode1 (lakes) and create new file. 343690 records"
+						 "Step 3: Run Union with gaps allowed unchecked, 18259 additional records are created. The islands in lakes now become new records and are identifiable with a FID=-1"
+						 "Step 4: now select all records (361949) and do union features (in edit mode). 1 extra record is created with the geometry of all polygons. Select this polygon and create a new file"
+						 "Step 5: multipart to single part conversion.(average distance of all cells 45km)"
+	,	DialogData = "LatLong"
+	{
+		unit<uint32> glwd
+		{
+			parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+			parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+		}
+	}
+
+	unit<uint32> MakeFSS := WWF/glwd
+	, 	StorageName = "%LocalDataProjDir%/Water/lakes/glwd_3_gridcode1_union_no_holes_sp.fss"
+	{
+		attribute<LatLong> Geometry (arc) := WWF/glwd/geometry;
+	}
+
+	unit<uint32> glwd_3
+	: 	StorageName = "%ToBURPDataDir%/Physical/Water/glwd_3_gridcode1_union_no_holes_sp.fss"
+	,  StorageReadOnly = "True"
+	{
+		attribute<LatLong>           Geometry (arc);
+		attribute<SphericalMercator> geometry_mer (arc):= Geometry[SphericalMercator];
+		
+		parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+		parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+	}
+
+	attribute<Float32> Location2Lake_mer     (CompactedDomain) := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+	attribute<km>      Location2Lake_km_CD   (CompactedDomain) := (Location2Lake_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
+	attribute<km>      Location2Lake_km_domain_export (domain) := Location2Lake_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to ToBURPDataDir
+
+	unit<ipoint> Location2Lake_km
+	:	StorageName     = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif"
+	,	StorageType     = "gdal.grid"
+	,	StorageReadOnly = "True"
+	,	DialogData      = "LatLong"
+	{
+		attribute<km> GridData (domain);
+		attribute<km> ReadData (domain) := MakeDefined(GridData,250[km]);
+		attribute<km> Lake     (domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
+		
+		unit<uint32> Country := RegionalUnits/Countries 
+		{
+			attribute<float32>  sumLake  := sum(Lake,per_grid);
+			attribute<float32>  MeanLake := mean(Lake,per_grid);
+			attribute<float32>  MinLake  := min(Lake,per_grid);
+			attribute<float32>  MaxLake  := max(Lake,per_grid);
+			attribute<float32>  SDLake   := sd(Lake,per_grid);
+		}
+	}
+}

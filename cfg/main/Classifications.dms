@@ -42,10 +42,10 @@ container Classifications : using = "units"
 		container V := for_each_nedv(Name, 'value('+string(ID(.))+',..)', void, .);
 	}	
 	
-	unit<uint8> ProjectionDate : nrofrows = 10
+	unit<uint8> ProjectionDate : nrofrows = 8
 	{
-		attribute<Year>   Yr: [ 2010, 2020, 2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100];
-		attribute<string> name          := 'Y'+string(Yr);
+		attribute<Year>   Yr             : [2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100];
+		attribute<string> name           := 'Y'+string(Yr);
 		
 		attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
 		attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
@@ -53,7 +53,7 @@ container Classifications : using = "units"
 
 	unit<uint8> ProjectionDate_Past : nrofrows = 3
 	{
-		attribute<Year>   Yr            : [ 1990, 2000, 2015];
+		attribute<Year>   Yr            : [ 1980, 2000, 2020];
 		attribute<string> name          := 'Y'+string(Yr);
 		attribute<string> prevStateName := MakeDefined(name[sub_or_null(ID(.),1b)]+'/NewState', 'InitialState');
 	}

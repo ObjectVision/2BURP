@@ -1,17 +1,6 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//            (C) Configuration Towards an Urban Preview - 2UP 2021                       //
-//         Netherlands Environmental Assessment Agency http://www.pbl.nl/en/contact       //
-//  This work is licensed under a Creative Commons Attribution 4.0 International License  //
-//              CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/              //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// Author:   Bas van Bemmel
-// Function: Main core of the model to calculate indicators of SSP-scenarios
-
-container Scenarios : using = "units;geography;sourcedata/regionalunits;classifications"
+container Future : using = "units;geography;sourcedata/regionalunits;classifications"
 {
 	//--------------------------------------- User specs ------------------------------------------------------//
-	// parameter<string> InputMethod    := Modelparameters/Method;
 	parameter<string> Calibration_On := Modelparameters/Calibration;
 	//---------------------------------------------------------------------------------------------------------//
 
@@ -20,223 +9,268 @@ container Scenarios : using = "units;geography;sourcedata/regionalunits;classifi
 	
 	parameter<float32> InPresentUrban_maximum_population_density_factor := 10f;//to prevent not feasible allocation of pop as max limits it
 
-	#include <ScenarioSpecs.dms>
+	// container   Claim := Preprocessing/Claims/Future/ReadFiles/SSP2/FileData;
+	// parameter<string> Scenario:= SSPclaim/Name;
 
-	container SSPs := 
-		for_each_ne(Classifications/SSP/Name, 
-			'RunScenarios_T(Preprocessing/Claims/Scenario/ReadFiles/'+Classifications/SSP/Name+'/FileData, ProjectionDate)'
+	container Source
+	{
+		// attribute<Classifications/urban_discrete/lu_type> landuse     (domain) := Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[uint8];
+
+		container SuitabilityMaps // Static Suitabilities
+		{
+			parameter<float32> ProtectionFactor := 1.0f;
+			parameter<float32> FloodFactor      := 1.0f;
+			parameter<float32> RegionalFactor   := 0.00001f;
+
+			attribute<bool>    IsProtected  (domain) := Policy/ProtectedAreas/ReadData > 0b;
+			attribute<bool>    IsFloodprone (domain) := Physical/Water/FloodProneArea/RP1000/ReadData > 0b;
+			attribute<bool>    IsRegional   (domain) := RestrictionsCountry/IsRegional;
+
+			//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
+			attribute<float32> pot_CoastLine_20km (domain) := !Preprocessing/Suitability/Coast/InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Location2Coast_km/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
+			// attribute<float32> TRI (domain)                := Preprocessing/Suitability/TRI/Weight / 100.0f;
+			attribute<float32> TravelTime (domain)         := Preprocessing/Suitability/TravelTime/Weight;
+			// attribute<float32> Urban_unCali (domain)       := TRI + TravelTime;
+			//end unCalibrated code
+
+			// --------------------------- Application of Calibration coefficients calculated by VU - Pendula Ferdinand (november 2020) -------------------- //
+			unit<wpoint> AutoGLM_Coeffs           := Analysis/Create_CalibrationOutput/coefficients/coef2domain/domain;
+			unit<wpoint> AutoGLM_UrbChange_Coeffs := Analysis/Create_CalibrationOutput/coefficients_UrbanChange/coef2domain/domain;
+			
+			attribute<float32> Urban_Cali (domain) := (Preprocessing/Population/PopulationDensity_8dir_StartYear/Ln_mean_8dir[float32]                                 * AutoGLM_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
+																	(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_Coeffs/DistanceToCoast_coef_grid) + 
+																	(Physical/Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_Coeffs/SweetWater_coef_grid) + 
+																	(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_Coeffs/Elevation_coef_grid) + 
+																	(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_Coeffs/Slope_coef_grid) + 
+																	(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_Coeffs/TRI_coef_grid) + 
+																	(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_Coeffs/TravelTime_coef_grid) + 
+																	(IsProtected[float32]                                                                                        * AutoGLM_Coeffs/ProtectedArea_coef_grid) + 
+																	(Physical/Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_Coeffs/FloodProneArea_coef_grid) + 
+																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_Coeffs/Earthquake_coef_grid) + 
+																	(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_Coeffs/Landslide_PR_coef_grid) + 
+																	(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_Coeffs/Landslide_EQ_coef_grid) + 
+																	(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32]                                       * AutoGLM_Coeffs/DistanceMainRoads_coef_grid) + 
+																	(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_Coeffs/DistanceSecondaryRoads_coef_grid) + 
+																	AutoGLM_Coeffs/Constant_coef_grid;
+
+			attribute<float32> UrbanChange_Cali (domain) := (Preprocessing/Population/PopulationDensity_8dir_StartYear/Ln_mean_8dir[float32]                           * AutoGLM_UrbChange_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
+																	(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceToCoast_coef_grid) + 
+																	(Physical/Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_UrbChange_Coeffs/SweetWater_coef_grid) + 
+																	(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Elevation_coef_grid) + 
+																	(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Slope_coef_grid) + 
+																	(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_UrbChange_Coeffs/TRI_coef_grid) + 
+																	(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_UrbChange_Coeffs/TravelTime_coef_grid) + 
+																	(IsProtected[float32]                                                                                        * AutoGLM_UrbChange_Coeffs/ProtectedArea_coef_grid) + 
+																	(Physical/Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_UrbChange_Coeffs/FloodProneArea_coef_grid) + 
+																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_UrbChange_Coeffs/Earthquake_coef_grid) + 
+																	(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_UrbChange_Coeffs/Landslide_PR_coef_grid) + 
+																	(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_UrbChange_Coeffs/Landslide_EQ_coef_grid) + 
+																	(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32]                                       * AutoGLM_UrbChange_Coeffs/DistanceMainRoads_coef_grid) + 
+																	(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceSecondaryRoads_coef_grid) + 
+																	AutoGLM_UrbChange_Coeffs/Constant_coef_grid;
+			// -------------------------------------------------------------------------------------------------------------------- //
+
+			attribute<float32> Urban (domain)     := =(Calibration_On == 'yes') ? 'UrbanChange_Cali' : 'Urban_unCali';
+			attribute<float32> UrbanProb (domain) := rescale(UrbanChange_Cali,0f,1f);//option Urban_Cali or UrbanChange_Cali
+		}
+
+		parameter<int32> threshold: = 0[int32];
+		container FeasibleSolution;
+	}
+
+	container Suitabilities 
+	{
+		attribute<float32> Urban         (CompactedDomain) := source/SuitabilityMaps/UrbanProb[CompactedDomain/org_rel];
+		attribute<bool>    ProtectedLand (CompactedDomain) := Source/SuitabilityMaps/IsProtected[CompactedDomain/org_rel];
+		attribute<bool>    FloodArea     (CompactedDomain) := Source/SuitabilityMaps/IsFloodprone[CompactedDomain/org_rel];
+		attribute<bool>    Regional      (CompactedDomain) := Source/SuitabilityMaps/IsRegional[CompactedDomain/org_rel];
+		//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
+		attribute<float32> Coast         (CompactedDomain) := Source/SuitabilityMaps/pot_CoastLine_20km[CompactedDomain/org_rel];
+		//end unCalibrated code
+	}
+
+	//Declare Country as region to distribute population in
+	unit<uint32> ClaimRegion := Countries 
+	{
+		// attribute<Person_km2> minimum_population_density := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Min_Pop_Density;
+		// attribute<Person_km2> mean_population_density    := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Mean_Pop_Density;//although named M1 also calculated for M3 in this code
+	}
+
+	//----------------------------------DYNAMIC POPULATION ALLOCATION-----------------------------------------------//
+	//--------------------------------------------------------------------------------------------------------------//
+
+	container Claims
+	{
+		container Population := 
+			for_each_nedv(
+				ProjectionDate/name
+				,'MakeDefined(Preprocessing/Claims/Future/Population/population_to_use_'+String(ProjectionDate/Yr)+'[MPerson][invert(Preprocessing/Claims/Future/Population/Country_rel) ] * 1000000[Person / MPerson], 0[Person])'
+				, ClaimRegion
+				, Person
+			);
+			
+		container Builtup := 
+			for_each_nedv(
+				ProjectionDate/name
+				,'Preprocessing/Claims/Future/Builtup/Builtup_'+String(ProjectionDate/Yr)
+				, ClaimRegion
+				, km2
+			);
+	}
+	container InitialState 
+	{
+		attribute<float32> BuiltUp_orgdom            (domain) := ='SourceData/Builtup/PerYear/'+ModelParameters/StartYear;
+		attribute<float32> BuiltUpShare_orgdom       (domain) := BuiltUp_orgdom / domain/area;
+		attribute<Bool>    HasBuiltup_orgdom         (domain) := BuiltUp_orgdom > 0[m2];
+		attribute<Person>  Population_orgdom         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
+		
+		attribute<bool>    IsBuiltup        (CompactedDomain) := HasBuiltup_orgdom[CompactedDomain/org_rel];
+		attribute<Person>  Population       (CompactedDomain) := Population_orgdom[CompactedDomain/org_rel]; 
+		attribute<m2>      Builtup          (CompactedDomain) := BuiltUp_orgdom[CompactedDomain/org_rel]; 
+		attribute<float32> BuiltupShare     (CompactedDomain) := BuiltUpShare_orgdom[CompactedDomain/org_rel];
+		attribute<bool>    IsNewlyBuilt     (CompactedDomain) := const(FALSE,CompactedDomain);
+		
+	}
+
+	container Allocate_Builtup := 
+		for_each_ne(
+			ProjectionDate/name 
+			,	'Allocate_Builtup_T('
+					+ProjectionDate/prevStateName+                                         // (0) State of previous period
+					', Claims/Builtup/'+ProjectionDate/name+                               // (1) Expected amount of builtup per region in km2
+				')'
 		);
 
-	template RunScenarios_T
+	Template Allocate_Builtup_T
 	{
-		container   SSPclaim;
-		unit<uint8> ProjectionDate;
-		//
-		parameter<string> Scenario:= SSPclaim/Name;
-
-		container Source
+		container          CurrState;
+		attribute<km2>     ExpectedBuiltUpArea       (ClaimRegion); 
+		///
+		parameter<float32> r_if_LocalMax              := 1.11f;
+		parameter<float32> r_if_notLocalMax_w_BUneigh := 1.06f;
+		parameter<float32> r_if_notBU_wo_BUneigh      := 1.04f;
+		
+		unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot2km)
+		{	
+			attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel);
+		}
+		
+		container LocalMaxima
 		{
-			attribute<Classifications/urban_discrete/lu_type> landuse     (domain) := Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[uint8];
+			attribute<float32> Current_LocalMaximum          (domain) := max(CurrState/BuiltUpShare_orgdom[domain_x_pot/third_rel] * domain_x_pot/second_rel -> buffer[float32], domain_x_pot/first_rel); 
+			attribute<bool>    IsLocalMaximum       (CompactedDomain) := (Current_LocalMaximum == CurrState/BuiltUpShare_orgdom)[CompactedDomain/org_rel];
+			attribute<bool>    HasBuiltUpNeighbours (CompactedDomain) := ((sum(CurrState/BuiltUpShare_orgdom[domain_x_pot/third_rel] * domain_x_pot/second_rel -> buffer[float32], domain_x_pot/first_rel) - CurrState/BuiltUpShare_orgdom) > 0f)[CompactedDomain/org_rel];
+		}
+		
+		container NewState
+		{
+			attribute<float32>  MaxAllowed_BuiltupShare (CompactedDomain) := 	switch(
+																					// If a cell has the highest local share of built-up area in T1, it can only increase by 11 pp in T2 (or by 50% - local share if this is smaller than 11 pp)
+																					 case(LocalMaxima/IsLocalMaximum, min_elem(CurrState/BuiltupShare * r_if_LocalMax, 1f))
+																					// If a cell doesn’t have the highest local share of built-up area in T1 but has neighbouring cells with built-up, it can only increase in T2 to the local maximum in T1 + 6 pp (or by 50% - local maximum if this is smaller than 6 pp)
+																					,case(not(LocalMaxima/IsLocalMaximum) && LocalMaxima/HasBuiltUpNeighbours,  min_elem(CurrState/BuiltupShare * r_if_notLocalMax_w_BUneigh, 1f))
+																					// If a cell is not built-up and doesn’t have any built-up in its neighbouring cells in T1, it can only increase by 4 pp in T2
+																					,case(not(LocalMaxima/IsLocalMaximum) && not(LocalMaxima/HasBuiltUpNeighbours),  min_elem(CurrState/BuiltupShare * r_if_notBU_wo_BUneigh, 1f))
+																					,CurrState/BuiltupShare
+																				);
+			attribute<bool>     IsChanged               (CompactedDomain) := MaxAllowed_BuiltupShare != CurrState/BuiltupShare;
+		}
+	}
 
-			container SuitabilityMaps // Static Suitabilities
+
+	//Calculation template that is used as loop for every projection date
+	template DynaPop_T
+	{
+		//The input data for the for_each loop function
+		container CurrState;
+		attribute<Person>      ExpPop       (Claimregion); // urban population claim
+		// attribute<Person>      ExpRuralPop       (Claimregion); // rural population claim
+		attribute<float32>     HydeIndex         (Claimregion);
+		attribute<km2>         Urban_landuse     (ClaimRegion); // urban land use claim)
+		attribute<ClaimRegion> Region_rel    (CompactedDomain) := CompactedDomain/Country_rel;
+		
+		container landuse_allocation 
+		{
+			attribute<km2> Urban_claim (Claimregion) := min_elem(MakeDefined(Urban_landuse, 0[km2]), sum(CompactedDomain/Area, region_rel));
+
+			container CompactedSuitabilities
 			{
-				parameter<float32> ProtectionFactor := ='ScenarioSpecs/ProtectionLevel/Factor_SSP'+substr(Scenario, 3, 1);
-				parameter<float32> FloodFactor      := ='ScenarioSpecs/FloodArea/Factor_SSP'      +substr(Scenario, 3, 1);
-				parameter<float32> RegionalFactor   := 0.00001f;
-
-				attribute<bool>    IsProtected  (domain) := Policy/ProtectedAreas/ReadData > 0b;
-				attribute<bool>    IsFloodprone (domain) := Water/FloodProneArea/RP1000/ReadData > 0b;
-				attribute<bool>    IsRegional   (domain) := RestrictionsCountry/IsRegional;
-
+				// -------------------- Components that are available in total suitability ------------------------ //
 				//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-				attribute<float32> pot_CoastLine_20km (domain) := !Preprocessing/Suitability/Coast/InRegion ? 0f : potential(float32(SourceData/Physical/Coast/Location2Coast_km/ReadData), Geography/Distmatrices/Impl/pot20km/potrange/RelWeightSqrt);
-				// attribute<float32> TRI (domain)                := Preprocessing/Suitability/TRI/Weight / 100.0f;
-				attribute<float32> TravelTime (domain)         := Preprocessing/Suitability/TravelTime/Weight;
-				// attribute<float32> Urban_unCali (domain)       := TRI + TravelTime;
+				attribute<float32> BuiltupPot        (CompactedDomain) := potential((CompactedDomain/Area * float32(CurrState/IsBuiltup))[CompactedDomain/BaseGrid], Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/org_rel];
+
+				// Extra weight to high population density places: OFF because already in NeighbourhoodEnrichtment/Or represented by current urban land
+				attribute<float32> UrbanPopPot       (CompactedDomain) := potential((CurrState/Pop*Float32(CurrState/IsUrban))[CompactedDomain/BaseGrid], Geography/Distmatrices/Impl/pot10km/potrange/RelWeightSqrt)[CompactedDomain/org_rel];
+				attribute<float32> pot_UrbanArea_5km (CompactedDomain) := potential(float32(CurrState/IsUrban[CompactedDomain/BaseGrid]), Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt)[CompactedDomain/org_rel];
+				attribute<float32> Coast_potential   (CompactedDomain) := (Suitabilities/Coast * pot_UrbanArea_5km) * 100f;
+				// ----------------------------------------------------------------------------------------------- //
+				attribute<float32> pot_Combined      (CompactedDomain) := Suitabilities/Urban                                                // Includes Traveltime and TRI as suitability factors
+																			+	UrbanPot * 200.0f * (1f - exp(-max_elem(UrbanPopPot, 0f)))   // Based on distance to dence built up analysis and weights (Frank van Rijn)
+																			+	MakeDefined(Coast_potential, 0.0f) * 2.0f;
 				//end unCalibrated code
 
-				// --------------------------- Application of Calibration coefficients calculated by VU - Pendula Ferdinand (november 2020) -------------------- //
-				unit<wpoint> AutoGLM_Coeffs           := Analysis/Calibration_AutoGLM/coefficients/coef2domain/domain;
-				unit<wpoint> AutoGLM_UrbChange_Coeffs := Analysis/Calibration_AutoGLM/coefficients_UrbanChange/coef2domain/domain;
-				
-				attribute<float32> Urban_Cali (domain) := (Population/M3/PopulationDensity8dir/StartYear/LN_Mean_Pop_Density_8dir[float32]                                 * AutoGLM_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_Coeffs/DistanceToCoast_coef_grid) + 
-																		(Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_Coeffs/SweetWater_coef_grid) + 
-																		(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_Coeffs/Elevation_coef_grid) + 
-																		(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_Coeffs/Slope_coef_grid) + 
-																		(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_Coeffs/TRI_coef_grid) + 
-																		(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_Coeffs/TravelTime_coef_grid) + 
-																		(IsProtected[float32]                                                                                        * AutoGLM_Coeffs/ProtectedArea_coef_grid) + 
-																		(Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_Coeffs/FloodProneArea_coef_grid) + 
-																		(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_Coeffs/Earthquake_coef_grid) + 
-																		(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_Coeffs/Landslide_PR_coef_grid) + 
-																		(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_Coeffs/Landslide_EQ_coef_grid) + 
-																		(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32]                                       * AutoGLM_Coeffs/DistanceMainRoads_coef_grid) + 
-																		(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_Coeffs/DistanceSecondaryRoads_coef_grid) + 
-																		AutoGLM_Coeffs/Constant_coef_grid;
+				attribute<float32> pot_Combined_Calibrated (CompactedDomain) := Suitabilities/Urban;
 
-				attribute<float32> UrbanChange_Cali (domain) := (Population/M3/PopulationDensity8dir/StartYear/LN_Mean_Pop_Density_8dir[float32]                           * AutoGLM_UrbChange_Coeffs/TotalPopulationDensity1990_8dir_coef_grid) + 
-																		(Physical/Coast/Location2Coast_km/Coastline[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceToCoast_coef_grid) + 
-																		(Water/Sweet_Water/Sweet_Water_Distance[float32]                                                             * AutoGLM_UrbChange_Coeffs/SweetWater_coef_grid) + 
-																		(Physical/Elevation/Elevation[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Elevation_coef_grid) + 
-																		(Physical/Slope_2021/ReadData[float32]                                                                       * AutoGLM_UrbChange_Coeffs/Slope_coef_grid) + 
-																		(Physical/TerrainRoughnessIndex/mean                                                                         * AutoGLM_UrbChange_Coeffs/TRI_coef_grid) + 
-																		(Socioeconomic/TravelTime/TravelTime[float32]                                                 * AutoGLM_UrbChange_Coeffs/TravelTime_coef_grid) + 
-																		(IsProtected[float32]                                                                                        * AutoGLM_UrbChange_Coeffs/ProtectedArea_coef_grid) + 
-																		(Water/FloodProneArea/RP100/RP100_bool[float32]                                                              * AutoGLM_UrbChange_Coeffs/FloodProneArea_coef_grid) + 
-																		(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]               * AutoGLM_UrbChange_Coeffs/Earthquake_coef_grid) + 
-																		(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_UrbChange_Coeffs/Landslide_PR_coef_grid) + 
-																		(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_UrbChange_Coeffs/Landslide_EQ_coef_grid) + 
-																		(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32]                                       * AutoGLM_UrbChange_Coeffs/DistanceMainRoads_coef_grid) + 
-																		(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_UrbChange_Coeffs/DistanceSecondaryRoads_coef_grid) + 
-																		AutoGLM_UrbChange_Coeffs/Constant_coef_grid;
-				// -------------------------------------------------------------------------------------------------------------------- //
-
-				attribute<float32> Urban (domain)     := =(Calibration_On == 'yes') ? 'UrbanChange_Cali' : 'Urban_unCali';
-				attribute<float32> UrbanProb (domain) := rescale(UrbanChange_Cali,0f,1f);//option Urban_Cali or UrbanChange_Cali
+				// ----------------------- SSP specific restrictions ---------------------------------------------- //
+				attribute<float32> pot_factor (CompactedDomain) :=
+					switch(
+							case(Suitabilities/ProtectedLand, Source/SuitabilityMaps/ProtectionFactor)  // SSP specific repulsion of protected land areas (0 = zero suitability; 1 = suitable for built up)
+						,	case(Suitabilities/Floodarea,     Source/SuitabilityMaps/FloodFactor)   	// SSP specific repulsion of flood prone areas (0 = zero suitabiliuty; 1 = suitable for built-up)
+						,	1.0f
+					);
+				// ----------------------------------------------------------------------------------------------- //	
+				attribute<float32> pot_Total (CompactedDomain) := =(Calibration_On == 'yes') ? 'pot_Combined_Calibrated * pot_factor' : 'pot_Combined * pot_factor';
+				// -------------------- Dynamic suitability ------------------------------------------------------ //
+				attribute<float32> Urban_float32 (CompactedDomain) := =Calibration_On == 'yes' 
+																			? '(Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[CompactedDomain/domain_rel][float32] + pot_Total + CurrState/NewlyBuilt)'
+																			: '(CurrState/IsUrban ? 600000f : 0f) + (pot_Total* 1000f)[float32]';
+				attribute<Suitability> Urban (CompactedDomain) := Urban_float32[Suitability];
+				// ----------------------------------------------------------------------------------------------- //
 			}
 
-			parameter<int32> threshold: = 0[int32];
-			container FeasibleSolution;
+			attribute<SuitabilityNeg> rank        (CompactedDomain) := -CompactedSuitabilities/Urban[SuitabilityNeg];
+			attribute<SuitabilityNeg> cuttingline (ClaimRegion)     := MakeDefined(nth_element_weighted(rank, urban_claim, CompactedDomain/area, region_rel), max(rank, region_rel));
+			attribute<bool>           IsUrban     (CompactedDomain) := rank < cuttingline[region_rel];
+			attribute<float32> IsUrbanF32(CompactedDomain) := Float32(IsUrban);
 		}
 
-		container Suitabilities 
+		attribute<Float32> GrowPot  (CompactedDomain) := max_elem(Float32(landuse_allocation/CompactedSuitabilities/Urban), 0f), FreeData = "False";
+		attribute<Float32> ShrinkPot(CompactedDomain) := max_elem(max(GrowPot, Region_rel)[Region_rel] - GrowPot, 0f);
+		attribute<float32> MaxSqr(CompactedDomain):= potential(Sqr(CurrState/Pop / CompactedDomain/Area)[CompactedDomain/BaseGrid] * landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel]
+														/	potential(landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel];
+		attribute<Person_km2> maximum_population_density_org(CompactedDomain) := max_elem(Sqrt(MaxSqr), ClaimRegion/mean_population_density[Region_rel]) * HydeIndex[Region_rel];
+		attribute<Person_km2> maximum_population_density(CompactedDomain)     := ModelParameters/InPresentUrban='InPresentUrban' ? maximum_population_density_org * InPresentUrban_maximum_population_density_factor : maximum_population_density_org, FreeData = "False";
+		attribute<Person>     maximum_population        (CompactedDomain) := CompactedDomain/Area * maximum_population_density, FreeData = "False";
+
+		template IterTempl
 		{
-			attribute<float32> Urban         (CompactedDomain) := source/SuitabilityMaps/UrbanProb[CompactedDomain/org_rel];
-			attribute<bool>    ProtectedLand (CompactedDomain) := Source/SuitabilityMaps/IsProtected[CompactedDomain/org_rel];
-			attribute<bool>    FloodArea     (CompactedDomain) := Source/SuitabilityMaps/IsFloodprone[CompactedDomain/org_rel];
-			attribute<bool>    Regional      (CompactedDomain) := Source/SuitabilityMaps/IsRegional[CompactedDomain/org_rel];
-			//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-			attribute<float32> Coast         (CompactedDomain) := Source/SuitabilityMaps/pot_CoastLine_20km[CompactedDomain/org_rel];
-			//end unCalibrated code
+			attribute<Person> CurrPop(CompactedDomain);
+			attribute<Person> ExtraPop   (ClaimRegion)     := ExpUrbanPop - sum(CurrPop * landuse_allocation/IsUrbanF32, Region_rel), FreeData = "False";
+			attribute<bool>   Abandonment(CompactedDomain) :=  (ExtraPop<0f)[Region_rel];
+			attribute<Person> DeltaUp  (CompactedDomain) := scalesum(GrowPot   * CompactedDomain/Area * landuse_allocation/IsUrbanF32 * Float32(maximum_population > CurrPop ), Region_rel, ExtraPop);
+			attribute<Person> DeltaDn  (CompactedDomain) := scalesum(ShrinkPot * CompactedDomain/Area * landuse_allocation/IsUrbanF32 * Float32(CurrPop > 0f  ), Region_rel, ExtraPop);
+			attribute<Person> Delta    (CompactedDomain) := Abandonment ? DeltaDn : DeltaUp;
+			attribute<Person> NextPop  (CompactedDomain) := CurrPop + makedefined(median(0f, Delta, float32(!Abandonment) * maximum_population - CurrPop),0f), FreeData = "False";
 		}
 
-		//Declare Country as region to distribute population in
-		unit<uint32> ClaimRegion := Countries 
+		container Iters := for_each_ne(Iter/name, 'IterTempl('+Iter/PrevPopName+')');
+		container Last := =Last('Iters/'+Iter/name); 
+
+		//-----------------------------------Rural population distribution---------------------------------------------//
+		attribute<Person> Initial_Rural_residence (CompactedDomain) := ='landuse_allocation/IsUrban ? 0[Person] : SourceData/Population/Past/PerYear/'+ModelParameters/StartYear+'/Population_LL[Person][CompactedDomain/org_rel]';//same for M1 and M3!
+		attribute<Person> RuralPop_corr               (ClaimRegion) := ExpRuralPop < 0f ? 0f : ExpRuralPop;
+		attribute<Person> RuralPop                (CompactedDomain) := MakeDefined(scalesum(Initial_Rural_residence, Region_rel, RuralPop_corr), 0f);
+		//-------------------------------------------------------------------------------------------------------------//
+
+		container NewState
 		{
-			// attribute<Person_km2> minimum_population_density := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Min_Pop_Density;
-			attribute<Person_km2> mean_population_density    := SourceData/Population/M3/Urban_pop_StartYear_Country/Urban_Mean_Pop_Density;//although named M1 also calculated for M3 in this code
+			attribute<Person>   Pop                (CompactedDomain) := Last/NextPop * landuse_allocation/IsUrbanF32 + RuralPop;
+			attribute<bool>     Builtup            (CompactedDomain) := landuse_allocation/IsUrban;
+			// attribute<uint16>   UrbanHistoryBits   (CompactedDomain) := CurrState/UrbanHistoryBits * 2w + Uint16(IsUrban);
+			// attribute<bool>     HasHad2UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 4w) == 3w;   // bijvoorbeeld in 2040 de history 2010 rural -> 2020 urban -> 2030 urban
+			attribute<float32>  NewlyBuilt (CompactedDomain) := Float32(IsUrban && !HasHad2UrbanPeriods); //extra prob for first urbanisation within 20, to keep/old first urb.
 		}
 
-		//----------------------------------DYNAMIC POPULATION ALLOCATION-----------------------------------------------//
-		//--------------------------------------------------------------------------------------------------------------//
-
-		#include <population_claimregion.dms> //known population claim imposed
-
-		container InitialState //Is used only once at the start of the DynaPop loop as CurrState.
-		{
-			attribute<bool>   IsUrban          (CompactedDomain) := source/landuse[CompactedDomain/org_rel] > 0b;
-			attribute<Person> Pop              (CompactedDomain) := GridData/InitPopGrid[CompactedDomain/org_rel]; // Population in each cell (Urban only)
-			attribute<float32>NewlyBuilt       (CompactedDomain) := const(0f,CompactedDomain);// no assumend extra probability for newly built urbanisation
-			attribute<uint16> UrbanHistoryBits (CompactedDomain) := IsUrban ? 15w : 0w; // 0000 1111 for IsUrban, 0000 0000 for not(IsUrban); not too many bits to avoid null value UInt16(-1), which now occurs after 16-4 time-steps.
-		}
-
-		container ProjectionDates := 
-			for_each_ne(ProjectionDate/name, 
-				'DynaPop_T('
-					+ProjectionDate/prevStateName+                                                                    // (0) State of previous perod
-					', population_claimregion/ExpUrbanPops/'+ProjectionDate/name+                                     // (1) ExpUrbanPop: Expected Urban population number per Country
-					', population_claimregion/ExpRuralPops/'+ProjectionDate/name+                                     // (2) ExpRuralPop: Expected Rural population per Country
-					', Preprocessing/HYDE/HYDEScen/HYDEindex/SSPs/'+Scenario+'/Indices/'+ProjectionDate/name+         // (3) HydeIndex: Factor for increase or decrease of urban density in each future decade
-					', Preprocessing/HYDE/HYDEScen/HYDEindex/SSPs/'+Scenario+'/ProjectionDates/'+ProjectionDate/name+ // (4) Urban_landuse: area for Urban land use
-					
-				')'
-			);
-
-		//Calculation template that is used as loop for every projection date
-		template DynaPop_T
-		{
-			//The input data for the for_each loop function
-			container CurrState;
-			attribute<Person>      ExpUrbanPop       (Claimregion); // urban population claim
-			attribute<Person>      ExpRuralPop       (Claimregion); // rural population claim
-			attribute<float32>     HydeIndex         (Claimregion);
-			attribute<km2>         Urban_landuse     (ClaimRegion); // urban land use claim)
-			attribute<ClaimRegion> Region_rel    (CompactedDomain) := CompactedDomain/Country_rel;
-			
-			container landuse_allocation 
-			{
-				attribute<km2> Urban_claim (Claimregion) := min_elem(MakeDefined(Urban_landuse, 0[km2]), sum(CompactedDomain/Area, region_rel));
-
-				container CompactedSuitabilities
-				{
-					// -------------------- Components that are available in total suitability ------------------------ //
-					//begin unCalibrated code (statistical Frank van Rijn / Jolien van Huystee)
-					attribute<float32> UrbanPot         (CompactedDomain) := potential((CompactedDomain/Area * float32(CurrState/IsUrban))[CompactedDomain/BaseGrid], Geography/Distmatrices/Impl/pot10km/potrange/RelWeightCorr)[CompactedDomain/org_rel];
-	
-					// Extra weight to high population density places: OFF because already in NeighbourhoodEnrichtment/Or represented by current urban land
-					attribute<float32> UrbanPopPot       (CompactedDomain) := potential((CurrState/Pop*Float32(CurrState/IsUrban))[CompactedDomain/BaseGrid], Geography/Distmatrices/Impl/pot10km/potrange/RelWeightSqrt)[CompactedDomain/org_rel];
-					attribute<float32> pot_UrbanArea_5km (CompactedDomain) := potential(float32(CurrState/IsUrban[CompactedDomain/BaseGrid]), Geography/Distmatrices/Impl/pot5km/potrange/RelWeightSqrt)[CompactedDomain/org_rel];
-					attribute<float32> Coast_potential   (CompactedDomain) := (Suitabilities/Coast * pot_UrbanArea_5km) * 100f;
-					// ----------------------------------------------------------------------------------------------- //
-					attribute<float32> pot_Combined      (CompactedDomain) := Suitabilities/Urban                                                // Includes Traveltime and TRI as suitability factors
-																				+	UrbanPot * 200.0f * (1f - exp(-max_elem(UrbanPopPot, 0f)))   // Based on distance to dence built up analysis and weights (Frank van Rijn)
-																				+	MakeDefined(Coast_potential, 0.0f) * 2.0f;
-					//end unCalibrated code
-
-					attribute<float32> pot_Combined_Calibrated (CompactedDomain) := Suitabilities/Urban;
-
-					// ----------------------- SSP specific restrictions ---------------------------------------------- //
-					attribute<float32> pot_factor (CompactedDomain) :=
-						switch(
-								case(Suitabilities/ProtectedLand, Source/SuitabilityMaps/ProtectionFactor)  // SSP specific repulsion of protected land areas (0 = zero suitability; 1 = suitable for built up)
-							,	case(Suitabilities/Floodarea,     Source/SuitabilityMaps/FloodFactor)   	// SSP specific repulsion of flood prone areas (0 = zero suitabiliuty; 1 = suitable for built-up)
-							,	1.0f
-						);
-					// ----------------------------------------------------------------------------------------------- //	
-					attribute<float32> pot_Total (CompactedDomain) := =(Calibration_On == 'yes') ? 'pot_Combined_Calibrated * pot_factor' : 'pot_Combined * pot_factor';
-					// -------------------- Dynamic suitability ------------------------------------------------------ //
-					attribute<float32> Urban_float32 (CompactedDomain) := =Calibration_On == 'yes' 
-																				? '(Preprocessing/UrbanArea/UrbanArea_StartYear/ReadData[CompactedDomain/domain_rel][float32] + pot_Total + CurrState/NewlyBuilt)'
-																				: '(CurrState/IsUrban ? 600000f : 0f) + (pot_Total* 1000f)[float32]';
-					attribute<Suitability> Urban (CompactedDomain) := Urban_float32[Suitability];
-					// ----------------------------------------------------------------------------------------------- //
-				}
-
-				attribute<SuitabilityNeg> rank        (CompactedDomain) := -CompactedSuitabilities/Urban[SuitabilityNeg];
-				attribute<SuitabilityNeg> cuttingline (ClaimRegion)     := MakeDefined(nth_element_weighted(rank, urban_claim, CompactedDomain/area, region_rel), max(rank, region_rel));
-				attribute<bool>           IsUrban     (CompactedDomain) := rank < cuttingline[region_rel];
-				attribute<float32> IsUrbanF32(CompactedDomain) := Float32(IsUrban);
-			}
-
-			attribute<Float32> GrowPot  (CompactedDomain) := max_elem(Float32(landuse_allocation/CompactedSuitabilities/Urban), 0f), FreeData = "False";
-			attribute<Float32> ShrinkPot(CompactedDomain) := max_elem(max(GrowPot, Region_rel)[Region_rel] - GrowPot, 0f);
-			attribute<float32> MaxSqr(CompactedDomain):= potential(Sqr(CurrState/Pop / CompactedDomain/Area)[CompactedDomain/BaseGrid] * landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel]
-															/	potential(landuse_allocation/IsUrbanF32[CompactedDomain/BaseGrid], /Geography/Distmatrices/Impl/pot10km/potrange/Conal)[CompactedDomain/org_rel];
-			attribute<Person_km2> maximum_population_density_org(CompactedDomain) := max_elem(Sqrt(MaxSqr), ClaimRegion/mean_population_density[Region_rel]) * HydeIndex[Region_rel];
-			attribute<Person_km2> maximum_population_density(CompactedDomain)     := ModelParameters/InPresentUrban='InPresentUrban' ? maximum_population_density_org * InPresentUrban_maximum_population_density_factor : maximum_population_density_org, FreeData = "False";
-			attribute<Person>     maximum_population        (CompactedDomain) := CompactedDomain/Area * maximum_population_density, FreeData = "False";
-
-			template IterTempl
-			{
-				attribute<Person> CurrPop(CompactedDomain);
-				attribute<Person> ExtraPop   (ClaimRegion)     := ExpUrbanPop - sum(CurrPop * landuse_allocation/IsUrbanF32, Region_rel), FreeData = "False";
-				attribute<bool>   Abandonment(CompactedDomain) :=  (ExtraPop<0f)[Region_rel];
-				attribute<Person> DeltaUp  (CompactedDomain) := scalesum(GrowPot   * CompactedDomain/Area * landuse_allocation/IsUrbanF32 * Float32(maximum_population > CurrPop ), Region_rel, ExtraPop);
-				attribute<Person> DeltaDn  (CompactedDomain) := scalesum(ShrinkPot * CompactedDomain/Area * landuse_allocation/IsUrbanF32 * Float32(CurrPop > 0f  ), Region_rel, ExtraPop);
-				attribute<Person> Delta    (CompactedDomain) := Abandonment ? DeltaDn : DeltaUp;
-				attribute<Person> NextPop  (CompactedDomain) := CurrPop + makedefined(median(0f, Delta, float32(!Abandonment) * maximum_population - CurrPop),0f), FreeData = "False";
-			}
-
-			container Iters := for_each_ne(Iter/name, 'IterTempl('+Iter/PrevPopName+')');
-			container Last := =Last('Iters/'+Iter/name); 
-
-			//-----------------------------------Rural population distribution---------------------------------------------//
-			attribute<Person> Initial_Rural_residence (CompactedDomain) := ='landuse_allocation/IsUrban ? 0[Person] : SourceData/Population/Past/PerYear/'+ModelParameters/StartYear+'/Population_LL[Person][CompactedDomain/org_rel]';//same for M1 and M3!
-			attribute<Person> RuralPop_corr               (ClaimRegion) := ExpRuralPop < 0f ? 0f : ExpRuralPop;
-			attribute<Person> RuralPop                (CompactedDomain) := MakeDefined(scalesum(Initial_Rural_residence, Region_rel, RuralPop_corr), 0f);
-			//-------------------------------------------------------------------------------------------------------------//
-
-			container NewState
-			{
-				attribute<Person> Pop (CompactedDomain)              := Last/NextPop * landuse_allocation/IsUrbanF32 + RuralPop;
-				attribute<bool>   IsUrban(CompactedDomain)          := landuse_allocation/IsUrban;
-				attribute<uint16> UrbanHistoryBits   (CompactedDomain) := CurrState/UrbanHistoryBits * 2w + Uint16(IsUrban);
-				attribute<bool>  HasHad2UrbanPeriods(CompactedDomain) := (UrbanHistoryBits % 4w) == 3w;   // bijvoorbeeld in 2040 de history 2010 rural -> 2020 urban -> 2030 urban
-				attribute<float32>  NewlyBuilt (CompactedDomain) := Float32(IsUrban && !HasHad2UrbanPeriods); //extra prob for first urbanisation within 20, to keep/old first urb.
-			}
-
-			attribute<Person>     UrbanPop    (CompactedDomain)           := NewState/Pop * landuse_allocation/IsUrbanF32;
-		}
+		attribute<Person>     UrbanPop    (CompactedDomain)           := NewState/Pop * landuse_allocation/IsUrbanF32;
 	}
 }

@@ -1,8 +1,5 @@
 container Countries2 : using = "units;geography"
 {	
-
-
-
 	unit<uint8> Country_old
 		:  StorageName = "%ToBURPDataDir%/administrative/countries/countries_GADM_2012_UCD_v10.shp"
 		,  StorageType     = "gdal.vect"
