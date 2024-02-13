@@ -8,6 +8,10 @@ container RegionalUnits
 	, StorageReadOnly = "true"
 	{
 		attribute<LatLong>           Geometry (poly);
+		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry, SphericalMercator);
+		attribute<SphericalMercator>           Geometry_WM_Simpl (poly) := bg_simplify_multi_polygon(Geometry_WM, 100.0);
+		unit<uint32> seq2p := sequence2points(geometry);
+		unit<uint32> seq2p_smpl := sequence2points(Geometry_WM_Simpl);
 		attribute<string>            ISO3                     := FIRST_ISOA;
 		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
 	}
@@ -19,8 +23,9 @@ container RegionalUnits
 	{
 		attribute<LatLong>           Geometry (poly);
 		attribute<string>            ISO3                     := GID_0;
-		attribute<Store_Continents>  continents_rel           := rlookup(AsItemName(continent_name), Store_Continents/name);
+		attribute<Store_Continents>  store_continents_rel     := rlookup(AsItemName(continent_name), Store_Continents/name);
 		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);
+		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
 	}
 	
 	unit<uint32> store_Countries := unique(CIESIN/ISO3)
@@ -33,8 +38,8 @@ container RegionalUnits
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
 		attribute<string>            values                   : DisableStorage = "true";
-		attribute<Continents>        Continents_rel           := first(CIESIN/Continents_rel, CIESIN/store_countries_rel);
-		attribute<string>            continent_name           := first(CIESIN/continent_name, CIESIN/store_countries_rel);
+		attribute<Continents>        Continents_rel           := first(GADM/store_continents_rel, GADM/store_countries_rel);
+		attribute<string>            continent_name           := first(GADM/continent_name, GADM/store_countries_rel);
 	}
 	
 	unit<uint32> Countries

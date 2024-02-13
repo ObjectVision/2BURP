@@ -1,59 +1,14 @@
 container Preprocessing : using = "Geography;Units;SourceData;SourceData/RegionalUnits"
 {
-	// container UrbanArea
-	// {
-		// attribute<float32> Store_UrbanArea_Y1990 (domain) := SourceData/Builtup/PerYear/Y1990/Builtup_LL, 
-			// StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_Y1990_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
-			// StorageType      = "gdalwrite.grid";
-			
-		// attribute<float32> Store_UrbanArea_StartYear (domain) := SourceData/Builtup/PerYear/Y2020/Builtup_LL, 
-			// StorageName = "='%ToBURPDataDir%/Builtup/IsUrban_'+ModelParameters/StartYear+'_'+string(ModelParameters/MW_Gridsize)+'m_Threshold-'+replace(string(ModelParameters/BuiltUp_threshold_value),'.','_')+'.tif'",	
-			// StorageType     = "gdalwrite.grid";
-			
-		// unit<ipoint> UrbanArea_Y1990
-		// : storagename = "= propvalue(Store_UrbanArea_Y1990, 'StorageName')"
-		// , StorageType     = "gdal.grid"
-		// , StorageReadOnly = "True"
-		// {
-			// attribute<float32> GridData(domain);
-		// }
-		
-		// unit<ipoint> UrbanArea_StartYear
-		// : storagename = "= propvalue(Store_UrbanArea_StartYear, 'StorageName')"
-		// , StorageType     = "gdal.grid"
-		// , StorageReadOnly = "True"
-		// , DialogType = "map"
-		// {
-			// attribute<float32> GridData;
-			// attribute<float32> ReadData (domain);
-			
-			
-			// attribute<Units/km2>                      ReadDatakm2               (domain) := ReadData[float32] * domain/area;
-			// attribute<uint2>                          IsUrbanInCountry          (domain) := ReadData[bool] ? ReadData[uint2] : (IsDefined(RegionalUnits/Countries/Country_grid) ? 3u2 : 0u2);
-			// attribute<Classifications/urb/IsUrbClass> ReadDataCD       (CompactedDomain) := ReadData[CompactedDomain/domain_rel];
-			// attribute<Units/km2>                      ReadDataCDkm2    (CompactedDomain) := ReadDataCD[float32] * domain/area[CompactedDomain/domain_rel];
-		// }
-
-		// unit<ipoint> RuralArea2010
-		// {
-			// attribute<bool> RuralArea2010 (domain):= !IsDefined(RegionalUnits/Countries/ClaimCountry_grid) ? false : !UrbanArea2010/ReadData;
-		// }
-	// }
-	
-	// #include <Preprocessing_Urban.dms>
-	// #include <Preprocessing_GHS_SMOD.dms>
-	// #include <UrbanDensity.dms>
-	
 	container Claims
 	{
 		#include <Claims_Read_Past.dms>
 		#include <Claims_Read_Scenario.dms>
 		#include <Preprocessing_Claims_Past.dms>
-		#include <Preprocessing_Claims_Scenario.dms>
+		// #include <Preprocessing_Claims_Scenario.dms>
 	} 
 	
 	#include <HYDE.dms>
-	#include <GDP.dms>
 	#include <Suitability.dms>
 	
 	container Population

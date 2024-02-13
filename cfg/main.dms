@@ -1,4 +1,4 @@
-container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy-order in coordinate conversions
+container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy-order in coordinate conversions
 {
 	#include <Units.dms>
 	#include <Classifications.dms>
@@ -33,7 +33,7 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.0900" //because of xy
 	container Final_Items : using = "units;geography"
 	{
 		attribute<bool>     IsBuiltup (CompactedDomain) := Analysis/Future/ProjectionDates/Y2030/NewState/IsUrban;
-		attribute<Person>   Pop     (CompactedDomain) := Analysis/Scenarios/SSPs/SSP2/ProjectionDates/Y2020/NewState/Pop;
+		attribute<Person>   Pop       (CompactedDomain) := Analysis/Future/SSPs/SSP2/ProjectionDates/Y2020/NewState/Pop;
 		
 		parameter<string>   Validation_Pop_Error      := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result";
 		parameter<string>   Validation_Urban_Accuracy := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/UrbanAccuracy/Country/export_csv/result";

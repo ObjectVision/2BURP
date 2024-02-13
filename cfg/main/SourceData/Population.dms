@@ -1,9 +1,5 @@
 container Population  : using = "units;geography;classifications;sourcedata/regionalunits"
 {
-	// #include <Past.dms>
-	// #include <Population_M1.dms>
-	// #include <Population_M3.dms>
-	
 	container Import_PerYear := 
 		for_each_ndvat(
 			GHS_years/name

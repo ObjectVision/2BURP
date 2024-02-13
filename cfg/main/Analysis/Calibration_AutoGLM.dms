@@ -1,27 +1,134 @@
-container Create_CalibrationOutput : using = "geography"
+container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 {
-	unit <uint32> CD := CompactedDomain
+	unit <uint32> Create_DataForCalibration := CompactedDomain
 	{
-		// attribute<uint32>                                      Number                           := domain/number[org_rel];
-		attribute<SourceData/RegionalUnits/Countries>  Country_grid                     := SourceData/RegionalUnits/Countries/per_grid[CompactedDomain/org_rel];
-		// attribute<SourceData/RegionalUnits/Continent>  Continent_grid                   := SourceData/RegionalUnits/Countries/Country/Continent_id_grid[CompactedDomain/org_rel];
+		attribute<Countries>  Country_grid                            := Countries/per_grid[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float32>    Coastline_Distance                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
+		attribute<float32>    Distance2River                          := Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
+		attribute<float32>    Lake_Distance                           := Physical/Water/Lakes/Location2Lake_km/Lake[CompactedDomain/org_rel];
+		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
+		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
+		attribute<float32>    TRImean                                 := Physical/TerrainRoughnessIndex/mean[CompactedDomain/org_rel];
+		attribute<uint8>      IsProtected                             := Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
+		attribute<uint8>      FloodProneArea_RP100                    := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
+		attribute<uint8>      Earthquakes_Modified_Mercalli_Intensity := Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
+		attribute<uint8>      Landslides_Precipitation                := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
+		attribute<uint8>      Landslides_Earthquakes                  := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
+		attribute<float32>    Road123_Distance                        := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
+		attribute<float32>    Road45_Distance                         := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
+	}
+	
+	container ReadCoffecients_UrbanArea 
+	: url   = "%projdir%/doc/Forecasting_patterns_of_urban_ expansion_Pendula_Ferdinand_August2020.pdf"
+	, Descr = "Coefficients per calibration variable for each continent for urban area 2014 calculated by Pendula Ferdinand 23 november 2020 (table 4 from pdf)"
+	{
+		unit<uint8> continent_coef : NrOfRows = 7
+		, url = "%projdir%/doc/Revised_calibration_of_the_2UP_model_20201214.pdf"
+		{
+			attribute<string>  name                                 :[     'Africa', 'Antarctica',           'Asia','Australia_Oceania',        'Europe',  'North_America','South_America'];
 
-		attribute<float64>                         TotalPopulationDensity2010_8dir         := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
-		attribute<float32>                         Coastline_Distance                      := SourceData/Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
-		attribute<float32>                         Distance2River                          := SourceData/Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
-		attribute<float32>                         Lake_Distance                           := SourceData/Physical/Water/Lakes/Location2Lake_km/Lake[CompactedDomain/org_rel];
-		attribute<int16>                           Elevation                               := SourceData/Physical/Elevation/Elevation[CompactedDomain/org_rel];
-		attribute<float32>                         Slope                                   := SourceData/Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
-		attribute<float32>                         TRImean                                 := SourceData/Physical/TerrainRoughnessIndex/mean[CompactedDomain/org_rel];
-		attribute<uint8>                           IsProtected                             := SourceData/Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>                           FloodProneArea_RP100                    := SourceData/Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>                           Earthquakes_Modified_Mercalli_Intensity := SourceData/Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>                           Landslides_Precipitation                := SourceData/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
-		attribute<uint8>                           Landslides_Earthquakes                  := SourceData/Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
-		attribute<float32>                         Road123_Distance                        := SourceData/Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
-		attribute<float32>                         Road45_Distance                         := SourceData/Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
+			attribute<float32> TotalPopulationDensity1990_8dir_coef :[  0.531497709,         null,      0.839765999,        0.870067398,     1.274528258,      0.974599052,      0.724074079];//Population Density
+			attribute<float32> DistanceToCoast_coef                 :[ -0.008463382,         null,     -0.005394479,       -0.005474561,    -0.000675937,     -0.002514605,     -0.004313727];//Distance to coast
+			attribute<float32> SweetWater_coef                      :[         null,         null,             null,               null,    -0.006863871,     -0.007378535,      0.011433245];//Distance to river-lake
+			attribute<float32> DistanceMainRoads_coef               :[ -0.014085749,         null,     -0.010793457,       -0.031643393,     0.005509163,     -0.075559046,     -0.034440931];//Distance main roads
+			attribute<float32> DistanceSecondaryRoads_coef          :[ -0.049962357,         null,             null,       -0.011904265,            null,             null,             null];//Distance secondary roads
+			attribute<float32> TravelTime_coef                      :[ -0.037591571,         null,     -0.034551404,       -0.030340505,    -0.032979389,     -0.052752656,     -0.037279886];//Travel Time
+			attribute<float32> Elevation_coef                       :[  0.001545315,         null,      0.000753538,         0.00140626,    -0.002031371,      0.000601571,     -0.000117761];//Elevation
+			attribute<float32> Slope_coef                           :[ -0.065971464,         null,      0.033417041,       -0.299321221,            null,      -0.04037477,      -0.06362772];//Slope
+			attribute<float32> TRI_coef                             :[ -0.653195893,         null,     -0.620312105,       -0.719939619,            null,     -0.651830594,             null];//TRI
+			attribute<float32> ProtectedArea_coef                   :[ -0.075611953,         null,     -0.383992502,        1.004850524,    -0.575104379,      0.578474954,     -0.706175672];//Protected Area
+			attribute<float32> FloodProneArea_coef                  :[  0.788375972,         null,             null,               null,     0.199432853,      0.179426493,      1.683693808];//Flood Prone Area
+			attribute<float32> Earthquake_coef                      :[         null,         null,      0.007257093,       -0.197845731,    -0.007995195,     -0.028916204,      0.095217295];//Earthquake
+			attribute<float32> Landslide_PR_coef                    :[         null,         null,             null,               null,            null,             null,             null];//Landslide [PR]
+			attribute<float32> Landslide_EQ_coef                    :[         null,         null,     -0.440048397,       1.554044128,             null,     -0.857242479,     -0.875636885];//Landslide [EQ]
+			
+			attribute<float32> Constant_coef                        :[  2.533543412,         null,     -1.132519129,       1.763324867,     -5.682607834,     -0.631474116,      -0.63287745];
+			attribute<string>  label          := name;
+			container V := for_each_nedv(name, string(id(.))+'[..]', void, .);
+		}
+		
+		container coef2domain := Coef2domain_T(continent_coef);
 	}
 
-	#include <Coefficients.dms>
-	#include <Coefficients_UrbanChange_1990_2014.dms>
+	container ReadCoffecients_UrbanChange
+	: url   = "%projdir%/doc/Forecasting_patterns_of_urban_ expansion_Pendula_Ferdinand_August2020.pdf"
+	, Descr = "Coefficients per calibration variable for each continent for Urban Change 1990 - 2014 calculated by Pendula Ferdinand 23 november 2020 (table 7 from pdf)"
+	{
+		unit<uint8> continent_coef : NrOfRows = 7
+		, url = "%projdir%/doc/Revised_calibration_of_the_2UP_model_20201214.pdf"
+		{
+			attribute<string>  name                                 :[     'Africa', 'Antarctica',           'Asia','Australia_Oceania',        'Europe',  'North_America','South_America'];
+			
+			attribute<float32> TotalPopulationDensity1990_8dir_coef  :[  0.494893076,        null,      0.657558208,        0.758458553,     1.102291549,      0.777435483,    0.691586949];//Population Density
+			attribute<float32> DistanceToCoast_coef                  :[ -0.007240492,        null,     -0.005956541,       -0.003295155,    -0.001791978,     -0.004124286,    -0.00491101];//Distance to coast
+			attribute<float32> SweetWater_coef                       :[         null,        null,      0.003290122,               null,            null,     -0.005466037,     0.01187778];//Distance to river-lake
+			attribute<float32> DistanceMainRoads_coef                :[ -0.021746603,        null,     -0.036724457,       -0.057291143,    -0.111799995,     -0.100846705,   -0.015739657];//Distance main roads
+			attribute<float32> DistanceSecondaryRoads_coef           :[ -0.052211328,        null,     -0.002947417,               null,            null,             null,           null];//Distance secondary roads
+			attribute<float32> TravelTime_coef                       :[ -0.036320857,        null,     -0.034689261,        -0.03659518,    -0.038918441,     -0.061306295,   -0.042471615];//Travel Time
+			attribute<float32> Elevation_coef                        :[  0.001418582,        null,      0.000574966,               null,    -0.000856137,      0.000807534,           null];//Elevation
+			attribute<float32> Slope_coef                            :[         null,        null,      0.045417824,       -0.726566465,    -0.139362843,      0.094781557,           null];//Slope
+			attribute<float32> TRI_coef                              :[  -0.64716299,        null,     -0.566655545,       -0.216091209,            null,     -0.713664916,   -0.054567323];//TRI
+			attribute<float32> ProtectedArea_coef                    :[  0.470415729,        null,     -0.410555547,        1.624222284,     -0.41355117,      0.939677477,           null];//Protected Area
+			attribute<float32> FloodProneArea_coef                   :[  0.822351373,        null,             null,               null,     0.494223116,             null,    1.405221738];//Flood Prone Area
+			attribute<float32> Earthquake_coef                       :[  0.039247626,        null,             null,       -0.235347635,     0.020103396,     -0.057929352,           null];//Earthquake
+			attribute<float32> Landslide_PR_coef                     :[         null,        null,             null,               null,            null,             null,           null];//Landslide [PR]
+			attribute<float32> Landslide_EQ_coef                     :[         null,        null,     -0.570523557,        1.453910414,            null,      -1.07805493,   -0.505662496];//Landslide [EQ]
+
+			attribute<float32> Constant_coef                         :[ 2.724646675,         null,      0.494858408,        2.766250116,    -4.121737156,     1.124378325,     0.216743421];
+
+			attribute<string>  label          := name;
+
+			container V := for_each_nedv(name, string(id(.))+'[..]', void, .);
+		}
+
+		container coef2domain := Coef2domain_T(continent_coef);
+	}
+	
+	Template Coef2domain_T
+	{
+		unit<uint8> continent_coef;
+		///
+		unit<uint32> Country     := SourceData/RegionalUnits/Countries 
+		{
+			attribute<uint8>   Continent_id       := rlookup(SourceData/RegionalUnits/Countries/Continent_name,continent_coef/name);
+
+			attribute<float32> TotalPopulationDensity1990_8dir_coef     := continent_coef/TotalPopulationDensity1990_8dir_coef[Continent_id];
+			attribute<float32> DistanceToCoast_coef                     := continent_coef/DistanceToCoast_coef[Continent_id];
+			attribute<float32> SweetWater_coef                          := continent_coef/SweetWater_coef[Continent_id];
+			attribute<float32> Elevation_coef                           := continent_coef/Elevation_coef[Continent_id];
+			attribute<float32> Slope_coef                               := continent_coef/Slope_coef[Continent_id];
+			attribute<float32> TRI_coef                                 := continent_coef/TRI_coef[Continent_id];
+			attribute<float32> TravelTime_coef                          := continent_coef/TravelTime_coef[Continent_id];
+			attribute<float32> ProtectedArea_coef                       := continent_coef/ProtectedArea_coef[Continent_id];
+			attribute<float32> FloodProneArea_coef                      := continent_coef/FloodProneArea_coef[Continent_id];
+			attribute<float32> Earthquake_coef                          := continent_coef/Earthquake_coef[Continent_id];
+			attribute<float32> Landslide_PR_coef                        := continent_coef/Landslide_PR_coef[Continent_id];
+			attribute<float32> Landslide_EQ_coef                        := continent_coef/Landslide_EQ_coef[Continent_id];
+			attribute<float32> DistanceMainRoads_coef                   := continent_coef/DistanceMainRoads_coef[Continent_id];
+			attribute<float32> DistanceSecondaryRoads_coef              := continent_coef/DistanceSecondaryRoads_coef[Continent_id];
+
+			attribute<float32> Constant_coef                            := continent_coef/Constant_coef[Continent_id];
+		}
+
+		unit<wpoint> domain     := geography/domain
+		{
+			attribute<float32> TotalPopulationDensity1990_8dir_coef_grid      := MakeDefined(Country/TotalPopulationDensity1990_8dir_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> DistanceToCoast_coef_grid                      := MakeDefined(Country/DistanceToCoast_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> SweetWater_coef_grid                           := MakeDefined(Country/SweetWater_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> Elevation_coef_grid                            := MakeDefined(Country/Elevation_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> Slope_coef_grid                                := MakeDefined(Country/Slope_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> TRI_coef_grid                                  := MakeDefined(Country/TRI_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> TravelTime_coef_grid                           := MakeDefined(Country/TravelTime_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> ProtectedArea_coef_grid                        := MakeDefined(Country/ProtectedArea_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> FloodProneArea_coef_grid                       := MakeDefined(Country/FloodProneArea_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> Earthquake_coef_grid                           := MakeDefined(Country/Earthquake_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> Landslide_PR_coef_grid                         := MakeDefined(Country/Landslide_PR_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> Landslide_EQ_coef_grid                         := MakeDefined(Country/Landslide_EQ_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> DistanceMainRoads_coef_grid                    := MakeDefined(Country/DistanceMainRoads_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+			attribute<float32> DistanceSecondaryRoads_coef_grid               := MakeDefined(Country/DistanceSecondaryRoads_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+
+			attribute<float32> Constant_coef_grid                             := MakeDefined(Country/Constant_coef[SourceData/RegionalUnits/Countries/per_grid],0f);
+		}
+	}
 }

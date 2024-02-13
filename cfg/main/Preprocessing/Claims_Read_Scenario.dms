@@ -14,12 +14,12 @@ container Future : using = "SourceData/RegionalUnits;geography"
 	unit<uint32> Builtup := Countries
 	{
 		
-		attribute<km2> Builtup_1975 := sum(SourceData/Builtup/PerYear/Y1975[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
-		attribute<km2> Builtup_1980 := sum(SourceData/Builtup/PerYear/Y1980[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
-		attribute<km2> Builtup_1990 := sum(SourceData/Builtup/PerYear/Y1990[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
-		attribute<km2> Builtup_2000 := sum(SourceData/Builtup/PerYear/Y2000[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
-		attribute<km2> Builtup_2010 := sum(SourceData/Builtup/PerYear/Y2010[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
-		attribute<km2> Builtup_2020 := sum(SourceData/Builtup/PerYear/Y2020[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_1975 := sum(SourceData/Builtup/Total/Y1975[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_1980 := sum(SourceData/Builtup/Total/Y1980[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_1990 := sum(SourceData/Builtup/Total/Y1990[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_2000 := sum(SourceData/Builtup/Total/Y2000[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_2010 := sum(SourceData/Builtup/Total/Y2010[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
+		attribute<km2> Builtup_2020 := sum(SourceData/Builtup/Total/Y2020[float32] * domain/area, /SourceData/RegionalUnits/Countries/per_grid);
 		
 		attribute<float32> Yearly_growth_rate_1975_80 := (1f + ((Builtup_1980 - Builtup_1975) / Builtup_1975))^0.2f;
 		attribute<float32> Yearly_growth_rate_1980_90 := (1f + ((Builtup_1990 - Builtup_1980) / Builtup_1980))^0.1f;
