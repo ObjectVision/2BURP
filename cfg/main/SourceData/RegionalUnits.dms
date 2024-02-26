@@ -28,18 +28,17 @@ container RegionalUnits
 		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
 	}
 	
-	unit<uint32> store_Countries := unique(CIESIN/ISO3)
+	unit<uint32> store_Countries := set_countries
 	, storagename = "%ToBURPDataDir%/Regions/fss/Countries.fss"
 	{
-		attribute<string>            Label                    := Values;
-		attribute<string>            ISO3                     := first(CIESIN/ISO3, CIESIN/store_countries_rel);
-		attribute<LatLong>           Geometry_LL       (poly) := partitioned_union_polygon(CIESIN/geometry[LatLong_ip], CIESIN/store_countries_rel)[LatLong];
+		attribute<string>            Label                    := set_countries/Label;
+		attribute<string>            ISO3                     := ZoneId;
+		attribute<LatLong>           Geometry_LL       (poly) := Geometry;
 		attribute<WorldMollweide>    Geometry_MW       (poly) := convert(Geometry_LL, WorldMollweide);
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
-		attribute<string>            values                   : DisableStorage = "true";
-		attribute<Continents>        Continents_rel           := first(GADM/store_continents_rel, GADM/store_countries_rel);
-		attribute<string>            continent_name           := first(GADM/continent_name, GADM/store_countries_rel);
+		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
+		attribute<string>            continent_name           := Continent;
 	}
 	
 	unit<uint32> Countries
@@ -52,7 +51,7 @@ container RegionalUnits
 		attribute<SphericalMercator> Geometry_WM (poly); 
 		attribute<WorldMollweide>    Geometry_MW (poly); 
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly);
-		attribute<Continents>        Continents_rel;
+		attribute<Continents>  		 Continents_rel;
 		attribute<string>            continent_name;
 		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
 		attribute<.>                 per_grid              (domain) := poly2grid(geometry_LL , domain);
@@ -61,25 +60,20 @@ container RegionalUnits
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
-	
-	unit<uint8> store_Continents := Classifications/Continents
-	, storagename = "%ToBURPDataDir%/Regions/fss/Continents.fss"
+
+	unit<uint8> Continents := Classifications/Continents
+	//: storagename = "= propvalue(store_Continents, 'StorageName')"
+	//, StorageReadOnly = "True"
 	{
-		attribute<LatLong>  geometry (poly) := partitioned_union_polygon(GADM/geometry[LatLong_ip], GADM/continents_rel)[LatLong];
+		attribute<LatLong>  geometry (poly): storagename = "= propvalue(store_geometry, 'storagename')", storagereadonly = "True";
 		attribute<string>   name            := Classifications/Continents/name;
-	}
-	
-	unit<uint8> Continents
-	: storagename = "= propvalue(store_Continents, 'StorageName')"
-	, StorageReadOnly = "True"
-	{
-		attribute<LatLong>  geometry (poly);
-		attribute<string>   name;
 		// attribute<string>   label           := Classifications/Continents/label;
 		
 		attribute<.>        per_grid        (domain) := poly2grid(geometry , domain);
 		
 		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
+		
+		attribute<LatLong>  store_geometry (poly) := partitioned_union_polygon(store_Countries/geometry_LL[LatLong_ip], store_Countries/continents_rel)[LatLong], storagename = "%ToBURPDataDir%/Regions/fss/Continents/Geom.fss";
 	}
 	
 	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
@@ -92,5 +86,257 @@ container RegionalUnits
 		attribute<string> Label  := const('World',.);
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
+	}
+	unit<uint32> set_countries: nrofrows = 238 {
+		attribute<string> ZoneId:= inMatrix/data[(id(.)*3+0)[inMatrix]];
+		attribute<string> Label:= inMatrix/data[(id(.)*3+1)[inMatrix]];
+		attribute<string> Continent:= inMatrix/data[(id(.)*3+2)[inMatrix]];
+		attribute<LatLong>  Geometry (poly):= rjoin(ZoneId, CIESIN/FIRST_ISOA, CIESIN/Geometry);
+		
+		unit<uint32> inMatrix:= range(uint32, 0, 239*3) {
+		
+			attribute<string> data: [
+			//'Code',	'Label',	'Continent',
+			'ABW',	'Aruba',	'South_America',
+			'AFG',	'Afghanistan',	'Asia',
+			'AGO',	'Angola',	'Africa',
+			'AIA',	'Anguilla',	'North_America',
+			'ALB',	'Albania',	'Europe',
+			'ANR',	'Andorra',	'Europe',
+			'ARE',	'United Arab Emirates',	'Asia',
+			'ARG',	'Argentina',	'South_America',
+			'ARM',	'Armenia',	'Asia',
+			'ASM',	'American Samoa',	'Australia_Oceania',
+			'ATG',	'Antigua and Barbuda',	'North_America',
+			'AUS',	'Australia',	'Australia_Oceania',
+			'AUT',	'Austria',	'Europe',
+			'AZE',	'Azerbaijan',	'Asia',
+			'BDI',	'Burundi',	'Africa',
+			'BEL',	'Belgium',	'Europe',
+			'BEN',	'Benin',	'Africa',
+			'BES',	'Bonaire, Sint Eustatius and Saba',	'South_America',
+			'BFA',	'Burkina Faso',	'Africa',
+			'BGD',	'Bangladesh',	'Asia',
+			'BGR',	'Bulgaria',	'Europe',
+			'BHR',	'Bahrain',	'Asia',
+			'BHS',	'Bahamas',	'North_America',
+			'BIH',	'Bosnia and Herzegovina',	'Europe',
+			'BLM',	'Saint-Barthélemy',	'North_America',
+			'BLR',	'Belarus',	'Europe',
+			'BLZ',	'Belize',	'North_America',
+			'BMU',	'Bermuda',	'North_America',
+			'BOL',	'Bolivia',	'South_America',
+			'BRA',	'Brazil',	'South_America',
+			'BRB',	'Barbados',	'North_America',
+			'BRN',	'Brunei',	'Asia',
+			'BTN',	'Bhutan',	'Asia',
+			'BWA',	'Botswana',	'Africa',
+			'CAF',	'Central African Republic',	'Africa',
+			'CAN',	'Canada',	'North_America',
+			'CHE',	'Switzerland',	'Europe',
+			'CHL',	'Chile',	'South_America',
+			'CHN',	'China',	'Asia',
+			'CIV',	'Côte dIvoire',	'Africa',
+			'CMR',	'Cameroon',	'Africa',
+			'COD',	'Democratic Republic of the Congo',	'Africa',
+			'COG',	'Republic of the Congo',	'Africa',
+			'COK',	'Cook Islands',	'Australia_Oceania',
+			'COL',	'Colombia',	'South_America',
+			'COM',	'Comoros',	'Africa',
+			'CPV',	'Cabo Verde',	'Africa',
+			'CRI',	'Costa Rica',	'North_America',
+			'CUB',	'Cuba',	'North_America',
+			'CUW',	'Curaçao',	'South_America',
+			'CYM',	'Cayman Islands',	'North_America',
+			'CYP',	'Cyprus',	'Asia',
+			'CZE',	'Czechia',	'Europe',
+			'DEU',	'Germany',	'Europe',
+			'DJI',	'Djibouti',	'Africa',
+			'DMA',	'Dominica',	'North_America',
+			'DNK',	'Denmark',	'Europe',
+			'DOM',	'Dominican Republic',	'North_America',
+			'DZA',	'Algeria',	'Africa',
+			'ECU',	'Ecuador',	'South_America',
+			'EGY',	'Egypt',	'Africa',
+			'ERI',	'Eritrea',	'Africa',
+			'ESH',	'Western Sahara',	'Africa',
+			'ESP',	'Spain',	'Europe',
+			'EST',	'Estonia',	'Europe',
+			'ETH',	'Ethiopia',	'Africa',
+			'FIN',	'Finland',	'Europe',
+			'FJI',	'Fiji',	'Australia_Oceania',
+			'FLK',	'Falkland Islands',	'South_America',
+			'FRA',	'France',	'Europe',
+			'FRO',	'Faroe Islands',	'Europe',
+			'FSM',	'Micronesia',	'Australia_Oceania',
+			'GAB',	'Gabon',	'Africa',
+			'GBR',	'United Kingdom',	'Europe',
+			'GEO',	'Georgia',	'Asia',
+			'GGY',	'Guernsey',	'Europe',
+			'GHA',	'Ghana',	'Africa',
+			'GIB',	'Gibraltar',	'Africa',
+			'GIN',	'Guinea',	'Africa',
+			'GLP',	'Guadeloupe',	'North_America',
+			'GMB',	'Gambia',	'Africa',
+			'GNB',	'Guinea-Bissau',	'Africa',
+			'GNQ',	'Equatorial Guinea',	'Africa',
+			'GRC',	'Greece',	'Europe',
+			'GRD',	'Grenada',	'North_America',
+			'GRL',	'Greenland',	'North_America',
+			'GTM',	'Guatemala',	'North_America',
+			'GUF',	'French Guiana',	'South_America',
+			'GUM',	'Guam',	'Australia_Oceania',
+			'GUY',	'Guyana',	'South_America',
+			'HKG',	'Hong Kong',	'Asia',
+			'HND',	'Honduras',	'North_America',
+			'HRV',	'Croatia',	'Europe',
+			'HTI',	'Haiti',	'North_America',
+			'HUN',	'Hungary',	'Europe',
+			'IDN',	'Indonesia',	'Asia',
+			'IMN',	'Isle of Man',	'Europe',
+			'IND',	'India',	'Asia',
+			'IRL',	'Ireland',	'Europe',
+			'IRN',	'Iran',	'Asia',
+			'IRQ',	'Iraq',	'Asia',
+			'ISL',	'Iceland',	'Europe',
+			'ISR',	'Israel',	'Asia',
+			'ITA',	'Italy',	'Europe',
+			'JAM',	'Jamaica',	'North_America',
+			'JEY',	'Jersey',	'Europe',
+			'JOR',	'Jordan',	'Asia',
+			'JPN',	'Japan',	'Asia',
+			'KAZ',	'Kazakhstan',	'Asia',
+			'KEN',	'Kenya',	'Africa',
+			'KGZ',	'Kyrgyzstan',	'Asia',
+			'KHM',	'Cambodia',	'Asia',
+			'KIR',	'Kiribati',	'Australia_Oceania',
+			'KNA',	'Saint Kitts and Nevis',	'North_America',
+			'KOR',	'South Korea',	'Asia',
+			'KOS',	'Kosovo',	'Europe',
+			'KWT',	'Kuwait',	'Asia',
+			'LAO',	'Laos',	'Asia',
+			'LBN',	'Lebanon',	'Asia',
+			'LBR',	'Liberia',	'Africa',
+			'LBY',	'Libya',	'Africa',
+			'LCA',	'Saint Lucia',	'North_America',
+			'LIE',	'Liechtenstein',	'Europe',
+			'LKA',	'Sri Lanka',	'Asia',
+			'LSO',	'Lesotho',	'Africa',
+			'LTU',	'Lithuania',	'Europe',
+			'LUX',	'Luxembourg',	'Europe',
+			'LVA',	'Latvia',	'Europe',
+			'MAC',	'Macau',	'Asia',
+			'GLP',	'Guadeloupe',	'North_America',
+			'MAR',	'Morocco',	'Africa',
+			'MCO',	'Monaco',	'Europe',
+			'MDA',	'Moldova',	'Europe',
+			'MDG',	'Madagascar',	'Africa',
+			'MDV',	'Maldives',	'Asia',
+			'MEX',	'México',	'North_America',
+			'MHL',	'Marshall Islands',	'Australia_Oceania',
+			'MKD',	'North Macedonia',	'Europe',
+			'MLI',	'Mali',	'Africa',
+			'MLT',	'Malta',	'Europe',
+			'MMR',	'Myanmar',	'Asia',
+			'MNE',	'Montenegro',	'Europe',
+			'MNG',	'Mongolia',	'Asia',
+			'MNP',	'Northern Mariana Islands',	'Australia_Oceania',
+			'MOZ',	'Mozambique',	'Africa',
+			'MRT',	'Mauritania',	'Africa',
+			'MSR',	'Montserrat',	'North_America',
+			'MTQ',	'Martinique',	'North_America',
+			'MUS',	'Mauritius',	'Africa',
+			'MWI',	'Malawi',	'Africa',
+			'MYS',	'Malaysia',	'Asia',
+			'MYT',	'Mayotte',	'Africa',
+			'NAM',	'Namibia',	'Africa',
+			'NCL',	'New Caledonia',	'Australia_Oceania',
+			'NER',	'Niger',	'Africa',
+			'NGA',	'Nigeria',	'Africa',
+			'NIC',	'Nicaragua',	'North_America',
+			'NIU',	'Niue',	'Australia_Oceania',
+			'NLD',	'Netherlands',	'Europe',
+			'NOR',	'Norway',	'Europe',
+			'NPL',	'Nepal',	'Asia',
+			'NRU',	'Nauru',	'Australia_Oceania',
+			'NZL',	'New Zealand',	'Australia_Oceania',
+			'OMN',	'Oman',	'Asia',
+			'PAK',	'Pakistan',	'Asia',
+			'PAN',	'Panama',	'North_America',
+			'PCN',	'Pitcairn Islands',	'Australia_Oceania',
+			'PER',	'Peru',	'South_America',
+			'PHL',	'Philippines',	'Asia',
+			'PLW',	'Palau',	'Australia_Oceania',
+			'PNG',	'Papua New Guinea',	'Australia_Oceania',
+			'POL',	'Poland',	'Europe',
+			'PRI',	'Puerto Rico',	'North_America',
+			'PRK',	'North Korea',	'Asia',
+			'PRT',	'Portugal',	'Europe',
+			'PRY',	'Paraguay',	'South_America',
+			'PSE',	'Palestine',	'Asia',
+			'PYF',	'French Polynesia',	'Australia_Oceania',
+			'QAT',	'Qatar',	'Asia',
+			'REU',	'Réunion',	'Africa',
+			'ROU',	'Romania',	'Europe',
+			'RUS',	'Russia',	'Europe',
+			'RWA',	'Rwanda',	'Africa',
+			'SAU',	'Saudi Arabia',	'Asia',
+			'SDN',	'Sudan',	'Africa',
+			'SEN',	'Senegal',	'Africa',
+			'SGP',	'Singapore',	'Asia',
+			'SHN',	'Saint Helena, Ascension and Tris',	'Africa',
+			'SLB',	'Solomon Islands',	'Australia_Oceania',
+			'SLE',	'Sierra Leone',	'Africa',
+			'SLV',	'El Salvador',	'North_America',
+			'SMR',	'San Marino',	'Europe',
+			'SOM',	'Somalia',	'Africa',
+			'SPM',	'Saint Pierre and Miquelon',	'North_America',
+			'SRB',	'Serbia',	'Europe',
+			'SSD',	'South Sudan',	'Africa',
+			'STP',	'São Tomé and Príncipe',	'Africa',
+			'SUR',	'Suriname',	'South_America',
+			'SVK',	'Slovakia',	'Europe',
+			'SVN',	'Slovenia',	'Europe',
+			'SWE',	'Sweden',	'Europe',
+			'SWZ',	'Swaziland',	'Africa',
+			'SXM',	'Sint Maarten',	'North_America',
+			'SYC',	'Seychelles',	'Africa',
+			'SYR',	'Syria',	'Asia',
+			'TCA',	'Turks and Caicos Islands',	'North_America',
+			'TCD',	'Chad',	'Africa',
+			'TGO',	'Togo',	'Africa',
+			'THA',	'Thailand',	'Asia',
+			'TJK',	'Tajikistan',	'Asia',
+			'TKL',	'Tokelau',	'Australia_Oceania',
+			'TKM',	'Turkmenistan',	'Asia',
+			'TLS',	'Timor-Leste',	'Asia',
+			'TON',	'Tonga',	'Australia_Oceania',
+			'TTO',	'Trinidad and Tobago',	'South_America',
+			'TUN',	'Tunisia',	'Africa',
+			'TUR',	'Turkey',	'Europe',
+			'TUV',	'Tuvalu',	'Australia_Oceania',
+			'TWN',	'Taiwan',	'Asia',
+			'TZA',	'Tanzania',	'Africa',
+			'UGA',	'Uganda',	'Africa',
+			'UKR',	'Ukraine',	'Europe',
+			'URY',	'Uruguay',	'South_America',
+			'USA',	'United States',	'North_America',
+			'UZB',	'Uzbekistan',	'Asia',
+			'VCS',	'Vatican city',	'Europe',
+			'VCT',	'Saint Vincent and the Grenadines',	'North_America',
+			'VEN',	'Venezuela',	'South_America',
+			'VGB',	'British Virgin Islands',	'North_America',
+			'VIR',	'Virgin Islands, U.S.',	'North_America',
+			'VNM',	'Vietnam',	'Asia',
+			'VUT',	'Vanuatu',	'Australia_Oceania',
+			'WLF',	'Wallis and Futuna',	'Australia_Oceania',
+			'WSM',	'Samoa',	'Australia_Oceania',
+			'YEM',	'Yemen',	'Asia',
+			'ZAF',	'South Africa',	'Africa',
+			'ZMB',	'Zambia',	'Africa',
+			'ZWE',	'Zimbabwe',	'Africa'];
+
+		}
+		
 	}
 }
