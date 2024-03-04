@@ -16,5 +16,25 @@ container Socioeconomic
 		attribute<uint8>   TravelTime (Geography/domain) :=  MakeDefined(GridData,60b);
 	}
 	
+	container access_to_settlements {
+	
+		container readgrids:= for_each_ne(gridslist/label, 'load_access_grids('+quote(gridslist/label)+')');
+
+		// towns td missing!!!! 'towns_td_uint8',
+		unit<uint32> gridslist: nrofrows = 11 { // swap to 12 when towns_td is added
+			attribute<string> label: ['cities_td_uint8', 'cities_tt_uint8', 'towns_tt_uint8', 'villages_td_uint8', 'villages_tt_uint8', 'loc_ctr_td_uint8', 'loc_ctr_tt_uint8', 'reg_ctr_td_uint8', 'reg_ctr_tt_uint8', 'nat_ctr_td_uint8', 'nat_ctr_tt_uint8'];
+		}
+		
+		template load_access_grids {
+			parameter<string> inpath;
+			
+			unit<wpoint> infile: Storagename = "= '%ToBURPDataDir%/Socioeconomic/Access_To_Settlements/v2023_P2020/'+inpath+'.tif'", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "Geography/WorldMollweide" {
+				attribute<uint8>   GridData;
+				attribute<uint8>   ReadData (Geography/Mollweide_grid);
+				attribute<uint32>   ReadData_LL (Geography/domain):= uint32(ReadData[Geography/domain/mollweide_rel]);
+			}
+		
+		}
+	}
 	#include <infrastructure.dms>
 }

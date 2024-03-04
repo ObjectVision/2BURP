@@ -3,6 +3,10 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 	unit <uint32> Create_DataForCalibration := CompactedDomain
 	{
 		attribute<Countries>  Country_grid                            := Countries/per_grid[CompactedDomain/org_rel];
+		attribute<float32>    BURES_2000                              := SourceData/Builtup/Residential/Y2000[CompactedDomain/org_rel];
+		attribute<float32>    BURES_2020                              := SourceData/Builtup/Residential/Y2020[CompactedDomain/org_rel];
+		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
+		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
 		attribute<float32>    Coastline_Distance                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
 		attribute<float32>    Distance2River                          := Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
@@ -17,6 +21,43 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<uint8>      Landslides_Earthquakes                  := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
 		attribute<float32>    Road123_Distance                        := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
 		attribute<float32>    Road45_Distance                         := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
+		
+		// needs to be first of containers with template variables
+		container access_to_settlements:= for_each_nedv(Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
+		
+		
+	}
+	container Export_DataForCalibration {
+		  unit<uint32> properties: nrofrows = 2 {attribute<string> name: ['name', 'DomainUnit'];}
+		  unit<uint32> directnames:= SubItem_PropValues(Create_DataForCalibration, properties/name) {
+			attribute<bool> isvalue:= DomainUnit = '.';
+		  }
+		  
+		  //parameter<string> fieldnamelist:= aslist(directnames/name, fieldseparator)+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
+		  parameter<string> fieldnamelist:= aslist(directnames/isvalue ? directnames/name : '', fieldseparator)+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
+		  //parameter<string> fieldreflist:= aslist('Create_DataForCalibration/'+directnames/name, fieldseparator)+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
+		  parameter<string> fieldreflist:= aslist(directnames/isvalue ? 'Create_DataForCalibration/'+directnames/name : '', fieldseparator)+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
+	
+		   // assume ExportDomain is a configured domain unit with two attributes as subitems: id & dist
+		  parameter<string> fieldseparator := ';';
+		  parameter<string> filename       := '%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/calibset.csv';
+
+		  unit<uint32> field := range(uint32, 0,strcount(fieldnamelist, ';') +1)
+		  {
+			  attribute<string> name := ReadArray(fieldnamelist, ., string, 0);
+			  attribute<string> ref := ReadArray(fieldreflist, ., string, 0);
+		  }
+
+		  parameter<string> newline := '\n';
+		  parameter<string> header  := fieldnamelist;
+		  attribute<string> body (Create_DataForCalibration) := = AsList(
+				+'string(' + field/ref + ')',' + '+quote(fieldseparator)+' +'
+			 );
+		 
+		  parameter<string> result := header + newline + AsList(body, newline)
+		  ,  StorageName = "= filename"
+		  ,  StorageType = "str";
+	
 	}
 	
 	container ReadCoffecients_UrbanArea 
