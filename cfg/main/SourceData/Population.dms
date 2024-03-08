@@ -17,4 +17,13 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			, float64
 		);
 		
+	container Pots_lin_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/RelWeight_ns)',  domain, float32);
+	container Pots_sqr_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/RelWeightSqrt_ns)',  domain, float32);
+	container Pots_lin_10km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot10km/potRange/RelWeight_ns)', domain, float32);
+	container Pots_sqr_10km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot10km/potRange/RelWeightSqrt_ns)', domain, float32);
+	container Pots_lin_20km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot20km/potRange/RelWeight_ns)', domain, float32);
+	container Pots_sqr_20km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot20km/potRange/RelWeightSqrt_ns)', domain, float32);
+	container Pots_lin_40km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot40km/potRange/RelWeight_ns)', domain, float32);
+	container Pots_sqr_40km:= for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot40km/potRange/RelWeightSqrt_ns)', domain, float32);
+	
 }

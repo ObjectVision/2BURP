@@ -153,12 +153,13 @@ container Geography : using = "units"
 		attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_grid);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_grid) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
+		attribute<Bool>	  InBU_5kmClip			 (domain) := ='IsDefined(Countries/per_grid) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
 
 		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 
 		attribute<Bool>   InRegionHasPopHasUrb   (domain) := (InRegion || HasPop || HasBuiltup);
-		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
+		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && InBU_5kmClip && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
 	}
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
