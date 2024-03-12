@@ -10,6 +10,7 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	
 	#include <HYDE.dms>
 	#include <Suitability.dms>
+	#include <GridDists.dms>
 	
 	container Population
 	{

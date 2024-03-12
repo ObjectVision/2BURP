@@ -30,8 +30,8 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		
 		// needs to be first of containers with template variables
 		container access_to_settlements:= for_each_nedv(Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
-		container pots_pop_2000:= for_each_nedv(pot_fields/label, 'SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel]', CompactedDomain, float32);
-		container pots_pop_2020:= for_each_nedv(pot_fields/label, 'SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel]', CompactedDomain, float32);
+		container pots_pop_2000:= for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
+		container pots_pop_2020:= for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
 		
 		
 	}
