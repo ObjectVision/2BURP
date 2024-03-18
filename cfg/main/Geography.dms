@@ -119,6 +119,7 @@ container Geography : using = "units"
 		
 		attribute<LatLong>        geometry      := id(.)[LatLong];
 		attribute<Mollweide_grid> mollweide_rel := convert(geometry, Mollweide_grid);
+		attribute<WebMercator_grid> webmercator_rel:= convert(geometry, WebMercator_grid);
 
 		parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
 		// attribute<rowset>  row          := pointrow(ID(.));

@@ -1,6 +1,6 @@
 container ModelParameters 
 {
-	parameter<string>  StudyArea               := 'Netherlands'; // World Netherlands Europe
+	parameter<string>  StudyArea               := 'Europe'; // World Netherlands Europe
 	// parameter<string>  Method                  := 'M3'; // Choose method (M1/M3)
 	// parameter<string>  Variant                 := 'var1'; // Only relevant for M3, var1=JRC 50 percent bua, var2=GHSMOD/ Leave empty when working with M_1
 	parameter<string>  InPresentUrban          := ''; //growth only inside present urban contour: InPresentUrban, otherwise Leave empty

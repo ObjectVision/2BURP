@@ -2,6 +2,12 @@ Container GridDists: using = "Geography;SourceData;" {
 	
 	parameter<string> sett_folder:= 'all_settlements_SMOD_V1s6_opr_P2023_v1_2000/';
 	
+	container travel_factors {
+		parameter<string> elev:= '1f + (elevation > 2000f ? 0.15f * exp(0.0007f * elevation) : 0f)', Descr= "Effect on travel speeds: For elevations lower than 2000 metres, there is no effect on foot-based based travel speed. For elevations above 2000, the following speed factor f is applied: f = 0.15e0.0007E, where E is elevation in metres.";
+		parameter<string> slope:= '1f / exp(-1f*gradient*3f)'; //v0e-ks
+		parameter<string> water:= 'InWater ? 3f : 1f'; //Water bodies at 20km/h, compared to the 60m/h reference
+	}
+	
 	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa_point', 'Asia_point', 'Australia_Oceania_point', 'Europe_point', 'North_America_point', 'South_America_point'];}
 	
 	container load_settlements:= for_each_ne(settlements/label, 'T_loadpointfile('+quote(sett_folder+settlements/label)+')') {
@@ -22,6 +28,9 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<bool> 	InWater:= Roughness = 0f || !GridData/IsNotLake;
 		attribute<float32>	Impedance:= Roughness^2f + (10f * InWater[float32]);
 		attribute<NodeSet>  NodeSet_rel:= invert(NodeSet/Nr_OrgEntity);
+		attribute<float32>  elevation:= Physical/Elevation/Elevation[float32];
+		attribute<float32>  slope:= Physical/Slope_2021/ReadData;
+		attribute<float32>	gradient:= slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
 		
 		attribute<NodeSet> N                   (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint)];
 		attribute<NodeSet> NE                  (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
@@ -32,6 +41,12 @@ Container GridDists: using = "Geography;SourceData;" {
 		unit<uint32> all_NEs:= subset(isdefined(NodeSet_rel) && isdefined(NE)) {attribute<NodeSet> F2:= grid/NE[Nr_OrgEntity]; attribute<float32> L:= const(1.414213562f,.,float32);} // square root of 2 (given 1km grids)
 		unit<uint32> all_Es:= subset(isdefined(NodeSet_rel) && isdefined(E)) {attribute<NodeSet> F2:= grid/E[Nr_OrgEntity]; attribute<float32> L:= const(1f,.,float32);}
 		unit<uint32> all_SEs:= subset(isdefined(NodeSet_rel) && isdefined(SE)) {attribute<NodeSet> F2:= grid/SE[Nr_OrgEntity]; attribute<float32> L:= const(1.414213562f,.,float32);} // square root of 2 (given 1km grids)}
+		
+		attribute<float32> impedance_elev:= =travel_factors/elev;
+		attribute<float32> impedance_slope:= =travel_factors/slope;
+		attribute<float32> impedance_water:= =travel_factors/water;
+		attribute<float32> impedance_all:= impedance_elev * impedance_slope * impedance_water;
+		
 	}
 		
 	unit<uint32> NodeSet:= subset(GridData/InRegion) {
@@ -55,9 +70,27 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<string> def: ['uint32(SelectedSettlements/type) > 10', 'uint32(SelectedSettlements/type) > 22', 'uint32(SelectedSettlements/type) > 29', 'bool(SelectedSettlements/L_15min)', 'bool(SelectedSettlements/L_30min)','bool(SelectedSettlements/L_60min)'];
 	}
 	
-	container AccessGrids:= for_each_ne(access_variants/label, 'T_getAccessGrids('+string(id(access_variants))+')');
+	container AccessGrids_nw:= for_each_ne(access_variants/label, 'T_getAccessGrids_netw('+string(id(access_variants))+')');
+	container AccessGrids_grid:= for_each_ne(access_variants/label, 'T_getAccessGrids_grid('+string(id(access_variants))+')');
 	
-	Template T_getAccessGrids {
+	Template T_getAccessGrids_grid {
+		parameter<access_variants> invariant;
+		
+		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
+		
+		unit<uint32> origins:= ='subset('+access_variants/def[invariant]+' && IsDefined(SelectedSettlements/NodeSet_rel))' {
+			attribute<LatLong> Geometry:= SelectedSettlements/Geometry[Nr_OrgEntity];
+			attribute<NodeSet> NodeSet_rel:= SelectedSettlements/NodeSet_rel[Nr_OrgEntity];
+			attribute<grid> grid_rel:= Geometry[grid];
+		}
+		
+		attribute<float32> impedances (grid):= grid/impedance_all;
+		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/grid_rel, const(0f, origins, float32)), 100f);
+		attribute<float32> costsgrid_maximp (grid):= griddist_maximp(impedances, origins/grid_rel, 100f);
+	}
+	
+	
+	Template T_getAccessGrids_netw {
 		parameter<access_variants> invariant;
 		
 		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
