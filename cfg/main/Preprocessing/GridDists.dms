@@ -95,6 +95,8 @@ Container GridDists: using = "Geography;SourceData;" {
 		
 		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
 		
+		unit<uint32> destinations: nrofrows = 1;
+		
 		unit<uint32> origins:= ='subset('+access_variants/def[invariant]+' && IsDefined(SelectedSettlements/NodeSet_rel))' {
 			attribute<LatLong> Geometry:= SelectedSettlements/Geometry[Nr_OrgEntity];
 			attribute<NodeSet> NodeSet_rel:= SelectedSettlements/NodeSet_rel[Nr_OrgEntity];
@@ -103,18 +105,20 @@ Container GridDists: using = "Geography;SourceData;" {
 			impedance_matrix(
 				//'bidirectional;startPoint(Node_rel);alternative(link_imp):alt_imp'
 				//'bidirectional;startPoint(Node_rel);endPoint(Node_rel);limit(OrgZone_max_mass,DstZone_mass)'
-				'bidirectional;startPoint(Node_rel);endPoint(Node_rel);limit(OrgZone_max_mass,DstZone_mass);alternative(link_imp):alt_imp;od:impedance,OrgZone_rel,DstZone_rel'
+				//'bidirectional;startPoint(Node_rel);endPoint(Node_rel);limit(OrgZone_max_mass,DstZone_mass);alternative(link_imp):alt_imp;od:impedance,OrgZone_rel,DstZone_rel'
+				'bidirectional;startPoint(Node_rel,OrgZone_rel);endPoint(Node_rel);cut(OrgZone_max_imp);alternative(link_imp):alt_imp;od:impedance,OrgZone_rel,DstZone_rel'
 				, Network/Impedance
 				, Network/F1
 				, Network/F2
-				, id(NodeSet)
 				, origins/NodeSet_rel
-				, 1f, 1f
+				, const(0,origins,destinations)
+				, id(NodeSet)
+				, 1000f
 				, Network/Length
 			);
 		
-		attribute<float32> costsgrid (grid):= min(Matrix/Impedance, Matrix/OrgZone_rel)[grid/NodeSet_rel];
-		attribute<float32> distancegrid (grid):= min(Matrix/Alt_imp, Matrix/OrgZone_rel)[grid/NodeSet_rel];
+		attribute<float32> costsgrid (grid):= min(Matrix/Impedance, Matrix/DstZone_rel)[grid/NodeSet_rel];
+		attribute<float32> distancegrid (grid):= min(Matrix/Alt_imp, Matrix/DstZone_rel)[grid/NodeSet_rel];
 		
 		
 	}
