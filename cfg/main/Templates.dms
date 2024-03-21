@@ -13,12 +13,12 @@ container Templates
 		parameter<float32> vertical_radius     := borderRadius / vertical_gridsize;
 		parameter<float32> horizontal_radius   := borderRadius / horizontal_gridsize;
 		
-		unit<spoint>       potRange            := range(spoint, point(-int16(vertical_radius), -int16(horizontal_radius)), point(int16(vertical_radius) + int16(1), int16(horizontal_radius) + int16(1)))
+		unit<spoint>       potRange            := range(spoint, point_yx(-int16(vertical_radius), -int16(horizontal_radius)), point_yx(int16(vertical_radius) + int16(1), int16(horizontal_radius) + int16(1)))
 		{
 			attribute<Potential> distMatr          := Sqr(Float32(pointrow(ID(.)))) + Sqr(Float32(pointcol(ID(.)))*AspectRatio);
 			attribute<km>        EuclideanDistMatr := Sqrt(distMatr)[km];
 			attribute<Potential> Weight            := interpolate_linear(EuclideanDistMatr * 1000[meter / km], value(Preprocessing/Suitability/DistanceBuildUp/Class/Distance_meter, meter), Float32(Preprocessing/Suitability/DistanceBuildUp/Class/PROBABILITY));
-			attribute<Potential> WeightCorr        := ID(.) == Point(0s, 0s) ? 0f : Weight;
+			attribute<Potential> WeightCorr        := ID(.) == point_yx(0s, 0s) ? 0f : Weight;
 			attribute<Potential> RelWeightCorr     := scalesum(WeightCorr, 1f );
 			
 			attribute<Potential> AbsWeight         := iif(distMatr <= vertical_radius * vertical_radius, 1f / (distMatr + 0.08f), 0f);

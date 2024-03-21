@@ -70,28 +70,28 @@ container Geography : using = "units"
 
 	container StudyAreas
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base, point(-90.0,-180.0), point(90.0, 180.0));
+		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0));
 
 		//For fast testing with extent of 1 country (no other country within extent)
-		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point( 62.0, -25.0), point(68.0,-12.0));
+		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0));
 
-		unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point(-51.0, -40.0), point(85.0, 71.0));
-		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point(-66.0, 170.0), point(85.0, 75.0));
+		unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point_yx(-51.0, -40.0), point_yx(85.0, 71.0));
+		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point_yx(-66.0, 170.0), point_yx(85.0, 75.0));
 		
 		//continents
-		//unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point( 29.0, -11.0), point(61.0, 30.0));
+		//unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
 		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
-		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point(-47.0, -26.0), point( 38.0, 64.0));
-		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point(-90.0,-180.0), point(-11.0,180.0));
-		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point(-13.0,-180.0), point( 82.0,180.0));
-		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point(-56.0,-180.0), point( 29.0,180.0));
-		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point(  5.0,-180.0), point( 84.0,180.0));
-		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point(-56.0,-110.0), point( 18.0,-28.0));
+		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0));
+		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(-11.0,180.0));
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0));
+		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0));
+		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0));
+		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0));
 
 		//countries
-		unit<dpoint> LatLong_test                     := range(LatLong_Base, point(52.04, 5.04), point(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
-		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point( 51.8,  4.7), point(52.3, 5.7));
-		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point( 45.0, -2.0), point(54.0,11.0));
+		unit<dpoint> LatLong_test                     := range(LatLong_Base, point_yx(52.04, 5.04), point_yx(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
+		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point_yx( 51.8,  4.7), point_yx(52.3, 5.7));
+		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0));
 	}
 
 	unit<wpoint> domain :=
@@ -104,7 +104,7 @@ container Geography : using = "units"
 	{
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
-			attribute<float64> lat_top    := pointrow( point(ID(.), const(0w, .), domain)[LatLong] );
+			attribute<float64> lat_top    := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
 			attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
 			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
 			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree));
@@ -135,11 +135,11 @@ container Geography : using = "units"
 	unit<ipoint> domain_sub :=
 		gridset(
 			range(LatLong, 
-				LowerBound(LatLong) + point(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong), 
-				UpperBound(LatLong) - point(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong)
+				LowerBound(LatLong) + point_yx(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong), 
+				UpperBound(LatLong) - point_yx(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong)
 			)
-			, point(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong)
-			, point(90d, -180d, LatLong)
+			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong)
+			, point_yx(90d, -180d, LatLong)
 			, ipoint
 		)
 	{
