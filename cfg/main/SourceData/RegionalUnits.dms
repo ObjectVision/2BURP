@@ -7,11 +7,11 @@ container RegionalUnits
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
 	{
-		attribute<LatLong>           Geometry (poly);
+		attribute<LatLong>           Geometry          (poly);
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry, SphericalMercator);
-		attribute<SphericalMercator>           Geometry_WM_Simpl (poly) := bg_simplify_multi_polygon(Geometry_WM, 100.0);
-		unit<uint32> seq2p := sequence2points(geometry);
-		unit<uint32> seq2p_smpl := sequence2points(Geometry_WM_Simpl);
+		attribute<SphericalMercator> Geometry_WM_Simpl (poly) := bg_simplify_multi_polygon(Geometry_WM, 100.0);
+		unit<uint32>                 seq2p                    := sequence2points(geometry);
+		unit<uint32>                 seq2p_smpl               := sequence2points(Geometry_WM_Simpl);
 		attribute<string>            ISO3                     := FIRST_ISOA;
 		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
 	}
@@ -21,7 +21,8 @@ container RegionalUnits
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
 	{
-		attribute<LatLong>           Geometry (poly);
+		attribute<LatLong>           Geometry          (poly);
+		attribute<LatLong>           Geometry_LL_Simpl (poly) := bg_simplify_multi_polygon(Geometry, 0.0005);
 		attribute<string>            ISO3                     := GID_0;
 		attribute<Store_Continents>  store_continents_rel     := rlookup(AsItemName(continent_name), Store_Continents/name);
 		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);

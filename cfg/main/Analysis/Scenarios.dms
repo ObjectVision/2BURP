@@ -119,8 +119,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	}
 	container InitialState 
 	{
-		attribute<float32> BuiltUp_orgdom            (domain) := ='SourceData/Builtup/Total/'+ModelParameters/StartYear;
-		attribute<float32> BuiltUpShare_orgdom       (domain) := BuiltUp_orgdom / domain/area;
+		attribute<m2>      BuiltUp_orgdom            (domain) := ='SourceData/Builtup/Total/'+ModelParameters/StartYear;
+		attribute<float32> BuiltUpShare_orgdom       (domain) := BuiltUp_orgdom / convert(domain/area, m2);
+		// attribute<float32> BuiltUpShare_orgdom       (domain) := BuiltUp_orgdom / domain/area;
 		attribute<Bool>    HasBuiltup_orgdom         (domain) := BuiltUp_orgdom > 0[m2];
 		attribute<Person>  Population_orgdom         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		
@@ -171,7 +172,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																			);
 		}
 		
-		container suitability
+		container Suitability
 		{
 		
 		}
