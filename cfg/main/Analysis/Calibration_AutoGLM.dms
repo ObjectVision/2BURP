@@ -29,8 +29,9 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<float32>    Road45_Distance                         := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
 		
 		// needs to be first of containers with template variables
-		container access_to_settlements:= for_each_nedv(Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
-		container griddist_to_settlements:= for_each_nedv('gd_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_grid/'+Preprocessing/GridDists/access_variants/Label+'/costsgrid[CompactedDomain/org_rel])', CompactedDomain, uint32);
+		container access_to_settlements:= for_each_nedv(Socioeconomic/access_to_settlements/gridslist/dist ? Socioeconomic/access_to_settlements/gridslist/label : '', 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
+		container griddist_to_settlements:= for_each_nedv('gd_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_nw/'+Preprocessing/GridDists/access_variants/Label+'/distancegrid[CompactedDomain/org_rel])', CompactedDomain, uint32);
+		container gridcost_to_settlements:= for_each_nedv('gc_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_nw/'+Preprocessing/GridDists/access_variants/Label+'/costsgrid[CompactedDomain/org_rel])', CompactedDomain, uint32);
 		container pots_pop_2000:= for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
 		container pots_pop_2020:= for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
 		
@@ -44,15 +45,17 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		  
 		  //parameter<string> fieldnamelist:= aslist(directnames/name, fieldseparator)+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		  parameter<string> fieldnamelist:= aslist(directnames/isvalue ? directnames/name : '', fieldseparator)
-			+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
+			+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/dist ? Socioeconomic/access_to_settlements/gridslist/label : '', fieldseparator)
 			+fieldseparator+aslist('gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
+			+fieldseparator+aslist('gc_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('pop2000_'+pot_fields/label, fieldseparator)
 			+fieldseparator+aslist('pop2020_'+pot_fields/label, fieldseparator)			
 			;
 		  //parameter<string> fieldreflist:= aslist('Create_DataForCalibration/'+directnames/name, fieldseparator)+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		  parameter<string> fieldreflist:= aslist(directnames/isvalue ? 'Create_DataForCalibration/'+directnames/name : '', fieldseparator)
-			+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
+			+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/dist ? 'Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label : '', fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/griddist_to_settlements/gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
+			+fieldseparator+aslist('Create_DataForCalibration/gridcost_to_settlements/gc_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
 			;
