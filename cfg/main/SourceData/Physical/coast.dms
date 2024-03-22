@@ -1,30 +1,66 @@
 container Coast
 {
-	unit<uint32> Coastline
-	:  StorageName      = "%ToBURPDataDir%/physical/Coast/Coastline.shp"
+	container Read_Coastline
+	:  StorageName      = "%ToBURPDataDir%/physical/Coast/COASTLINE_WGS84.gpkg"
 	,  StorageType      = "gdal.vect"
 	,  StorageReadOnly  = "True"
+	,  SyncMode         = "AllTables"
+	,	DialogData      = "LatLong";
+	
+	unit<uint32> Coastline := Read_Coastline/out
 	{
-		attribute<LatLong>           Geometry     (poly);
-		attribute<SphericalMercator> Geometry_mer (arc)    := convert(Geometry, SphericalMercator);
-		attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
+		attribute<LatLong>           Geometry     (poly)   := Read_Coastline/out/geometry;
+		// attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
+		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(geometry, domain_sub)), StorageName = "%ToBURPDataDir%/physical/Coast/IsLandMass_subdomain.tif";
+		attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 
-		unit<uint32> CoastArcSet := arc2segm(Geometry_mer)
+		unit<uint32> split_polygon := split_polygon(Geometry[LatLong_ip])
+		{
+			attribute<LatLong> Split (poly) := geometry[LatLOng];
+			attribute<LatLong> Outer (poly) := bg_outer_multi_polygon(Split);
+			
+			attribute<LatLong_ip> Lakes (poly) := Outer[LatLong_ip] - Split[LatLong_ip];
+			
+			unit<uint32> lakes_clean := split_partitioned_union_polygon(Lakes, id(.));
+		}
+		
+		unit<uint32> union_outer_lakes := union_unit(split_polygon, split_polygon/lakes_clean)
+		{
+			attribute<LatLong>           geometry     (poly) := union_data(.,split_polygon/Outer, split_polygon/lakes_clean/Geometry[LatLong]);
+			attribute<SphericalMercator> Geometry_mer (poly) := convert(Geometry, SphericalMercator);
+		}
+
+		unit<uint32> CoastArcSet := arc2segm(union_outer_lakes/Geometry_mer)
 		{
 			unit<uint32> pointset := union_unit(.,.)
 			{
-				attribute<SphericalMercator> point    := union_data(., CoastArcSet/point, CoastArcSet/nextpoint);
-				attribute<uint32>            ordinal  := union_data(., const(0,CoastArcSet), const(1,CoastArcSet));
-				attribute<CoastArcSet>       sequence := union_data(., id(CoastArcSet), id(CoastArcSet));
+				attribute<SphericalMercator> point    := union_data(., ../point, ../nextpoint);
+				attribute<..>                sequence := union_data(., id(..), id(..));
+				attribute<uint32>            ordinal  := union_data(., const(0,..), const(1,..));
 			}
-			attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(CoastArcSet/pointset/point, CoastArcSet/pointset/sequence, CoastArcSet/pointset/ordinal);
+			attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
 		}
+		
+		unit<uint32> DynaPoints := dyna_point_with_ends(CoastArcSet/point, CoastArcSet/nextpoint, 100d);
+		unit<uint32> UqDynaPoints := unique(DynaPoints/point);
 	}
 	
-	attribute<Float32> Location2Coast_mer_segm   (CompactedDomain) := dist_info(Coastline/CoastArcSet/geometry_mer_segm, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+	unit<uint32> from_domain  := CompactedDomain 
+	{
+	   attribute<SphericalMercator> geometry      := CompactedDomain/Geometry_mer;
+	   attribute<to_domain>         to_domain_rel := connect(to_domain/geometry, geometry);
+	   attribute<SphericalMercator> geometry_to   := to_domain/geometry[to_domain_rel];
+	   attribute<float64>           dist          := dist(geometry_to, geometry);
+	}
+
+	unit<uint32> to_domain  := Coastline/UqDynaPoints
+	{
+	   attribute<SphericalMercator> geometry := Coastline/UqDynaPoints/values;
+	}  	
+	
+	attribute<float32> Location2Coast_mer_segm   (CompactedDomain) := from_domain/dist[float32]; 
 	attribute<km>      Location2Coast_km_CD      (CompactedDomain) := (Location2Coast_mer_segm * latlong_base/lengthdegree * CompactedDomain/lat_factor);
 	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/physical/Coast/Location2Coast_km.tif";
-
 
 	unit<ipoint> Location2Coast_km
 	:	StorageName     = "%ToBURPDataDir%/physical/Coast/Location2Coast_km.tif"

@@ -75,8 +75,6 @@ container Physical : using = "geography"
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 			
 			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "%ToBURPDataDir%/physical/Water/IsInlandWater_subdomain.tif";
-			
-			
 			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		}
 
@@ -92,15 +90,13 @@ container Physical : using = "geography"
 		
 		container AllWater
 		{
-			attribute<bool>   LandMass      (domain) := IsDefined(poly2grid(RegionalUnits/GADM/Geometry, domain_sub));
+			attribute<bool>   LandMass      (domain_sub) := Coast/Coastline/Read_per_subgrid;
+			attribute<bool>   IsInlandWater (domain_sub) := Water/Inland_Water/Read_per_subgrid;
+			attribute<bool>   IsOcean       (domain_sub) := not(LandMass);
+			attribute<bool>   IsWater       (domain_sub) := IsInlandWater || IsOcean;
 			
-			attribute<bool>   IsInlandWater (domain) := Water/Inland_Water/Read_per_grid;
-			attribute<bool>   IsOcean       (domain) := not(LandMass);
-			
-			attribute<bool>   IsWater       (domain) := IsInlandWater || IsOcean;
-			
-			
+			attribute<uint32> Fraction_Water0  (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
+			attribute<uint32> Fraction_Water   (domain) := ((Fraction_Water0[float32] / 36f) * 100f)[uint32];
 		}
-		
 	}
 }

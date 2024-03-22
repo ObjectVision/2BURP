@@ -144,7 +144,17 @@ container Geography : using = "units"
 		)
 	{
 		attribute<domain> domain_rel := mapping(., domain);
+		
+		unit<int32> rowset := range(int32, pointrow(Lowerbound(domain_sub)), pointrow(Upperbound(domain_sub)))
+		{
+			attribute<float64> lat_top    := pointrow( point_yx(ID(.), const(0i, .), domain_sub)[LatLong] );
+			attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain_sub)[LatLong]);
+			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain_sub)[LatLong])) * LatLong_base/lengthdegree));
+		}
+		attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
 	}
+	
 	
 	container GridData : using = "SourceData/RegionalUnits"
 	{
