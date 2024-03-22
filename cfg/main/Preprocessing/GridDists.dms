@@ -8,18 +8,17 @@ Container GridDists: using = "Geography;SourceData;" {
 		parameter<string> water:= 'InWater ? 3f : 1f'; //Water bodies at 20km/h, compared to the 60m/h reference
 	}
 	
-	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa_point', 'Asia_point', 'Australia_Oceania_point', 'Europe_point', 'North_America_point', 'South_America_point'];}
+	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa', 'Asia', 'Australia_Oceania', 'Europe', 'North_America', 'South_America'];}
 	
-	container load_settlements:= for_each_ne(settlements/label, 'T_loadpointfile('+quote(sett_folder+settlements/label)+')') {
+	container load_settlements:= for_each_ne(settlements/label, 'T_loadpolyfile('+quote(sett_folder+settlements/label)+')') {
 		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' {
-			attribute<LatLong> Geometry:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
+			attribute<LatLong> Geometry (arc):= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
 			attribute<string> Label:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Label')+')';
 			attribute<uint32> type:= switch(case(strcount(Label, 'sdt') > 0, 22), case(strcount(Label, 'town') > 0, 23), case(strcount(Label, 'city') > 0, 30), 13);
 			attribute<uint32> L_15min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_15min')+')';
 			attribute<uint32> L_30min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
 			attribute<uint32> L_60min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
-			attribute<grid>   grid_rel:= Geometry[grid];
-			attribute<NodeSet>NodeSet_rel:= grid/NodeSet_rel[grid_rel];
+			attribute<uint32> gridcount:= pcount(grid/as_id);
 		}	
 	}
 	
@@ -31,6 +30,7 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<float32>  elevation:= Physical/Elevation/Elevation[float32];
 		attribute<float32>  slope:= Physical/Slope_2021/ReadData;
 		attribute<float32>	gradient:= slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
+		attribute<load_settlements/all_settlements> as_id:= poly2grid(load_settlements/all_settlements/Geometry, .);
 		
 		attribute<NodeSet> N                   (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint)];
 		attribute<NodeSet> NE                  (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
@@ -53,7 +53,8 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<LatLong>  Geometry:= Nr_OrgEntity[LatLong];
 		attribute<float32> 	Roughness:= grid/Roughness[Nr_OrgEntity];
 		attribute<bool>		InWater:= grid/Inwater[Nr_OrgEntity];
-		attribute<float32>	Impedance:= MakeDefined(Roughness^2f, 10f) + (10f * InWater[float32]);
+		attribute<float32>	Impedance_abstract:= MakeDefined(Roughness^2f, 10f) + (10f * InWater[float32]);
+		attribute<float32>	Impedance:= grid/impedance_all[Nr_OrgEntity];
 		attribute<float32>  EastWest_correction:= const(1f,.,float32);
 		//attribute<bool>		N:= 
 	}
@@ -78,28 +79,37 @@ Container GridDists: using = "Geography;SourceData;" {
 		
 		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
 		
-		unit<uint32> origins:= ='subset('+access_variants/def[invariant]+' && IsDefined(SelectedSettlements/NodeSet_rel))' {
-			attribute<LatLong> Geometry:= SelectedSettlements/Geometry[Nr_OrgEntity];
-			attribute<NodeSet> NodeSet_rel:= SelectedSettlements/NodeSet_rel[Nr_OrgEntity];
-			attribute<grid> grid_rel:= Geometry[grid];
+		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0)' {
+			attribute<LatLong> Geometry (poly):= SelectedSettlements/Geometry[Nr_OrgEntity];
 		}
+		attribute<FilteredSettlements> fs_rel (grid):= poly2grid(FilteredSettlements/Geometry, grid);
+		unit<uint32> origins:= subset(isdefined(fs_rel));
 		
 		attribute<float32> impedances (grid):= grid/impedance_all;
-		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/grid_rel, const(0f, origins, float32)), 100f);
-		attribute<float32> costsgrid_maximp (grid):= griddist_maximp(impedances, origins/grid_rel, 100f);
+		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/Nr_OrgEntity, const(0f, origins, float32)), 100f);
+		attribute<float32> costsgrid_maximp (grid):= griddist_maximp(impedances, origins/Nr_OrgEntity, 100f);
+		attribute<float32> costsgrid_untiled (grid):= min_elem(griddist_untiled(impedances, origins/Nr_OrgEntity, const(0f, origins, float32)), 100f);		
+		attribute<float32> costsgrid_untiled_maximp (grid):= griddist_maximp_untiled(impedances, origins/Nr_OrgEntity, 100f);
 	}
 	
 	
 	Template T_getAccessGrids_netw {
 		parameter<access_variants> invariant;
+		parameter<float32>		   maxrange:= 6000f; // 100km * the practical maximum impedance for crossing 1km 
 		
 		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
 		
 		unit<uint32> destinations: nrofrows = 1;
 		
-		unit<uint32> origins:= ='subset('+access_variants/def[invariant]+' && IsDefined(SelectedSettlements/NodeSet_rel))' {
-			attribute<LatLong> Geometry:= SelectedSettlements/Geometry[Nr_OrgEntity];
-			attribute<NodeSet> NodeSet_rel:= SelectedSettlements/NodeSet_rel[Nr_OrgEntity];
+		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0)' {
+			attribute<LatLong> Geometry (poly):= SelectedSettlements/Geometry[Nr_OrgEntity];
+		}
+		
+		attribute<FilteredSettlements> fs_rel (grid):= rlookup(grid/as_id, FilteredSettlements/Nr_OrgEntity);
+			
+		unit<uint32> origins:= subset(isdefined(fs_rel) && isdefined(grid/NodeSet_rel)) {
+			attribute<LatLong> Geometry:= Nr_OrgEntity[LatLong];
+			attribute<NodeSet> NodeSet_rel:= grid/NodeSet_rel[Nr_OrgEntity];
 		}
 		unit<uint32> Matrix := 
 			impedance_matrix(
@@ -113,12 +123,12 @@ Container GridDists: using = "Geography;SourceData;" {
 				, origins/NodeSet_rel
 				, const(0,origins,destinations)
 				, id(NodeSet)
-				, 1000f
+				, maxrange	
 				, Network/Length
 			);
 		
-		attribute<float32> costsgrid (grid):= min(Matrix/Impedance, Matrix/DstZone_rel)[grid/NodeSet_rel];
-		attribute<float32> distancegrid (grid):= min(Matrix/Alt_imp, Matrix/DstZone_rel)[grid/NodeSet_rel];
+		attribute<float32> costsgrid (grid):= min_elem(min(Matrix/Impedance, Matrix/DstZone_rel)[grid/NodeSet_rel], maxrange);
+		attribute<float32> distancegrid (grid):= min_elem(min(Matrix/Alt_imp, Matrix/DstZone_rel)[grid/NodeSet_rel], maxrange);
 		
 		
 	}
@@ -129,6 +139,17 @@ Container GridDists: using = "Geography;SourceData;" {
 		
 		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" {
 			attribute<LatLong> Geometry;
+			attribute<string>  label;
+			attribute<uint32>  L_15min;
+			attribute<uint32>  L_30min;
+			attribute<uint32>  L_60min;
+		}
+	}
+	Template T_loadpolyfile {
+		parameter<string> inpath;
+		
+		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" {
+			attribute<LatLong> Geometry (poly);
 			attribute<string>  label;
 			attribute<uint32>  L_15min;
 			attribute<uint32>  L_30min;
