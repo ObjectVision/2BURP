@@ -5,7 +5,7 @@ Container GridDists: using = "Geography;SourceData;" {
 	container travel_factors {
 		parameter<string> elev:= '1f + (elevation > 2000f ? 0.15f * exp(0.0007f * elevation) : 0f)', Descr= "Effect on travel speeds: For elevations lower than 2000 metres, there is no effect on foot-based based travel speed. For elevations above 2000, the following speed factor f is applied: f = 0.15e0.0007E, where E is elevation in metres.";
 		parameter<string> slope:= '1f / exp(-1f*gradient*3f)'; //v0e-ks
-		parameter<string> water:= 'InWater ? 3f : 1f'; //Water bodies at 20km/h, compared to the 60m/h reference
+		parameter<string> water:= 'InWater * 3f + 1f'; //Water bodies at 20km/h, compared to the 60m/h reference
 	}
 	
 	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa', 'Asia', 'Australia_Oceania', 'Europe', 'North_America', 'South_America'];}
@@ -24,7 +24,7 @@ Container GridDists: using = "Geography;SourceData;" {
 	
 	unit<wpoint> grid:= Geography/domain {
 		attribute<float32> 	Roughness:= Physical/TerrainRoughnessIndex/mean;
-		attribute<bool> 	InWater:= Roughness = 0f || !GridData/IsNotLake;
+		attribute<float32> 	InWater:= Physical/Water/AllWater/Fraction_Water[float32] / 100f;
 		attribute<float32>	Impedance:= Roughness^2f + (10f * InWater[float32]);
 		attribute<NodeSet>  NodeSet_rel:= invert(NodeSet/Nr_OrgEntity);
 		attribute<float32>  elevation:= Physical/Elevation/Elevation[float32];
