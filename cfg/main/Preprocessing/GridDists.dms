@@ -86,10 +86,12 @@ Container GridDists: using = "Geography;SourceData;" {
 		unit<uint32> origins:= subset(isdefined(fs_rel));
 		
 		attribute<float32> impedances (grid):= grid/impedance_all;
-		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/Nr_OrgEntity, const(0f, origins, float32)), 100f);
+		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/Nr_OrgEntity), 100f);
 		attribute<float32> costsgrid_maximp (grid):= griddist_maximp(impedances, origins/Nr_OrgEntity, 100f);
-		attribute<float32> costsgrid_untiled (grid):= min_elem(griddist_untiled(impedances, origins/Nr_OrgEntity, const(0f, origins, float32)), 100f);		
+		attribute<float32> costsgrid_untiled (grid):= min_elem(griddist_untiled(impedances, origins/Nr_OrgEntity), 100f);		
 		attribute<float32> costsgrid_untiled_maximp (grid):= griddist_maximp_untiled(impedances, origins/Nr_OrgEntity, 100f);
+		attribute<float32> costsgrid_untiled_latitude_specific (grid):= min_elem(griddist_untiled_latitude_specific(impedances, origins/Nr_OrgEntity), 100f);
+		attribute<float32> costsgrid_untiled_maximp_latitude_specific (grid):= griddist_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, 100f);
 	}
 	
 	
