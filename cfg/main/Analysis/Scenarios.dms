@@ -147,11 +147,12 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container          CurrState;
 		attribute<km2>     ExpectedBuiltUpArea       (ClaimRegion); 
 		///
-		parameter<float32> r_if_LocalMax              := 1.11f;
-		parameter<float32> r_if_notLocalMax_w_BUneigh := 1.06f;
-		parameter<float32> r_if_notBU_wo_BUneigh      := 1.04f;
+		parameter<float32> r_if_LocalMax    := 0.11f;
+		parameter<float32> r_if_notLocalMax := 0.06f;
+		parameter<float32> r_if_notBU       := 0.02f;
+		parameter<float32> max_saturation   := 0.50f;
 		
-		unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot2km)
+		unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km) //pot1km == 3x3 cellen, pot2km == 5x5 cellen
 		{	
 			attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel);
 		}
@@ -163,11 +164,12 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<bool>    HasBuiltUpNeighbours    (CompactedDomain) := ((sum(CurrState/BuiltUpShare_orgdom[domain_x_pot/third_rel] * domain_x_pot/second_rel -> buffer[float32], domain_x_pot/first_rel) - CurrState/BuiltUpShare_orgdom) > 0f)[CompactedDomain/org_rel];
 			attribute<float32> MaxAllowed_BuiltupShare (CompactedDomain) := switch(
 																					// If a cell has the highest local share of built-up area in T1, it can only increase by 11 pp in T2 (or by 50% - local share if this is smaller than 11 pp)
-																					 case(LocalMaxima/IsLocalMaximum, min_elem(CurrState/BuiltupShare * r_if_LocalMax, 1f))
-																					// If a cell doesn’t have the highest local share of built-up area in T1 but has neighbouring cells with built-up, it can only increase in T2 to the local maximum in T1 + 6 pp (or by 50% - local maximum if this is smaller than 6 pp)
-																					,case(not(LocalMaxima/IsLocalMaximum) && LocalMaxima/HasBuiltUpNeighbours,  min_elem(CurrState/BuiltupShare * r_if_notLocalMax_w_BUneigh, 1f))
-																					// If a cell is not built-up and doesn’t have any built-up in its neighbouring cells in T1, it can only increase by 4 pp in T2
-																					,case(not(LocalMaxima/IsLocalMaximum) && not(LocalMaxima/HasBuiltUpNeighbours),  min_elem(CurrState/BuiltupShare * r_if_notBU_wo_BUneigh, 1f))
+																					 case(LocalMaxima/IsLocalMaximum && CurrState/BuiltupShare <  max_saturation, min_elem(CurrState/BuiltupShare + r_if_LocalMax, max_saturation))
+																					,case(LocalMaxima/IsLocalMaximum && CurrState/BuiltupShare >= max_saturation, CurrState/BuiltupShare)
+																					// If a cell is built-up but it doesn’t have the highest local share of built-up area in T1, it can only increase in T2 to the local maximum in T1 + 6 pp (or by 50% - local share, if this is smaller than local maximum in T1 + 6 pp)
+																					,case(not(LocalMaxima/IsLocalMaximum) && CurrState/BuiltupShare > 0f,  min_elem(Current_LocalMaximum[CompactedDomain/org_rel] + r_if_notLocalMax, max_saturation))
+																					// If a cell is not built-up in T1, it can only increase by 2 pp in T2
+																					,case(CurrState/BuiltupShare == 0f,  CurrState/BuiltupShare + r_if_notBU)
 																					,CurrState/BuiltupShare
 																			);
 		}
