@@ -14,22 +14,39 @@ container Physical : using = "geography"
 		attribute<int16> Elevation(domain):=MakeDefined(ReadData,0s);//0--> oceans/seas - no inland lakes! essential for rank there are values otherwise null in Urban_Cali --> moving of cururb
 	}	
 	
-	// unit<ipoint> Slope
-	// :	StorageName = "%ToBURPDataDir%/physical/Slope/GMTED_SLOPE_30ASec.tif"
-	// ,	StorageType = "gdal.grid"
-	// ,	url         = "%ToBURPDataDir%/physical/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010)" //https://topotools.cr.usgs.gov/gmted_viewer/viewer.htm"//
-	// ,	Source      = "original Global Terrain Elevation Data 2010 GMTED (USGS)"
-					  // "Frank van Rijn - PBL: Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\Basisdata.gdb GMTED_SLOPE_30ASec"
-					  // "original: 43203 c, 20641 r;GCS_WGS_1984"
-					  // "Slope genereated in ArcGIS from DEM in degrees"
-					  // "conversiion to tif-format in ArcGIS, float32, LZW-compression"
-					  // " nodata has been given value 0 due to impossibility to specify in geodms 7.145 nodata for float32 regarding a number has become nan (not a number)."
-					  // "-3.4E38 is given a 0; extent adjusted (by clipping) so that 43200 columns and 21600 rows are generated"
-	// ,	StorageReadOnly = "True"
-	// ,	DialogData      = "LatLong"
-	// {
-		// attribute<float32> ReadData (domain); 
-	// }	
+	unit<ipoint> Elevation_new
+	:	StorageName     = "%ToBURPDataDir%/physical/Elevation/GLO_90_3ss_4326.tif"
+	,	StorageType     = "gdal.grid"
+	,	StorageReadOnly = "True"
+	,	DialogData      = "LatLong"
+	, 	LazyCalculated  = "true"
+	{
+		attribute<int32> ReadData (domain);
+	}
+	
+	unit<wpoint> TRI_new := domain
+	{
+		attribute<int32>   elevation := Elevation_new/ReadData;
+		attribute<float32> TRI       := sqrt(
+											  sqr(elevation - N)
+											+ sqr(elevation - NE)
+											+ sqr(elevation - E)
+											+ sqr(elevation - SE)
+											+ sqr(elevation - S)
+											+ sqr(elevation - SW)
+											+ sqr(elevation - W)
+											+ sqr(elevation - NW)
+										)[float32];
+										
+		attribute<int32>   N                   (domain) := elevation[(id(domain)) - point(1w, 0w, wpoint)];
+		attribute<int32>   NE                  (domain) := elevation[(id(domain)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
+		attribute<int32>   E                   (domain) := elevation[(id(domain)) + point(0w, 1w, wpoint)];
+		attribute<int32>   SE                  (domain) := elevation[(id(domain)) + point(1w, 1w, wpoint)];
+		attribute<int32>   S                   (domain) := elevation[(id(domain)) + point(1w, 0w, wpoint)];
+		attribute<int32>   SW                  (domain) := elevation[(id(domain)) + point(1w, 0w, wpoint) - point(0w, 1w, wpoint)];
+		attribute<int32>   W                   (domain) := elevation[(id(domain)) - point(0w, 1w, wpoint)];
+		attribute<int32>   NW                  (domain) := elevation[(id(domain)) - point(1w, 1w, wpoint)];
+	}
 	
 	unit<ipoint> Slope_2021
 	:	StorageName = "%ToBURPDataDir%/physical/Slope/gtopo30_degree_planar_zfactor1_ag1061_exportgeodms.tif"

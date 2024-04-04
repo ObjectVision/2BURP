@@ -1,29 +1,40 @@
 container Make_Past : using = "SourceData/RegionalUnits;units;geography"
 {
-	unit<uint32> Year: nrofrows = 4
+	unit<uint32> Year: nrofrows = 5
 	{
-		attribute<int16>  dc:     [1975,1990,2000,2020];
-		// attribute<int16>  dc2:    [1975,1990,2000,2014];
-		attribute<String> name := 'y'+String(dc);
-		// attribute<String> name2:= 'y'+String(dc2);
+		attribute<int16>  year : [1980,1990,2000,2010,2020];
+		attribute<String> name := 'y'+String(year);
+		attribute<string> prev := name[sub_or_null(id(.),1)];
+		
+		unit<uint32> Change := select_with_attr_by_cond(.,IsDefined(prev));
 	}
 
-	container PopSumCountry: =
+	container PopSumCountry :=
 		for_each_nedvd(
 			 Year/name
 			 ,'sum(value(SourceData/Population/PerYear/'+ Year/name + ',float32), Countries/per_grid)'
 			,  Countries 
 			,  float32
-			,  'Sum population ' + String(Year/dc)
+			,  'Sum population ' + String(Year/year)
 		);
-
+		
+	container PopulationChangePerDecade :=
+		for_each_nedv(
+			 Year/Change/name
+			 ,'PopSumCountry/'+Year/Change/name+' - PopSumCountry/'+Year/Change/prev
+			,  Countries 
+			,  float32
+		);
+		
+		
+		
 	container PopSumCountryMillion: =
 		for_each_nedvd(
 			 Year/name
 			 ,'(value(PopSumCountry/'+ Year/name + ',float32))/1000000f'
 			,  Countries 
 			,  float32
-			,  'Sum population in Country in Million ' + String(Year/dc)
+			,  'Sum population in Country in Million ' + String(Year/year)
 		);
 
 	// container PopUrbanSum: =
@@ -32,7 +43,7 @@ container Make_Past : using = "SourceData/RegionalUnits;units;geography"
 			 // ,'value(SourceData/Population/PerYear/'+ Year/name + ',uint32) * value(Preprocessing/urban/BuiltUpBoolJRC_50prc/'+ Year/name2+',uint32)'
 			// ,  domain
 			// ,  uint32
-			// ,  'Sum Urban population ' + String(Year/dc)
+			// ,  'Sum Urban population ' + String(Year/year)
 		// );
 
 	container PopSum: =
@@ -41,7 +52,7 @@ container Make_Past : using = "SourceData/RegionalUnits;units;geography"
 			 ,'value(SourceData/Population/PerYear/'+ Year/name + ',uint32)'
 			,  domain
 			,  uint32
-			,  'Sum population ' + String(Year/dc)
+			,  'Sum population ' + String(Year/year)
 		);
 
 	// container PopUrbanSumCountry: =
