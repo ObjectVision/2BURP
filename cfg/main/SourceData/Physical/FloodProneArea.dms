@@ -14,8 +14,7 @@ container FloodProneArea
 	unit<ipoint> RP1000:
 	StorageName = "%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP1000_area.tif",
 	StorageType = "gdal.grid",
-	Source = "Provided by Arno Bouwman"
-			 "conversion to tif-format in ArcGIS, LZW-compression with correct extent",
+	Source = "Provided by Arno Bouwman conversion to tif-format in ArcGIS, LZW-compression with correct extent",
 	StorageReadOnly = "True",
 	DialogData = "LatLong"
 	{

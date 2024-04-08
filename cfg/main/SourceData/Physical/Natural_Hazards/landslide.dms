@@ -1,12 +1,16 @@
 container Landslide
 {
 	//expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000
-	unit<ipoint> Frequency_of_landslides_triggered_by_earthquakes:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ls_eq.tif",
-		StorageType     = "gdal.grid",
-		Source          = "International Centre for Geohazards / NGI",
-		url             = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/Global Risk Data Platform_ls_eq.mht",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
+	unit<ipoint> Frequency_of_landslides_triggered_by_earthquakes
+	: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ls_eq.tif"
+	, StorageType     = "gdal.grid"
+	, Source          = "International Centre for Geohazards / NGI"
+	, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/Global Risk Data Platform_ls_eq.mht"
+	, StorageReadOnly = "True"
+	, DialogData      = "LatLong"
+	, Descr           = "This dataset includes an estimate of the annual frequency of landslide triggered by earthquakes. It depends on the combination of trigger and "
+						"susceptibility defined by six parameters: slope factor, lithological (or geological) conditions, soil moisture condition, vegetation cover, "
+						"precipitation and seismic conditions. Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000."
 	{
 		attribute<uint16> ReadData(domain);
 		attribute<bool> LS_EQ_Bool(domain)   := value(ReadData > 0w ? 1 : 0,bool);
@@ -23,12 +27,16 @@ container Landslide
 	}
 
 	//Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000.
-	unit<ipoint> Frequency_of_landslides_triggered_by_precipitations:StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ls_pr.tif",
-		StorageType     = "gdal.grid",
-		Source          = "International Centre for Geohazards / NGI",
-		url             = "%ToBURPDataDir%/physical/Landslide/Frequency_of_landslides_triggered_by_precipitations/Natural_Hazards/Global Risk Data Platform_ls_pr.mht",
-		StorageReadOnly = "True",
-		DialogData      = "LatLong"
+	unit<ipoint> Frequency_of_landslides_triggered_by_precipitations
+	: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ls_pr.tif"
+	, StorageType     = "gdal.grid"
+	, Source          = "International Centre for Geohazards / NGI"
+	, url             = "%ToBURPDataDir%/physical/Landslide/Frequency_of_landslides_triggered_by_precipitations/Natural_Hazards/Global Risk Data Platform_ls_pr.mht"
+	, StorageReadOnly = "True"
+	, DialogData      = "LatLong"
+	, Descr           = "This dataset includes an estimate of the annual frequency of landslide triggered by precipitations. It depends on the combination of trigger and "
+						"susceptibility defined by six parameters: slope factor, lithological (or geological) conditions, soil moisture condition, vegetation cover, "
+						"precipitation and seismic conditions. Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000."
 		{
 			attribute<uint16> ReadData(domain);
 			attribute<bool> LS_PR_Bool(domain)   := value(ReadData > 0w ? 1 : 0,bool);
