@@ -28,8 +28,8 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<uint8>      NrOfLandslides_Earthquakes              := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[CompactedDomain/org_rel];
 		
 		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Rivers                         := Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Lakes                          := Physical/Water/Lakes/Location2Lake_km/Lake[CompactedDomain/org_rel];
+		attribute<float32>    Distance2Rivers                         := Physical/Water/Rivers/Dist_River_km/GridData[CompactedDomain/org_rel];
+		attribute<float32>    Distance2Lakes                          := Physical/Water/Lakes/Dist_Lake_km/GridData[CompactedDomain/org_rel];
 		attribute<float32>    Distance2MajorRoads                     := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
 		attribute<float32>    Distance2SecundaryRoads                 := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
 		

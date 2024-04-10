@@ -35,28 +35,29 @@ container Lakes
 		parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
 		parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 	}
-
-	attribute<Float32> Location2Lake_mer     (CompactedDomain) := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-	attribute<km>      Location2Lake_km_CD   (CompactedDomain) := (Location2Lake_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2Lake_km_domain_export (domain) := Location2Lake_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Water/lakes/Location2Lake_km.tif";//copy to ToBURPDataDir
-
-	unit<ipoint> Location2Lake_km
+	
+	attribute<Float32> sqr_dist                (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
+	attribute<Float32> Location2Lake_distInfo  (CompactedDomain) := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
+	attribute<km>      Location2Lake_km        (CompactedDomain) := (Location2Lake_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
+	attribute<km>      Location2Lake_km_domain_export (domain) := min_elem(Location2Lake_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif";
+	
+	unit<ipoint> Dist_Lake_km
 	:	StorageName     = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif"
 	,	StorageType     = "gdal.grid"
 	,	StorageReadOnly = "True"
 	,	DialogData      = "LatLong"
 	{
 		attribute<km> GridData (domain);
-		attribute<km> ReadData (domain) := MakeDefined(GridData,250[km]);
-		attribute<km> Lake     (domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
+		// attribute<km> ReadData (domain) := MakeDefined(GridData,250[km]);
+		// attribute<km> Lake     (domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
 		
-		unit<uint32> Country := RegionalUnits/Countries 
-		{
-			attribute<float32>  sumLake  := sum(Lake,per_grid);
-			attribute<float32>  MeanLake := mean(Lake,per_grid);
-			attribute<float32>  MinLake  := min(Lake,per_grid);
-			attribute<float32>  MaxLake  := max(Lake,per_grid);
-			attribute<float32>  SDLake   := sd(Lake,per_grid);
-		}
+		// unit<uint32> Country := RegionalUnits/Countries 
+		// {
+			// attribute<float32>  sumLake  := sum(Lake,per_grid);
+			// attribute<float32>  MeanLake := mean(Lake,per_grid);
+			// attribute<float32>  MinLake  := min(Lake,per_grid);
+			// attribute<float32>  MaxLake  := max(Lake,per_grid);
+			// attribute<float32>  SDLake   := sd(Lake,per_grid);
+		// }
 	}
 }
