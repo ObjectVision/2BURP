@@ -11,8 +11,11 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<Countries>  Country_grid                            := Countries/per_grid[CompactedDomain/org_rel];
 		attribute<float32>    BURES_2000                              := SourceData/Builtup/Residential/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BURES_2020                              := SourceData/Builtup/Residential/Y2020[CompactedDomain/org_rel];
+		attribute<float32>    BUTOT_2000                              := SourceData/Builtup/Total/Y2000[CompactedDomain/org_rel];
+		attribute<float32>    BUTOT_2020                              := SourceData/Builtup/Total/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
 		attribute<float32>    Coastline_Distance                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
 		attribute<float32>    Distance2River                          := Physical/Water/Rivers/Dist_River_km/ReadData[CompactedDomain/org_rel];
@@ -59,7 +62,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
 			;
-	
+		
 		   // assume ExportDomain is a configured domain unit with two attributes as subitems: id & dist
 		  parameter<string> fieldseparator := ';';
 		  parameter<string> filename       := '%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/calibset.csv';
@@ -79,7 +82,8 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		  parameter<string> result := header + newline + AsList(body, newline)
 		  ,  StorageName = "= filename"
 		  ,  StorageType = "str";
-	
+		
+		container Export_Tiffs_ForCalibration:= for_each_nedva(field/name, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])',domain,uint32,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif');
 	}
 	
 	container ReadCoffecients_UrbanArea 

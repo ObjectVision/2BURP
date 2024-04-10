@@ -12,14 +12,20 @@ Container GridDists: using = "Geography;SourceData;" {
 	
 	container load_settlements:= for_each_ne(settlements/label, 'T_loadpolyfile('+quote(sett_folder+settlements/label)+')') {
 		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' {
-			attribute<LatLong> Geometry (arc):= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
+			attribute<LatLong> Geometry (poly):= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
 			attribute<string> Label:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Label')+')';
 			attribute<uint32> type:= switch(case(strcount(Label, 'sdt') > 0, 22), case(strcount(Label, 'town') > 0, 23), case(strcount(Label, 'city') > 0, 30), 13);
 			attribute<uint32> L_15min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_15min')+')';
 			attribute<uint32> L_30min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
 			attribute<uint32> L_60min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
+			attribute<float32> pop:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
 			attribute<uint32> gridcount:= pcount(grid/as_id);
-		}	
+		}
+		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) {
+			attribute<LatLong> Geometry (poly):= org_rel->geometry;
+			attribute<uint32> type:= org_rel->type;
+			attribute<float32>pop:= org_rel->pop;
+		}
 	}
 	
 	unit<wpoint> grid:= Geography/domain {

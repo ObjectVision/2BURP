@@ -63,7 +63,7 @@ container Coast
 	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km_CD[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/physical/Coast/Location2Coast_km.tif";
 
 	unit<ipoint> Location2Coast_km
-	:	StorageName     = "%ToBURPDataDir%/physical/Coast/Location2Coast_km.tif"
+	:	StorageName     = "%LocalDataProjDir%/physical/Coast/Location2Coast_km.tif"
 	,	StorageType     = "gdal.grid"
 	,	StorageReadOnly = "True"
 	,	DialogData      = "LatLong"
