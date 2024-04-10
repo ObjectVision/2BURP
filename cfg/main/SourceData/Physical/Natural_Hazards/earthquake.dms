@@ -11,12 +11,15 @@
 container Earthquake
 {
 	unit<ipoint> Earthquakes_Modified_Mercalli_Intensity
-	: StorageName = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif",
-	StorageType     = "gdal.grid",
-	Source          = "Earthquakes Modified Mercalli Intensity  UNEP/DEWA/GRID-Europe",
-	url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht",
-	StorageReadOnly = "True",
-	DialogData      = "LatLong"
+	: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif"
+	, StorageType     = "gdal.grid"
+	, Descr           = "Earthquakes Modified Mercalli Intensity by UNEP/DEWA/GRID-Europe for the Global Assessment Report on Risk Reduction (GAR)."
+							"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
+	, Source          = "Earthquakes Modified Mercalli Intensity by UNEP/DEWA/GRID-Europe for the Global Assessment Report on Risk Reduction (GAR)."
+							"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
+	, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht"
+	, StorageReadOnly = "True"
+	, DialogData      = "LatLong"
 	{
 		attribute<uint8> ReadData_org(domain);
 		attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);

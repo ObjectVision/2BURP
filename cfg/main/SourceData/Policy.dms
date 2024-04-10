@@ -1,12 +1,12 @@
 container Policy : using = "geography"
 {
 	unit<ipoint> ProtectedAreas 
-	: StorageName = "%ToBURPDataDir%/Policy/ProtectedAreas/ProtectedAreas_uint2.tif",
-	StorageType = "gdal.grid",
-	Source = "Database: Y:\\data\\PBLbase\\Data\\WorldProtectedAreas.gdb Feature Class: ProtectedAreasWDPA_2010_vlak_WCMC"
-			 "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent",
-	StorageReadOnly = "True",
-	DialogData = "LatLong"
+	: StorageName = "%ToBURPDataDir%/Policy/ProtectedAreas/ProtectedAreas_uint2.tif"
+	, Source = "Database: Y:\\data\\PBLbase\\Data\\WorldProtectedAreas.gdb Feature Class: ProtectedAreasWDPA_2010_vlak_WCMC conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent"
+	, Descr = "from the World Database on Protected Areas (WDPA)" 
+	, StorageType = "gdal.grid"
+	, StorageReadOnly = "True"
+	, DialogData = "LatLong"
 	{
 		attribute<uint8> ReadData(domain);
 		attribute<bool>  ReadData_bool(domain) := ReadData[bool];
