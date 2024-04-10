@@ -39,9 +39,10 @@ container Rivers
 		parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 	}
 
-	attribute<Float32> Location2River_mer     (CompactedDomain) := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-	attribute<km>      Location2River_km      (CompactedDomain) := (Location2River_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2River_km_domain_export (domain) := Location2River_km[CompactedDomain/BaseGrid], StorageName = "%ToBURPDataDir%/Physical/water/Location2River_km.tif";
+	attribute<Float32> sqr_dist                (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
+	attribute<Float32> Location2River_distInfo (CompactedDomain) := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
+	attribute<km>      Location2River_km       (CompactedDomain) := (Location2River_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
+	attribute<km>      Location2River_km_domain_export (domain) := min_elem(Location2River_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/water/Location2River_km.tif";
 
 	unit<ipoint> Dist_River_km:
 	StorageName     = "%ToBURPDataDir%/physical/water/Location2River_km.tif",
@@ -50,15 +51,15 @@ container Rivers
 	DialogData      = "LatLong"
 	{
 		attribute<km> GridData (domain);
-		attribute<km> ReadData (domain):= MakeDefined(GridData,5[km]);
+		// attribute<km> ReadData (domain):= MakeDefined(GridData,5[km]);
 		
-		unit<uint32> Country := SourceData/RegionalUnits/Countries 
-		{
-			attribute<km>  sumReadData_org  := sum(ReadData,per_grid);
-			attribute<km>  MeanReadData_org := mean(ReadData,per_grid);
-			attribute<km>  MinReadData_org  := min(ReadData,per_grid);
-			attribute<km>  MaxReadData_org  := max(ReadData,per_grid);
-			attribute<km>  SDReadData_org   := sd(ReadData,per_grid);
-		}
+		// unit<uint32> Country := SourceData/RegionalUnits/Countries 
+		// {
+			// attribute<km>  sumReadData_org  := sum(ReadData,per_grid);
+			// attribute<km>  MeanReadData_org := mean(ReadData,per_grid);
+			// attribute<km>  MinReadData_org  := min(ReadData,per_grid);
+			// attribute<km>  MaxReadData_org  := max(ReadData,per_grid);
+			// attribute<km>  SDReadData_org   := sd(ReadData,per_grid);
+		// }
 	}
 }
