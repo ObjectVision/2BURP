@@ -100,7 +100,7 @@ container Physical : using = "geography"
 		
 		container Sweet_Water
 		{
-			attribute<float64> Sweet_Water_Distance(domain) := min_elem(Lakes/Location2Lake_km/Lake[float64],Rivers/Dist_River_km/ReadData[float64]);
+			attribute<float64> Sweet_Water_Distance(domain) := min_elem(Lakes/Dist_Lake_km/GridData[float64],Rivers/Dist_River_km/GridData[float64]);
 		}
 
 		#include <floodProneArea.dms>

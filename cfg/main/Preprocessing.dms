@@ -3,17 +3,17 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	container Claims_BuiltUp := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'int64(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+')[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)]'
+			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)]'
 			, FunctionalAreas
-			, int64
+			, km2
 		);
 	
 	container Claims_Population := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'int64(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+')[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
+			, '(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+'[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
 			, FunctionalAreas
-			, int64
+			, Person
 		);
 		
 	#include <GridDists.dms>
