@@ -1,38 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<DocType name="GeoDmsMetaInfo">
-<DefaultInfo>
-	<FullName>/Preprocessing/Claims/Scenario/SSPs/SSP2/export_csv_M1/Result
-	</FullName>
-	<GeoDmsVersion>GeoDms 7.308 [Feb 23 2021]
-	</GeoDmsVersion>
-	<StatusFlags>0x5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
-	</StatusFlags>
-</DefaultInfo>
-<Software>
-	<GeoDmsVersion>7.308
-	</GeoDmsVersion>
-</Software>
-<Config>
-	<FullName>/Preprocessing/Claims/Scenario/SSPs/SSP2/export_csv_M1/Result
-	</FullName>
-	<Expr>Header + &apos;\n&apos; + AsList(Body+&apos;\n&apos;, &apos;&apos;)
-	</Expr>
-</Config>
-<Environment>
-	<Processor>Intel64 Family 6 Model 79 Stepping 1, GenuineIntel
-	</Processor>
-	<User>bemmelvb
-	</User>
-	<ComputerName>geodms-p-0
-	</ComputerName>
-</Environment>
-<Svn>
-	<RevisionInfo>SubWCRev: &apos;K:\PD\TowardsAnUrbanPreview&apos;<BR/>
-		Last committed at revision 7285<BR/>
-		Updated to revision 7330<BR/>
-		Local modifications found<BR/>
-		
-	</RevisionInfo>
-</Svn>
-</DocType>

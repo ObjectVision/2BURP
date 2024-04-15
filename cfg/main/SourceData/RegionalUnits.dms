@@ -1,7 +1,5 @@
 container RegionalUnits
 {
-	// #include <Country.dms>
-	
 	unit<uint32> CIESIN 
 	: StorageName = "%ToBURPDataDir%/Regions/Global_admin0.shp"
 	, StorageType = "gdal.vect"
@@ -63,17 +61,11 @@ container RegionalUnits
 	}
 
 	unit<uint8> Continents := Classifications/Continents
-	//: storagename = "= propvalue(store_Continents, 'StorageName')"
-	//, StorageReadOnly = "True"
 	{
 		attribute<LatLong>  geometry (poly): storagename = "= propvalue(store_geometry, 'storagename')", storagereadonly = "True";
 		attribute<string>   name            := Classifications/Continents/name;
-		// attribute<string>   label           := Classifications/Continents/label;
-		
 		attribute<.>        per_grid        (domain) := poly2grid(geometry , domain);
-		
 		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
-		
 		attribute<LatLong>  store_geometry (poly) := partitioned_union_polygon(store_Countries/geometry_LL[LatLong_ip], store_Countries/continents_rel)[LatLong], storagename = "%ToBURPDataDir%/Regions/fss/Continents/Geom.fss";
 	}
 	
@@ -88,11 +80,26 @@ container RegionalUnits
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
-	unit<uint32> set_countries: nrofrows = 238 {
-		attribute<string> ZoneId:= inMatrix/data[(id(.)*3+0)[inMatrix]];
-		attribute<string> Label:= inMatrix/data[(id(.)*3+1)[inMatrix]];
-		attribute<string> Continent:= inMatrix/data[(id(.)*3+2)[inMatrix]];
-		attribute<LatLong>  Geometry (poly):= rjoin(ZoneId, CIESIN/FIRST_ISOA, CIESIN/Geometry);
+	
+
+	unit<uint32> FunctionalAreas 
+	: StorageName = "%ToBURPDataDir%/Regions/fas_combined_20240322.shp"
+	, StorageType = "gdal.vect"
+	, StorageReadOnly = "true"
+	, DialogData      = "geometry_LL"
+	, DialogType      = "map"
+	{
+		attribute<WorldMollweide> geometry (poly);
+		attribute<LatLong>        geometry_LL (poly) := convert(geometry, LatLong);
+		attribute<string>         Label              := name;
+	}
+
+	unit<uint32> set_countries: nrofrows = 238 
+	{
+		attribute<string>   ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
+		attribute<string>   Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
+		attribute<string>   Continent       := inMatrix/data[(id(.)*3+2)[inMatrix]];
+		attribute<LatLong>  Geometry (poly) := rjoin(ZoneId, CIESIN/FIRST_ISOA, CIESIN/Geometry);
 		
 		unit<uint32> inMatrix:= range(uint32, 0, 239*3) {
 		
@@ -336,8 +343,6 @@ container RegionalUnits
 			'ZAF',	'South Africa',	'Africa',
 			'ZMB',	'Zambia',	'Africa',
 			'ZWE',	'Zimbabwe',	'Africa'];
-
 		}
-		
 	}
 }
