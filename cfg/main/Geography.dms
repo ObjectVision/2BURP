@@ -73,25 +73,25 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0));
 
 		//For fast testing with extent of 1 country (no other country within extent)
-		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0));
+		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Iceland];}
 
 		unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point_yx(-51.0, -40.0), point_yx(85.0, 71.0));
 		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point_yx(-66.0, 170.0), point_yx(85.0, 75.0));
 		
 		//continents
 		//unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
-		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
-		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0));
-		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(-11.0,180.0));
-		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0));
-		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0));
-		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0));
-		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0));
+		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
+		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
+//		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(-11.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Antarctica];}
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
+		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}
+		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/North_America];}
+		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/South_America];}
 
 		//countries
 		unit<dpoint> LatLong_test                     := range(LatLong_Base, point_yx(52.04, 5.04), point_yx(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
 		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point_yx( 51.8,  4.7), point_yx(52.3, 5.7));
-		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0));
+		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
 	}
 
 	unit<wpoint> domain :=
@@ -162,6 +162,7 @@ container Geography : using = "units"
 		attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 
 		attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_grid);
+		attribute<Bool>   InStudyArea			 (domain) := poly2grid(LatLong/geometry, domain);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_grid) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip			 (domain) := ='IsDefined(Countries/per_grid) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
@@ -170,7 +171,8 @@ container Geography : using = "units"
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 
 		attribute<Bool>   InRegionHasPopHasUrb   (domain) := (InRegion || HasPop || HasBuiltup);
-		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && InBU_5kmClip && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
+		
+		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && InStudyArea && InBU_5kmClip && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
 	}
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"

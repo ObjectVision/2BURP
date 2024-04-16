@@ -11,7 +11,7 @@ container Coast
 	{
 		attribute<LatLong>           Geometry     (poly)   := Read_Coastline/out/geometry;
 		// attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
-		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(geometry, domain_sub)), StorageName = "%ToBURPDataDir%/physical/Coast/IsLandMass_subdomain.tif";
+		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain.tif'";
 		attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 
 		unit<uint32> split_polygon := split_polygon(Geometry[LatLong_ip])

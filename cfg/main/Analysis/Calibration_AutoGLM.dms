@@ -15,6 +15,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
 		
 		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
@@ -28,28 +29,27 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<uint8>      NrOfLandslides_Earthquakes              := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[CompactedDomain/org_rel];
 		
 		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Rivers                         := Physical/Water/Rivers/Dist_River_km/GridData[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Lakes                          := Physical/Water/Lakes/Dist_Lake_km/GridData[CompactedDomain/org_rel];
+		attribute<float32>    Distance2AnyInlandWater                 := Physical/Water/AllWater/Dist_AllInland_km/GridData[CompactedDomain/org_rel];
+		attribute<float32>    Distance2LargeInlandWater               := Physical/Water/AllWater/Dist_LargeInland_km/GridData[CompactedDomain/org_rel];
 		attribute<float32>    Distance2MajorRoads                     := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
 		attribute<float32>    Distance2SecundaryRoads                 := Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
 		
-		attribute<float32>    Distance2Villages_GridBased             := Preprocessing/GridDists/AccessGrids_grid/villages/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Town_GridBased                 := Preprocessing/GridDists/AccessGrids_grid/towns/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Cities_GridBased               := Preprocessing/GridDists/AccessGrids_grid/cities/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Villages_NetworkBased          := Preprocessing/GridDists/AccessGrids_nw/villages/distancegrid[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Town_NetworkBased              := Preprocessing/GridDists/AccessGrids_nw/towns/distancegrid[CompactedDomain/org_rel];
-		attribute<float32>    Distance2Cities_NetworkBased            := Preprocessing/GridDists/AccessGrids_nw/cities/distancegrid[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Villages_GridBased             := Preprocessing/GridDists/AccessGrids_grid/villages/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Town_GridBased                 := Preprocessing/GridDists/AccessGrids_grid/towns/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Cities_GridBased               := Preprocessing/GridDists/AccessGrids_grid/cities/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Villages_NetworkBased          := Preprocessing/GridDists/AccessGrids_nw/villages/distancegrid[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Town_NetworkBased              := Preprocessing/GridDists/AccessGrids_nw/towns/distancegrid[CompactedDomain/org_rel];
+		//attribute<float32>    Distance2Cities_NetworkBased            := Preprocessing/GridDists/AccessGrids_nw/cities/distancegrid[CompactedDomain/org_rel];
 		  
 		
 		
 		// needs to be first of containers with template variables
 		container access_to_settlements   := for_each_nedv(Socioeconomic/access_to_settlements/gridslist/dist ? Socioeconomic/access_to_settlements/gridslist/label : '', 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
 		container griddist_to_settlements := for_each_nedv('gd_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_nw/'+Preprocessing/GridDists/access_variants/Label+'/distancegrid[CompactedDomain/org_rel])', CompactedDomain, uint32);
-		container gridcost_to_settlements := for_each_nedv('gc_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_nw/'+Preprocessing/GridDists/access_variants/Label+'/costsgrid[CompactedDomain/org_rel])', CompactedDomain, uint32);
+		container gridcost_to_settlements := for_each_nedv('gc_'+Preprocessing/GridDists/access_variants/Label, 'uint32(Preprocessing/GridDists/AccessGrids_grid/'+Preprocessing/GridDists/access_variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific[CompactedDomain/org_rel])', CompactedDomain, uint32);
 		container pots_pop_2000           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
 		container pots_pop_2020           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
 	}
-	
 	container Export_DataForCalibration 
 	{
 		unit<uint32> properties : nrofrows = 2 

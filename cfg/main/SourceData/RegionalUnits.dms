@@ -279,7 +279,7 @@ container RegionalUnits
 			'QAT',	'Qatar',	'Asia',
 			'REU',	'Réunion',	'Africa',
 			'ROU',	'Romania',	'Europe',
-			'RUS',	'Russia',	'Europe',
+			'RUS',	'Russia',	'Asia',   // Asia in 2UP, split into two in the networkmodel_world
 			'RWA',	'Rwanda',	'Africa',
 			'SAU',	'Saudi Arabia',	'Asia',
 			'SDN',	'Sudan',	'Africa',
@@ -314,7 +314,7 @@ container RegionalUnits
 			'TON',	'Tonga',	'Australia_Oceania',
 			'TTO',	'Trinidad and Tobago',	'South_America',
 			'TUN',	'Tunisia',	'Africa',
-			'TUR',	'Turkey',	'Europe',
+			'TUR',	'Turkey',	'Asia', //Asia in 2UP, Europe in networkmodel_world
 			'TUV',	'Tuvalu',	'Australia_Oceania',
 			'TWN',	'Taiwan',	'Asia',
 			'TZA',	'Tanzania',	'Africa',
