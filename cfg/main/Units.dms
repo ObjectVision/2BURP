@@ -1,15 +1,18 @@
 container Units
 {
-	unit<Float32> Meter          := BaseUnit('m', float32);
-	unit<Float32> km             := 1000.0 * Meter;
-	unit<float32> km2            := km * km;
-	unit<float32> m2             := Meter * Meter;
-	unit<Float32> year           := BaseUnit('Yr', float32);
-	unit<float32> Person         := BaseUnit('p', float32); //, cdf = "classifications/PopClass/ClassBreak";
-	unit<float32> MPerson        := 1000000.0 * Person;
-	unit<Float32> Person_km2     := Person / km2;
-	// unit<Float32> USD            := BaseUnit('USD', float32);
-	// unit<Float32> kUSDCapClass   := 1000.0 * USD, cdf = "classifications/GDP/GDPCapClass/ClassBreak";
-	// unit<float32> Suitability    : cdf = "classifications/Suitability/UrbSuitclass/ClassBreak";
-	// unit<float32> SuitabilityNeg : cdf = "classifications/Suitability/UrbSuitNegclass/ClassBreak";
+	unit<Float32> Meter                    := BaseUnit('m', float32);
+	unit<Float32> km                       := 1000.0 * Meter;
+	unit<float32> km2                      := km * km;
+	unit<float32> BuiltUpKm2               := BaseUnit('BuiltUpKm2', float32);
+	unit<float32> m2                       := Meter * Meter;
+	unit<Float32> year                     := BaseUnit('Yr', float32);
+	unit<Float32> decade                   := 10.0 * year;
+	unit<float32> Person                   := BaseUnit('p', float32); //, cdf = "classifications/PopClass/ClassBreak";
+	unit<float32> MPerson                  := 1000000.0 * Person;
+	unit<Float32> Person_km2               := Person / km2;
+	unit<Float32> Person_BuiltUpKm2        := Person / BuiltUpKm2;
+	unit<Float32> Person_km2_decade        := Person / km2 / decade;
+	unit<Float32> Person_BuiltUpKm2_decade := Person / BuiltUpKm2 / decade;
+	unit<float32> Suit;
+	unit<float32> SuitNeg;
 }

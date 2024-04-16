@@ -89,8 +89,10 @@ container RegionalUnits
 	, DialogType      = "map"
 	{
 		attribute<WorldMollweide> geometry (poly);
-		attribute<LatLong>        geometry_LL (poly) := convert(geometry, LatLong);
-		attribute<string>         Label              := name;
+		attribute<LatLong>        geometry_LL (poly)                    := convert(geometry, LatLong);
+		attribute<string>         Label                                 := name;
+		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
+		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 	}
 
 	unit<uint32> set_countries: nrofrows = 238 

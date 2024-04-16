@@ -50,10 +50,6 @@ container ExportSettings
 			container Parameters
 			{
 				parameter<string> StudyArea             := ModelParameters/StudyArea;
-				// parameter<string> Method                := ModelParameters/Method;
-				// parameter<string> Variant               := ModelParameters/Variant;
-				parameter<string> InPresentUrban        := ModelParameters/InPresentUrban;
-				parameter<string> Calibration           := ModelParameters/Calibration;
 			}
 		}
 	}

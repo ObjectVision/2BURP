@@ -9,10 +9,18 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			,'gdal.grid'
 		);
 
-	container PerYear := 
+	container PerYear_CorrectForNoData := 
 		for_each_nedv(
 			GHS_years/name
 			, 'Import_PerYear/'+GHS_years/name+' > 0d ? Import_PerYear/'+GHS_years/name+' : 0d'
+			, domain
+			, float64
+		);
+		
+	container PerYear := // Correct for population without no built-up area
+		for_each_nedv(
+			GHS_years/name
+			, 'Builtup/Total/'+GHS_years/name+' > 0[m2] ? PerYear_CorrectForNoData/'+GHS_years/name+' : 0d'
 			, domain
 			, float64
 		);

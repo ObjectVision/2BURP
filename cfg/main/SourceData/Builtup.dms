@@ -1,5 +1,14 @@
 container Builtup : using = "units;classifications;sourcedata/regionalunits"
 {
+	container Total_src :=
+		for_each_ndvat(
+			GHS_years/name
+			, domain
+			, m2
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			,'gdal.grid'
+		);
+		
 	container Total :=
 		for_each_ndvat(
 			GHS_years/name
@@ -24,4 +33,14 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			, m2
 		);
 	container Total_sums_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(Total/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/flat2)[m2]',  domain, m2);
+	
+	
+	//ad hoc
+	unit<uint32> histogram_builtup := unique(Builtup/Total/Y2020)
+	{
+		attribute<uint32> count := pcount(rlookup(Builtup/Total/Y2020, values)); 
+	}
+	
+	
+	
 }
