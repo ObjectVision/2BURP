@@ -187,8 +187,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			}
 			
 			attribute<Person>         Final_Population   (CompactedDomain) := Population_Allocation/Last/Population_rounded;
-			
-			// non-residential builtup eraf halen.
+			attribute<float32>        Final_ClaimRealisation (ClaimRegion) := sum(Final_Population + Reduced_Population, Region_rel) / Expected_Population;
 		}
 	}
 
