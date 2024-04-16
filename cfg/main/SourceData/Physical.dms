@@ -91,7 +91,7 @@ container Physical : using = "geography"
 			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater.tif'";
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 			
-			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/'+ModelParameters/StudyArea+'/Water/IsInlandWater_subdomain.tif'";
+			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain.tif'";
 			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		}
 
