@@ -14,8 +14,8 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		attribute<float32>    BUTOT_2020                              := SourceData/Builtup/Total/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
-		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
-		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
 		
 		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];

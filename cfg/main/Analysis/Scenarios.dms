@@ -27,10 +27,12 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	container Suitabilities : KeepData = "true"
 	{
 		unit<wpoint> AutoGLM_Coeffs             := Analysis/Calibration/ReadCoffecients/coef2domain/domain;
-
+		
 		attribute<Suit> Calc_BuiltUp (domain) := (Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/Ln_mean_8dir[float32]                             * AutoGLM_Coeffs/LnPopulationDensity_2000_8dir) + 
 																(Physical/Coast/Location2Coast_km/Coastline[float32]                                                         * AutoGLM_Coeffs/Distance2Coastline) + 
-																(Physical/Water/Sweet_Water/Sweet_Water_Distance[float32]                                                    * AutoGLM_Coeffs/Distance2FreshWater) + 
+																(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32]                                                    * AutoGLM_Coeffs/Distance2FreshWater) + 
+																// (Physical/Water/AllWater/Dist_AllInland_km/GridData[float32]                                                    * AutoGLM_Coeffs/Distance2AnyInlandWater) + 
+																// (Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32]                                                    * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32]                                       * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32]                                         * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
 																// (Preprocessing/GridDists/AccessGrids_grid/cities/costsgrid_untiled_maximp_latitude_specific[float32]         * AutoGLM_Coeffs/Distance2Cities_GridBased) + 
@@ -43,7 +45,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] * AutoGLM_Coeffs/NrOfLandslides_Precipitation) + 
 																(Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[float32]    * AutoGLM_Coeffs/NrOfLandslides_Earthquakes) + 
 																AutoGLM_Coeffs/Constant;
-		attribute<Suit> Write_BuiltUp (domain) := Calc_BuiltUp, StorageName = "%LocalDataProjDir%/Temp/Suitability.tif";
+		attribute<Suit> Write_BuiltUp (domain) := Calc_BuiltUp, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability.tif'";
 		attribute<Suit> BuiltUp       (domain) : StorageName = "=PropValue(Write_BuiltUp, 'StorageName')", StorageReadOnly = "true", LazyCalculated = "true";
 	}
 

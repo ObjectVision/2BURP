@@ -1,6 +1,6 @@
 container ModelParameters 
 {
-	parameter<string>  StudyArea               := 'Netherlands'; // World Netherlands Europe
+	parameter<string>  StudyArea               := 'Europe'; // World Netherlands Europe
 	
 	parameter<float64> MW_Gridsize             := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<string>  WGS_Gridsize            := '30ss'; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
