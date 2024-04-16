@@ -1,18 +1,24 @@
-container Preprocessing : using = "Geography;Units;SourceData;SourceData/RegionalUnits"
+container Preprocessing : using = "Geography;Units;SourceData;SourceData/RegionalUnits;Classifications"
 {
-	container Claims
-	{
-		#include <Claims_Read_Past.dms>
-		#include <Claims_Read_Scenario.dms>
-		#include <Preprocessing_Claims_Past.dms>
-		// #include <Preprocessing_Claims_Scenario.dms>
-	} 
+	container Claims_BuiltUp := 
+		for_each_nedv(
+			ProjectionYears/name
+			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)]'
+			, FunctionalAreas
+			, km2
+		);
 	
-	#include <HYDE.dms>
-	// #include <Suitability.dms>
+	container Claims_Population := 
+		for_each_nedv(
+			ProjectionYears/name
+			, '(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+'[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
+			, FunctionalAreas
+			, Person
+		);
+		
 	#include <GridDists.dms>
 	
-	container Population
+	container Population_Neighbourhoods
 	{
 		container Population_8dir_Y1990            := Create_8dir_T(SourceData/Population/PerYear/Y1990);
 		container Population_8dir_StartYear        := ='Create_8dir_T(SourceData/Population/PerYear/'+ModelParameters/StartYear+')';
