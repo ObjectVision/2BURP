@@ -109,26 +109,13 @@ container Geography : using = "units"
 			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
 			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree));
 		}
-
-		// unit<uint16> colset := range(uint16, pointcol(Lowerbound(domain)), pointcol(Upperbound(domain)))
-		// {
-			// attribute<LatLong> EquatorPoints := point_yx(const(0w, colset),ID(colset), domain)[LatLong];
-			// attribute<float64> long_top      := pointcol(EquatorPoints);
-			// attribute<float64> long_mid      := long_top  + 0.5 * pointcol(getprojectionfactor(domain)[LatLong]);
-		// }
 		
 		attribute<LatLong>        geometry      := id(.)[LatLong];
 		attribute<Mollweide_grid> mollweide_rel := convert(geometry, Mollweide_grid);
 		attribute<WebMercator_grid> webmercator_rel:= convert(geometry, WebMercator_grid);
 
 		parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
-		// attribute<rowset>  row          := pointrow(ID(.));
-		// attribute<colset>  col          := pointcol(ID(.));
-		// attribute<uint32>  rowcol       := uint32(row) * boundrange_c;
-		// attribute<uint32>  number       := (rowcol + uint32(col)) + 1;
 		attribute<Float32> lat_factor   := rowset/lat_factor[pointrow(ID(.))];
-		// attribute<Float64> lat          := rowset/lat_mid[row];
-		// attribute<Float64> long         := colset/long_mid[col_colset];
 		attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
 	}
 
@@ -180,14 +167,10 @@ container Geography : using = "units"
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
 		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
-		// attribute<domain/rowset>     row                   := domain/row[domain_rel];
 		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
 		attribute<km2>               area                  := domain/area[domain_rel];
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel   := Countries/per_grid[domain_rel];
-		// attribute<Continents>        Continent_rel := Continents/per_grid[domain_rel];
-		// attribute<World>             World_rel     := Countries/World_id_grid[domain_rel];
-		// attribute<LatLong>           geometry_not_as_feature := org_rel[LatLong];
 	}
 	
 	container Distmatrices

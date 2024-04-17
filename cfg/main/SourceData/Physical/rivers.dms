@@ -51,15 +51,5 @@ container Rivers
 	DialogData      = "LatLong"
 	{
 		attribute<km> GridData (domain);
-		// attribute<km> ReadData (domain):= MakeDefined(GridData,5[km]);
-		
-		// unit<uint32> Country := SourceData/RegionalUnits/Countries 
-		// {
-			// attribute<km>  sumReadData_org  := sum(ReadData,per_grid);
-			// attribute<km>  MeanReadData_org := mean(ReadData,per_grid);
-			// attribute<km>  MinReadData_org  := min(ReadData,per_grid);
-			// attribute<km>  MaxReadData_org  := max(ReadData,per_grid);
-			// attribute<km>  SDReadData_org   := sd(ReadData,per_grid);
-		// }
 	}
 }

@@ -10,6 +10,112 @@
 
 container Natural_Hazards
 {
-	#include <earthquake.dms>
-	#include <landslide.dms>
+	container Earthquake
+	{
+		unit<ipoint> Earthquakes_Modified_Mercalli_Intensity
+		: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif"
+		, StorageType     = "gdal.grid"
+		, Descr           = "Earthquakes Modified Mercalli Intensity by UNEP/DEWA/GRID-Europe for the Global Assessment Report on Risk Reduction (GAR)."
+								"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
+		, Source          = "Earthquakes Modified Mercalli Intensity by UNEP/DEWA/GRID-Europe for the Global Assessment Report on Risk Reduction (GAR)."
+								"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
+		, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht"
+		, StorageReadOnly = "True"
+		, DialogData      = "LatLong"
+		{
+			attribute<uint8> ReadData_org(domain);
+			attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);
+			attribute<bool> EQ_5 (domain): = (ReadData[uint32]==5 ? 1 :0)[bool];
+			attribute<bool> EQ_6 (domain): = (ReadData[uint32]==6 ? 1 :0)[bool];
+			attribute<bool> EQ_7 (domain): = (ReadData[uint32]==7 ? 1 :0)[bool];
+			attribute<bool> EQ_8 (domain): = (ReadData[uint32]==8 ? 1 :0)[bool];
+			attribute<bool> EQ_9 (domain): = (ReadData[uint32]==9 ? 1 :0)[bool];
+		}
+
+		unit<uint16> EQUAGEO
+			:  StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
+			,  StorageType     = "gdal.vect"
+			,  url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.txt"
+			,  StorageReadOnly = "True"
+			,  Source          = "",
+			DialogType         = "Map",
+			DialogData         = "Geometry"
+			{
+				attribute<LatLong> Geometry(polygon);
+			}
+
+		container Earthquake_Intensity_Zones 
+		{
+			attribute<EQUAGEO> EQUAGEO_grid (domain) := poly2grid(EQUAGEO/Geometry , domain);
+			attribute<uint16> Zone(domain)           := EQUAGEO/Zone[uint16][EQUAGEO_grid];
+
+			attribute<bool> EQUAGEO_0 (domain): = (Zone[uint32]==0 ? 1 :0)[bool];
+			attribute<bool> EQUAGEO_1 (domain): = (Zone[uint32]==1 ? 1 :0)[bool];
+			attribute<bool> EQUAGEO_2 (domain): = (Zone[uint32]==2 ? 1 :0)[bool];
+			attribute<bool> EQUAGEO_3 (domain): = (Zone[uint32]==3 ? 1 :0)[bool];
+			attribute<bool> EQUAGEO_4 (domain): = (Zone[uint32]==4 ? 1 :0)[bool];
+			attribute<bool> EQUAGEO_10 (domain): = (Zone[uint32]==10 ? 1 :0)[bool];
+		}
+	}	
+	
+	container Landslide
+	{
+		//expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000
+		unit<ipoint> Frequency_of_landslides_triggered_by_earthquakes
+		: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ls_eq.tif"
+		, StorageType     = "gdal.grid"
+		, Source          = "International Centre for Geohazards / NGI"
+		, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/Global Risk Data Platform_ls_eq.mht"
+		, StorageReadOnly = "True"
+		, DialogData      = "LatLong"
+		, Descr           = "This dataset includes an estimate of the annual frequency of landslide triggered by earthquakes. It depends on the combination of trigger and "
+							"susceptibility defined by six parameters: slope factor, lithological (or geological) conditions, soil moisture condition, vegetation cover, "
+							"precipitation and seismic conditions. Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000."
+		{
+			attribute<uint16> ReadData(domain);
+			attribute<bool> LS_EQ_Bool(domain)   := value(ReadData > 0w ? 1 : 0,bool);
+			attribute<bool> LS_EQ_Bool_5(domain) := value(ReadData > 5w ? 1 : 0,bool);
+			attribute<uint8> LS_EQ_uint8(domain)   := LS_EQ_Bool ? 1b: 0b;
+			attribute<bool> LS_0_ (domain):     = (ReadData[uint32]==0 ? 1 :0)[bool];
+			attribute<bool> LS_5_ (domain):     = (ReadData[uint32]==5 ? 1 :0)[bool];
+			attribute<bool> LS_15_ (domain):    = (ReadData[uint32]==15 ? 1 :0)[bool];
+			attribute<bool> LS_50_ (domain):    = (ReadData[uint32]==50 ? 1 :0)[bool];
+			attribute<bool> LS_210_ (domain):   = (ReadData[uint32]==210 ? 1 :0)[bool];
+			attribute<bool> LS_900_ (domain):   = (ReadData[uint32]==900 ? 1 :0)[bool];
+			attribute<bool> LS_3600_ (domain):  = (ReadData[uint32]==3600 ? 1 :0)[bool];
+			attribute<bool> LS_15000_ (domain): = (ReadData[uint32]==15000 ? 1 :0)[bool];
+		}
+
+		//Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000.
+		unit<ipoint> Frequency_of_landslides_triggered_by_precipitations
+		: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ls_pr.tif"
+		, StorageType     = "gdal.grid"
+		, Source          = "International Centre for Geohazards / NGI"
+		, url             = "%ToBURPDataDir%/physical/Landslide/Frequency_of_landslides_triggered_by_precipitations/Natural_Hazards/Global Risk Data Platform_ls_pr.mht"
+		, StorageReadOnly = "True"
+		, DialogData      = "LatLong"
+		, Descr           = "This dataset includes an estimate of the annual frequency of landslide triggered by precipitations. It depends on the combination of trigger and "
+							"susceptibility defined by six parameters: slope factor, lithological (or geological) conditions, soil moisture condition, vegetation cover, "
+							"precipitation and seismic conditions. Unit is expected annual probability and percentage of pixel of occurrence of a potentially destructive landslide event x 1000000."
+			{
+				attribute<uint16> ReadData(domain);
+				attribute<bool> LS_PR_Bool(domain)   := value(ReadData > 0w ? 1 : 0,bool);
+				attribute<bool> LS_PR_Bool_5(domain) := value(ReadData > 5w ? 1 : 0,bool);
+				attribute<uint8> LS_pr_uint8(domain)   := LS_pr_Bool ? 1b: 0b;
+				attribute<bool> LS_0_ (domain):     = (ReadData[uint32]==0 ? 1 :0)[bool];
+				attribute<bool> LS_5_ (domain):     = (ReadData[uint32]==5 ? 1 :0)[bool];
+				attribute<bool> LS_15_ (domain):    = (ReadData[uint32]==15 ? 1 :0)[bool];
+				attribute<bool> LS_50_ (domain):    = (ReadData[uint32]==50 ? 1 :0)[bool];
+				attribute<bool> LS_210_ (domain):   = (ReadData[uint32]==210 ? 1 :0)[bool];
+				attribute<bool> LS_900_ (domain):   = (ReadData[uint32]==900 ? 1 :0)[bool];
+				attribute<bool> LS_3600_ (domain):  = (ReadData[uint32]==3600 ? 1 :0)[bool];
+				attribute<bool> LS_15000_ (domain): = (ReadData[uint32]==15000 ? 1 :0)[bool];
+			}
+
+		attribute<bool> LS_bool (domain)  := Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_Bool || Frequency_of_landslides_triggered_by_precipitations/LS_PR_Bool;
+		attribute<bool> LS_b5 (domain)    := Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_Bool_5 || Frequency_of_landslides_triggered_by_precipitations/LS_PR_Bool_5;
+
+		attribute<bool> LS_b5_0_ (domain):= (LS_b5[float32] == 0f ? 1f : 0f)[bool];
+		attribute<bool> LS_b5_1_ (domain):= (LS_b5[float32] == 1f ? 1f : 0f)[bool];
+	}
 }

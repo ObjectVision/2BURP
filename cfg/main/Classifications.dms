@@ -1,11 +1,5 @@
 container Classifications : using = "units"
 {
-	// unit<uint8> PopulationSrcYears : nrofrows = 4
-	// {
-		// attribute<Year>   Yr   : [1975, 1990, 2000, 2015];
-		// attribute<string> name := 'Y'+string(Yr);
-	// }
-	
 	unit<uint8>  GHS_years  : nrofrows = 10 
 	{
 		attribute<uint16> year: [ 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]; 
@@ -25,23 +19,6 @@ container Classifications : using = "units"
 		attribute<string> PrevPopName := MakeDefined(name[sub_or_null(ID(.),1)]+'/NextPop', 'CurrState/Pop');
 	}
 
-	// unit<uint8> SSP: nrofrows = 5
-	// {
-		// attribute<uint8>   id    :=id(.);
-		// attribute<string>  Name  : ['SSP1','SSP2', 'SSP3', 'SSP4', 'SSP5'];
-		// attribute<string>  Label := Name;
-
-		// container V := for_each_nedv(Name, 'value('+string(ID(.))+',..)', void, .);
-	// }
-	
-	// unit<uint8> SSP_Past : nrofrows = 1
-	// {
-		// attribute<string>  Name: ['SSPPast'];
-		// attribute<string>  Label := Name;
-
-		// container V := for_each_nedv(Name, 'value('+string(ID(.))+',..)', void, .);
-	// }	
-	
 	unit<uint8> ProjectionYears : nrofrows = 8
 	{
 		attribute<Year>   Yr             : [2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100];
@@ -50,18 +27,4 @@ container Classifications : using = "units"
 		attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
 		attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
-
-	unit<uint8> ProjectionYears_Past : nrofrows = 3
-	{
-		attribute<Year>   Yr            : [ 1980, 2000, 2020];
-		attribute<string> name          := 'Y'+string(Yr);
-		attribute<string> prevStateName := MakeDefined(name[sub_or_null(ID(.),1b)]+'/NewState', 'InitialState');
-	}
-	
-	#include <classification_prc.dms>
-	#include <classification_urban_discrete.dms>
-	#include <classification_urb.dms>
-	#include <classification_GHS_SMOD_export.dms>
-	#include <classification_PopClass.dms>
-	#include <classification_suitability.dms>
 }

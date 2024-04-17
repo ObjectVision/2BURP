@@ -48,16 +48,5 @@ container Lakes
 	,	DialogData      = "LatLong"
 	{
 		attribute<km> GridData (domain);
-		// attribute<km> ReadData (domain) := MakeDefined(GridData,250[km]);
-		// attribute<km> Lake     (domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
-		
-		// unit<uint32> Country := RegionalUnits/Countries 
-		// {
-			// attribute<float32>  sumLake  := sum(Lake,per_grid);
-			// attribute<float32>  MeanLake := mean(Lake,per_grid);
-			// attribute<float32>  MinLake  := min(Lake,per_grid);
-			// attribute<float32>  MaxLake  := max(Lake,per_grid);
-			// attribute<float32>  SDLake   := sd(Lake,per_grid);
-		// }
 	}
 }

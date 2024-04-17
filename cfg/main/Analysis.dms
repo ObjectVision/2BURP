@@ -1,6 +1,6 @@
 container Analysis: using = "units;geography"
 {
 	#include <Calibration_AutoGLM.dms>
-	#include <Scenarios.dms>              //Main core of the model to calculate indicators of SSP-scenarios
-	#include <Scenarios_Past.dms>         //Main core of the model to calculate indicators of Past (Validation)
+	#include <Future.dms>
+	#include <Validation.dms>
 }

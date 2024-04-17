@@ -1,18 +1,4 @@
 container Postprocessing
 {
-	// container Scenarios
-	// {
-		// #include <ReadResults.dms>              //reading in detached result files
-		// #include <ReadResultsPerCountry.dms>    //reading in detached result files per country
-		// #include <CreateResultsPerCountry.dms>  //writing results per country from detached result files (world)
-	// }
-	
-	// container Past
-	// {
-		// #include <ReadResultsPast.dms>
-		// #include <ReadResultsPastPerCountry.dms>
-		// #include <CreateResultsPastPerCountry.dms>
-	// }
-	
 	#include <Validation.dms>
 }
