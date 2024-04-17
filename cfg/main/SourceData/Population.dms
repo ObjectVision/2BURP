@@ -8,6 +8,12 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			, '%ToBURPDataDir%/Population/GHS_POP_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
 			,'gdal.grid'
 		);
+		
+	//adhoc
+	unit<uint32> histogram_population := unique(int32(Import_PerYear/Y2020))
+	{
+		attribute<uint32> count := pcount(rlookup(int32(Import_PerYear/Y2020), values)); 
+	}
 
 	container PerYear_CorrectForNoData := 
 		for_each_nedv(
@@ -23,7 +29,15 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			, 'Builtup/Total/'+GHS_years/name+' > 0[m2] ? PerYear_CorrectForNoData/'+GHS_years/name+' : 0d'
 			, domain
 			, float64
-		);
+		)
+	{
+		//adhoc
+		attribute<bool> NoBuiltUp_butPopulation (domain) := BuiltUp/Total/Y2020 == 0[m2] && PerYear_CorrectForNoData/Y2020 > 0d;
+		attribute<bool> BuiltUp_wihtPopulation (domain) := BuiltUp/Total/Y2020 > 0[m2] && PerYear_CorrectForNoData/Y2020 > 0d;
+		
+		parameter<float32> Pop_with_no_BU  := sum(float32(NoBuiltUp_butPopulation) * float32(PerYear_CorrectForNoData/Y2020));
+		
+	}
 		
 	container Pots_lin_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/RelWeight_ns)',  domain, float32);
 	container Pots_sqr_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/RelWeightSqrt_ns)',  domain, float32);

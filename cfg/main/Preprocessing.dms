@@ -3,9 +3,9 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	container Claims_BuiltUp := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)]'
+			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
 			, FunctionalAreas
-			, km2
+			, BuiltUpKm2
 		);
 	
 	container Claims_Population := 
