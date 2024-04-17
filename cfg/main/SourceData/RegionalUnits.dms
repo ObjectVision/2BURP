@@ -14,7 +14,7 @@ container RegionalUnits
 		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
 	}
 	
-	unit<uint32> GADM 
+/*	unit<uint32> GADM 
 	: StorageName = "%ToBURPDataDir%/Regions/gadm_410.gpkg"
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
@@ -25,7 +25,7 @@ container RegionalUnits
 		attribute<Continents>  store_continents_rel     := rlookup(AsItemName(continent_name), Continents/name);
 		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);
 		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/ISO3);
-	}
+	}*/
 	
 	unit<uint32> store_Countries := set_countries
 	, storagename = "%ToBURPDataDir%/Regions/fss/Countries.fss"
