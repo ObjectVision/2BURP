@@ -10,6 +10,19 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<float32>           BuiltUp_Total_Share_domain              (domain) := BuiltUp_Total_Area_domain / domain/area * 1[km2] / 1[BuiltUpKm2];
 		attribute<Person>            Population_domain                       (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		attribute<Person_BuiltUpKm2> Population_inRes_Density_domain         (domain) := Population_domain / BuiltUp_Residential_Area_domain; // DO NOT USE!
+		attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc_domain   (domain) := min_elem(Population_inRes_Density_domain, maxmax_saturation);
+		attribute<Person>            Population_Trunc_domain                 (domain) := Population_inRes_Density_Trunc_domain * BuiltUp_Residential_Area_domain; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+		
+		attribute<BuiltUpKm2>        BuiltUp_Total_Area             (CompactedDomain) := BuiltUp_Total_Area_domain[CompactedDomain/org_rel]; 
+		attribute<BuiltUpKm2>        BuiltUp_Residential_Area       (CompactedDomain) := BuiltUp_Residential_Area_domain[CompactedDomain/org_rel]; 
+		attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area    (CompactedDomain) := BuiltUp_NonResidential_Area_domain[CompactedDomain/org_rel]; 
+		attribute<float32>           Builtup_Total_Share            (CompactedDomain) := BuiltUp_Total_Share_domain[CompactedDomain/org_rel];
+		attribute<Person>            Population                     (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
+		attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := Population / BuiltUp_Residential_Area; // DO NOT USE!
+		attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc (CompactedDomain) := min_elem(Population_inRes_Density, maxmax_saturation);
+		attribute<Person>            Population_Trunc               (CompactedDomain) := Population_inRes_Density_Trunc * BuiltUp_Residential_Area; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+		
+		parameter<Person_BuiltUpKm2> maxmax_saturation                                := 1000000[Person_BuiltUpKm2];
 		
 		//adhoc
 		attribute<Person_BuiltUpKm2> Population_inBU_Density_domain          (domain) := Population_domain / BuiltUp_Total_Area_domain; // DO NOT USE!
@@ -21,18 +34,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		{
 			attribute<uint32> count := pcount(rlookup(int32(Population_inBU_Density_domain), values)); 
 		}
-		
-		attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc_domain   (domain) := min_elem(Population_inRes_Density_domain, maxmax_saturation);
-		attribute<BuiltUpKm2>        BuiltUp_Total_Area             (CompactedDomain) := BuiltUp_Total_Area_domain[CompactedDomain/org_rel]; 
-		attribute<BuiltUpKm2>        BuiltUp_Residential_Area       (CompactedDomain) := BuiltUp_Residential_Area_domain[CompactedDomain/org_rel]; 
-		attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area    (CompactedDomain) := BuiltUp_NonResidential_Area_domain[CompactedDomain/org_rel]; 
-		attribute<float32>           Builtup_Total_Share            (CompactedDomain) := BuiltUp_Total_Share_domain[CompactedDomain/org_rel];
-		attribute<Person>            Population                     (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
-		attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := Population / BuiltUp_Residential_Area; // DO NOT USE!
-		attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc (CompactedDomain) := min_elem(Population_inRes_Density, maxmax_saturation);
-		attribute<Person>            Population_Trunc               (CompactedDomain) := Population_inRes_Density_Trunc * BuiltUp_Residential_Area; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
-		
-		parameter<Person_BuiltUpKm2> maxmax_saturation                                := 1000000[Person_BuiltUpKm2];
 	}
 
 	container Suitabilities : KeepData = "true"
@@ -163,7 +164,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Person>            Reduced_Population                    (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
 			
 			//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
-			attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density (CompactedDomain) := mean(CurrState/Population_inRes_Density_Trunc_domain[LocalMaxima/domain_x_pot/third_rel], LocalMaxima/domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
+			attribute<Person>            Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population_Trunc_domain[LocalMaxima/domain_x_pot/third_rel], LocalMaxima/domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
+			attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(CurrState/BuiltUp_Residential_Area_domain[LocalMaxima/domain_x_pot/third_rel], LocalMaxima/domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
+			attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density     (CompactedDomain) := Avg_Local_Population_inRes_Density_Num / Avg_Local_Population_inRes_Density_Den; 
 			attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 			
 			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area; 
