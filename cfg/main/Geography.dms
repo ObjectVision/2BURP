@@ -177,16 +177,17 @@ container Geography : using = "units"
 	{
 		container Impl
 		{
-			container pot1km  :=Templates/potrange_T(value(1, km), value(  1, km));
-			container pot2km  :=Templates/potrange_T(value(1, km), value(  2, km));
-			container pot3km  :=Templates/potrange_T(value(1, km), value(  3, km));
-			container pot5km  :=Templates/potrange_T(value(1, km), value(  5, km));
-			container pot10km :=Templates/potrange_T(value(1, km), value(10, km));
-			container pot15km :=Templates/potrange_T(value(1, km), value(15, km));
-			container pot20km :=Templates/potrange_T(value(1, km), value(20, km));
-			container pot25km :=Templates/potrange_T(value(1, km), value(25, km));
-			container pot40km :=Templates/potrange_T(value(1, km), value(40, km));
-			container pot50km :=Templates/potrange_T(value(1, km), value(50, km));
+			container pot1km   :=Templates/potrange_T(value(1, km), value(  1, km));
+			container pot2km   :=Templates/potrange_T(value(1, km), value(  2, km));
+			container pot3km   :=Templates/potrange_T(value(1, km), value(  3, km));
+			container pot5km   :=Templates/potrange_T(value(1, km), value(  5, km));
+			container pot10km  :=Templates/potrange_T(value(1, km), value(10, km));
+			container pot15km  :=Templates/potrange_T(value(1, km), value(15, km));
+			container pot20km  :=Templates/potrange_T(value(1, km), value(20, km));
+			container pot25km  :=Templates/potrange_T(value(1, km), value(25, km));
+			container pot40km  :=Templates/potrange_T(value(1, km), value(40, km));
+			container pot50km  :=Templates/potrange_T(value(1, km), value(50, km));
+			container pot250km :=Templates/potrange_T(value(1, km), value(250,km));
 		}
 		unit<spoint> pot1km  :=Impl/pot1km/PotRange;
 		unit<spoint> pot2km  :=Impl/pot2km/PotRange;
@@ -198,6 +199,7 @@ container Geography : using = "units"
 		unit<spoint> pot25km :=Impl/pot25km/PotRange;
 		unit<spoint> pot40km :=Impl/pot40km/PotRange;
 		unit<spoint> pot50km :=Impl/pot50km/PotRange;
+		unit<spoint> pot250km:=Impl/pot250km/PotRange;
 	}
 	
 	#include <wms_layer_latlong.dms>
