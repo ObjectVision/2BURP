@@ -8,10 +8,13 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 	unit <uint32> Create_DataForCalibration := CompactedDomain
 	{
 		attribute<Countries>  Country_id                              := Countries/per_grid[CompactedDomain/org_rel];
+		attribute<float32>	  latitude_factor						  := lat_factor;
 		attribute<float32>    BU_RES_2000                             := SourceData/Builtup/Residential/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BU_RES_2020                             := SourceData/Builtup/Residential/Y2020[CompactedDomain/org_rel];
 		attribute<float32>    BUTOT_2000                              := SourceData/Builtup/Total/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BUTOT_2020                              := SourceData/Builtup/Total/Y2020[CompactedDomain/org_rel];
+		attribute<float32>	  BUPERCTOT_2000						  := makedefined(BUTOT_2000 / latitude_factor, 0f);
+		attribute<float32>	  BUPERCTOT_2020						  := makedefined(BUTOT_2020 / latitude_factor, 0f);
 		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
