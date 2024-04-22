@@ -1,4 +1,5 @@
-Container DegreeOfUrbanisation : using = "Geography;SourceData;" 
+Container DegreeOfUrbanisation : using = "Geography;SourceData;"
+, URL = "https://ghsl.jrc.ec.europa.eu/degurbaDefinitions.php"
 {
 	attribute<km2>               Land_Area                        (domain) := domain/area;
 	attribute<BuiltUpKm2>        BuiltUp_Total_Area               (domain) := ='SourceData/BuiltUp/Total/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
@@ -17,7 +18,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 			parameter<Person_km2>        Min_Density                   := 1500[Person_km2];
 			parameter<Person>            Min_Total_Pop                 := 50000[Person];
 			parameter<float32>           Min_Additional_BU_Share       := 0.5f;
-			parameter<float32>           Max_LakeFill_Area             := 15[km2];
+			parameter<float32>           Max_GapFill_Area              := 15[km2];
 		}
 		container Dense_Urban_Cluster
 		{
@@ -92,8 +93,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>    IsGap                                             := NOT(first(IsLargeEnoughGroup, GroupDomain_rel));
 		}
 		
-		//  NOW STILL CONTAINS SETTLEMENTS THAT NOT TRUE LAKES
-		attribute<bool>        ToBeAdded_DueToGapFilling                (domain) := GapFilling/GroupArea[GapFilling/GroupDomain_rel] < Parameters/Max_LakeFill_Area;
+		attribute<bool>        ToBeAdded_DueToGapFilling                (domain) := GapFilling/GroupArea[GapFilling/GroupDomain_rel] < Parameters/Max_GapFill_Area;
 		
 		attribute<bool>        Result                                   (domain) := IsLargeEnoughGroup || ToBeAdded_DueToMedianFiltering || ToBeAdded_DueToGapFilling;
 		attribute<TypologyK>   Typology                                 (domain) := Result ? TypologyK/v/urban_centre : null_b;
