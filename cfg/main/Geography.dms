@@ -104,10 +104,11 @@ container Geography : using = "units"
 	{
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
-			attribute<float64> lat_top    := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
-			attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
-			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree));
+			attribute<float64> lat_top         := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
+			attribute<float64> lat_mid         := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
+			attribute<Float32> lat_factor      := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			parameter<km2>     Equatorial_Area := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
+			attribute<km2>     area            := lat_factor * Equatorial_Area;
 		}
 		
 		attribute<LatLong>        geometry      := id(.)[LatLong];
