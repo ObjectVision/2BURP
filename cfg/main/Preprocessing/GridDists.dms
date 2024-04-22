@@ -19,7 +19,8 @@ Container GridDists: using = "Geography;SourceData;" {
 			attribute<uint32> L_30min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
 			attribute<uint32> L_60min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
 			attribute<float32> pop:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
-			attribute<uint32> gridcount:= pcount(grid/as_id);
+			attribute<uint32> gridcount:= pcount(NodeSet/sett_id);
+			attribute<bool>	  in_continent:= point_in_polygon(centroid_or_mid(Geometry), LatLong/geometry);
 		}
 		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) {
 			attribute<LatLong> Geometry (poly):= org_rel->geometry;
@@ -62,6 +63,7 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<float32>	Impedance_abstract:= MakeDefined(Roughness^2f, 10f) + (10f * InWater[float32]);
 		attribute<float32>	Impedance:= grid/impedance_all[Nr_OrgEntity];
 		attribute<float32>  EastWest_correction:= domain/lat_factor[Nr_OrgEntity];
+		attribute<load_settlements/all_settlements> sett_id:= point_in_polygon(Geometry, load_settlements/all_settlements/Geometry);
 		//attribute<bool>		N:= 
 	}
 	
@@ -88,7 +90,7 @@ Container GridDists: using = "Geography;SourceData;" {
 		
 		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
 		
-		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0)' {
+		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0 && SelectedSettlements/in_continent)' {
 			attribute<LatLong> Geometry (poly):= SelectedSettlements/Geometry[Nr_OrgEntity];
 		}
 		attribute<FilteredSettlements> fs_rel (grid):= poly2grid(FilteredSettlements/Geometry, grid);
