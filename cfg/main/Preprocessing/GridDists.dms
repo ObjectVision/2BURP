@@ -10,21 +10,47 @@ Container GridDists: using = "Geography;SourceData;" {
 	
 	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa', 'Asia', 'Australia_Oceania', 'Europe', 'North_America', 'South_America'];}
 	
-	container load_settlements:= for_each_ne(settlements/label, 'T_loadpolyfile('+quote(sett_folder+settlements/label)+')') {
-		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' {
-			attribute<LatLong> Geometry (poly):= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
-			attribute<string> Label:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/Label')+')';
-			attribute<uint32> type:= switch(case(strcount(Label, 'sdt') > 0, 22), case(strcount(Label, 'town') > 0, 23), case(strcount(Label, 'city') > 0, 30), 13);
-			attribute<uint32> L_15min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_15min')+')';
-			attribute<uint32> L_30min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
-			attribute<uint32> L_60min:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
-			attribute<float32> pop:= ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
-			attribute<uint32> gridcount:= pcount(grid/as_id);
+	container load_settlements:= for_each_ne(settlements/label, 'T_loadpolyfile('+quote(sett_folder+settlements/label)+')') 
+	{
+		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' 
+		{
+			attribute<LatLong> Geometry_org     (poly) := ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
+			attribute<LatLong> Geometry_cleaned (poly) := FindCoordinateConversionErros/GeometriesThatContainErrors/Geometry_cleaned[invert(FindCoordinateConversionErros/GeometriesThatContainErrors/org_rel)];
+			attribute<LatLong> Geometry         (poly) := FindCoordinateConversionErros/FindSeperators/ContainsSepValues ? Geometry_cleaned : Geometry_org;
+			
+			container FindCoordinateConversionErros
+			{
+				unit<uint32> FindSeperators := split_multi_linestring(Geometry_org)
+				{ 
+					attribute<uint32>  pcount            (all_settlements) := pcount(org_rel);
+					attribute<bool>    ContainsSepValues (all_settlements) := pcount > 1;
+				}
+				
+				unit<uint32> GeometriesThatContainErrors := select_with_org_rel(FindSeperators/ContainsSepValues)
+				{
+					attribute<LatLong> Geometry          (poly) := Geometry_org[org_rel];
+					attribute<string>  label                    := org_rel -> label; 
+					attribute<LatLong> Geometry_cleaned  (poly) := points2polygon_ps(OmitUndefinedCoordinates/point, OmitUndefinedCoordinates/sequence_rel);
+					unit<uint32>       Seq2Points               := sequence2points(Geometry);
+					unit<uint32>       OmitUndefinedCoordinates := select_with_attr_by_cond(Seq2Points, IsDefined(Seq2Points/point));
+				}
+			}
+			
+			
+			attribute<string>  Label               := ='union_data(.,'+asitemlist(settlements/label+'/inFile/Label')+')';
+			attribute<uint32>  type            := switch(case(strcount(Label, 'sdt') > 0, 22), case(strcount(Label, 'town') > 0, 23), case(strcount(Label, 'city') > 0, 30), 13);
+			attribute<uint32>  L_15min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_15min')+')';
+			attribute<uint32>  L_30min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
+			attribute<uint32>  L_60min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
+			attribute<float32> pop             := ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
+			attribute<uint32>  gridcount       := pcount(grid/as_id);
 		}
-		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) {
-			attribute<LatLong> Geometry (poly):= org_rel->geometry;
-			attribute<uint32> type:= org_rel->type;
-			attribute<float32>pop:= org_rel->pop;
+		
+		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) 
+		{
+			attribute<LatLong> Geometry (poly) := org_rel -> geometry;
+			attribute<uint32>  type            := org_rel -> type;
+			attribute<float32> pop             := org_rel -> pop;
 		}
 	}
 	
@@ -152,10 +178,12 @@ Container GridDists: using = "Geography;SourceData;" {
 	}
 	
 	
-	Template T_loadpointfile {
+	Template T_loadpointfile 
+	{
 		parameter<string> inpath;
 		
-		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" {
+		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" 
+		{
 			attribute<LatLong> Geometry;
 			attribute<string>  label;
 			attribute<uint32>  L_15min;
@@ -163,10 +191,12 @@ Container GridDists: using = "Geography;SourceData;" {
 			attribute<uint32>  L_60min;
 		}
 	}
-	Template T_loadpolyfile {
+	Template T_loadpolyfile 
+	{
 		parameter<string> inpath;
 		
-		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" {
+		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" 
+		{
 			attribute<LatLong> Geometry (poly);
 			attribute<string>  label;
 			attribute<uint32>  L_15min;
