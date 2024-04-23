@@ -88,7 +88,7 @@ container Physical : using = "geography"
 		,  StorageReadOnly  = "True"
 		{
 			attribute<LatLong>           Geometry(poly);
-			attribute<m2>				 Area:= area(Geometry[WorldMollweide], float64)[m2];
+			attribute<m2>                Area                    := area(Geometry[WorldMollweide], float64)[m2];
 			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater.tif'";
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 			

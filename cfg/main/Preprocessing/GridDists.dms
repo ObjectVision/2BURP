@@ -54,14 +54,15 @@ Container GridDists: using = "Geography;SourceData;" {
 		}
 	}
 	
-	unit<wpoint> grid:= Geography/domain {
-		attribute<float32> 	Roughness:= Physical/TerrainRoughnessIndex/mean;
-		attribute<float32> 	InWater:= Physical/Water/AllWater/Fraction_Water[float32] / 100f;
-		attribute<float32>	Impedance:= Roughness^2f + (10f * InWater[float32]);
-		attribute<NodeSet>  NodeSet_rel:= invert(NodeSet/Nr_OrgEntity);
-		attribute<float32>  elevation:= Physical/Elevation/Elevation[float32];
-		attribute<float32>  slope:= Physical/Slope_2021/ReadData;
-		attribute<float32>	gradient:= slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
+	unit<wpoint> grid := Geography/domain 
+	{
+		attribute<float32> 	Roughness   := Physical/TerrainRoughnessIndex/mean;
+		attribute<float32> 	InWater     := Physical/Water/AllWater/Fraction_Water[float32] / 100f;
+		attribute<float32>	Impedance   := Roughness^2f + (10f * InWater[float32]);
+		attribute<NodeSet>  NodeSet_rel := invert(NodeSet/org_rel);
+		attribute<float32>  elevation   := Physical/Elevation/Elevation[float32];
+		attribute<float32>  slope       := Physical/Slope_2021/ReadData;
+		attribute<float32>	gradient    := slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
 		attribute<load_settlements/all_settlements> as_id:= poly2grid(load_settlements/all_settlements/Geometry, .);
 		
 		attribute<NodeSet> N                   (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint)];
@@ -69,31 +70,31 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<NodeSet> E                   (domain) := NodeSet_rel[(id(.)) + point(0w, 1w, wpoint)];
 		attribute<NodeSet> SE                  (domain) := NodeSet_rel[(id(.)) + point(1w, 1w, wpoint)];
 				
-		unit<uint32> all_Ns:= subset(isdefined(NodeSet_rel) && isdefined(N)) {attribute<NodeSet> F2:= grid/N[Nr_OrgEntity]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= L;}
-		unit<uint32> all_NEs:= subset(isdefined(NodeSet_rel) && isdefined(NE)) {attribute<NodeSet> F2:= grid/NE[Nr_OrgEntity]; attribute<float32> L:= const(1.414213562f,.,float32); attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[Nr_OrgEntity]]) / 4f;} // square root of 2 (given 1km grids)
-		unit<uint32> all_Es:= subset(isdefined(NodeSet_rel) && isdefined(E)) {attribute<NodeSet> F2:= grid/E[Nr_OrgEntity]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= NodeSet/EastWest_correction[F2];}
-		unit<uint32> all_SEs:= subset(isdefined(NodeSet_rel) && isdefined(SE)) {attribute<NodeSet> F2:= grid/SE[Nr_OrgEntity]; attribute<float32> L:= const(1.414213562f,.,float32);attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[Nr_OrgEntity]]) / 4f;} // square root of 2 (given 1km grids)}
+		unit<uint32> all_Ns  := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(N)) {attribute<NodeSet> F2:= grid/N[org_rel]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= L;}
+		unit<uint32> all_NEs := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(NE)) {attribute<NodeSet> F2:= grid/NE[org_rel]; attribute<float32> L:= const(1.414213562f,.,float32); attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[org_rel]]) / 4f;} // square root of 2 (given 1km grids)
+		unit<uint32> all_Es  := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(E)) {attribute<NodeSet> F2:= grid/E[org_rel]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= NodeSet/EastWest_correction[F2];}
+		unit<uint32> all_SEs := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(SE)) {attribute<NodeSet> F2:= grid/SE[org_rel]; attribute<float32> L:= const(1.414213562f,.,float32);attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[org_rel]]) / 4f;} // square root of 2 (given 1km grids)}
 		
 		attribute<float32> impedance_elev:= =travel_factors/elev;
 		attribute<float32> impedance_slope:= =travel_factors/slope;
 		attribute<float32> impedance_water:= =travel_factors/water;
 		attribute<float32> impedance_all:= impedance_elev * impedance_slope * impedance_water;
-		
 	}
-		
-	unit<uint32> NodeSet:= subset(GridData/InRegion) {
-		attribute<LatLong>  Geometry:= Nr_OrgEntity[LatLong];
-		attribute<float32> 	Roughness:= grid/Roughness[Nr_OrgEntity];
-		attribute<bool>		InWater:= grid/Inwater[Nr_OrgEntity];
+	
+	unit<uint32> NodeSet := select_with_org_rel(GridData/InRegion) 
+	{
+		attribute<LatLong>  Geometry := org_rel[LatLong];
+		attribute<float32> 	Roughness:= grid/Roughness[org_rel];
+		attribute<bool>		InWater:= grid/Inwater[org_rel];
 		attribute<float32>	Impedance_abstract:= MakeDefined(Roughness^2f, 10f) + (10f * InWater[float32]);
-		attribute<float32>	Impedance:= grid/impedance_all[Nr_OrgEntity];
-		attribute<float32>  EastWest_correction:= domain/lat_factor[Nr_OrgEntity];
+		attribute<float32>	Impedance:= grid/impedance_all[org_rel];
+		attribute<float32>  EastWest_correction:= domain/lat_factor[org_rel];
 		attribute<load_settlements/all_settlements> sett_id:= point_in_polygon(Geometry, load_settlements/all_settlements/Geometry);
 		//attribute<bool>		N:= 
 	}
 	
 	unit<uint32> Network:= union_unit(grid/all_Ns, grid/all_NEs, grid/all_Es, grid/all_SEs) {
-		attribute<NodeSet> F1:= union_data(., grid/NodeSet_rel[grid/all_Ns/Nr_OrgEntity], grid/NodeSet_rel[grid/all_NEs/Nr_OrgEntity], grid/NodeSet_rel[grid/all_Es/Nr_OrgEntity], grid/NodeSet_rel[grid/all_SEs/Nr_OrgEntity]);
+		attribute<NodeSet> F1:= union_data(., grid/NodeSet_rel[grid/all_Ns/org_rel], grid/NodeSet_rel[grid/all_NEs/org_rel], grid/NodeSet_rel[grid/all_Es/org_rel], grid/NodeSet_rel[grid/all_SEs/org_rel]);
 		attribute<NodeSet> F2:= union_data(., grid/all_Ns/F2, grid/all_NEs/F2, grid/all_Es/F2, grid/all_SEs/F2);
 		attribute<float32> Length:= union_data(.,  grid/all_Ns/L, grid/all_NEs/L, grid/all_Es/L, grid/all_SEs/L);
 		attribute<float32> LatLon_corr:= union_data(.,  grid/all_Ns/LatLon_corr, grid/all_NEs/LatLon_corr, grid/all_Es/LatLon_corr, grid/all_SEs/LatLon_corr);
