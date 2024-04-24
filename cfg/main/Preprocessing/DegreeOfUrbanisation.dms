@@ -271,14 +271,14 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 	
 	attribute<TypologyK>       Typology                                 (domain) := ='switch('+AsList('case('+TypologyK/name+'/Result, TypologyK/v/'+TypologyK/name+')', ',')+', null_b)';
 
-
 	unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
 	{	
-		attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel -> org_rel);
+		attribute<ipoint> third_rel_i  := ipoint(first_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain> third_rel    := PointRow(third_rel_i) >= 0i && PointCol(third_rel_i) >= 0i ? wpoint(third_rel_i) : null_wp;
 	}
 	unit<uint32> domain_x_pot3k := combine(domain, Distmatrices/pot3km/Buffer_NonNull_Cells) //pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
 	{	
-		attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel -> org_rel);
+		attribute<ipoint> third_rel_i  := ipoint(first_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain> third_rel    := PointRow(third_rel_i) >= 0i && PointCol(third_rel_i) >= 0i ? wpoint(third_rel_i) : null_wp;
 	}
-
 }

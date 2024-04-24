@@ -35,23 +35,23 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			
 			attribute<float64> ItemOfInterest_Null (domain) := ItemOfInterest > 0d ? ItemOfInterest : null_d;
 
-			attribute<float64> N                   (domain) := ItemOfInterest[(id(domain)) - point_yx(1w, 0w, wpoint)];
-			attribute<float64> NE                  (domain) := ItemOfInterest[(id(domain)) - point_yx(1w, 0w, wpoint) + point_yx(0w, 1w, wpoint)];
-			attribute<float64> E                   (domain) := ItemOfInterest[(id(domain)) + point_yx(0w, 1w, wpoint)];
-			attribute<float64> SE                  (domain) := ItemOfInterest[(id(domain)) + point_yx(1w, 1w, wpoint)];
-			attribute<float64> S                   (domain) := ItemOfInterest[(id(domain)) + point_yx(1w, 0w, wpoint)];
-			attribute<float64> SW                  (domain) := ItemOfInterest[(id(domain)) + point_yx(1w, 0w, wpoint) - point_yx(0w, 1w, wpoint)];
-			attribute<float64> W                   (domain) := ItemOfInterest[(id(domain)) - point_yx(0w, 1w, wpoint)];
-			attribute<float64> NW                  (domain) := ItemOfInterest[(id(domain)) - point_yx(1w, 1w, wpoint)];
+			attribute<float64> N                   (domain) := ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint))];
+			attribute<float64> NE                  (domain) := ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint)) + point_yx(0w, 1w, wpoint)];
+			attribute<float64> E                   (domain) := ItemOfInterest[id(domain) + point_yx(0w, 1w, wpoint)];
+			attribute<float64> SE                  (domain) := ItemOfInterest[id(domain) + point_yx(1w, 1w, wpoint)];
+			attribute<float64> S                   (domain) := ItemOfInterest[id(domain) + point_yx(1w, 0w, wpoint)];
+			attribute<float64> SW                  (domain) := ItemOfInterest[sub_or_null(id(domain) + point_yx(1w, 0w, wpoint), point_yx(0w, 1w, wpoint))];
+			attribute<float64> W                   (domain) := ItemOfInterest[sub_or_null(id(domain), point_yx(0w, 1w, wpoint))];
+			attribute<float64> NW                  (domain) := ItemOfInterest[sub_or_null(id(domain), point_yx(1w, 1w, wpoint))];
 			
-			attribute<bool>    N_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point_yx(1w, 0w, wpoint)]);
-			attribute<bool>    NE_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point_yx(1w, 0w, wpoint) + point_yx(0w, 1w, wpoint)]);
-			attribute<bool>    E_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point_yx(0w, 1w, wpoint)]);
-			attribute<bool>    SE_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point_yx(1w, 1w, wpoint)]);
-			attribute<bool>    S_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point_yx(1w, 0w, wpoint)]);
-			attribute<bool>    SW_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) + point_yx(1w, 0w, wpoint) - point_yx(0w, 1w, wpoint)]);
-			attribute<bool>    W_Null              (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point_yx(0w, 1w, wpoint)]);
-			attribute<bool>    NW_Null             (domain) := IsDefined(ItemOfInterest_Null[(id(domain)) - point_yx(1w, 1w, wpoint)]);
+			attribute<bool>    N_Null              (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(1w, 0w, wpoint))]);
+			attribute<bool>    NE_Null             (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(1w, 0w, wpoint)) + point_yx(0w, 1w, wpoint)]);
+			attribute<bool>    E_Null              (domain) := IsDefined(ItemOfInterest_Null[id(domain) + point_yx(0w, 1w, wpoint)]);
+			attribute<bool>    SE_Null             (domain) := IsDefined(ItemOfInterest_Null[id(domain) + point_yx(1w, 1w, wpoint)]);
+			attribute<bool>    S_Null              (domain) := IsDefined(ItemOfInterest_Null[id(domain) + point_yx(1w, 0w, wpoint)]);
+			attribute<bool>    SW_Null             (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain) + point_yx(1w, 0w, wpoint), point_yx(0w, 1w, wpoint))]);
+			attribute<bool>    W_Null              (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(0w, 1w, wpoint))]);
+			attribute<bool>    NW_Null             (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(1w, 1w, wpoint))]);
 			
 			attribute<float64> Cells_with_data     (domain) := (N_Null[float64] + NE_Null[float64] + E_Null[float64] + SE_Null[float64] + S_Null[float64] + SE_Null[float64] + W_Null[float64] + NW_Null[float64]);
 			attribute<float64> Mean_8dir_org       (domain) := (N + NE + E + SE + S + SW + W + NW) / Cells_with_data; //max 8

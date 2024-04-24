@@ -116,11 +116,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated := 350[Person_BuiltUpKm2_decade];
 			parameter<Person_BuiltUpKm2>         max_saturation    := 100000[Person_BuiltUpKm2];
 			
-			unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen, pot2km == 5x5 cellen
-			{	
-				attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel -> org_rel);
-			}
-			
 			attribute<Person_BuiltUpKm2>  Current_LocalMaximum          (CompactedDomain) := max(CurrState/Population_inRes_Density_Trunc_domain[domain_x_pot/third_rel], domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
 			attribute<bool>               IsLocalMaximum                (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density_Trunc;
 			attribute<bool>               HasNoPopulation               (CompactedDomain) := CurrState/Population == 0f;
@@ -222,11 +217,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		parameter<float32> r_if_notBU       := 0.02f;
 		parameter<float32> max_saturation   := 0.50f;
 		
-		unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
-		{	
-			attribute<domain> third_rel := wpoint(spoint(first_rel) + second_rel -> org_rel);
-		}
-		
 		container LocalMaxima
 		{
 			attribute<float32> Current_LocalMaximum_Share (CompactedDomain) := max(CurrState/BuiltUp_Total_Share_domain[domain_x_pot/third_rel], domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
@@ -277,5 +267,11 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			
 			attribute<float32>    Claim_Realisation             (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
 		}
+	}
+	
+	unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint> third_rel_i  := ipoint(first_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain> third_rel    := PointRow(third_rel_i) >= 0i && PointCol(third_rel_i) >= 0i ? wpoint(third_rel_i) : null_wp;
 	}
 }
