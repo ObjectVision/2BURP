@@ -155,11 +155,11 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<uint32>            NumberOfCellsWithPopulationPerRegion       (ClaimRegion) := sum_uint32(CurrState/Population_Trunc > 0[Person], Region_rel);
 			attribute<float32>           Average_Population_per_PopulatedCell       (ClaimRegion) := Population_for_Region / NumberOfCellsWithPopulationPerRegion[float32];
 			attribute<Person>            Regional_Reduction_per_cell                (ClaimRegion) := Average_Population_per_PopulatedCell * Initial_Population_Absolute_Reduction_Rate;
-			attribute<Person>            Reduced_Population                    (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
+			attribute<Person>            Reduced_Population                     (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
 			
 			//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
-			attribute<Person>            Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population_Trunc_domain[LocalMaxima/domain_x_pot/third_rel], LocalMaxima/domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
-			attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(CurrState/BuiltUp_Residential_Area_domain[LocalMaxima/domain_x_pot/third_rel], LocalMaxima/domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
+			attribute<Person>            Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population_Trunc_domain[domain_x_pot/third_rel], domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
+			attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(CurrState/BuiltUp_Residential_Area_domain[domain_x_pot/third_rel], domain_x_pot/first_rel)[CompactedDomain/org_rel]; 
 			attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density     (CompactedDomain) := Avg_Local_Population_inRes_Density_Num / Avg_Local_Population_inRes_Density_Den; 
 			attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 			
