@@ -15,10 +15,10 @@ Container GridDists: using = "Geography;SourceData;" {
 		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' 
 		{
 			attribute<LatLong> Geometry_org     (poly) := ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
-			attribute<LatLong> Geometry_cleaned (poly) := FindCoordinateConversionErros/GeometriesThatContainErrors/Geometry_cleaned[invert(FindCoordinateConversionErros/GeometriesThatContainErrors/org_rel)];
-			attribute<LatLong> Geometry         (poly) := FindCoordinateConversionErros/FindSeperators/ContainsSepValues ? Geometry_cleaned : Geometry_org;
+			attribute<LatLong> Geometry_cleaned (poly) := FindCoordinateConversionErrors/GeometriesThatContainErrors/Geometry_cleaned[invert(FindCoordinateConversionErrors/GeometriesThatContainErrors/org_rel)];
+			attribute<LatLong> Geometry         (poly) := FindCoordinateConversionErrors/FindSeperators/ContainsSepValues ? Geometry_cleaned : Geometry_org;
 			
-			container FindCoordinateConversionErros
+			container FindCoordinateConversionErrors
 			{
 				unit<uint32> FindSeperators := split_multi_linestring(Geometry_org)
 				{ 
