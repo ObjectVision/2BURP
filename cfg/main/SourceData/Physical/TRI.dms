@@ -73,7 +73,7 @@ container TerrainRoughnessIndex: Source = "conversion to tif-format in ArcGIS, u
 		attribute<float32> ReadData_fl32(domain):=value(ReadData,float32);
 	}
 	
-	attribute<float32> mean(domain):=	((TRI1/ReadData[float32]) / 100f) * 1f + 
+	attribute<float32> mean (domain):=	((TRI1/ReadData[float32]) / 100f) * 1f + 
 											((TRI2/ReadData[float32]) / 100f) * 2f + 
 											((TRI3/ReadData[float32]) / 100f) * 3f + 
 											((TRI4/ReadData[float32]) / 100f) * 4f + 

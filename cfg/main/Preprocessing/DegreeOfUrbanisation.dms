@@ -160,7 +160,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 		// @JC to itself?          
 		// attribute<bool>        IsDUCorSDUC                              (domain) := Dense_Urban_Cluster/Result || Result_BeforeDistCriterium;
 		attribute<bool>        IsDUC                                    (domain) := Dense_Urban_Cluster/Result;
-		attribute<bool>        IsFartherThan3kFrom_DUC_SDUC             (domain) := sum(uint32(IsDUC)[domain_x_pot/third_rel], domain_x_pot/first_rel) == 0; 
+		attribute<bool>        IsFartherThan3kFrom_DUC_SDUC             (domain) := sum_uint32(IsDUC[domain_x_pot3k/third_rel], domain_x_pot3k/first_rel) == 0; 
 		
 		attribute<bool>        Result                                   (domain) := Result_BeforeDistCriterium && IsFartherThan3kFrom_DUC_SDUC;
 		attribute<TypologyK>   Typology                                 (domain) := Result ? TypologyK/v/Semi_dense_urban_cluster : null_b;
@@ -191,7 +191,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 		attribute<bool>        IsLargeEnoughGroup                       (domain) := GroupPopulationSize >= Parameters/Min_Total_Pop;
 		
 		attribute<bool>        IsDUCorSDUC                              (domain) := Dense_Urban_Cluster/Result || Semi_Dense_Urban_Cluster/Result;
-		attribute<bool>        IsWithin3kFrom_DUC_SDUC                  (domain) := sum(uint32(IsDUCorSDUC)[domain_x_pot/third_rel], domain_x_pot/first_rel) > 0; 
+		attribute<bool>        IsWithin3kFrom_DUC_SDUC                  (domain) := sum_uint32(IsDUCorSDUC[domain_x_pot3k/third_rel], domain_x_pot3k/first_rel) > 0; 
 		
 		attribute<bool>        IsNotOtherTypology                       (domain) := NOT(
 																						Urban_Centre/Typology == TypologyK/v/Urban_Centre 
