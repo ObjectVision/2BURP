@@ -60,6 +60,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 		attribute<string> Label : ['Urban centre','Dense urban cluster','Semi-dense urban cluster','Suburban grid cell','Rural cluster','Low density rural grid cell','Very low density grid cell'];
 		attribute<string> name  := AsItemName(label);
 		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
+		attribute<uint32> BrushColor: [rgb(255,0,0),rgb(115,35,0),rgb(168,112,0),rgb(255,255,0),rgb(55,86,35),rgb(171,205,102),rgb(205,245,122)];
 	}
 
 	// URBAN CENTRE: Typology 30 is defined as: all cells with a local population density of at least 1,500 people/km2 or with a local built-up area share of at least 0.50, and clustered in a 4-connectivity object of at least 50,000 people or all cells resulting from 3x3 median filtering or by gap filling < 15 km2 (median filtering and gap filling applied to cluster of cells that met the previous logics)

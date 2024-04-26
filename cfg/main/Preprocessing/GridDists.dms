@@ -44,6 +44,7 @@ Container GridDists: using = "Geography;SourceData;" {
 			attribute<uint32>  L_60min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
 			attribute<float32> pop             := ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
 			attribute<uint32>  gridcount       := pcount(grid/as_id);
+			attribute<bool>	   in_continent	   := point_in_polygon(centroid_or_mid(Geometry), LatLong/Geometry);
 		}
 		
 		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) 

@@ -68,7 +68,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		//parameter<string> fieldnamelist:= aslist(directnames/name, fieldseparator)+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		parameter<string> fieldnamelist:= aslist(directnames/isvalue ? directnames/name : '', fieldseparator)
 			+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/dist ? Socioeconomic/access_to_settlements/gridslist/label : '', fieldseparator)
-			+fieldseparator+aslist('gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
+			//+fieldseparator+aslist('gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('gc_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('pop2000_'+pot_fields/label, fieldseparator)
 			+fieldseparator+aslist('pop2020_'+pot_fields/label, fieldseparator)	
@@ -76,7 +76,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData"
 		//parameter<string> fieldreflist:= aslist('Create_DataForCalibration/'+directnames/name, fieldseparator)+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		parameter<string> fieldreflist:= aslist(directnames/isvalue ? 'Create_DataForCalibration/'+directnames/name : '', fieldseparator)
 			+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/dist ? 'Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label : '', fieldseparator)
-			+fieldseparator+aslist('Create_DataForCalibration/griddist_to_settlements/gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
+			//+fieldseparator+aslist('Create_DataForCalibration/griddist_to_settlements/gd_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/gridcost_to_settlements/gc_'+Preprocessing/GridDists/access_variants/Label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
