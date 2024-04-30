@@ -41,11 +41,11 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 			parameter<Person_km2>        Min_Density_high              := 1500[Person_km2];
 			parameter<float32>           Min_BU_Share_low              := 0.03f;
 			parameter<float32>           Min_BU_Share_high             := 0.5f;
-			parameter<Person>            Min_Total_Pop                 := 5000[Person];
+			parameter<Person>            Min_Total_Pop                 := 2500[Person];
 		}
 		container Suburban_Grid_Cell
 		{
-			parameter<Person_km2>        Min_Density_low               := 300[Person_km2];
+			parameter<Person_km2>        Min_Density_low               := 900[Person_km2];
 			parameter<Person_km2>        Min_Density_high              := 1500[Person_km2];
 			parameter<float32>           Min_BU_Share_low              := 0.03f;
 			parameter<float32>           Min_BU_Share_high             := 0.5f;
@@ -93,13 +93,13 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 		attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 	
 		// All cells resulting from 3x3 median filtering 
-		attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[Cdomain_x_pot/third_rel], Cdomain_x_pot/first_rel); 
+		attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[Cdomain_x_pot1k/third_rel], Cdomain_x_pot1k/first_rel); 
 		
 		// Gap filling: lake < 15km2
 		unit<uint32> GapFilling := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsLargeEnoughGroup)))
 		{
 			attribute<.>       GroupDomain_rel                                   (domain) := districts;
-			attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+			// attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
 			attribute<km2>     GroupArea                                                  := sum(Land_Area_domain, GroupDomain_rel);
 			attribute<bool>    IsGap                                                      := NOT(first(recollect_by_cond(domain/IsCompactedDomain, IsLargeEnoughGroup), GroupDomain_rel));
 		}
@@ -137,7 +137,7 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 	
 	
 
-	// SEMI-DENSE URBAN CLUSTER: Typology 22 is defined as: all cells with a local population density of at least 300 people/km2 and with a local built-up area share of at least 0.03, or all cells with a local population density of at least 1,500 people/km2 or built-up area share of at least 0.5	, clustered in a 4-connectivity object of at least 5,000 people, farther than 3 km from a typology 23 or typology 22, and are not typology 30 or typology 23
+	// SEMI-DENSE URBAN CLUSTER: Typology 22 is defined as: all cells with a local population density of at least 300 people/km2 and with a local built-up area share of at least 0.03, or all cells with a local population density of at least 1,500 people/km2 or built-up area share of at least 0.5, clustered in a 4-connectivity object of at least 5,000 people, farther than 3 km from a typology 23 or typology 22, and are not typology 30 or typology 23
 	container Semi_Dense_Urban_Cluster
 	{
 		container Parameters := DegreeOfUrbanisation/Parameters/Semi_Dense_Urban_Cluster;
@@ -165,16 +165,10 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 																								Urban_Centre/Typology == TypologyK/v/urban_centre 
 																								|| Dense_Urban_Cluster/Typology == TypologyK/v/Dense_Urban_Cluster
 																							);
-																			
-		attribute<bool>        Result_BeforeDistCriterium               (CompactedDomain) := IsLargeEnoughGroup && IsNotOtherTypology;
+		attribute<bool>        IsDUCorUC                                (CompactedDomain) := Urban_Centre/Result || Dense_Urban_Cluster/Result;
+		attribute<bool>        IsFarEnoughFrom_DUC_UC                   (CompactedDomain) := sum_uint32(IsDUCorUC[Cdomain_x_pot2k/third_rel], Cdomain_x_pot2k/first_rel) == 0; 
 		
-		// Farther than 3km from type 23 (DUC) or 22 (SDUC) 
-		// @JC to itself?          
-		// attribute<bool>        IsDUCorSDUC                              (domain) := Dense_Urban_Cluster/Result || Result_BeforeDistCriterium;
-		attribute<bool>        IsDUC                                    (CompactedDomain) := Dense_Urban_Cluster/Result;
-		attribute<bool>        IsFartherThan3kFrom_DUC_SDUC             (CompactedDomain) := sum_uint32(IsDUC[Cdomain_x_pot3k/third_rel], Cdomain_x_pot3k/first_rel) == 0; 
-		
-		attribute<bool>        Result                                   (CompactedDomain) := Result_BeforeDistCriterium && IsFartherThan3kFrom_DUC_SDUC;
+		attribute<bool>        Result                                   (CompactedDomain) := IsLargeEnoughGroup && IsNotOtherTypology && IsFarEnoughFrom_DUC_UC;
 		attribute<TypologyK>   Typology                                 (CompactedDomain) := Result ? TypologyK/v/Semi_dense_urban_cluster : null_b;
 	}
 	
@@ -204,14 +198,14 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 		attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 		
 		attribute<bool>        IsDUCorSDUC                              (CompactedDomain) := Dense_Urban_Cluster/Result || Semi_Dense_Urban_Cluster/Result;
-		attribute<bool>        IsWithin3kFrom_DUC_SDUC                  (CompactedDomain) := sum_uint32(IsDUCorSDUC[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel) > 0; 
+		attribute<bool>        IsCloseEnoughTo_DUC_SDUC                 (CompactedDomain) := sum_uint32(IsDUCorSDUC[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel) > 0; 
 		
 		attribute<bool>        IsNotOtherTypology                       (CompactedDomain) := NOT(
 																								Urban_Centre/Typology == TypologyK/v/Urban_Centre 
 																								|| Dense_Urban_Cluster/Typology == TypologyK/v/Dense_Urban_Cluster
 																							);
 		
-		attribute<bool>        Result                                   (CompactedDomain) := IsLargeEnoughGroup && IsWithin3kFrom_DUC_SDUC && IsNotOtherTypology;
+		attribute<bool>        Result                                   (CompactedDomain) := IsLargeEnoughGroup && IsCloseEnoughTo_DUC_SDUC && IsNotOtherTypology;
 		attribute<TypologyK>   Typology                                 (CompactedDomain) := Result ? TypologyK/v/Suburban_Grid_Cell : null_b;
 	}
 	
@@ -285,7 +279,14 @@ Container DegreeOfUrbanisation : using = "Geography;SourceData;"
 	
 	attribute<TypologyK>       Typology                                 (CompactedDomain) := ='switch('+AsList('case('+TypologyK/name+'/Result, TypologyK/v/'+TypologyK/name+')', ',')+', null_b)';
 	
-	unit<uint32> Cdomain_x_pot := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
+	unit<uint32> Cdomain_x_pot2k := combine(CompactedDomain, Distmatrices/pot2km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
 	{	
 		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
 		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
