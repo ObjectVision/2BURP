@@ -15,9 +15,13 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			, FunctionalAreas
 			, Person
 		);
-		
-	#include <DegreeOfUrbanisation.dms>
+	
 	#include <GridDists.dms>
+	
+	container DegreesOfUrbanisation:= for_each_ne(GHS_years/name, 'Calculate_DegreeOfUrbanisation/gen(Builtup/Total/'+GHS_years/name+', Builtup/Residential/'+GHS_years/name+', Population/PerYear/'+GHS_years/name+'[Person])');
+	
+	
+	#include <DegreeOfUrbanisation.dms>
 	
 	container Population_Neighbourhoods
 	{

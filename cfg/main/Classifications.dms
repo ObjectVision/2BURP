@@ -27,4 +27,13 @@ container Classifications : using = "units"
 		attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
 		attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
+	unit<uint8> TypologyK : nrofrows = 7, Descr = "Degree of urbanisation level 2 typologies", URL = "https://human-settlement.emergency.copernicus.eu/degurbaDefinitions.php"
+	{
+		attribute<uint8>  EK    : [30, 23, 22, 21, 13, 12, 11];
+		attribute<string> Label : ['Urban centre','Dense urban cluster','Semi-dense urban cluster','Suburban grid cell','Rural cluster','Low density rural grid cell','Very low density grid cell'];
+		attribute<uint32> BrushColor: [rgb(255,0,0),rgb(115,35,0),rgb(168,112,0),rgb(255,255,0),rgb(55,86,35),rgb(171,205,102),rgb(205,245,122)];
+		attribute<string> name  := AsItemName(label);
+		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
+	}
+	
 }
