@@ -18,11 +18,13 @@ container Socioeconomic
 	
 	container access_to_settlements {
 	
-		container readgrids:= for_each_ne(gridslist/label, 'load_access_grids('+quote(gridslist/label)+')');
+		container readgrids:= for_each_ne(gridslist/label, 'load_access_grids('+quote(gridslist/path)+')');
 
-		unit<uint32> gridslist: nrofrows = 12 { // swap to 12 when towns_td is added
-			attribute<string> label: ['cities_td_uint8', 'cities_tt_uint8', 'towns_td_uint8','towns_tt_uint8', 'villages_td_uint8', 'villages_tt_uint8', 'loc_ctr_td_uint8', 'loc_ctr_tt_uint8', 'reg_ctr_td_uint8', 'reg_ctr_tt_uint8', 'nat_ctr_td_uint8', 'nat_ctr_tt_uint8'];
-			attribute<bool>	  dist:= mod(id(.), 2) = 0;
+		unit<uint32> gridslist: nrofrows = 3 { 
+			// swap to 12 when towns_td is added
+			attribute<string> path: ['cities_td_uint8','towns_td_uint8','villages_td_uint8'];
+			attribute<string> label: ['cities', 'towns','villages'];
+			attribute<bool>	  dist:= const(True,.,bool);
 		}
 		
 		template load_access_grids {

@@ -1,6 +1,4 @@
-Container GridDists: using = "Geography;SourceData;" {
-	
-	parameter<string> sett_folder:= 'all_settlements_SMOD_V1s6_opr_P2023_v1_2000/';
+Container Calculate_GridDistances: using = "Geography;SourceData;Classifications;" {
 	
 	container travel_factors {
 		parameter<string> elev:= '1f + (elevation > 2000f ? 0.15f * exp(0.0007f * elevation) : 0f)', Descr= "Effect on travel speeds: For elevations lower than 2000 metres, there is no effect on foot-based based travel speed. For elevations above 2000, the following speed factor f is applied: f = 0.15e0.0007E, where E is elevation in metres.";
@@ -8,120 +6,37 @@ Container GridDists: using = "Geography;SourceData;" {
 		parameter<string> water:= 'InWater * 3f + 1f'; //Water bodies at 20km/h, compared to the 60m/h reference
 	}
 	
-	unit<uint32> settlements: nrofrows = 6 {attribute<string> label: ['Africa', 'Asia', 'Australia_Oceania', 'Europe', 'North_America', 'South_America'];}
-	
-	container load_settlements:= for_each_ne(settlements/label, 'T_loadpolyfile('+quote(sett_folder+settlements/label)+')') 
-	{
-		unit<uint32> all_settlements:= ='union_unit('+asitemlist(settlements/label+'/inFile')+')' 
-		{
-			attribute<LatLong> Geometry_org     (poly) := ='union_data(.,'+asitemlist(settlements/label+'/inFile/Geometry')+')';
-			attribute<LatLong> Geometry_cleaned (poly) := FindCoordinateConversionErrors/GeometriesThatContainErrors/Geometry_cleaned[invert(FindCoordinateConversionErrors/GeometriesThatContainErrors/org_rel)];
-			attribute<LatLong> Geometry         (poly) := FindCoordinateConversionErrors/FindSeperators/ContainsSepValues ? Geometry_cleaned : Geometry_org;
-			
-			container FindCoordinateConversionErrors
-			{
-				unit<uint32> FindSeperators := split_multi_linestring(Geometry_org)
-				{ 
-					attribute<uint32>  pcount            (all_settlements) := pcount(org_rel);
-					attribute<bool>    ContainsSepValues (all_settlements) := pcount > 1;
-				}
-				
-				unit<uint32> GeometriesThatContainErrors := select_with_org_rel(FindSeperators/ContainsSepValues)
-				{
-					attribute<LatLong> Geometry          (poly) := Geometry_org[org_rel];
-					attribute<string>  label                    := org_rel -> label; 
-					attribute<LatLong> Geometry_cleaned  (poly) := points2polygon_ps(OmitUndefinedCoordinates/point, OmitUndefinedCoordinates/sequence_rel);
-					unit<uint32>       Seq2Points               := sequence2points(Geometry);
-					unit<uint32>       OmitUndefinedCoordinates := select_with_attr_by_cond(Seq2Points, IsDefined(Seq2Points/point));
-				}
-			}
-			
-			
-			attribute<string>  Label               := ='union_data(.,'+asitemlist(settlements/label+'/inFile/Label')+')';
-			attribute<uint32>  type            := switch(case(strcount(Label, 'sdt') > 0, 22), case(strcount(Label, 'town') > 0, 23), case(strcount(Label, 'city') > 0, 30), 13);
-			attribute<uint32>  L_15min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_15min')+')';
-			attribute<uint32>  L_30min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_30min')+')';
-			attribute<uint32>  L_60min         := ='union_data(.,'+asitemlist(settlements/label+'/inFile/L_60min')+')';
-			attribute<float32> pop             := ='union_data(.,'+asitemlist(settlements/label+'/inFile/pop[float32]')+')';
-			attribute<uint32>  gridcount       := pcount(grid/as_id);
-			attribute<bool>	   in_continent	   := point_in_polygon(centroid_or_mid(Geometry), LatLong/Geometry);
-		}
-		
-		unit<uint32> all_catchment_centres:= select_with_org_rel(all_settlements/L_30min > 0 && all_settlements/pop > 50000f) 
-		{
-			attribute<LatLong> Geometry (poly) := org_rel -> geometry;
-			attribute<uint32>  type            := org_rel -> type;
-			attribute<float32> pop             := org_rel -> pop;
-		}
-	}
-	
-	unit<wpoint> grid := Geography/domain 
+	unit<wpoint> grid := domain 
 	{
 		attribute<float32> 	Roughness   := Physical/TerrainRoughnessIndex/mean;
 		attribute<float32> 	InWater     := Physical/Water/AllWater/Fraction_Water[float32] / 100f;
 		attribute<float32>	Impedance   := Roughness^2f + (10f * InWater[float32]);
-		attribute<NodeSet>  NodeSet_rel := invert(NodeSet/org_rel);
 		attribute<float32>  elevation   := Physical/Elevation/Elevation[float32];
 		attribute<float32>  slope       := Physical/Slope_2021/ReadData;
 		attribute<float32>	gradient    := slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
-		attribute<load_settlements/all_settlements> as_id:= poly2grid(load_settlements/all_settlements/Geometry, .);
-		
-		attribute<NodeSet> N                   (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint)];
-		attribute<NodeSet> NE                  (domain) := NodeSet_rel[(id(.)) - point(1w, 0w, wpoint) + point(0w, 1w, wpoint)];
-		attribute<NodeSet> E                   (domain) := NodeSet_rel[(id(.)) + point(0w, 1w, wpoint)];
-		attribute<NodeSet> SE                  (domain) := NodeSet_rel[(id(.)) + point(1w, 1w, wpoint)];
 				
-		unit<uint32> all_Ns  := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(N)) {attribute<NodeSet> F2:= grid/N[org_rel]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= L;}
-		unit<uint32> all_NEs := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(NE)) {attribute<NodeSet> F2:= grid/NE[org_rel]; attribute<float32> L:= const(1.414213562f,.,float32); attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[org_rel]]) / 4f;} // square root of 2 (given 1km grids)
-		unit<uint32> all_Es  := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(E)) {attribute<NodeSet> F2:= grid/E[org_rel]; attribute<float32> L:= const(1f,.,float32); attribute<float32> LatLon_corr:= NodeSet/EastWest_correction[F2];}
-		unit<uint32> all_SEs := select_with_org_rel(isdefined(NodeSet_rel) && isdefined(SE)) {attribute<NodeSet> F2:= grid/SE[org_rel]; attribute<float32> L:= const(1.414213562f,.,float32);attribute<float32> LatLon_corr:= (2f + NodeSet/EastWest_correction[F2] + NodeSet/EastWest_correction[NodeSet_rel[org_rel]]) / 4f;} // square root of 2 (given 1km grids)}
-		
 		attribute<float32> impedance_elev:= =travel_factors/elev;
 		attribute<float32> impedance_slope:= =travel_factors/slope;
 		attribute<float32> impedance_water:= =travel_factors/water;
 		attribute<float32> impedance_all:= impedance_elev * impedance_slope * impedance_water;
 	}
 	
-	unit<uint32> NodeSet := select_with_org_rel(GridData/InRegion) 
-	{
-		attribute<LatLong>  Geometry := org_rel[LatLong];
-		attribute<float32> 	Roughness:= grid/Roughness[org_rel];
-		attribute<bool>		InWater:= grid/Inwater[org_rel];
-		attribute<float32>	Impedance_abstract:= MakeDefined(Roughness^2f, 10f) + (10f * InWater[float32]);
-		attribute<float32>	Impedance:= grid/impedance_all[org_rel];
-		attribute<float32>  EastWest_correction:= domain/lat_factor[org_rel];
-		attribute<load_settlements/all_settlements> sett_id:= point_in_polygon(Geometry, load_settlements/all_settlements/Geometry);
-		//attribute<bool>		N:= 
-	}
-	
-	unit<uint32> Network:= union_unit(grid/all_Ns, grid/all_NEs, grid/all_Es, grid/all_SEs) {
-		attribute<NodeSet> F1:= union_data(., grid/NodeSet_rel[grid/all_Ns/org_rel], grid/NodeSet_rel[grid/all_NEs/org_rel], grid/NodeSet_rel[grid/all_Es/org_rel], grid/NodeSet_rel[grid/all_SEs/org_rel]);
-		attribute<NodeSet> F2:= union_data(., grid/all_Ns/F2, grid/all_NEs/F2, grid/all_Es/F2, grid/all_SEs/F2);
-		attribute<float32> Length:= union_data(.,  grid/all_Ns/L, grid/all_NEs/L, grid/all_Es/L, grid/all_SEs/L);
-		attribute<float32> LatLon_corr:= union_data(.,  grid/all_Ns/LatLon_corr, grid/all_NEs/LatLon_corr, grid/all_Es/LatLon_corr, grid/all_SEs/LatLon_corr);
-		attribute<float32> LatLon_Corr_Length:= Length * LatLon_corr;
-		attribute<float32> Impedance:= LatLon_Corr_Length * (0.5f * (NodeSet/Impedance[F1] + NodeSet/Impedance[F2]));
+	Template T_AllVariants_instantiation {
+		attribute<TypologyK> in_degurba (grid);
 		
+		container get_Grid_Costs:= for_each_ne(Accessibility_Variants/Label, 'T_getAccessGrids_grid(in_degurba, '+string(id(Accessibility_Variants))+'[Accessibility_Variants])');
+		
+		container Grid_costs_atleast_to:= for_each_nedv(Accessibility_Variants/Label, 'get_Grid_Costs/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific', grid, float32);
 	}
-	
-	unit<uint32> access_variants: nrofrows = 6 {
-		attribute<string> label: ['villages', 'towns', 'cities', 'loc_ctr', 'reg_ctr', 'nat_ctr'];
-		attribute<string> def: ['uint32(SelectedSettlements/type) > 10', 'uint32(SelectedSettlements/type) > 22', 'uint32(SelectedSettlements/type) > 29', 'bool(SelectedSettlements/L_15min)', 'bool(SelectedSettlements/L_30min)','bool(SelectedSettlements/L_60min)'];
-	}
-	
-	container AccessGrids_nw:= for_each_ne(access_variants/label, 'T_getAccessGrids_netw('+string(id(access_variants))+')');
-	container AccessGrids_grid:= for_each_ne(access_variants/label, 'T_getAccessGrids_grid('+string(id(access_variants))+')');
 	
 	Template T_getAccessGrids_grid {
-		parameter<access_variants> invariant;
+		attribute<TypologyK> in_degurba (grid);
+		parameter<Accessibility_Variants> invariant;
 		
-		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
+		attribute<uint8> 	 degurba_class (grid):= TypologyK/EK[in_degurba];
+		attribute<bool> 	 eval (grid):= =Accessibility_Variants/definition[invariant];
 		
-		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0 && SelectedSettlements/in_continent)' {
-			attribute<LatLong> Geometry (poly):= SelectedSettlements/Geometry[Nr_OrgEntity];
-		}
-		attribute<FilteredSettlements> fs_rel (grid):= poly2grid(FilteredSettlements/Geometry, grid);
-		unit<uint32> origins:= subset(isdefined(fs_rel));
+		unit<uint32> origins:= subset(eval);
 		
 		attribute<float32> impedances (grid):= grid/impedance_all;
 		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/Nr_OrgEntity), 100f);
@@ -138,74 +53,4 @@ Container GridDists: using = "Geography;SourceData;" {
 		attribute<float32> costsgrid_zonal_untiled_latitude_specific (grid):= min_elem(griddist_zonal_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f), 100f);
 		attribute<float32> costsgrid_zonal_untiled_maximp_latitude_specific (grid):= griddist_zonal_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f, 100f);
 	}
-	
-	
-	Template T_getAccessGrids_netw {
-		parameter<access_variants> invariant;
-		parameter<float32>		   maxrange:= 6000f; // 100km * the practical maximum impedance for crossing 1km 
-		
-		unit<uint32> SelectedSettlements:= load_settlements/all_settlements;
-		
-		unit<uint32> destinations: nrofrows = 1;
-		
-		unit<uint32> FilteredSettlements:= ='subset('+access_variants/def[invariant]+' && SelectedSettlements/gridcount > 0)' {
-			attribute<LatLong> Geometry (poly):= SelectedSettlements/Geometry[Nr_OrgEntity];
-		}
-		
-		attribute<FilteredSettlements> fs_rel (grid):= rlookup(grid/as_id, FilteredSettlements/Nr_OrgEntity);
-			
-		unit<uint32> origins:= subset(isdefined(fs_rel) && isdefined(grid/NodeSet_rel)) {
-			attribute<LatLong> Geometry:= Nr_OrgEntity[LatLong];
-			attribute<NodeSet> NodeSet_rel:= grid/NodeSet_rel[Nr_OrgEntity];
-		}
-		unit<uint32> Matrix := 
-			impedance_matrix(
-				//'bidirectional;startPoint(Node_rel);alternative(link_imp):alt_imp'
-				//'bidirectional;startPoint(Node_rel);endPoint(Node_rel);limit(OrgZone_max_mass,DstZone_mass)'
-				//'bidirectional;startPoint(Node_rel);endPoint(Node_rel);limit(OrgZone_max_mass,DstZone_mass);alternative(link_imp):alt_imp;od:impedance,OrgZone_rel,DstZone_rel'
-				'bidirectional;startPoint(Node_rel,OrgZone_rel);endPoint(Node_rel);cut(OrgZone_max_imp);alternative(link_imp):alt_imp;od:impedance,OrgZone_rel,DstZone_rel'
-				, Network/Impedance
-				, Network/F1
-				, Network/F2
-				, origins/NodeSet_rel
-				, const(0,origins,destinations)
-				, id(NodeSet)
-				, maxrange	
-				, Network/LatLon_Corr_Length
-			);
-		
-		attribute<float32> costsgrid (grid):= min_elem(min(Matrix/Impedance, Matrix/DstZone_rel)[grid/NodeSet_rel], maxrange);
-		attribute<float32> distancegrid (grid):= min_elem(min(Matrix/Alt_imp, Matrix/DstZone_rel)[grid/NodeSet_rel], maxrange);
-		
-		
-	}
-	
-	
-	Template T_loadpointfile 
-	{
-		parameter<string> inpath;
-		
-		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" 
-		{
-			attribute<LatLong> Geometry;
-			attribute<string>  label;
-			attribute<uint32>  L_15min;
-			attribute<uint32>  L_30min;
-			attribute<uint32>  L_60min;
-		}
-	}
-	Template T_loadpolyfile 
-	{
-		parameter<string> inpath;
-		
-		unit<uint32> inFile: storagename = "= '%ToBURPDataDir%/Socioeconomic/Settlements/'+inpath+'.shp'", storagereadonly = "true", storagetype = "gdal.vect" 
-		{
-			attribute<LatLong> Geometry (poly);
-			attribute<string>  label;
-			attribute<uint32>  L_15min;
-			attribute<uint32>  L_30min;
-			attribute<uint32>  L_60min;
-		}
-	}
-
 }

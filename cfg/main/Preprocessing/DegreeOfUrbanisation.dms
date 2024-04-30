@@ -277,8 +277,9 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 		
 		
 		attribute<TypologyK>       Typology                                 (CompactedDomain) := ='switch('+AsList('case('+TypologyK/name+'/Result, TypologyK/v/'+TypologyK/name+')', ',')+', null_b)';
+		attribute<TypologyK>  	   Typology_Domain                          (Domain)          := recollect_by_cond(domain/IsCompactedDomain, Typology); // seems redundant, added because of the need to have this result in the grid distance access computations
 		
-		attribute<uint8>	   StoreTypology (domain):= recollect_by_cond(domain/IsCompactedDomain, TypologyK/EK[Typology]), StorageName = "= '%localdataprojdir%/export/degurbagrids/'+ModelParameters/StudyArea+'/'+propvalue(., 'Name')+'.tif'";
+		attribute<uint8>	   StoreTypology (domain):= TypologyK/EK[Typology_Domain], StorageName = "= '%localdataprojdir%/export/degurbagrids/'+ModelParameters/StudyArea+'/'+propvalue(., 'Name')+'.tif'";
 		
 		unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
 		{	
