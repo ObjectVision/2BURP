@@ -118,6 +118,7 @@ container Geography : using = "units"
 		parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
 		attribute<Float32> lat_factor   := rowset/lat_factor[pointrow(ID(.))];
 		attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
+		attribute<bool>    IsCompactedDomain := GridData/FreeLand;
 	}
 
 	unit<ipoint> domain_sub :=
@@ -163,8 +164,9 @@ container Geography : using = "units"
 		attribute<Bool>   FreeLand               (domain) := InRegionHasPopHasUrb && InStudyArea && InBU_5kmClip && (IsNotLake || HasBuiltup || HasPop) && (IsNotIce || HasBuiltup || HasPop), FreeData = "False";
 	}
 	
-	unit<uint32> CompactedDomain := select_with_org_rel(GridData/FreeLand), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
+	unit<uint32> CompactedDomain := select_with_org_rel(domain/IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
+		attribute<.>                 id                    := id(.);
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
 		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;

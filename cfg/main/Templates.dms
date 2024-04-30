@@ -18,9 +18,9 @@ container Templates
 			attribute<Potential> distMatr          := Sqr(Float32(pointrow(ID(.)))) + Sqr(Float32(pointcol(ID(.)))*AspectRatio);
 			attribute<km>        EuclideanDistMatr := Sqrt(distMatr)[km];
 			attribute<float32>	 inv_EDM		   := EuclideanDistMatr[float32] <= vertical_radius ? 1f / max_elem(1f, EuclideanDistMatr[float32]) : 0f;
-			attribute<Potential> Weight            := interpolate_linear(EuclideanDistMatr * 1000[meter / km], value(Preprocessing/Suitability/DistanceBuildUp/Class/Distance_meter, meter), Float32(Preprocessing/Suitability/DistanceBuildUp/Class/PROBABILITY));
-			attribute<Potential> WeightCorr        := ID(.) == point_yx(0s, 0s) ? 0f : Weight;
-			attribute<Potential> RelWeightCorr     := scalesum(WeightCorr, 1f );
+			// attribute<Potential> Weight            := interpolate_linear(EuclideanDistMatr * 1000[meter / km], value(Preprocessing/Suitability/DistanceBuildUp/Class/Distance_meter, meter), Float32(Preprocessing/Suitability/DistanceBuildUp/Class/PROBABILITY));
+			// attribute<Potential> WeightCorr        := ID(.) == point_yx(0s, 0s) ? 0f : Weight;
+			// attribute<Potential> RelWeightCorr     := scalesum(WeightCorr, 1f );
 			
 			attribute<Potential> AbsWeight         := iif(distMatr <= vertical_radius * vertical_radius, 1f / (distMatr + 0.08f), 0f);
 			attribute<Potential> AbsWeight_noself  := distMatr > 0f ? AbsWeight : 0f;
