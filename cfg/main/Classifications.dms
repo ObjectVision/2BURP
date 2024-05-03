@@ -35,8 +35,15 @@ container Classifications : using = "units"
 		attribute<string> name  := AsItemName(label);
 		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
 	}
-	unit<uint32> Accessibility_Variants: nrofrows = 3, Descr = "Accessibility definitions used for endogenous accessibility grid-based calculations" {
-		attribute<string> label: ['villages', 'towns', 'cities'];
-		attribute<string> definition: ['degurba_class = 13[TypologyK] || degurba_class > 21[TypologyK]', 'degurba_class > 21[TypologyK]', 'degurba_class = 30[TypologyK]'];
+	unit<uint32> Accessibility_Variants : nrofrows = 3, Descr = "Accessibility definitions used for endogenous accessibility grid-based calculations" 
+	{
+		attribute<string> label       : ['villages', 'towns', 'cities'];
+		attribute<string> definition  : ['degurba_class = 13[TypologyK] || degurba_class > 21[TypologyK]', 'degurba_class > 21[TypologyK]', 'degurba_class = 30[TypologyK]'];
 	}
+	
+	unit<uint32> Pot_fields : nrofrows = 8 
+	{
+		attribute<string> label : ['Pots_lin_5km', 'Pots_sqr_5km', 'Pots_lin_10km', 'Pots_sqr_10km', 'Pots_lin_20km', 'Pots_sqr_20km', 'Pots_lin_40km', 'Pots_sqr_40km'];
+	}
+
 }

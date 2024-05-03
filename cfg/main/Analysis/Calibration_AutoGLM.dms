@@ -1,20 +1,15 @@
 container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;Classifications;"
 {
-	unit<uint32> pot_fields: nrofrows = 8 
-	{
-		attribute<string> label: ['Pots_lin_5km', 'Pots_sqr_5km', 'Pots_lin_10km', 'Pots_sqr_10km', 'Pots_lin_20km', 'Pots_sqr_20km', 'Pots_lin_40km', 'Pots_sqr_40km'];
-	}
-	
 	unit <uint32> Create_DataForCalibration := CompactedDomain
 	{
 		attribute<Countries>  Country_id                              := Countries/per_grid[CompactedDomain/org_rel];
-		attribute<float32>	  latitude_factor						  := lat_factor;
+		attribute<float32>	  latitude_factor                         := lat_factor;
 		attribute<float32>    BU_RES_2000                             := SourceData/Builtup/Residential/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BU_RES_2020                             := SourceData/Builtup/Residential/Y2020[CompactedDomain/org_rel];
 		attribute<float32>    BUTOT_2000                              := SourceData/Builtup/Total/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BUTOT_2020                              := SourceData/Builtup/Total/Y2020[CompactedDomain/org_rel];
-		attribute<float32>	  BUPERCTOT_2000						  := makedefined(BUTOT_2000 / (1000f * 1000f * latitude_factor), 0f);
-		attribute<float32>	  BUPERCTOT_2020						  := makedefined(BUTOT_2020 / (1000f * 1000f * latitude_factor), 0f);
+		attribute<float32>	  BUPERCTOT_2000                          := makedefined(BUTOT_2000 / (1000f * 1000f * latitude_factor), 0f);
+		attribute<float32>	  BUPERCTOT_2020                          := makedefined(BUTOT_2020 / (1000f * 1000f * latitude_factor), 0f);
 		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
 		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
@@ -22,14 +17,14 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		
 		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
-		attribute<float32>    TRI_mean                                := Physical/TerrainRoughnessIndex/mean[CompactedDomain/org_rel];
+		attribute<uint8>      TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[CompactedDomain/org_rel];
 		
 		attribute<uint8>      IsProtectedArea                         := Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
 		attribute<uint8>      IsFloodProneArea_RP100                  := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
 		
 		attribute<uint8>      Earthquakes_MMI_Index                   := Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>      NrOfLandslides_Precipitation            := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_PR_uint8[CompactedDomain/org_rel];
-		attribute<uint8>      NrOfLandslides_Earthquakes              := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[CompactedDomain/org_rel];
+		attribute<uint16>     NrOfLandslides_Precipitation            := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ReadData[CompactedDomain/org_rel];
+		attribute<uint16>     NrOfLandslides_Earthquakes              := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ReadData[CompactedDomain/org_rel];
 		
 		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
 		attribute<float32>    Distance2AnyInlandWater                 := Physical/Water/AllWater/Dist_AllInland_km/GridData[CompactedDomain/org_rel];
@@ -104,77 +99,70 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 	
 	container ReadCoffecients
 	{
-		unit<uint8> continent : NrOfRows = 7
+		container Read_XLSX 
+		: StorageName = "%ProjDir%/Data/Calibration/Calibration_continents_20240425.xlsx"
+		, StorageType = "gdal.vect"
+		, StorageReadOnly = "true"
 		{
-			attribute<string>  name                            :[     'Africa', 'Antarctica',           'Asia','Australia_Oceania',  'Europe',  'North_America','South_America'];
-
-			attribute<float32> LnPopulationDensity_2000_8dir   :[  0.531497709,         null,      0.839765999,        0.870067398,     1.985,      0.974599052,      0.724074079];//Population Density
-			attribute<float32> Distance2Coastline              :[ -0.008463382,         null,     -0.005394479,       -0.005474561,    -0.037,     -0.002514605,     -0.004313727];//Distance to coast
-			attribute<float32> Distance2FreshWater             :[         null,         null,             null,               null,     0.009,     -0.007378535,      0.011433245];//Distance to river-lake
-			attribute<float32> Distance2MajorRoads             :[ -0.014085749,         null,     -0.010793457,       -0.031643393,     0.068,     -0.075559046,     -0.034440931];//Distance main roads
-			attribute<float32> Distance2SecundaryRoads         :[ -0.049962357,         null,             null,       -0.011904265,      null,             null,             null];//Distance secondary roads
-			attribute<float32> Distance2Cities_GridBased       :[ -0.037591571,         null,     -0.034551404,       -0.030340505,    -0.009,     -0.052752656,     -0.037279886];//Travel Time
-			attribute<float32> Elevation                       :[  0.001545315,         null,      0.000753538,         0.00140626,    -0.001,      0.000601571,     -0.000117761];//Elevation
-			attribute<float32> Slope                           :[ -0.065971464,         null,      0.033417041,       -0.299321221,      null,      -0.04037477,      -0.06362772];//Slope
-			attribute<float32> TRI_mean                        :[ -0.653195893,         null,     -0.620312105,       -0.719939619,      null,     -0.651830594,             null];//TRI
-			attribute<float32> IsProtectedArea                 :[ -0.075611953,         null,     -0.383992502,        1.004850524,    -0.452,      0.578474954,     -0.706175672];//Protected Area
-			attribute<float32> IsFloodProneArea_RP100          :[  0.788375972,         null,             null,               null,     0.059,      0.179426493,      1.683693808];//Flood Prone Area
-			attribute<float32> Earthquakes_MMI_Index           :[         null,         null,      0.007257093,       -0.197845731,    -0.059,     -0.028916204,      0.095217295];//Earthquake
-			attribute<float32> NrOfLandslides_Precipitation    :[         null,         null,             null,               null,      null,             null,             null];//Landslide [PR]
-			attribute<float32> NrOfLandslides_Earthquakes      :[         null,         null,     -0.440048397,       1.554044128,       null,     -0.857242479,     -0.875636885];//Landslide [EQ]
-			
-			attribute<float32> Constant                        :[  2.533543412,         null,     -1.132519129,       1.763324867,     -0.482,     -0.631474116,      -0.63287745];
-			attribute<string>  label          := name;
+			unit<uint32> Calib_results;
+		}
+		
+		unit<uint32> Calibration_variables := Read_XLSX/Calib_results
+		{
+			attribute<string> name := AsItemName(_2BURP_variable);
 			container V := for_each_nedv(name, string(id(.))+'[..]', void, .);
 		}
 		
-		container coef2domain := Coef2domain_T(continent);
+		unit<uint8> Continents_InCalib : nrofrows = 4
+		{
+			attribute<string> name : ['Africa','Europe','North_America','South_America'];
+			attribute<string> label := name;
+			container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
+		}
+	
+		container PerContinent := 
+			for_each_nedv(
+				Continents_InCalib/name
+				, 'Calibration_variables/' + Continents_InCalib/name + '[float32]'
+				, Calibration_variables
+				, float32
+			)
+		{
+			attribute<string> var_name (Calibration_variables) := Calibration_variables/name;
+		}
+
+		container PerVar := 
+			for_each_nedv(
+				Calibration_variables/name
+				, 'union_data(Continents_InCalib,'+replace(AsItemList('PerContinent/'+Continents_InCalib/name+'[Calibration_variables/V/@CV@]'),'@CV@', Calibration_variables/Name)+')'
+				, Continents_InCalib
+				, float32
+			);
+		
+		container Coef2domain := Coef2domain_T(PerVar);
 	}
 
 	Template Coef2domain_T
 	{
-		unit<uint8> continent;
+		container Continent;
 		///
-		unit<uint32> Country     := SourceData/RegionalUnits/Countries 
-		{
-			attribute<uint8>   Continent_id       := rlookup(SourceData/RegionalUnits/Countries/Continent_name,continent/name);
-
-			attribute<float32> LnPopulationDensity_2000_8dir     := continent/LnPopulationDensity_2000_8dir[Continent_id];
-			attribute<float32> Distance2Coastline                := continent/Distance2Coastline[Continent_id];
-			attribute<float32> Distance2FreshWater               := continent/Distance2FreshWater[Continent_id];
-			attribute<float32> Distance2MajorRoads               := continent/Distance2MajorRoads[Continent_id];
-			attribute<float32> Distance2SecundaryRoads           := continent/Distance2SecundaryRoads[Continent_id];
-			attribute<float32> Distance2Cities_GridBased         := continent/Distance2Cities_GridBased[Continent_id];
-			attribute<float32> Elevation                         := continent/Elevation[Continent_id];
-			attribute<float32> Slope                             := continent/Slope[Continent_id];
-			attribute<float32> TRI_mean                          := continent/TRI_mean[Continent_id];
-			attribute<float32> IsProtectedArea                   := continent/IsProtectedArea[Continent_id];
-			attribute<float32> IsFloodProneArea_RP100            := continent/IsFloodProneArea_RP100[Continent_id];
-			attribute<float32> Earthquakes_MMI_Index             := continent/Earthquakes_MMI_Index[Continent_id];
-			attribute<float32> NrOfLandslides_Precipitation      := continent/NrOfLandslides_Precipitation[Continent_id];
-			attribute<float32> NrOfLandslides_Earthquakes        := continent/NrOfLandslides_Earthquakes[Continent_id];
-
-			attribute<float32> Constant                          := continent/Constant[Continent_id];
-		}
-
-		unit<wpoint> domain     := geography/domain
-		{
-			attribute<float32> LnPopulationDensity_2000_8dir     := MakeDefined(Country/LnPopulationDensity_2000_8dir[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Distance2Coastline                := MakeDefined(Country/Distance2Coastline[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Distance2FreshWater               := MakeDefined(Country/Distance2FreshWater[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Distance2MajorRoads               := MakeDefined(Country/Distance2MajorRoads[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Distance2SecundaryRoads           := MakeDefined(Country/Distance2SecundaryRoads[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Distance2Cities_GridBased         := MakeDefined(Country/Distance2Cities_GridBased[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Elevation                         := MakeDefined(Country/Elevation[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Slope                             := MakeDefined(Country/Slope[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> TRI_mean                          := MakeDefined(Country/TRI_mean[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> IsProtectedArea                   := MakeDefined(Country/IsProtectedArea[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> IsFloodProneArea_RP100            := MakeDefined(Country/IsFloodProneArea_RP100[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> Earthquakes_MMI_Index             := MakeDefined(Country/Earthquakes_MMI_Index[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> NrOfLandslides_Precipitation      := MakeDefined(Country/NrOfLandslides_Precipitation[SourceData/RegionalUnits/Countries/per_grid],0f);
-			attribute<float32> NrOfLandslides_Earthquakes        := MakeDefined(Country/NrOfLandslides_Earthquakes[SourceData/RegionalUnits/Countries/per_grid],0f);
-
-			attribute<float32> Constant                          := MakeDefined(Country/Constant[SourceData/RegionalUnits/Countries/per_grid],0f);
-		}
+		
+		attribute<uint8>   Continent_id (Countries)   := rlookup(Countries/Continent_name, Continents_InCalib/name);
+		
+		container Country := 
+			for_each_nedv(
+				Calibration_variables/name
+				, 'Continent/'+Calibration_variables/name+'[Continent_id]'
+				, Countries 
+				, float32
+			);
+			
+		container Domain := 
+			for_each_nedv(
+				Calibration_variables/name
+				, 'MakeDefined(Country/'+Calibration_variables/name+'[Countries/per_grid],0f)'
+				, geography/domain 
+				, float32
+			);
 	}
 }

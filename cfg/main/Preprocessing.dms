@@ -16,8 +16,17 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			, Person
 		);
 	
-	container DegreesOfUrbanisation:= for_each_ne(GHS_years/name, 'Calculate_DegreeOfUrbanisation/gen(Builtup/Total/'+GHS_years/name+', Builtup/Residential/'+GHS_years/name+', Population/PerYear/'+GHS_years/name+'[Person])');
-	container GridDistances:= for_each_ne(GHS_years/name, 'Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+GHS_years/name+'/Typology_Domain)');
+	container DegreesOfUrbanisation := 
+		for_each_ne(
+			GHS_years/name
+			, 'Calculate_DegreeOfUrbanisation/Gen_T(convert(Builtup/Total/'+GHS_years/name+', km2) / 1[km2] * 1[BuiltUpKm2], convert(Builtup/Residential/'+GHS_years/name+',km2) / 1[km2] * 1[BuiltUpKm2], Population/PerYear/'+GHS_years/name+'[Person])'
+		);
+		
+	container GridDistances := 
+		for_each_ne(
+			GHS_years/name
+			, 'Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+GHS_years/name+'/Typology_Domain)'
+		);
 	
 	#include <GridDists.dms>
 	#include <DegreeOfUrbanisation.dms>

@@ -205,6 +205,27 @@ container Geography : using = "units"
 		unit<spoint> pot250km:=Impl/pot250km/PotRange;
 	}
 	
+	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
+	unit<uint32> Cdomain_x_pot2k := combine(CompactedDomain, Distmatrices/pot2km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
+	unit<uint32> Cdomain_x_pot3k := combine(CompactedDomain, Distmatrices/pot3km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
 	#include <wms_layer_latlong.dms>
 	#include <tms_layer_osm_webmercator.dms>
 }

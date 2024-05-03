@@ -24,7 +24,7 @@ container Physical : using = "geography"
 		attribute<int32> ReadData (domain_sub);
 	}
 	
-	unit<ipoint> TRI_new := domain_sub
+	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
 		attribute<int32>   elevation := Elevation_new/ReadData;
 		attribute<int32>   TRI_sqr       := 
@@ -75,7 +75,7 @@ container Physical : using = "geography"
 		attribute<float32> ReadData (domain);
 	}	
 
-	#include <TRI.dms>
+	// #include <TRI.dms>
 	
 	unit<ipoint> SnowIceCover
 	:	StorageName     = "%ToBURPDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2.tif"
