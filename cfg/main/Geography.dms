@@ -92,7 +92,13 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_test                     := range(LatLong_Base, point_yx(52.04, 5.04), point_yx(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
 		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point_yx( 51.8,  4.7), point_yx(52.3, 5.7));
 		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
+		unit<dpoint> LatLong_Nicaragua                := range(LatLong_Base, point_yx( 8.66, -90.0), point_yx(15.0, -80.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nicaragua];}
+		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0), point_yx(17.0, 20.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
 	}
+
+
+
+
 
 	unit<wpoint> domain :=
 		gridset(

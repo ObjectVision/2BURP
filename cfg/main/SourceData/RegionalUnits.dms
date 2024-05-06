@@ -43,6 +43,8 @@ container RegionalUnits
 	unit<uint32> Countries
 	: storagename = "= propvalue(store_Countries, 'StorageName')"
 	, StorageReadOnly = "True"
+	, DialogType = "map"
+	, DialogData = "geometry_ll"
 	{
 		attribute<string>            Label; 
 		attribute<string>            ISO3; 
