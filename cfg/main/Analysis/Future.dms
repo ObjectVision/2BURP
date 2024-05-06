@@ -102,7 +102,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 				, domain
 				, Person
-			);
+			)
+		{
+			attribute<Person> D_2030_2100 (domain) := Y2100 - Y2030;
+		}
 			
 		container BuiltUp_Total_Area := 
 			for_each_nedv(
@@ -129,7 +132,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 						, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
 			)
 		{
-			parameter<string> Generate : ExplicitSuppliers = "=AsList(ProjectionYears/name+'/StoreTypology', ';')";
+			parameter<string> Generate := 'Ready', ExplicitSuppliers = "=AsList(ProjectionYears/name+'/StoreTypology', ';')";
 		}
 
 		// Future change in population per degree of urbanisation class.
@@ -241,13 +244,15 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 			attribute<BuiltUpKm2>        BuiltUp_Residential_Area               (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
 			
-			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area; 
+			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
 			attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := New_BuiltUp_Area * Avg_Local_Population_inRes_Density;
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
+			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area;
 			attribute<float32>           Sum_Suitability                            (ClaimRegion) := sum(Suitability/Population, Region_rel);
-			attribute<Person>            Room_for_Population                    (CompactedDomain) := LocalMaxima/MaxAllowed_Population + Population_in_New_BuiltUp_Area - Reduced_Population;
-			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]);
+			attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
+			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := Rescale(Room_for_Population, 0f, 1f);
+			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Population_beforeAllocation, Region_rel), 0[Person]);
 			attribute<float32>           ScaleFactor_0                              (ClaimRegion) := RestClaim / Sum_Suitability; //Number of persons per suitability value. 
 			
 			attribute<Person>            Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!
@@ -272,7 +277,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			{
 				attribute<float32>       ScaleFactor                  (ClaimRegion);
 				///
-				attribute<Person>        Population               (CompactedDomain) := min_elem(ScaleFactor[Region_rel] * Suitability/Population, Room_for_Population);
+				attribute<Person>        Population               (CompactedDomain) := min_elem(ScaleFactor[Region_rel] * Suitability/Population * Room_for_Population_Normalised, Room_for_Population);
 				attribute<Person>        Population_rounded       (CompactedDomain) := int32(Population)[Person]; //we round here, to omit fractional people which can then reallocated in the next iter.
 				attribute<Person>        Realisation                  (ClaimRegion) := sum(Population_rounded, Region_rel);
 				attribute<float32>       RescaleFactor                (ClaimRegion) := RestClaim / Realisation; // We need to correct the scale factor to accomodate left over claims.
@@ -280,7 +285,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			}
 			
 			//Results
-			attribute<Person>            Population               (CompactedDomain) := Population_Allocation/Last/Population_rounded + Reduced_Population;
+			attribute<Person>            Population               (CompactedDomain) := Population_Allocation/Last/Population_rounded + Population_beforeAllocation;
 			attribute<Person_BuiltUpKm2> Population_inRes_Density (CompactedDomain) := Population / BuiltUp_Residential_Area;
 			attribute<float32>           Final_ClaimRealisation       (ClaimRegion) := sum(Population, Region_rel) / Claims/Population;
 		}

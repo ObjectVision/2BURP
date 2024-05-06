@@ -26,7 +26,7 @@ container Physical : using = "geography"
 	
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
-		attribute<int32>   elevation := Elevation_new/ReadData;
+		attribute<int32>   Elevation := Physical/Elevation_new/ReadData;
 		attribute<int32>   TRI_sqr       := 
 											  sqr(elevation - N)
 											+ sqr(elevation - NE)
@@ -40,9 +40,9 @@ container Physical : using = "geography"
 										
 		attribute<TRI_Classes> TRI_K_rel              := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
 		
-		attribute<float32>     TRI_mean_1k       (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
-		attribute<TRI_Classes> TRI_Class_mean_1k (domain) := TRI_mean_1k[TRI_Classes];
-
+		attribute<float32>     TRI_mean_1k             (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
+		attribute<TRI_Classes> Write_TRI_Class_mean_1k (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
+		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
@@ -74,8 +74,6 @@ container Physical : using = "geography"
 	{
 		attribute<float32> ReadData (domain);
 	}	
-
-	// #include <TRI.dms>
 	
 	unit<ipoint> SnowIceCover
 	:	StorageName     = "%ToBURPDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2.tif"
@@ -90,8 +88,6 @@ container Physical : using = "geography"
 	}	
 	
 	#include <coast.dms>
-	// #include <nature.dms>
-	// #include <soil.dms>
 	#include <natural_hazards.dms>
 	
 	container Water : using = "geography"
@@ -112,12 +108,6 @@ container Physical : using = "geography"
 
 		#include <rivers.dms> // dms file kan evt gedelete? ligt aan calibratie
 		#include <lakes.dms> // dms file kan evt gedelete? ligt aan calibratie
-		
-		//container Sweet_Water
-		//{
-		//	attribute<float64> Sweet_Water_Distance(domain) := min_elem(Lakes/Location2Lake_km/Lake[float64],Rivers/Dist_River_km/ReadData[float64]);
-		//}
-
 		#include <floodProneArea.dms>
 		
 		container AllWater
@@ -139,7 +129,8 @@ container Physical : using = "geography"
 			//unit<ipoint> Dist_AllInland_km: StorageName     = "= PropValue(inv_dist_all_inland_water, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
 			//unit<ipoint> Dist_LargeInland_km: StorageName     = "= PropValue(inv_dist_large_inland_water, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
 			
-			unit<uint32> large_inland_water:= select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) {
+			unit<uint32> large_inland_water:= select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) 
+			{
 				attribute<SphericalMercator> geometry_mer (polygon):= org_rel->Geometry[SphericalMercator];
 			}
 			attribute<Float32> sqr_dist                				(CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
