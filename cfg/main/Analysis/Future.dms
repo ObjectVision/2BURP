@@ -115,12 +115,35 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				, BuiltUpKm2
 			);
 			
+		container BuiltUp_Total_Share := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
+				, domain
+				, float32
+			);
+			
 		container BuiltUp_Residential_Area := 
 			for_each_nedv(
 				ProjectionYears/name
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)'
 				, domain
 				, BuiltUpKm2
+			);
+			
+		container Population_inRes_Density := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population_inRes_Density)'
+				, domain
+				, Person_BuiltUpKm2
+			);
+		container Population_Density := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population_TotalLand_Density)'
+				, domain
+				, Person_Km2
 			);
 			
 		container DegreesOfUrbanisation :=
@@ -159,7 +182,44 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, 'pcount(Classify(Population/'+ProjectionYears/name+', ClassBreaks))'
 					, .
 					, uint32
-				);
+				)
+			{
+				attribute<string>  Label     (..) := ../label;
+			}
+ 		}
+		
+		unit<uint8> Population_density_Histogram : nrofrows = 10
+		{
+			attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+			attribute<float32> ClassBreaks       : [0, 1, 250, 500, 1000, 3000, 4000, 5000, 7500, 10000];
+			
+			container PerYear := 
+				for_each_nedv(
+					ProjectionYears/name
+					, 'pcount(Classify(Population_inRes_Density/'+ProjectionYears/name+', ClassBreaks))'
+					, .
+					, uint32
+				)
+			{
+				attribute<string>  Label     (..) := ../label;
+			}
+ 		}
+		
+		unit<uint8> Population_density_TotalLand_Histogram : nrofrows = 10
+		{
+			attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+			attribute<float32> ClassBreaks       : [0, 1, 250, 500, 1000, 3000, 4000, 5000, 7500, 10000];
+			
+			container PerYear := 
+				for_each_nedv(
+					ProjectionYears/name
+					, 'pcount(Classify(Population_Density/'+ProjectionYears/name+', ClassBreaks))'
+					, .
+					, uint32
+				)
+			{
+				attribute<string>  Label     (..) := ../label;
+			}
  		}
 		
 		unit<uint8> BuiltUp_Histogram : nrofrows = 10
@@ -173,7 +233,27 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, 'pcount(Classify(BuiltUp_Residential_Area/'+ProjectionYears/name+', ClassBreaks))'
 					, .
 					, uint32
-				);
+				)
+			{
+				attribute<string>  Label     (..) := ../label;
+			}
+ 		}
+		
+		unit<uint8> BuiltUp_Share_Histogram : nrofrows = 10
+		{
+			attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+			attribute<float32> ClassBreaks       : [0, 0.0001, 0.001, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25];
+			
+			container PerYear := 
+				for_each_nedv(
+					ProjectionYears/name
+					, 'pcount(Classify(Builtup_Total_Share/'+ProjectionYears/name+', ClassBreaks))'
+					, .
+					, uint32
+				)
+			{
+				attribute<string>  Label     (..) := ../label;
+			}
  		}
 		
 	}
@@ -249,7 +329,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
 			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area;
-			attribute<float32>           Sum_Suitability                            (ClaimRegion) := sum(Suitability/Population, Region_rel);
+			attribute<float32>           Sum_Suitability                            (ClaimRegion) := sum(Suitability/Population * Room_for_Population_Normalised , Region_rel);
 			attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
 			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := Rescale(Room_for_Population, 0f, 1f);
 			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Population_beforeAllocation, Region_rel), 0[Person]);
@@ -287,6 +367,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			//Results
 			attribute<Person>            Population               (CompactedDomain) := Population_Allocation/Last/Population_rounded + Population_beforeAllocation;
 			attribute<Person_BuiltUpKm2> Population_inRes_Density (CompactedDomain) := Population / BuiltUp_Residential_Area;
+			attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := Population / CompactedDomain/area;
 			attribute<float32>           Final_ClaimRealisation       (ClaimRegion) := sum(Population, Region_rel) / Claims/Population;
 		}
 	}
@@ -326,7 +407,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container Claims
 		{
 			attribute<BuiltUpKm2>        Builtup                            (ClaimRegion) := Claim;
-			// attribute<Person>            Population                         (ClaimRegion) := ='Preprocessing/Claims_Population/'+ThisYear;
 		}
 		
 		container NewState
@@ -353,10 +433,4 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32>    Claim_Realisation             (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
 		}
 	}
-	
-	// unit<uint32> domain_x_pot := combine(domain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen, pot2km == 5x5 cellen
-	// {	
-		// attribute<ipoint> third_rel_i  := ipoint(first_rel) + ipoint(second_rel -> org_rel);
-		// attribute<domain> third_rel    := PointRow(third_rel_i) >= 0i && PointCol(third_rel_i) >= 0i ? wpoint(third_rel_i) : null_wp;
-	// }
 }
