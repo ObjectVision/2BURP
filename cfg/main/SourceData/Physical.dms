@@ -52,14 +52,14 @@ container Physical : using = "geography"
 			attribute<int32>   ClassBreaks_sqr   := int32(sqr(ClassBreaks_org));
  		}
 
-		attribute<int32>   N                    := elevation[sub_or_null(id(.), point(1i, 0i, ipoint))];
-		attribute<int32>   NE                   := elevation[sub_or_null(id(.), point(1i, 0i, ipoint)) + point(0i, 1i, ipoint)];
-		attribute<int32>   E                    := elevation[id(.) + point(0i, 1i, ipoint)];
-		attribute<int32>   SE                   := elevation[id(.) + point(1i, 1i, ipoint)];
-		attribute<int32>   S                    := elevation[id(.) + point(1i, 0i, ipoint)];
-		attribute<int32>   SW                   := elevation[sub_or_null(id(.) + point(1i, 0i, ipoint), point(0i, 1i, ipoint))];
-		attribute<int32>   W                    := elevation[sub_or_null(id(.), point(0i, 1i, ipoint))];
-		attribute<int32>   NW                   := elevation[sub_or_null(id(.), point(1i, 1i, ipoint))];
+		attribute<int32>   N                    := elevation[sub_or_null(id(.), point_yx(1i, 0i, ipoint))];
+		attribute<int32>   NE                   := elevation[sub_or_null(id(.), point_yx(1i, 0i, ipoint)) + point_yx(0i, 1i, ipoint)];
+		attribute<int32>   E                    := elevation[id(.) + point_yx(0i, 1i, ipoint)];
+		attribute<int32>   SE                   := elevation[id(.) + point_yx(1i, 1i, ipoint)];
+		attribute<int32>   S                    := elevation[id(.) + point_yx(1i, 0i, ipoint)];
+		attribute<int32>   SW                   := elevation[sub_or_null(id(.) + point_yx(1i, 0i, ipoint), point_yx(0i, 1i, ipoint))];
+		attribute<int32>   W                    := elevation[sub_or_null(id(.), point_yx(0i, 1i, ipoint))];
+		attribute<int32>   NW                   := elevation[sub_or_null(id(.), point_yx(1i, 1i, ipoint))];
 	}
 	
 	unit<ipoint> Slope_2021
