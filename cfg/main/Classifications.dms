@@ -1,8 +1,13 @@
 container Classifications : using = "units"
 {
-	unit<uint8>  GHS_years  : nrofrows = 10 
+	// unit<uint8>  GHS_years  : nrofrows = 10 
+	// {
+		// attribute<uint16> year: [ 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]; 
+		// attribute<string> name := 'Y'+string(year); 
+	// }
+	unit<uint8>  GHS_years  : nrofrows = 1 
 	{
-		attribute<uint16> year: [ 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]; 
+		attribute<uint16> year: [  2020]; 
 		attribute<string> name := 'Y'+string(year); 
 	}
 	

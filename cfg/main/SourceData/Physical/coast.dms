@@ -10,12 +10,16 @@ container Coast
 	unit<uint32> Coastline := Read_Coastline/out
 	{
 		attribute<LatLong>           Geometry     (poly)   := Read_Coastline/out/geometry;
+		attribute<WorldMollweide>    Geometry_MW  (poly)   := convert(geometry, WorldMollweide);
 		// attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
 		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain.tif'";
 		attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		
 		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain.tif'";
 		attribute<bool>              Read_per_grid         (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
+
+		attribute<bool>              Write_per_grid_MW        (Mollweide_grid) := IsDefined(poly2grid(Geometry_MW, Mollweide_grid)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain_MW.tif'";
+		attribute<bool>              Read_per_grid_MW         (Mollweide_grid) : StorageName = "=PropValue(Write_per_grid_MW, 'StorageName')", StorageReadOnly = "true";
 
 		unit<uint32> split_polygon := split_polygon(Geometry[LatLong_ip])
 		{

@@ -47,14 +47,29 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 	Template Gen_T
 	{
 		
-		attribute<BuiltUpKm2>        BuiltUp_Total (domain);
-		attribute<BuiltUpKm2>        BuiltUp_Residential (domain);
-		attribute<Person>            Population_domain (domain);
+		attribute<BuiltUpKm2>        BuiltUp_Total (mw_domain);
+		attribute<BuiltUpKm2>        BuiltUp_Residential (mw_domain);
+		attribute<Person>            Population_domain (mw_domain);
 		///
+		unit<ipoint> mw_domain          := Mollweide_grid
+		{
+			attribute<bool> IsCompactedDomain := const(true,.);
+		}
+		unit<uint64> CompactedDomain := select_with_org_rel_with_attr_by_cond(mw_domain,mw_domain/IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
+		{
+			attribute<.>                 id                    := id(.);
+			attribute<mw_domain>         domain_rel         := org_rel;
+			attribute<.>                 BaseGrid  (mw_domain)    := invert(domain_rel);
+			attribute<bool>              IsCD      (mw_domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
+			attribute<km2>               area                  := mw_domain/area[domain_rel];
+			attribute<SphericalMercator> geometry_mer          := convert(domain_rel/geometry[domain_rel], SphericalMercator);
+			attribute<Countries>         Country_rel   := Countries/per_grid[domain_rel];
+		}
+
 		
-		attribute<km2>               Land_Area_domain                        (domain) := domain/area;
-		attribute<BuiltUpKm2>        BuiltUp_Total_Area_domain               (domain) := BuiltUp_Total;
-		attribute<Person_km2>        Population_Land_Density_domain          (domain) := Population_domain / Land_Area_domain; // DO NOT USE!
+		attribute<km2>               Land_Area_domain                        (mw_domain) := mw_domain/area;
+		attribute<BuiltUpKm2>        BuiltUp_Total_Area_domain               (mw_domain) := BuiltUp_Total;
+		attribute<Person_km2>        Population_Land_Density_domain          (mw_domain) := Population_domain / Land_Area_domain; // DO NOT USE!
 		attribute<BuiltUpKm2>        BuiltUp_Total_Area             (CompactedDomain) := BuiltUp_Total_Area_domain[CompactedDomain/org_rel]; 
 		attribute<Person_km2>        Population_Land_Density        (CompactedDomain) := Population_Land_Density_domain[CompactedDomain/org_rel];
 		attribute<km2>               Land_Area                      (CompactedDomain) := Land_Area_domain[CompactedDomain/org_rel];
@@ -69,23 +84,23 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>        IsDenseEnoughOrBuiltupEnough             (CompactedDomain) := Has_Min_PopDensity || Has_Min_BUShare;
 			
 			// Clustered to total pop >= 50,000 persons
-			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough)))
+			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
-				attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
+				attribute<uint32>  GroupCellSize                                     (mw_domain) := pcount_uint32(districts)[GroupDomain_rel];
 				attribute<Person>  Sum_Population_perGroup                                    := sum(Population_domain,GroupDomain_rel);
-				attribute<Person>  GroupPopulationSize                               (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				attribute<Person>  GroupPopulationSize                               (mw_domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
 			}
 			
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 		
 			// All cells resulting from 3x3 median filtering 
-			attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[Cdomain_x_pot1k/third_rel], Cdomain_x_pot1k/first_rel); 
+			attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[MW_Cdomain_x_pot1k/third_rel], MW_Cdomain_x_pot1k/first_rel); 
 			
 			// Gap filling: lake < 15km2
-			unit<uint32> GapFilling := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsLargeEnoughGroup)))
+			unit<uint32> GapFilling := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsLargeEnoughGroup)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
 				attribute<km2>     GroupArea                                                  := sum(Land_Area_domain, GroupDomain_rel);
 			}
 			
@@ -104,12 +119,12 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>        Has_Min_BUShare                          (CompactedDomain) := BuiltUp_Total_Area / Land_Area >= Parameters/Min_BU_Share; 
 			attribute<bool>        IsDenseEnoughOrBuiltupEnough             (CompactedDomain) := Has_Min_PopDensity || Has_Min_BUShare;
 			
-			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough)))
+			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
-				attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
+				attribute<uint32>  GroupCellSize                                     (mw_domain) := pcount_uint32(districts)[GroupDomain_rel];
 				attribute<Person>  Sum_Population_perGroup                                    := sum(Population_domain, GroupDomain_rel);
-				attribute<Person>  GroupPopulationSize                               (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				attribute<Person>  GroupPopulationSize                               (mw_domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
 			}
 			
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
@@ -137,12 +152,12 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			
 			attribute<bool>        IsDenseEnoughAndOrBuiltUpEnough_Combined (CompactedDomain) := IsDenseEnoughAndBuiltupEnough_low || IsDenseEnoughOrBuiltupEnough_high;
 			
-			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined)))
+			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
-				attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
+				attribute<uint32>  GroupCellSize                                     (mw_domain) := pcount_uint32(districts)[GroupDomain_rel];
 				attribute<Person>  Sum_Population_perGroup                                    := sum(Population_domain,GroupDomain_rel);
-				attribute<Person>  GroupPopulationSize                               (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				attribute<Person>  GroupPopulationSize                               (mw_domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
 			}
 			
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
@@ -151,7 +166,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 																									|| Dense_Urban_Cluster/Typology == TypologyK/v/Dense_Urban_Cluster
 																								);
 			attribute<bool>        IsDUCorUC                                (CompactedDomain) := Urban_Centre/Result || Dense_Urban_Cluster/Result;
-			attribute<bool>        IsFarEnoughFrom_DUC_UC                   (CompactedDomain) := sum_uint32(IsDUCorUC[Cdomain_x_pot2k/third_rel], Cdomain_x_pot2k/first_rel) == 0; 
+			attribute<bool>        IsFarEnoughFrom_DUC_UC                   (CompactedDomain) := sum_uint32(IsDUCorUC[MW_Cdomain_x_pot2k/third_rel], MW_Cdomain_x_pot2k/first_rel) == 0; 
 			
 			attribute<bool>        Result                                   (CompactedDomain) := IsLargeEnoughGroup && IsNotOtherTypology && IsFarEnoughFrom_DUC_UC;
 			attribute<TypologyK>   Typology                                 (CompactedDomain) := Result ? TypologyK/v/Semi_dense_urban_cluster : null_b;
@@ -172,20 +187,20 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			
 			attribute<bool>        IsDenseEnoughAndOrBuiltUpEnough_Combined (CompactedDomain) := IsDenseEnoughAndBuiltupEnough_low || IsDenseEnoughOrBuiltupEnough_high;
 			
-			attribute<bool>		   crit_domain (domain):= recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined);
+			attribute<bool>		   crit_domain (mw_domain):= recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined);
 
-			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined)))
+			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughAndOrBuiltUpEnough_Combined)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
-				attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
+				attribute<uint32>  GroupCellSize                                     (mw_domain) := pcount_uint32(districts)[GroupDomain_rel];
 				attribute<Person>  Sum_Population_perGroup                                    := sum(crit_domain ? Population_domain : 0[Person],GroupDomain_rel);
-				attribute<Person>  GroupPopulationSize                               (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				attribute<Person>  GroupPopulationSize                               (mw_domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
 			}
 			
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 			
 			attribute<bool>        IsDUCorSDUC                              (CompactedDomain) := Dense_Urban_Cluster/Result || Semi_Dense_Urban_Cluster/Result;
-			attribute<bool>        IsCloseEnoughTo_DUC_SDUC                 (CompactedDomain) := sum_uint32(IsDUCorSDUC[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel) > 0; 
+			attribute<bool>        IsCloseEnoughTo_DUC_SDUC                 (CompactedDomain) := sum_uint32(IsDUCorSDUC[MW_cdomain_x_pot3k/third_rel], MW_cdomain_x_pot3k/first_rel) > 0; 
 			
 			attribute<bool>        IsNotOtherTypology                       (CompactedDomain) := NOT(
 																									Urban_Centre/Typology == TypologyK/v/Urban_Centre 
@@ -205,12 +220,12 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>        Has_Min_BUShare                          (CompactedDomain) := BuiltUp_Total_Area / Land_Area >= Parameters/Min_BU_Share; 
 			attribute<bool>        IsDenseEnoughOrBuiltupEnough             (CompactedDomain) := Has_Min_PopDensity || Has_Min_BUShare;
 			
-			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough && IsNotOtherTypology)))
+			unit<uint32> FindContiguousCells := district(uint8(recollect_by_cond(mw_domain/IsCompactedDomain, IsDenseEnoughOrBuiltupEnough && IsNotOtherTypology)))
 			{
-				attribute<.>       GroupDomain_rel                                   (domain) := districts;
-				attribute<uint32>  GroupCellSize                                     (domain) := pcount_uint32(districts)[GroupDomain_rel];
+				attribute<.>       GroupDomain_rel                                   (mw_domain) := districts;
+				attribute<uint32>  GroupCellSize                                     (mw_domain) := pcount_uint32(districts)[GroupDomain_rel];
 				attribute<Person>  Sum_Population_perGroup                                    := sum(Population_domain, GroupDomain_rel);
-				attribute<Person>  GroupPopulationSize                               (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				attribute<Person>  GroupPopulationSize                               (mw_domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
 			}
 			
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
@@ -249,7 +264,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 		{
 			// container Parameters := DegreeOfUrbanisation/Parameters/Very_Low_Density_Grid_Cell;
 			
-			attribute<bool>        IsOnLand                                 (CompactedDomain) := /SourceData/Physical/Coast/Coastline/Read_per_grid[CompactedDomain/domain_rel];
+			attribute<bool>        IsOnLand                                 (CompactedDomain) := /SourceData/Physical/Coast/Coastline/Read_per_grid_MW[CompactedDomain/domain_rel];
 			attribute<bool>        IsNotOtherTypology                       (CompactedDomain) := NOT(
 																									Urban_Centre/Typology == TypologyK/v/urban_centre 
 																									|| Dense_Urban_Cluster/Typology == TypologyK/v/Dense_Urban_Cluster
@@ -265,10 +280,32 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 		
 		
 		attribute<TypologyK>       Typology                                 (CompactedDomain) := ='switch('+AsList('case('+TypologyK/name+'/Result, TypologyK/v/'+TypologyK/name+')', ',')+', null_b)';
-		attribute<TypologyK>       Typology_Domain                                   (Domain) := recollect_by_cond(domain/IsCompactedDomain, Typology); // seems redundant, added because of the need to have this result in the grid distance access computations
+		attribute<TypologyK>       Typology_Domain                                   (mw_domain) := recollect_by_cond(mw_domain/IsCompactedDomain, Typology); // seems redundant, added because of the need to have this result in the grid distance access computations
 		
-		attribute<uint8>           StoreTypology                                     (domain) := TypologyK/EK[Typology_Domain], StorageName = "= '%localdataprojdir%/export/degurbagrids/'+ModelParameters/StudyArea+'/'+propvalue(., 'Name')+'.tif'";
-		attribute<uint8>           ReadTypology                                      (domain) : StorageName = "=PropValue(StoreTypology, 'StorageName')", StorageReadOnly = "true";
-		attribute<TypologyK>       ReadTypologyK                                     (domain) := invert(TypologyK/EK)[ReadTypology];
+		attribute<uint8>           StoreTypology                                     (mw_domain) := TypologyK/EK[Typology_Domain], StorageName = "= '%localdataprojdir%/export/degurbagrids_mw/'+ModelParameters/StudyArea+'/'+propvalue(., 'Name')+'.tif'";
+		attribute<uint8>           ReadTypology                                      (mw_domain) : StorageName = "=PropValue(StoreTypology, 'StorageName')", StorageReadOnly = "true";
+		attribute<TypologyK>       ReadTypologyK                                     (mw_domain) := invert(TypologyK/EK)[ReadTypology];
+		
+		unit<uint32> MW_Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+		{	
+			attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+			attribute<mw_domain>          third_rel_d   := ipoint(third_rel_i);
+			attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+		}
+		
+		unit<uint32> MW_Cdomain_x_pot2k := combine(CompactedDomain, Distmatrices/pot2km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+		{	
+			attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+			attribute<mw_domain>          third_rel_d   := ipoint(third_rel_i);
+			attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+		}
+		
+		unit<uint32> MW_Cdomain_x_pot3k := combine(CompactedDomain, Distmatrices/pot3km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+		{	
+			attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+			attribute<mw_domain>       third_rel_d   := ipoint(third_rel_i);
+			attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+		}
 	}
+	
 }

@@ -10,7 +10,8 @@ container Geography : using = "units"
 		parameter<km>      lengthdegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
 	}
 	unit<ipoint> LatLong_ip             := gridset(LatLong,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
-	unit<dpoint> WorldMollweide         : SpatialReference = "ESRI:54009";
+	unit<dpoint> WorldMollweide         := ='StudyAreas/WorldMollweide_'+ModelParameters/StudyArea;
+	unit<dpoint> WorldMollweide_Base    : SpatialReference = "ESRI:54009";
 	Unit<dpoint> SphericalMercator_base : SpatialReference = "EPSG:3857", DialogData = "tms_layer_osm_webmercator";
 	Unit<dpoint> SphericalMercator      := range(SphericalMercator_base, point_yx(-16000000.0, -20000000.0),  point_yx(16000000.0, 20000000.0))
 	{
@@ -59,6 +60,7 @@ container Geography : using = "units"
 	{
 		attribute<WorldMollWeide> point       := mapping(., WorldMollWeide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, WorldMollWeide);
 		attribute<LatLong>        domain_rel  := convert(point, LatLong);
+		attribute<km2>            area        := const(1[km2],.);
 		
 		unit<uint64> points := select_with_org_rel(isDefined(point))
 		{
@@ -94,7 +96,10 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
 		unit<dpoint> LatLong_Nicaragua                := range(LatLong_Base, point_yx( 8.66, -90.0), point_yx(15.0, -80.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nicaragua];}
 		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0), point_yx(17.0, 20.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
+
+		unit<dpoint> WorldMollweide_Netherlands       := range(WorldMollweide_Base, point_yx( 5760626.04, -2445.18), point_yx(6371834.81,738413.94)) {parameter<WorldMollweide> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_MW[SourceData/RegionalUnits/Countries/V/Netherlands];}
 	}
+
 
 
 
@@ -231,6 +236,9 @@ container Geography : using = "units"
 		attribute<domain>          third_rel_d   := wpoint(third_rel_i);
 		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
 	}
+	
+	
+	
 	
 	#include <wms_layer_latlong.dms>
 	#include <tms_layer_osm_webmercator.dms>
