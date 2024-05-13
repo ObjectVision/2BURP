@@ -20,7 +20,20 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		for_each_ne(
 			GHS_years/name
 			, 'Calculate_DegreeOfUrbanisation/Gen_T(convert(Builtup/Total_MW/'+GHS_years/name+', km2) / 1[km2] * 1[BuiltUpKm2], convert(Builtup/Residential_MW/'+GHS_years/name+',km2) / 1[km2] * 1[BuiltUpKm2], Population/PerYear_MW/'+GHS_years/name+'[Person])'
-		);
+		) {
+			// ad-hoc loading of degurba file
+			unit<wpoint> degurba_official: storagename = "%ToBURPDataDir%/SocioEconomic/Settlements/GHS_SMOD_E2020_GLOBE_R2023A_54009_1000_V1_0.tif", storagereadonly = "true", dialogdata = "WorldMollweide", storagetype = "gdal.grid" {
+				attribute<uint8> GridData;
+				attribute<uint8> ReadData (Mollweide_grid);
+				attribute<Typologyk> Degurba (Mollweide_grid):= invert(TypologyK/EK)[ReadData];
+			}
+			attribute<ErrorMatrix> mistake_matrix (Mollweide_grid):= rlookup(point(degurba_official/Degurba[int16], Y2020/Typology_Domain[int16], spoint), ErrorMatrix/uni_id);
+			
+			unit<uint32> ErrorMatrix:= combine(TypologyK, TypologyK) {
+				attribute<spoint> uni_id:= point(first_rel[int16], second_rel[int16]);
+				attribute<uint64> counts:= pcount(mistake_matrix);
+			}
+		}
 		
 	container GridDistances := 
 		for_each_ne(
