@@ -47,14 +47,14 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			
 			attribute<float64> ItemOfInterest_Null (domain) := ItemOfInterest > 0d ? ItemOfInterest : null_d;
 
-			attribute<float64> N                   (domain) := ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint))];
-			attribute<float64> NE                  (domain) := ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint)) + point_yx(0w, 1w, wpoint)];
-			attribute<float64> E                   (domain) := ItemOfInterest[id(domain) + point_yx(0w, 1w, wpoint)];
-			attribute<float64> SE                  (domain) := ItemOfInterest[id(domain) + point_yx(1w, 1w, wpoint)];
-			attribute<float64> S                   (domain) := ItemOfInterest[id(domain) + point_yx(1w, 0w, wpoint)];
-			attribute<float64> SW                  (domain) := ItemOfInterest[sub_or_null(id(domain) + point_yx(1w, 0w, wpoint), point_yx(0w, 1w, wpoint))];
-			attribute<float64> W                   (domain) := ItemOfInterest[sub_or_null(id(domain), point_yx(0w, 1w, wpoint))];
-			attribute<float64> NW                  (domain) := ItemOfInterest[sub_or_null(id(domain), point_yx(1w, 1w, wpoint))];
+			attribute<float64> N                   (domain) := MakeDefined(ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint))],0d);
+			attribute<float64> NE                  (domain) := MakeDefined(ItemOfInterest[sub_or_null(id(domain),point_yx(1w, 0w, wpoint)) + point_yx(0w, 1w, wpoint)],0d);
+			attribute<float64> E                   (domain) := MakeDefined(ItemOfInterest[id(domain) + point_yx(0w, 1w, wpoint)],0d);
+			attribute<float64> SE                  (domain) := MakeDefined(ItemOfInterest[id(domain) + point_yx(1w, 1w, wpoint)],0d);
+			attribute<float64> S                   (domain) := MakeDefined(ItemOfInterest[id(domain) + point_yx(1w, 0w, wpoint)],0d);
+			attribute<float64> SW                  (domain) := MakeDefined(ItemOfInterest[sub_or_null(id(domain) + point_yx(1w, 0w, wpoint), point_yx(0w, 1w, wpoint))],0d);
+			attribute<float64> W                   (domain) := MakeDefined(ItemOfInterest[sub_or_null(id(domain), point_yx(0w, 1w, wpoint))],0d);
+			attribute<float64> NW                  (domain) := MakeDefined(ItemOfInterest[sub_or_null(id(domain), point_yx(1w, 1w, wpoint))],0d);
 			
 			attribute<bool>    N_Null              (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(1w, 0w, wpoint))]);
 			attribute<bool>    NE_Null             (domain) := IsDefined(ItemOfInterest_Null[sub_or_null(id(domain), point_yx(1w, 0w, wpoint)) + point_yx(0w, 1w, wpoint)]);
