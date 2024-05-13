@@ -45,7 +45,6 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 		attribute<float32>	cutoff:= float32(id(.)) * 10000f;
 		attribute<int32>  	max:= max(compactdomain/d_perc, compactdomain/bu_2000_perc);
 		attribute<int32>  	p99:= rth_element(compactdomain/d_perc, 0.99f, compactdomain/bu_2000_perc);
-		
 	}
 	unit<uint32> compactdomain:= CompactedDomain {
 		attribute<float32> bu_2000_corr:= float32(Builtup/Total/Y2000)[domain_rel] / lat_factor;

@@ -45,5 +45,8 @@ container Classifications : using = "units"
 	{
 		attribute<string> label : ['Pots_lin_5km', 'Pots_sqr_5km', 'Pots_lin_10km', 'Pots_sqr_10km', 'Pots_lin_20km', 'Pots_sqr_20km', 'Pots_lin_40km', 'Pots_sqr_40km'];
 	}
+	unit<uint32> percentages: nrofrows = 100 {
+		attribute<string> 	label:= string(id(.)+1)+'%';
+	}
 
 }

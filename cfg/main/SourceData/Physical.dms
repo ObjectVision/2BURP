@@ -42,7 +42,8 @@ container Physical : using = "geography"
 		
 		attribute<float32>     TRI_mean_1k             (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
 		attribute<TRI_Classes> Write_TRI_Class_mean_1k (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
-		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		//attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= '%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
