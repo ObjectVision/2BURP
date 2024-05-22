@@ -272,7 +272,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32> MaxAllowed_Builtup_Total_Share                   (CompactedDomain) := min_elem(MaxAllowed_Builtup_Total_Share_extraRestrictie, MaxAllowed_Builtup_Total_Share0);
 			
 			//adhoc
-			attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
+			attribute<float32> Modifier (CompactedDomain) := max_elem(MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share, 0f) / max_elem(r_if_LocalMax, max_saturation - CurrState/BuiltUp_Total_Share);
 		}
 		
 		container Suitability
@@ -295,6 +295,12 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	AutoGLM_Coeffs/Constant';
 					
 			attribute<Suit>  BuiltUp (CompactedDomain) := Calc[CompactedDomain/org_rel];
+			attribute<float32> Prob (CompactedDomain) := exp(BuiltUp) / (1f + exp(BuiltUp));
+			
+			
+			/* ad hoc code from LUISA: 
+				exp(min_elem(MakeDefined(BuiltUp, Float32(-1000000)), float32(80)))/(Float32(1)+exp(min_elem(MakeDefined(EmpiricallyObtainedSuitability/Urban, Float32(-1000000)), float32(80))))
+			*/
 		}
 		
 		container Claims
@@ -302,8 +308,37 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        Builtup                            (ClaimRegion) := Claim;
 		}
 		
-		container NewState
-		{
+		container NewState:= AllocModel_AoN_prob_wlimits;//AllocModel_AoN_lin_suit;
+		
+		container AllocModel_AoN_prob_wlimits {
+			attribute<Suit> AdjProb (CompactedDomain):= (Suitability/Prob * LocalMaxima/Modifier)[Suit];
+			
+			attribute<SuitNeg>    Rank                     (CompactedDomain) := -1[SuitNeg / Suit] * AdjProb;
+			attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
+			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
+			
+			attribute<SuitNeg>    CuttingLine                  (ClaimRegion) := MakeDefined(
+																				nth_element_weighted(
+																					Rank                                // negative suitability
+																					, Delta_Claim                       // delta claim in BuiltUpKm2
+																					, Weight                            // per cell value that adds towards the claim in BuiltUpKm2
+																					, Region_rel   // relation between grid domain and claim region
+																				)
+																				, max(Rank, Region_rel) // if no cuttingline is found, the maximum of the negative suitablity is chosen per claim region. In other words, making sure there is a value, albeit the least suitable location.
+																			);
+			attribute<bool>       WillBeBuiltUp             (CompactedDomain) := Rank < CuttingLine[Region_rel]; //If smaller or equal to, this could result in 'gele vla'. If just smaller than, and the suitability is not expressive enough, this could result in underrealisation.
+
+			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := WillBeBuiltUp ? max_elem(LocalMaxima/MaxAllowed_Builtup_Total_Share, CurrState/BuiltUp_Total_Share) : CurrState/BuiltUp_Total_Share; 
+			attribute<BuiltUpKm2> BuiltUp_Total_Area        (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2];
+			attribute<BuiltUpKm2> BuiltUp_Residential_Area  (CompactedDomain) := BuiltUp_Total_Area - InitialState/BuiltUp_NonResidential_Area;
+			attribute<percentages> Perc_BuiltUp_Total (CompactedDomain):= classify(100f * (BuiltUp_Total_Share), id(percentages)[float32]);
+
+			attribute<float32>    Claim_Realisation             (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
+			
+			
+		}
+		
+		container AllocModel_AoN_lin_suit {
 			attribute<SuitNeg>    Rank                     (CompactedDomain) := -1[SuitNeg / Suit] * Suitability/BuiltUp;
 			attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
 			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
