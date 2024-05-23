@@ -88,6 +88,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, BuiltUpKm2
 				);
 				
+			container Delta_BuiltUp_Total_Area := 
+				for_each_nedv(
+					ProjectionYears_Delta/name
+					, 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/'+ProjectionYears_Delta/prev_name
+					, domain
+					, BuiltUpKm2
+				);
+				
 			container BuiltUp_Total_Share := 
 				for_each_nedv(
 					ProjectionYears/name
@@ -131,6 +139,18 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
 		}
 
+		
+		container Added_BU_perDoU2020 := 
+			for_each_nedv(
+				ProjectionYears_Delta/name
+				, 'sum(Prep/Delta_BuiltUp_Total_Area/'+ProjectionYears_Delta/name+', Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK)'
+				, TypologyK
+				, BuiltUpKm2
+			)
+		{
+			attribute<string>  Label     (TypologyK) := TypologyK/label;
+		}
+		
 		// Future change in population per degree of urbanisation class.
 		container Population_perDoU := 
 			for_each_nedv(

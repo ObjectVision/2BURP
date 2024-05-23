@@ -70,7 +70,7 @@ container Geography : using = "units"
 
 	container StudyAreas
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0));
+		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= union_polygon(ipolygon(SourceData/RegionalUnits/Countries/Geometry_LL));}
 
 		//For fast testing with extent of 1 country (no other country within extent)
 		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Iceland];}
