@@ -334,6 +334,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<SuitNeg>    Rank                     (CompactedDomain) := -1[SuitNeg / Suit] * Suitability/BuiltUp;
 			attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
 			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
+			attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
 			
 			attribute<SuitNeg>    CuttingLine                  (ClaimRegion) := MakeDefined(
 																				nth_element_weighted(
@@ -344,7 +345,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																				)
 																				, max(Rank, Region_rel) // if no cuttingline is found, the maximum of the negative suitablity is chosen per claim region. In other words, making sure there is a value, albeit the least suitable location.
 																			);
-			attribute<bool>       WillBeBuiltUp             (CompactedDomain) := Rank < CuttingLine[Region_rel]; //If smaller or equal to, this could result in 'gele vla'. If just smaller than, and the suitability is not expressive enough, this could result in underrealisation.
+			attribute<bool>       WillBeBuiltUp             (CompactedDomain) := Rank < CuttingLine[Region_rel]; //If smaller or equal to, this could result in too much allocation. If just smaller than, and the suitability is not expressive enough, this could result in underrealisation.
 
 			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := WillBeBuiltUp ? max_elem(LocalMaxima/MaxAllowed_Builtup_Total_Share, CurrState/BuiltUp_Total_Share) : CurrState/BuiltUp_Total_Share; 
 			attribute<BuiltUpKm2> BuiltUp_Total_Area        (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2];
