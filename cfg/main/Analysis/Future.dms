@@ -363,8 +363,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container          NewState_BuiltUp;
 		attribute<Person>  Claim (ClaimRegion);
 		///
-		parameter<float32> Initial_Population_Proportional_Reduction_Rate := 0.1f;
-		parameter<float32> Initial_Population_Absolute_Reduction_Rate     := 0.1f;
+		parameter<float32> Initial_Population_Proportional_Reduction_Rate_base := 0.025f;
+		parameter<float32> Initial_Population_Absolute_Reduction_Rate_base     := 0.025f;
+		attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * 2f, Initial_Population_Proportional_Reduction_Rate_base) : Initial_Population_Proportional_Reduction_Rate_base';
+		attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * 2f, Initial_Population_Absolute_Reduction_Rate_base) : Initial_Population_Absolute_Reduction_Rate_base';
 		
 		
 		container LocalMaxima
