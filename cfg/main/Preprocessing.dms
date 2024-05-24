@@ -6,7 +6,11 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
 			, FunctionalAreas
 			, BuiltUpKm2
-		);
+		)
+	{
+		attribute<BuiltUpKm2> Y2010 (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2010, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+		attribute<BuiltUpKm2> Y2020 (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2020, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+	}
 	
 	container Claims_Population := 
 		for_each_nedv(
@@ -14,13 +18,20 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			, '(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+'[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
 			, FunctionalAreas
 			, Person
-		);
+		)
+	{
+		attribute<Person> Y2010 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2010[Person], FunctionalAreas/per_domain);
+		attribute<Person> Y2020 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2020[Person], FunctionalAreas/per_domain);
+	}
 	
 	container DegreesOfUrbanisation := 
 		for_each_ne(
 			GHS_years/name
 			, 'Calculate_DegreeOfUrbanisation/Gen_T(convert(Builtup/Total/'+GHS_years/name+', km2) / 1[km2] * 1[BuiltUpKm2], convert(Builtup/Residential/'+GHS_years/name+',km2) / 1[km2] * 1[BuiltUpKm2], Population/PerYear/'+GHS_years/name+'[Person])'
-		);
+		)
+	{
+		parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+GHS_years/name+'/StoreTypology', ';')";
+	}
 		
 	container GridDistances := 
 		for_each_ne(

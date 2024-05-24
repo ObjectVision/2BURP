@@ -1,6 +1,5 @@
 container UrbanCombine : using = "geography"
 {
-	//User Input --> 3e variable for 3way test: Past/SSPs/SSPPast/ProjectionDates/Y2015/landuse_allocation/IsUrban
 	container urbanization_model_valuation_examples
 	{
 		container JRC_1990_2014_M2015 := 
@@ -32,7 +31,7 @@ container UrbanCombine : using = "geography"
 		unit<uint32> past_curr_combi := combine(A, B);
 		unit<uint32> value_combi := combine(past_curr_combi, C);
 		unit<uint32> part_value_combi := combine(value_combi, P)
-		{				
+		{
 			attribute<uint32> count := pcount(sample_set2/per_sample);
 		}
 		unit<uint32> sample_set2 := sample_set 

@@ -47,12 +47,15 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		for_each_ne(
 			ProjectionYears/name 
 			,	'Allocate_Builtup_T('
-					+quote(ProjectionYears/name)+                                        
-					', Allocate_Builtup/'+ProjectionYears/prevStateName+                                         // (0) State of previous period
-					', Allocate_Population/'+ProjectionYears/prevStateName+                                         // (0) State of previous period (population_allocation container)
-					', Claim/Builtup/'+ProjectionYears/name+       // (1) Expected amount of builtup per region in km2
+					+quote(ProjectionYears/name)+                              // (0) Year
+					', Allocate_Builtup/'+ProjectionYears/prevStateName+       // (1) State builtup of previous period
+					', Allocate_Population/'+ProjectionYears/prevStateName+    // (2) State population of previous period (population_allocation container)
+					', Claim/Builtup/'+ProjectionYears/name+                   // (3) Expected amount of builtup per region in km2
 				')'
-		) {container InitialState:= Future/InitialState;}
+		) 
+	{
+		container InitialState:= Future/InitialState;
+	}
 		
 	container Allocate_Population := 
 		for_each_ne(
@@ -63,7 +66,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					', Allocate_Builtup/'+ProjectionYears/name+'/NewState'
 					', Claim/Population/'+ProjectionYears/name+
 				')'
-		)  {container InitialState:= Future/InitialState;}
+		) 
+	{
+		container InitialState:= Future/InitialState;
+	}
 
 	container Indicators
 	{
@@ -298,8 +304,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container Suitability
 		{
 			container        AutoGLM_Coeffs            := Analysis/Calibration/ReadCoffecients/coef2domain/domain;
-		attribute<Suit> Calc (domain) := ='(CurrPopState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + 
-																	(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                            * AutoGLM_Coeffs/Distance2Coastline) + 
+		// attribute<Suit> Calc (domain) := ='(Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + '
+		attribute<Suit> Calc (domain) := ='(CurrPopState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + '
+																	'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                            * AutoGLM_Coeffs/Distance2Coastline) + 
 																	(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
@@ -390,8 +397,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container Suitability
 		{
 			container AutoGLM_Coeffs  := Analysis/Calibration/ReadCoffecients/coef2domain/domain;
-			attribute<Suit> Calc (domain) := ='(CurrState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + 
-																	(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                            * AutoGLM_Coeffs/Distance2Coastline) + 
+			// attribute<Suit> Calc (domain) := ='(Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/Ln_mean_8dir[float32]                                    * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + '
+			attribute<Suit> Calc (domain) := ='(CurrState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/PopulationDensity_2000_8dir) + '
+																	'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                            * AutoGLM_Coeffs/Distance2Coastline) + 
 																	(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
