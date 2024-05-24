@@ -98,7 +98,7 @@ container RegionalUnits
 		attribute<bool>           IsStudyArea                           := pcount(per_CompactedDomain) > 1000;
 	}
 	
-	unit<uint32> FunctionalAreas := select_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
+	unit<uint32> FunctionalAreas := select_with_org_rel_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
 	, DialogData      = "geometry_LL"
 	, DialogType      = "map"
 	{

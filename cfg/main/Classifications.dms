@@ -18,7 +18,7 @@ container Classifications : using = "units"
 		attribute<string> name := 'I'+string(id(.));
 		attribute<string> PrevPopName := MakeDefined(name[sub_or_null(ID(.),1)]+'/NextPop', 'CurrState/Pop');
 	}
-	// parameter<uint8> test := uint8(substr(ModelParameters/StartYear, 2,2));
+
 	unit<uint8> ProjectionYears := range(uint8, uint8(substr(ModelParameters/StartYear, 2,2))+1b, 11b) //11b-1b becomes 2100 in this setup.
 	{
 		attribute<Year>   Yr             := (float32(id(.)) * 10f + 2000f)[Year];
@@ -28,7 +28,7 @@ container Classifications : using = "units"
 		attribute<string> prevStateName  := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
 	
-	unit<uint8> ProjectionYears_Delta := select_with_attr_by_cond(ProjectionYears,id(ProjectionYears) >= 1b);
+	unit<uint8> ProjectionYears_Delta := select_with_attr_by_cond(ProjectionYears, id(ProjectionYears) != first(id(ProjectionYears)));
 	
 	unit<uint8> TypologyK : nrofrows = 7, Descr = "Degree of urbanisation level 2 typologies", URL = "https://human-settlement.emergency.copernicus.eu/degurbaDefinitions.php"
 	{

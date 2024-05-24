@@ -24,6 +24,14 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		attribute<Person> Y2020 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2020[Person], FunctionalAreas/per_domain);
 	}
 	
+	container Delta_Claims_Population := 
+		for_each_nedv(
+			ProjectionYears_Delta/name
+			, '(Claims_Population/'+ProjectionYears_Delta/name+' - Claims_Population/'+ProjectionYears_Delta/prev_name+') / Claims_Population/'+ProjectionYears_Delta/prev_name
+			, FunctionalAreas
+			, float32
+		);
+	
 	container DegreesOfUrbanisation := 
 		for_each_ne(
 			GHS_years/name
