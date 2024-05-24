@@ -344,7 +344,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																					, Region_rel   // relation between grid domain and claim region
 																				)
 																				, max(Rank, Region_rel) // if no cuttingline is found, the maximum of the negative suitablity is chosen per claim region. In other words, making sure there is a value, albeit the least suitable location.
-																			);
+																			), IntegrityCheck = "FeasibilityCheck";
 			attribute<bool>       WillBeBuiltUp             (CompactedDomain) := Rank < CuttingLine[Region_rel]; //If smaller or equal to, this could result in too much allocation. If just smaller than, and the suitability is not expressive enough, this could result in underrealisation.
 
 			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := WillBeBuiltUp ? max_elem(LocalMaxima/MaxAllowed_Builtup_Total_Share, CurrState/BuiltUp_Total_Share) : CurrState/BuiltUp_Total_Share; 
@@ -483,20 +483,22 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			//Results  
 			attribute<Person>            Population                   (CompactedDomain) := Population_Allocation/Last/Population_rounded + Population_beforeAllocation;
 			attribute<Person_BuiltUpKm2> Population_inRes_Density     (CompactedDomain) := Population / BuiltUp_Residential_Area;
-			attribute<Person_Km2> Population_TotalLand_Density (CompactedDomain) := (Population / CompactedDomain/area);
+			attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := (Population / CompactedDomain/area);
 			attribute<float32>           Final_ClaimRealisation       (ClaimRegion) := sum(Population, Region_rel) / Claims/Population;
 			
 			container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T(recollect_by_cond(domain/IsCompactedDomain, Population_TotalLand_Density)[float64]);
 			
-			container Diagnostics {
-				unit<uint32> Relevant_ClaimRegions:= subset(pcount(Region_rel)>1000) {
-					attribute<uint32>	ncells:= pcount(Region_rel)[Nr_OrgEntity];
-					attribute<LatLong> 	Geometry (poly):= ClaimRegion/Geometry_LL[Nr_OrgEntity];
-					attribute<Person> 	Total_Pop_pool:= (Claims/Population - sum(Reduced_Population, Region_rel))[Nr_OrgEntity];
-					attribute<Person> 	Total_In_NewBuiltup:= sum(Population_in_New_BuiltUp_Area, Region_rel)[Nr_OrgEntity];
-					attribute<float32> 	Perc_Pop_pool_in_new_builtup:= Total_In_NewBuiltup[float32] /  Total_Pop_pool[float32];
-					attribute<float32>  Perc_Pop_in_new_builtup:= Total_In_NewBuiltup[float32] /  (Claims/Population[float32])[Nr_OrgEntity];
-					attribute<float32>  Perc_New_BuiltUp:= sum(New_BuiltUp_Area[float32], Region_rel)[Nr_OrgEntity] / sum(BuiltUp_Total_Area[float32], Region_rel)[Nr_OrgEntity];
+			container Diagnostics 
+			{
+				unit<uint32> Relevant_ClaimRegions:= select_with_org_rel(pcount(Region_rel) > 1000) 
+				{
+					attribute<uint32>   ncells                       := pcount(Region_rel)[org_rel];
+					attribute<LatLong>  Geometry              (poly) := ClaimRegion/Geometry_LL[org_rel];
+					attribute<Person>   Total_Pop_pool               := (Claims/Population - sum(Reduced_Population, Region_rel))[org_rel];
+					attribute<Person>   Total_In_NewBuiltup          := sum(Population_in_New_BuiltUp_Area, Region_rel)[org_rel];
+					attribute<float32>  Perc_Pop_pool_in_new_builtup := Total_In_NewBuiltup[float32] /  Total_Pop_pool[float32];
+					attribute<float32>  Perc_Pop_in_new_builtup      := Total_In_NewBuiltup[float32] /  (Claims/Population[float32])[org_rel];
+					attribute<float32>  Perc_New_BuiltUp             := sum(New_BuiltUp_Area[float32], Region_rel)[org_rel] / sum(BuiltUp_Total_Area[float32], Region_rel)[org_rel];
 				}
 			}
 		}

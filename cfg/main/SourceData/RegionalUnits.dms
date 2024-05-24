@@ -95,11 +95,12 @@ container RegionalUnits
 		attribute<string>         Label                                 := name;
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
-		
-		attribute<bool>           IsStudyArea                           := has_any(per_domain);
+		attribute<bool>           IsStudyArea                           := pcount(per_CompactedDomain) > 1000;
 	}
 	
 	unit<uint32> FunctionalAreas := select_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
+	, DialogData      = "geometry_LL"
+	, DialogType      = "map"
 	{
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
