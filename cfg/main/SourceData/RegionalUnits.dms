@@ -55,7 +55,7 @@ container RegionalUnits
 		attribute<Continents>  		 Continents_rel;
 		attribute<string>            continent_name;
 		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
-		attribute<.>                 per_grid              (domain) := poly2grid(geometry_LL , domain);
+		attribute<.>                 per_domain              (domain) := poly2grid(geometry_LL , domain);
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
@@ -83,7 +83,7 @@ container RegionalUnits
 	}
 	
 
-	unit<uint32> FunctionalAreas 
+	unit<uint32> FunctionalAreas_all
 	: StorageName = "%ToBURPDataDir%/Regions/fas_combined_20240423.shp"
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
@@ -93,6 +93,16 @@ container RegionalUnits
 		attribute<WorldMollweide> geometry (poly);
 		attribute<LatLong>        geometry_LL (poly)                    := convert(geometry, LatLong);
 		attribute<string>         Label                                 := name;
+		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
+		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
+		attribute<bool>           IsStudyArea                           := pcount(per_CompactedDomain) > 1000;
+	}
+	
+	unit<uint32> FunctionalAreas := select_with_org_rel_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
+	, DialogData      = "geometry_LL"
+	, DialogType      = "map"
+	{
+		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 	}

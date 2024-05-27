@@ -1,5 +1,14 @@
 container Validation : using = "geography"
 {
+	parameter<string> StartYear := 'Y2000';
+	parameter<string> EndYear   := 'Y2020';
+
+	attribute<Person> Start_Observed_Population (domain) := ='/SourceData/Population/PerYear/'+StartYear+'[Person]';
+	attribute<Person> End_Observed_Population   (domain) := ='/SourceData/Population/PerYear/'+EndYear+'[Person]';
+	
+
+
+
 	#include <UrbanCombine.dms>
 	#include <UrbanAccuracy.dms>
 	#include <Population_Error_Indicators.dms>

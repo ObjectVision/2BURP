@@ -70,7 +70,7 @@ container Geography : using = "units"
 
 	container StudyAreas
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0));
+		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= union_polygon(ipolygon(SourceData/RegionalUnits/Countries/Geometry_LL));}
 
 		//For fast testing with extent of 1 country (no other country within extent)
 		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Iceland];}
@@ -156,11 +156,11 @@ container Geography : using = "units"
 		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 
-		attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_grid);
+		attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_domain);
 		attribute<Bool>   InStudyArea			 (domain) := poly2grid(LatLong/geometry, domain);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
-		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_grid) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
-		attribute<Bool>	  InBU_5kmClip			 (domain) := ='IsDefined(Countries/per_grid) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
+		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
+		attribute<Bool>	  InBU_5kmClip			 (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
 
 		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
@@ -179,7 +179,8 @@ container Geography : using = "units"
 		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
 		attribute<km2>               area                  := domain/area[domain_rel];
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
-		attribute<Countries>         Country_rel   := Countries/per_grid[domain_rel];
+		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
+		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
 	}
 	
 	container Distmatrices

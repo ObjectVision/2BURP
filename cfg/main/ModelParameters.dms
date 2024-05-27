@@ -8,4 +8,6 @@ container ModelParameters
 	parameter<float32> BuiltUp_threshold       := BuiltUp_threshold_value * float32(MW_Gridsize)^2f;
 	
 	parameter<string>  StartYear               := 'Y2020';
+	
+	parameter<uint8>   BU_BinSize              := 5b;
 }

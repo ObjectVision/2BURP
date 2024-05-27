@@ -19,14 +19,17 @@ container Classifications : using = "units"
 		attribute<string> PrevPopName := MakeDefined(name[sub_or_null(ID(.),1)]+'/NextPop', 'CurrState/Pop');
 	}
 
-	unit<uint8> ProjectionYears : nrofrows = 8
+	unit<uint8> ProjectionYears := range(uint8, uint8(substr(ModelParameters/StartYear, 2,2))+1b, 11b) //11b-1b becomes 2100 in this setup.
 	{
-		attribute<Year>   Yr             : [2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100];
+		attribute<Year>   Yr             := (float32(id(.)) * 10f + 2000f)[Year];
 		attribute<string> name           := 'Y'+string(Yr);
 		
-		attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
-		attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
+		attribute<string> prev_name      := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
+		attribute<string> prevStateName  := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
+	
+	unit<uint8> ProjectionYears_Delta := select_with_attr_by_cond(ProjectionYears, id(ProjectionYears) != first(id(ProjectionYears)));
+	
 	unit<uint8> TypologyK : nrofrows = 7, Descr = "Degree of urbanisation level 2 typologies", URL = "https://human-settlement.emergency.copernicus.eu/degurbaDefinitions.php"
 	{
 		attribute<uint8>  EK    : [30, 23, 22, 21, 13, 12, 11];
@@ -45,5 +48,21 @@ container Classifications : using = "units"
 	{
 		attribute<string> label : ['Pots_lin_5km', 'Pots_sqr_5km', 'Pots_lin_10km', 'Pots_sqr_10km', 'Pots_lin_20km', 'Pots_sqr_20km', 'Pots_lin_40km', 'Pots_sqr_40km'];
 	}
-
+	unit<uint32> percentages: nrofrows = 100 {
+		attribute<string> 	label:= string(id(.)+1)+'%';
+	}
+	
+	unit<uint8> AllShares := cat_range(0b, 101b)
+	{
+		attribute<BU_DensityBins> DensityBins_rel := Classify(id(.), BU_DensityBins/LB);
+	}
+		
+	unit<uint8> BU_DensityBins := cat_range(uint8, 0b, 50b / ModelParameters/BU_BinSize + 1b)
+	{
+		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
+		attribute<AllShares>  LB    := id(.) == 0b ? 1[AllShares] : (id(.)*ModelParameters/BU_BinSize)[AllShares];
+		attribute<uint8>  UB    := id(.) == last(id(.)) ? 100b : LB[id(.)+1b];
+	}
+	
+	
 }

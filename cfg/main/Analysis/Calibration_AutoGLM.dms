@@ -160,7 +160,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		container Domain := 
 			for_each_nedv(
 				Calibration_variables/name
-				, 'MakeDefined(Country/'+Calibration_variables/name+'[Countries/per_grid],0f)'
+				, 'MakeDefined(Country/'+Calibration_variables/name+'[Countries/per_domain],0f)'
 				, geography/domain 
 				, float32
 			);
