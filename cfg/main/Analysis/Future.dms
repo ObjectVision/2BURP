@@ -301,7 +301,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
 		}
 		
-		container Initial_BuiltUp_Density_Distribution
+		container BuiltUp_Density_Distribution
 		{
 			container Per_ClaimRegion := 
 				for_each_ne(
@@ -309,7 +309,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, 'BuiltUp_Density_Distribution_Per_ClaimRegion_T('+string(id(ClaimRegion))+'[ClaimRegion], CurrState/Builtup_Total_Share)'
 				);
 				
-			container Result :=
+			container Initial :=
 				for_each_nedv(
 					ClaimRegion/item_name
 					, 'Per_ClaimRegion/'+ClaimRegion/item_name+'/DensityBins/density'
@@ -317,8 +317,23 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, float32
 				)
 			{
-				attribute<string> label (BU_DensityBins) := BU_DensityBins/label;
-			}
+				attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
+				attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
+			} 
+			
+			parameter<float32> nroftimestepsleft := max_elem(float32(max(id(ProjectionYears)) - rlookup(ThisYear, ProjectionYears/name)), 1f);
+			
+			container Convergence :=
+				for_each_nedv(
+					ClaimRegion/item_name
+					, 'Initial/'+ClaimRegion/item_name+' + ((Initial/Average - Initial/'+ClaimRegion/item_name+') / nroftimestepsleft)'
+					, BU_DensityBins
+					, float32
+				)
+			{
+				attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
+				attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
+			} 
 		}
 		
 		container Suitability
@@ -446,7 +461,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container NewState
 		{
 			//Reduction step 1: All cells will lose 10% of their initial population. This proportional reduction has the biggest impact in dense cells.
-			attribute<Person>            Proportional_Reducted_Population       (CompactedDomain) := CurrState/Population * (1f - Initial_Population_Proportional_Reduction_Rate); 
+			attribute<Person>            Proportional_Reducted_Population       (CompactedDomain) := CurrState/Population * (1f - Initial_Population_Proportional_Reduction_Rate[ClaimRegion/per_CompactedDomain]); 
 			
 			//Reduction step 2: All inhabited cells will lose up to a fixed (per functional area) number of persons of 10% of the initial average population of the inhabited grid cells. This absolute reduction will have the biggest impact on low-density cells.
 			attribute<Person>            Population_for_Region                      (ClaimRegion) := sum(CurrState/Population, Region_rel);
