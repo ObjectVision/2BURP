@@ -301,6 +301,26 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
 		}
 		
+		container Initial_BuiltUp_Density_Distribution
+		{
+			container Per_ClaimRegion := 
+				for_each_ne(
+					ClaimRegion/item_name
+					, 'BuiltUp_Density_Distribution_Per_ClaimRegion_T('+string(id(ClaimRegion))+'[ClaimRegion], CurrState/Builtup_Total_Share)'
+				);
+				
+			container Result :=
+				for_each_nedv(
+					ClaimRegion/item_name
+					, 'Per_ClaimRegion/'+ClaimRegion/item_name+'/DensityBins/density'
+					, BU_DensityBins
+					, float32
+				)
+			{
+				attribute<string> label (BU_DensityBins) := BU_DensityBins/label;
+			}
+		}
+		
 		container Suitability
 		{
 			container        AutoGLM_Coeffs            := Analysis/Calibration/ReadCoffecients/coef2domain/domain;
@@ -503,6 +523,22 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					attribute<float32>  Perc_New_BuiltUp             := sum(New_BuiltUp_Area[float32], Region_rel)[org_rel] / sum(BuiltUp_Total_Area[float32], Region_rel)[org_rel];
 				}
 			}
+		}
+	}
+	
+	Template BuiltUp_Density_Distribution_Per_ClaimRegion_T
+	{
+		parameter<ClaimRegion> ClaimRegion_rel;
+		attribute<float32>     Builtup_Total_Share (CompactedDomain);
+		///
+		attribute<uint8>       Builtup_Total_Share_int (CompactedDomain) := ClaimRegion/per_CompactedDomain == ClaimRegion_rel ? uint8(Builtup_Total_Share * 100f) : null_b;
+		
+		attribute<BU_DensityBins> Classified              (CompactedDomain) := lookup(Builtup_Total_Share_int, AllShares/DensityBins_rel);
+		
+		unit<uint8> DensityBins := BU_DensityBins
+		{
+			attribute<uint32>  count   := pcount(Classified); 
+			attribute<float32> density := float32(count) / float32(sum(count));
 		}
 	}
 }

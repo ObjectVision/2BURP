@@ -102,6 +102,7 @@ container RegionalUnits
 	, DialogData      = "geometry_LL"
 	, DialogType      = "map"
 	{
+		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 	}
