@@ -186,7 +186,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				attribute<string>  Label     (..) := ../label;
 			}
  		}
-				
+		container delta_BuiltUp := 
+			for_each_nedv(ProjectionYears/name, 'Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share - InitialState/BuiltUp_Total_Share', CompactedDomain, float32); 
+		
 		container BuiltUp_Percentages_Histogram := 
 			for_each_nedv(
 				ProjectionYears/name

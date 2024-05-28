@@ -51,7 +51,7 @@ container Classifications : using = "units"
 	unit<uint32> percentages: nrofrows = 100 {
 		attribute<string> 	label:= string(id(.)+1)+'%';
 	}
-	
+			
 	unit<uint8> AllShares := cat_range(0b, 101b)
 	{
 		attribute<BU_DensityBins> DensityBins_rel := Classify(id(.), BU_DensityBins/LB);
