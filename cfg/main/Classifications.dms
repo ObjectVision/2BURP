@@ -27,6 +27,8 @@ container Classifications : using = "units"
 		attribute<string> prev_name      := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
 		attribute<string> prevStateName  := (id(.) >= 1b) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
+	unit<uint8> ProjectionYears_Delta := select_with_attr_by_cond(ProjectionYears,id(ProjectionYears) >= 1b);
+	
 	unit<uint8> TypologyK : nrofrows = 7, Descr = "Degree of urbanisation level 2 typologies", URL = "https://human-settlement.emergency.copernicus.eu/degurbaDefinitions.php"
 	{
 		attribute<uint8>  EK    : [30, 23, 22, 21, 13, 12, 11];

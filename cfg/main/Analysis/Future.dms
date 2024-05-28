@@ -87,7 +87,13 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, domain
 					, BuiltUpKm2
 				);
-				
+			container Delta_BuiltUp_Total_Area := 
+				for_each_nedv(
+					ProjectionYears_Delta/name
+					, 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/'+ProjectionYears_Delta/prev_name
+					, domain
+					, BuiltUpKm2
+				);
 			container BuiltUp_Total_Share := 
 				for_each_nedv(
 					ProjectionYears/name
@@ -131,6 +137,18 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
 		}
 
+		container Added_BU_perDoU2020 := 
+			for_each_nedv(
+				ProjectionYears_Delta/name
+				, 'sum(Prep/Delta_BuiltUp_Total_Area/'+ProjectionYears_Delta/name+', Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK)'
+				, TypologyK
+				, BuiltUpKm2
+			)
+		{
+			attribute<string>  Label     (TypologyK) := TypologyK/label;
+		}
+		
+
 		// Future change in population per degree of urbanisation class.
 		container Population_perDoU := 
 			for_each_nedv(
@@ -160,7 +178,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				attribute<string>  Label     (..) := ../label;
 			}
  		}
-				
+		
+		container delta_BuiltUp := 
+			for_each_nedv(ProjectionYears/name, 'Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share - InitialState/BuiltUp_Total_Share', CompactedDomain, float32); 
+		
 		container BuiltUp_Percentages_Histogram := 
 			for_each_nedv(
 				ProjectionYears/name
@@ -308,7 +329,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        Builtup                            (ClaimRegion) := Claim;
 		}
 		
-		container NewState:= AllocModel_AoN_prob_wlimits;//AllocModel_AoN_lin_suit;
+		container NewState:= AllocModel_AoN_prob_wlimits;//AllocModel_AoN_lin_suit;//
 		
 		container AllocModel_AoN_prob_wlimits {
 			attribute<Suit> AdjProb (CompactedDomain):= (Suitability/Prob * LocalMaxima/Modifier)[Suit];

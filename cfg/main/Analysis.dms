@@ -3,4 +3,70 @@ container Analysis: using = "units;geography"
 	#include <Calibration_AutoGLM.dms>
 	#include <Future.dms>
 	#include <Validation.dms>
+	
+	// adhoc analysis written to better assess changes in built-up densities 
+	
+	container Ad_hoc_Analyses {
+		
+		unit<uint32> percentages: nrofrows = 100 {
+			attribute<string> 	label:= string(id(.)+1)+'%';
+			attribute<float32>	cutoff:= float32(id(.)) * 10000f;
+		}
+		unit<uint32> percentage_matrices:= combine(percentages, percentages) {
+			attribute<upoint> unirel:= point(first_rel, second_rel, upoint);
+		}
+		attribute<functional_areas> fa_rel (domain):= poly2grid(functional_areas/Geometry_LL, domain);
+		attribute<percentages> in_bu_1990_perc (domain):= classify(float32(SourceData/Builtup/Total/Y1990), percentages/cutoff);
+		attribute<percentages> in_bu_2000_perc (domain):= classify(float32(SourceData/Builtup/Total/Y2000), percentages/cutoff);
+		attribute<percentages> in_bu_2020_perc (domain):= classify(float32(SourceData/Builtup/Total/Y2020), percentages/cutoff);
+		
+		unit<uint32> functional_areas:= /SourceData/RegionalUnits/FunctionalAreas  {
+			attribute<LatLong> Geometry (poly):= Geometry_LL;
+			attribute<uint32> domain_overlap:= pcount(fa_rel);
+			attribute<uint32> contains_compacted_domain:= sum(uint32(domain/IsCompactedDomain), fa_rel);
+			attribute<string> Label:= /SourceData/RegionalUnits/FunctionalAreas/Label;
+			attribute<Person> pop_1990:= sum(SourceData/Population/PerYear/Y1990[Person], fa_rel);
+			attribute<Person> pop_2000:= sum(SourceData/Population/PerYear/Y2000[Person], fa_rel);
+			attribute<Person> pop_2020:= sum(SourceData/Population/PerYear/Y2020[Person], fa_rel);
+			attribute<km2> bu_1990:= sum(SourceData/Builtup/Total/Y1990, fa_rel)[km2];
+			attribute<km2> bu_2000:= sum(SourceData/Builtup/Total/Y2000, fa_rel)[km2];
+			attribute<km2> bu_2020:= sum(SourceData/Builtup/Total/Y2020, fa_rel)[km2];
+			attribute<.> man_org_rel:= id(.);
+			
+			
+		}
+		unit<uint32> sel_functional_areas:= select_with_attr_by_cond(functional_areas, functional_areas/contains_compacted_domain > 100) {
+			attribute<string> zoneid:= 'fa_'+string(id(.));
+			attribute<Person_km2> popdens_1990:= pop_1990 / bu_1990;
+			attribute<Person_km2> popdens_2000:= pop_2000 / bu_2000;
+			attribute<Person_km2> popdens_2020:= pop_2020 / bu_2020;
+		}
+		
+		container percentages_per_fa:= for_each_ne(sel_functional_areas/zoneid, 'get_percentage_densities('+string(sel_functional_areas/man_org_rel)+')') {
+			container list_percentage_matrices:= for_each_nedv(sel_functional_areas/zoneid, 'percentages_per_fa/'+sel_functional_areas/zoneid+'/percentage_matrix/rel', percentage_matrices, float32);
+		}
+		
+		Template get_percentage_densities {
+			parameter<functional_areas> in_fa;
+			
+			unit<uint32> percentages_set:= percentages {
+				attribute<string> 	label:= percentages/label;
+				attribute<uint32> 	n1990:= pcount(selgrids/bu_1990_perc);
+				attribute<uint32>   n2000:= pcount(selgrids/bu_2000_perc);
+				attribute<uint32>   n2020:= pcount(selgrids/bu_2020_perc);
+			}
+			unit<uint32> percentage_matrix:= percentage_matrices {
+				attribute<uint32> n:= pcount(selgrids/perc_matrix_rel);
+				attribute<float32> rel:= n[float32] / float32(percentages_set/n1990)[first_rel];
+			}
+			unit<uint32> selgrids:= select(fa_rel = in_fa) {
+				attribute<percentages> bu_1990_perc:= collect_by_cond(selgrids, fa_rel = in_fa, in_bu_1990_perc);
+				attribute<percentages> bu_2000_perc:= collect_by_cond(selgrids, fa_rel = in_fa, in_bu_2000_perc);
+				attribute<percentages> bu_2020_perc:= collect_by_cond(selgrids, fa_rel = in_fa, in_bu_2020_perc);
+				attribute<percentage_matrix> perc_matrix_rel:= rlookup(point(bu_1990_perc, bu_2020_perc, upoint), percentage_matrix/unirel);
+			}
+			
+			
+		}
+	}
 }
