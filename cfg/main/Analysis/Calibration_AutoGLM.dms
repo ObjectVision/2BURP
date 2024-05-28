@@ -2,7 +2,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 {
 	unit <uint32> Create_DataForCalibration := CompactedDomain
 	{
-		attribute<Countries>  Country_id                              := Countries/per_grid[CompactedDomain/org_rel];
+		attribute<Countries>  Country_id                              := Countries/per_domain[CompactedDomain/org_rel];
 		attribute<float32>	  latitude_factor                         := lat_factor;
 		attribute<float32>    BU_RES_2000                             := SourceData/Builtup/Residential/Y2000[CompactedDomain/org_rel];
 		attribute<float32>    BU_RES_2020                             := SourceData/Builtup/Residential/Y2020[CompactedDomain/org_rel];

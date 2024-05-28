@@ -46,11 +46,11 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		attribute<float32> costsgrid_untiled_latitude_specific (grid):= min_elem(griddist_untiled_latitude_specific(impedances, origins/Nr_OrgEntity), 100f);
 		attribute<float32> costsgrid_untiled_maximp_latitude_specific (grid):= griddist_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, 100f);
 		
-		attribute<float32> costsgrid_zonal (grid):= min_elem(griddist_zonal(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f), 100f);
-		attribute<float32> costsgrid_zonal_maximp (grid):= griddist_zonal_maximp(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f, 100f);
-		attribute<float32> costsgrid_zonal_untiled (grid):= min_elem(griddist_zonal_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f), 100f);		
-		attribute<float32> costsgrid_zonal_untiled_maximp (grid):= griddist_zonal_maximp_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f, 100f);
-		attribute<float32> costsgrid_zonal_untiled_latitude_specific (grid):= min_elem(griddist_zonal_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f), 100f);
-		attribute<float32> costsgrid_zonal_untiled_maximp_latitude_specific (grid):= griddist_zonal_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_grid), 25f, 100f);
+		attribute<float32> costsgrid_zonal (grid):= min_elem(griddist_zonal(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
+		attribute<float32> costsgrid_zonal_maximp (grid):= griddist_zonal_maximp(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
+		attribute<float32> costsgrid_zonal_untiled (grid):= min_elem(griddist_zonal_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);		
+		attribute<float32> costsgrid_zonal_untiled_maximp (grid):= griddist_zonal_maximp_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
+		attribute<float32> costsgrid_zonal_untiled_latitude_specific (grid):= min_elem(griddist_zonal_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
+		attribute<float32> costsgrid_zonal_untiled_maximp_latitude_specific (grid):= griddist_zonal_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
 	}
 }

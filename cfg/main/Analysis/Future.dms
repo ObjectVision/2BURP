@@ -346,17 +346,17 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/cities/costsgrid_untiled_maximp_latitude_specific           * AutoGLM_Coeffs/gc_cities) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/towns/costsgrid_untiled_maximp_latitude_specific            * AutoGLM_Coeffs/gc_towns) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/villages/costsgrid_untiled_maximp_latitude_specific         * AutoGLM_Coeffs/gc_villages) + 
+																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/villages 					   					      * AutoGLM_Coeffs/gc_cities) + 
+																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/towns            									  * AutoGLM_Coeffs/gc_towns) + 
+																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/cities       										  * AutoGLM_Coeffs/gc_villages) + 
 																	(Physical/Elevation/Elevation[float32]                                                                        * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
-																	((Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] + 
-																		Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[float32]) * AutoGLM_Coeffs/Landslide_Prone) + 
+																	(((Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_Bool ||  
+																		Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_Bool)[float32]) * AutoGLM_Coeffs/Landslide_Prone) + 
 																	AutoGLM_Coeffs/Intercept';
 					
 			attribute<Suit>  BuiltUp (CompactedDomain) := Calc[CompactedDomain/org_rel];
