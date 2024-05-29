@@ -363,14 +363,15 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Suit>  CappedBuiltUp(CompactedDomain) :=min_elem(BuiltUp, 80[suit]);
 			attribute<Suit>  expCappedBuiltUp(CompactedDomain) := exp(CappedBuiltUp);
 			attribute<float32> Prob  (CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
-			attribute<Classifications/AllShares> BuiltUp_Share_Perc(CompactedDomain) := value(CurrState/BuiltUp_Total_Area / CompactedDomain/area * 100f, Classifications/AllShares);
+			attribute<float32> BuiltUp_Share(CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
+			attribute<Classifications/AllShares> BuiltUp_Share_Perc(CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
 			attribute<float32> Moving_up_probability(CompactedDomain) := BuiltUp_Share_Perc->Moving_up_probability;
 			
 			attribute<Float32> AvgProb(Classifications/AllShares) := mean(Prob, BuiltUp_Share_Perc);
-			attribute<float32> RepulsionFactor(CompactedDomain) := median(0f, 1f - 2f*CurrState/BuiltUp_Total_Area / CompactedDomain/area, 1f);
+			attribute<float32> BalanceFactor(CompactedDomain) := 1f / (AvgProb[BuiltUp_Share_Perc]); //median(0f, 1f - 2f*BuiltUp_Share, 1f);
 			// TODO: make RepulsionFactor density dependent to counterbalance the correlation of suitability with high density
 			// OPTIONAL TODO: make it endogenous to counterbalance drifting away from the idealised distribution
-			attribute<float32> FinalProb(CompactedDomain) := Prob * Moving_up_probability * RepulsionFactor;
+			attribute<float32> FinalProb(CompactedDomain) := Prob * Moving_up_probability * BalanceFactor;
 		}
 		
 		container Claims
