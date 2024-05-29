@@ -7,7 +7,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<BuiltUpKm2>        BuiltUp_Total_Area_domain               (domain) := ='SourceData/BuiltUp/Total/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
 		attribute<BuiltUpKm2>        BuiltUp_Residential_Area_domain         (domain) := ='SourceData/BuiltUp/Residential/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
 		attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area_domain      (domain) := ='SourceData/BuiltUp/NonResidential/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
-		attribute<float32>           BuiltUp_Total_Share_domain              (domain) := BuiltUp_Total_Area_domain / domain/area * 1[km2] / 1[BuiltUpKm2];
+		attribute<float32>           BuiltUp_Total_Share_domain              (domain) := BuiltUp_Total_Area_domain / domain/area; // * 1[km2] / 1[BuiltUpKm2];
 		attribute<Person>            Population_domain                       (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		attribute<Person_BuiltUpKm2> Population_inRes_Density_domain         (domain) := Population_domain / BuiltUp_Residential_Area_domain; // DO NOT USE!
 		attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc_domain   (domain) := min_elem_alldefined(Population_inRes_Density_domain, maxmax_saturation);
@@ -17,7 +17,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<BuiltUpKm2>        BuiltUp_Residential_Area       (CompactedDomain) := BuiltUp_Residential_Area_domain[CompactedDomain/org_rel]; 
 		attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area    (CompactedDomain) := BuiltUp_NonResidential_Area_domain[CompactedDomain/org_rel]; 
 		attribute<float32>           Builtup_Total_Share            (CompactedDomain) := BuiltUp_Total_Share_domain[CompactedDomain/org_rel];
-		attribute<percentages> 		 Perc_BuiltUp_Total             (CompactedDomain) := classify(100f * (BuiltUp_Total_Share), id(percentages)[float32]);
+		attribute<Classifications/AllShares> 		 Perc_BuiltUp_Total             (CompactedDomain) := (100f * BuiltUp_Total_Share)[Classifications/AllShares];
 		attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
 		attribute<Person_BuiltUpKm2> Population_inRes_Density_org   (CompactedDomain) := Population_org / BuiltUp_Residential_Area; // DO NOT USE!
 		attribute<Person_BuiltUpKm2> Population_inTot_Density_org   (CompactedDomain) := Population_org / BuiltUp_Total_Area; // DO NOT USE!
@@ -193,10 +193,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			for_each_nedv(
 				ProjectionYears/name
 				, 'pcount(Allocate_Builtup/'+ProjectionYears/name+'/NewState/Perc_BuiltUp_Total)'
-				, percentages
+				, Classifications/AllShares
 				, uint32
 			) {
-				attribute<uint32> Y2020 (percentages):= pcount(InitialState/Perc_BuiltUp_Total);
+				attribute<uint32> Y2020 (Classifications/AllShares):= pcount(InitialState/Perc_BuiltUp_Total);
 			}
 		unit<uint8> Population_InRes_Density_Histogram : nrofrows = 10
 		{
@@ -381,17 +381,18 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		{
 //			attribute<SuitNeg>    Rank                     (CompactedDomain) := -1[SuitNeg / Suit] * Suitability/BuiltUp;
 			attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
-			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
+			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area, 0[BuiltUpKm2]);
 			attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
 			
 // TODO: Check that Weight isn't already factored in by Moving_up_probability in Suitability/FinalProp
 			attribute<float32> InitialProb (CompactedDomain) := Suitability/FinalProb * Weight;
 // TODO: use nth_element to assign fractions according to maximizing the actual built-up size that each percent represents, similar to residual seat distribution in Dutch Parliament.
-			attribute<Float32> RoundoffCompensationFactor0(ClaimRegion) := const(1.2f, ClaimRegion);
+
+			attribute<Float32> RoundoffCompensationFactor0(ClaimRegion) := const(1.0f, ClaimRegion);
 			
 			attribute<BuiltUpKm2> new_BuiltUp_area(CompactedDomain) := scalesum(InitialProb, Region_rel, Delta_Claim * RoundoffCompensationFactor0);
 			
-			attribute<Classifications/AllShares> new_BuiltUp_share_perc(CompactedDomain) := (100f * new_BuiltUp_area / CompactedDomain/area)[Classifications/AllShares];
+//			attribute<Classifications/AllShares> new_BuiltUp_share_perc(CompactedDomain) := (100f * new_BuiltUp_area / CompactedDomain/area)[Classifications/AllShares];
 			
 			
 /*			
@@ -406,11 +407,12 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																			), IntegrityCheck = "FeasibilityCheck";
 			attribute<bool>       WillBeBuiltUp             (CompactedDomain) := Rank < CuttingLine[Region_rel]; //If smaller or equal to, this could result in too much allocation. If just smaller than, and the suitability is not expressive enough, this could result in underrealisation.
 */
-			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := CurrState/BuiltUp_Total_Share + Float32(new_BuiltUp_share_perc) / 100f; 
-			attribute<BuiltUpKm2> BuiltUp_Total_Area        (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2];
+//			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := CurrState/BuiltUp_Total_Share + Float32(new_BuiltUp_share_perc) / 100f; 
+			attribute<float32>    BuiltUp_Total_Share       (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area; 
+			attribute<BuiltUpKm2> BuiltUp_Total_Area        (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area; // / 1[km2] * 1[BuiltUpKm2];
 			attribute<BuiltUpKm2> BuiltUp_Residential_Area  (CompactedDomain) := BuiltUp_Total_Area - InitialState/BuiltUp_NonResidential_Area;
 			
-//			attribute<percentages> Perc_BuiltUp_Total (CompactedDomain):= classify(100f * (BuiltUp_Total_Share), id(percentages)[float32]);
+			attribute<Classifications/AllShares> Perc_BuiltUp_Total (CompactedDomain):= (100f * BuiltUp_Total_Share)[Classifications/AllShares];
 
 			attribute<float32>    Claim_Realisation             (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
 		}
