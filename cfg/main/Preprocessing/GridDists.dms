@@ -26,7 +26,7 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		
 		container get_Grid_Costs:= for_each_ne(Accessibility_Variants/Label, 'T_getAccessGrids_grid(in_degurba, '+string(id(Accessibility_Variants))+'[Accessibility_Variants])');
 		
-		container Grid_costs_atleast_to:= for_each_nedv(Accessibility_Variants/Label, 'get_Grid_Costs/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific', grid, float32);
+		container Grid_costs_atleast_to:= for_each_nedv(Accessibility_Variants/Label, 'makedefined(get_Grid_Costs/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific, 100f)', grid, float32);
 	}
 	
 	Template T_getAccessGrids_grid {
