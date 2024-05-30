@@ -370,7 +370,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																		Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_Bool)[float32]) * AutoGLM_Coeffs/Landslide_Prone) + 
 																	AutoGLM_Coeffs/Intercept';
 					
-			attribute<Suit>      BuiltUp               (CompactedDomain) := MakeDefined(Calc[CompactedDomain/org_rel], min(Calc[CompactedDomain/org_rel]));
+			attribute<Suit>      BuiltUp               (CompactedDomain) := MakeDefined(Calc[CompactedDomain/org_rel], -100[suit]);
 			attribute<Suit>      CappedBuiltUp         (CompactedDomain) := min_elem(BuiltUp, 80[suit]);
 			attribute<Suit>      expCappedBuiltUp      (CompactedDomain) := exp(CappedBuiltUp);
 			attribute<float32>   Prob                  (CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
