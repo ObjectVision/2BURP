@@ -54,7 +54,7 @@ container Classifications : using = "units"
 			
 	unit<uint8> AllShares := cat_range(0b, 101b)
 	{
-		attribute<BU_DensityBins> DensityBins_rel := Classify(id(.), BU_DensityBins/LB);
+		attribute<BU_DensityBin> DensityBin_rel := Classify(id(.), BU_DensityBin/LB);
 		attribute<Float32> Moving_up_probability_data : [ 
 			0.024179 ,0.557334 ,0.833489 ,0.9228637,0.9508959,
 			0.9647802,0.9698947,0.9700665,0.9718882,0.9717724,
@@ -70,8 +70,8 @@ container Classifications : using = "units"
 		];
 		attribute<Float32> Moving_up_probability := MakeDefined(Moving_up_probability_data, 0f);
 	}
-		
-	unit<uint8> BU_DensityBins := cat_range(uint8, 0b, 50b / ModelParameters/BU_BinSize + 1b)
+	
+	unit<uint8> BU_DensityBin := cat_range(uint8, 0b, 50b / ModelParameters/BU_BinSize + 1b)
 	{
 		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
 		attribute<AllShares>  LB    := id(.) == 0b ? 1[AllShares] : (id(.)*ModelParameters/BU_BinSize)[AllShares];
