@@ -24,7 +24,7 @@ container Classifications : using = "units"
 		attribute<Year>   Yr             := (float32(id(.)) * 10f + 2000f)[Year];
 		attribute<string> name           := 'Y'+string(Yr);
 		
-		attribute<string> prev_name      := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ] : 'StartingYear';
+		attribute<string> prev_name      := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ] : ModelParameters/StartYear;
 		attribute<string> prevStateName  := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
 	}
 	

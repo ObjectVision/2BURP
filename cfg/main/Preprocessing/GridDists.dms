@@ -21,36 +21,48 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		attribute<float32> impedance_all:= impedance_elev * impedance_slope * impedance_water;
 	}
 	
-	Template T_AllVariants_instantiation {
+	Template T_AllVariants_instantiation  
+	{
 		attribute<TypologyK> in_degurba (grid);
+		///
+		container get_Grid_Costs := 
+			for_each_ne(
+				Accessibility_Variants/Label
+				, 'T_getAccessGrids_grid(in_degurba, '+string(id(Accessibility_Variants))+'[Accessibility_Variants])'
+			);
 		
-		container get_Grid_Costs:= for_each_ne(Accessibility_Variants/Label, 'T_getAccessGrids_grid(in_degurba, '+string(id(Accessibility_Variants))+'[Accessibility_Variants])');
-		
-		container Grid_costs_atleast_to:= for_each_nedv(Accessibility_Variants/Label, 'makedefined(get_Grid_Costs/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific, 100f)', grid, float32);
+		container Grid_costs_atleast_to := 
+			for_each_nedv(
+				Accessibility_Variants/Label
+				, 'makedefined(get_Grid_Costs/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific, 100f)'
+				, grid
+				, float32
+			);
 	}
 	
-	Template T_getAccessGrids_grid {
+	Template T_getAccessGrids_grid 
+	{
 		attribute<TypologyK> in_degurba (grid);
 		parameter<Accessibility_Variants> invariant;
+		///
+		attribute<uint8>   degurba_class                                    (grid):= TypologyK/EK[in_degurba];
+		attribute<bool>    eval                                             (grid):= =Accessibility_Variants/definition[invariant];
+ 
+		unit<uint32> origins := select_with_org_rel(eval);
 		
-		attribute<uint8> 	 degurba_class (grid):= TypologyK/EK[in_degurba];
-		attribute<bool> 	 eval (grid):= =Accessibility_Variants/definition[invariant];
+		attribute<float32> impedances                                       (grid):= grid/impedance_all;
+		attribute<float32> costsgrid                                        (grid):= min_elem(griddist(impedances, origins/org_rel), 100f);
+		attribute<float32> costsgrid_maximp                                 (grid):= griddist_maximp(impedances, origins/org_rel, 100f);
+		attribute<float32> costsgrid_untiled                                (grid):= min_elem(griddist_untiled(impedances, origins/org_rel), 100f);
+		attribute<float32> costsgrid_untiled_maximp                         (grid):= griddist_maximp_untiled(impedances, origins/org_rel, 100f);
+		attribute<float32> costsgrid_untiled_latitude_specific              (grid):= min_elem(griddist_untiled_latitude_specific(impedances, origins/org_rel), 100f);
+		attribute<float32> costsgrid_untiled_maximp_latitude_specific       (grid):= griddist_maximp_untiled_latitude_specific(impedances, origins/org_rel, 100f);
 		
-		unit<uint32> origins:= subset(eval);
-		
-		attribute<float32> impedances (grid):= grid/impedance_all;
-		attribute<float32> costsgrid (grid):= min_elem(griddist(impedances, origins/Nr_OrgEntity), 100f);
-		attribute<float32> costsgrid_maximp (grid):= griddist_maximp(impedances, origins/Nr_OrgEntity, 100f);
-		attribute<float32> costsgrid_untiled (grid):= min_elem(griddist_untiled(impedances, origins/Nr_OrgEntity), 100f);		
-		attribute<float32> costsgrid_untiled_maximp (grid):= griddist_maximp_untiled(impedances, origins/Nr_OrgEntity, 100f);
-		attribute<float32> costsgrid_untiled_latitude_specific (grid):= min_elem(griddist_untiled_latitude_specific(impedances, origins/Nr_OrgEntity), 100f);
-		attribute<float32> costsgrid_untiled_maximp_latitude_specific (grid):= griddist_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, 100f);
-		
-		attribute<float32> costsgrid_zonal (grid):= min_elem(griddist_zonal(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
-		attribute<float32> costsgrid_zonal_maximp (grid):= griddist_zonal_maximp(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
-		attribute<float32> costsgrid_zonal_untiled (grid):= min_elem(griddist_zonal_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);		
-		attribute<float32> costsgrid_zonal_untiled_maximp (grid):= griddist_zonal_maximp_untiled(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
-		attribute<float32> costsgrid_zonal_untiled_latitude_specific (grid):= min_elem(griddist_zonal_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
-		attribute<float32> costsgrid_zonal_untiled_maximp_latitude_specific (grid):= griddist_zonal_maximp_untiled_latitude_specific(impedances, origins/Nr_OrgEntity, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
+		attribute<float32> costsgrid_zonal                                  (grid):= min_elem(griddist_zonal(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
+		attribute<float32> costsgrid_zonal_maximp                           (grid):= griddist_zonal_maximp(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
+		attribute<float32> costsgrid_zonal_untiled                          (grid):= min_elem(griddist_zonal_untiled(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
+		attribute<float32> costsgrid_zonal_untiled_maximp                   (grid):= griddist_zonal_maximp_untiled(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
+		attribute<float32> costsgrid_zonal_untiled_latitude_specific        (grid):= min_elem(griddist_zonal_untiled_latitude_specific(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f), 100f);
+		attribute<float32> costsgrid_zonal_untiled_maximp_latitude_specific (grid):= griddist_zonal_maximp_untiled_latitude_specific(impedances, origins/org_rel, UInt16(/SourceData/RegionalUnits/Countries/per_domain), 25f, 100f);
 	}
 }

@@ -48,6 +48,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			ProjectionYears/name 
 			,	'Allocate_Builtup_T('
 					+quote(ProjectionYears/name)+                              // (0) Year
+					','+quote(ProjectionYears/prev_name)+                      // (0) PrevYear
 					', Allocate_Builtup/'+ProjectionYears/prevStateName+       // (1) State builtup of previous period
 					', Allocate_Population/'+ProjectionYears/prevStateName+    // (2) State population of previous period (population_allocation container)
 					', Claim/Builtup/'+ProjectionYears/name+                   // (3) Expected amount of builtup per region in km2
@@ -62,6 +63,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			ProjectionYears/name 
 			,	'Allocate_Population_T('
 					+quote(ProjectionYears/name)+
+					','+quote(ProjectionYears/prev_name)+
 					','+ProjectionYears/prevStateName+
 					', Allocate_Builtup/'+ProjectionYears/name+'/NewState'
 					', Claim/Population/'+ProjectionYears/name+
@@ -139,10 +141,18 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 							  recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)
 							, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)
 							, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
+				);
+				
+			parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+			
+			container GridDistances := 
+				for_each_ne(
+					ProjectionYears/name
+					, 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
 				)
 			{
+				container Y2020 := /Preprocessing/GridDistances/Y2020;
 			}
-			parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
 		}
 
 		
@@ -272,6 +282,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	Template Allocate_Builtup_T
 	{
 		parameter<string>     ThisYear;
+		parameter<string>     PrevYear;
 		container             CurrState;
 		container             CurrPopState;
 		attribute<BuiltUpKm2> Claim (ClaimRegion);
@@ -346,9 +357,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
-																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/villages 					   					      * AutoGLM_Coeffs/gc_cities) + 
-																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/towns            									  * AutoGLM_Coeffs/gc_towns) + 
-																	(Preprocessing/GridDistances/Y2020/Grid_costs_atleast_to/cities       										  * AutoGLM_Coeffs/gc_villages) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
 																	(Physical/Elevation/Elevation[float32]                                                                        * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
@@ -419,6 +430,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	Template Allocate_Population_T
 	{
 		parameter<string>  ThisYear;
+		parameter<string>  PrevYear;
 		container          CurrState;
 		container          NewState_BuiltUp;
 		attribute<Person>  Claim (ClaimRegion);
@@ -465,9 +477,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
 																	(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/cities/costsgrid_untiled_maximp_latitude_specific           * AutoGLM_Coeffs/gc_cities) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/towns/costsgrid_untiled_maximp_latitude_specific            * AutoGLM_Coeffs/gc_towns) + 
-																	(Preprocessing/GridDistances/Y2020/get_Grid_Costs/villages/costsgrid_untiled_maximp_latitude_specific         * AutoGLM_Coeffs/gc_villages) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
+																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
 																	(Physical/Elevation/Elevation[float32]                                                                        * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
