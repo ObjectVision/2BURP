@@ -161,6 +161,7 @@ container Geography : using = "units"
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
+		attribute<Bool>	  InPop_5kmClip          (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Population/Total_sums_5km/'+ModelParameters/StartYear+' > 0f)';
 
 		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
