@@ -71,10 +71,10 @@ container Classifications : using = "units"
 		attribute<Float32> Moving_up_probability := MakeDefined(Moving_up_probability_data, 0f);
 	}
 	
-	unit<uint8> BU_DensityBin := cat_range(uint8, 0b, 50b / ModelParameters/BU_BinSize + 1b)
+	unit<uint8> BU_DensityBin := cat_range(0b, 15b)
 	{
+		attribute<AllShares>  LB: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
-		attribute<AllShares>  LB    := id(.) == 0b ? 1[AllShares] : (id(.)*ModelParameters/BU_BinSize)[AllShares];
-		attribute<uint8>  UB    := id(.) == last(id(.)) ? 100b : LB[id(.)+1b];
+		attribute<uint8>  UB    := id(.) == last(id(.)) ? 101b : LB[id(.)+1b];
 	}
 }

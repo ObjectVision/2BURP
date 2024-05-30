@@ -416,10 +416,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			// use nth_element to assign fractions according to maximizing the actual built-up size that each percent represents, similar to residual seat distribution in Dutch Parliament.
 			attribute<AllShares>  Perc_BuiltUp_Total        (CompactedDomain) := (100.0f * NewState/BuiltUp_Total_Share)[Classifications/AllShares];
 			attribute<BU_DensityBin> DensityBin_rel         (CompactedDomain) := Perc_BuiltUp_Total->DensityBin_rel;
-			
+			attribute<bool>  UnmatchedBins(CompactedDomain) := not(IsDefined(DensityBin_rel));
 			unit<uint32> DensityBin_x_region := combine(BU_DensityBin, ClaimRegion)
 			{
+				attribute<BU_DensityBin> first_rel;
+				attribute<ClaimRegion>   second_rel;
+				
 				attribute<.> per_CompactedDomain(CompactedDomain) := combine_data(., DensityBin_rel, region_rel);
+				
 				attribute<BuiltUpKm2> TotalArea := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
 				attribute<uint32> CellCount := pcount(per_CompactedDomain);
 				
@@ -435,9 +439,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32>    Rank                        (CompactedDomain) := 1.0[BuiltUpKm2 / km2] - Rest_Share;
 			attribute<float32>    roundoff_breakpoint     (DensityBin_x_region) := 1.0[BuiltUpKm2 / km2] - nth_element_weighted(Rank, Rest_claim, CompactedDomain/area * (0.01[BuiltUpKm2] / 1[km2]), DensityBin_x_region/per_CompactedDomain);
 			
-			attribute<bool >      above_breakpoint            (CompactedDomain) := Rest_Share >= roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
-			attribute<AllShares>  Perc_BuiltUp_Total_Balanced (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[Classifications/AllShares];
-			attribute<float32>    Rounded_Realisation             (ClaimRegion) := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, Region_rel);
+			attribute<bool >      at_or_above_breakpoint      (CompactedDomain) := Rest_Share >= roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
+			attribute<AllShares>  Perc_BuiltUp_Total_Balanced (CompactedDomain) := Perc_BuiltUp_Total + at_or_above_breakpoint[Classifications/AllShares];
+			attribute<BuiltUpKm2> Rounded_Realisation             (ClaimRegion) := sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, Region_rel) * (0.01[BuiltUpKm2 / km2]);
+			attribute<BuiltUpKm2> UnmatchedArea                   (ClaimRegion) := sum_float32(NewState/BuiltUp_Total_area * Float32(UnmatchedBins), Region_rel);
 			attribute<float32>    Claim_Realisation               (ClaimRegion) := Rounded_Realisation / Claims/BuiltUp; //Check if around 1.0
 		}
 	}
