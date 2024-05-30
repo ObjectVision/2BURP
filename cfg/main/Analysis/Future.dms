@@ -202,7 +202,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container BuiltUp_Percentages_Histogram := 
 			for_each_nedv(
 				ProjectionYears/name
-				, 'pcount(Allocate_Builtup/'+ProjectionYears/name+'/NewState/Perc_BuiltUp_Total)'
+				, 'pcount(Allocate_Builtup/'+ProjectionYears/name+'/RoundedState/Perc_BuiltUp_Total_Balanced)'
 				, Classifications/AllShares
 				, uint32
 			) {
