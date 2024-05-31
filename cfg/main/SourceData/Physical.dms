@@ -26,47 +26,25 @@ container Physical : using = "geography"
 	
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
-		attribute<int32>   Elevation := Physical/Elevation_new/ReadData;
-		attribute<int32>   TRI_sqr       := 
-											  sqr(elevation - N)
-											+ sqr(elevation - NE)
-											+ sqr(elevation - E)
-											+ sqr(elevation - SE)
-											+ sqr(elevation - S)
-											+ sqr(elevation - SW)
-											+ sqr(elevation - W)
-											+ sqr(elevation - NW)
-											;
-											
-		attribute<int32> compacted_elevation(CompactedDomainSub) := elevation[CompactedDomainSub/org_rel];
-		attribute<int32> TRI_sqr_2_CD(CompactedDomainSub) := sum(sqr(compacted_elevation[CdomainSub_x_pot1k/first_rel] - compacted_elevation[CdomainSub_x_pot1k/third_rel]), CdomainSub_x_pot1k/first_rel);
-		attribute<int32> TRI_sqr_2 := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_2_CD);
+		attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation_new/ReadData[CompactedDomainSub/org_rel];
+		attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[CdomainSub_x_pot1k/first_rel] - Elevation[CdomainSub_x_pot1k/third_rel]), CdomainSub_x_pot1k/first_rel);
+		attribute<int32>       TRI_sqr                            := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_CD);
 		
-		attribute<TRI_Classes> TRI_K_rel              := Classify(TRI_sqr_2, TRI_Classes/ClassBreaks_sqr);
+		attribute<TRI_Classes> TRI_K_rel                          := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
+		attribute<float32>     TRI_mean_1k               (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
 		
-		attribute<float32>     TRI_mean_1k             (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
-		attribute<TRI_Classes> Write_TRI_Class_mean_1k (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
-		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
-		// attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= '%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
-		parameter<string> Generate := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
+		attribute<TRI_Classes> Write_TRI_Class_mean_1k   (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
+		attribute<TRI_Classes> TRI_Class_mean_1k         (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		
+		parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
+		
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
-			attribute<uint8>   Class         := id(.) + 1b;
-			attribute<string>  label            : ['level surface', 'nearly level surface', 'slightly rugged surface', 'intermediately rugged surface', 'moderately rugged surface', 'highly rugged surface', 'extremely rugged surface'];
+			attribute<uint8>   Class             := id(.) + 1b;
+			attribute<string>  label             : ['level surface', 'nearly level surface', 'slightly rugged surface', 'intermediately rugged surface', 'moderately rugged surface', 'highly rugged surface', 'extremely rugged surface'];
 			attribute<float32> ClassBreaks_org   : [0, 81, 117, 162, 240, 498, 959];
 			attribute<int32>   ClassBreaks_sqr   := int32(sqr(ClassBreaks_org));
  		}
-
-		attribute<int32>   N                    := elevation[sub_or_null(id(.), point_yx(1i, 0i, ipoint))];
-		attribute<int32>   NE                   := elevation[sub_or_null(id(.), point_yx(1i, 0i, ipoint)) + point_yx(0i, 1i, ipoint)];
-		attribute<int32>   E                    := elevation[id(.) + point_yx(0i, 1i, ipoint)];
-		attribute<int32>   SE                   := elevation[id(.) + point_yx(1i, 1i, ipoint)];
-		attribute<int32>   S                    := elevation[id(.) + point_yx(1i, 0i, ipoint)];
-		attribute<int32>   SW                   := elevation[sub_or_null(id(.) + point_yx(1i, 0i, ipoint), point_yx(0i, 1i, ipoint))];
-		attribute<int32>   W                    := elevation[sub_or_null(id(.), point_yx(0i, 1i, ipoint))];
-		attribute<int32>   NW                   := elevation[sub_or_null(id(.), point_yx(1i, 1i, ipoint))];
-		
-		
 	}
 	
 	unit<ipoint> Slope_2021
