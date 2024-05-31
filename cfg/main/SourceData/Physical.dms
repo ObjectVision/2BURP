@@ -27,9 +27,6 @@ container Physical : using = "geography"
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
 		attribute<int32>   Elevation := Physical/Elevation_new/ReadData;
-		
-		attribute<int32>   Test      := max(Elevation[cdomain_x_pot1k/third_rel], cdomain_x_pot1k/first_rel); 
-		
 		attribute<int32>   TRI_sqr       := 
 											  sqr(elevation - N)
 											+ sqr(elevation - NE)
@@ -45,12 +42,12 @@ container Physical : using = "geography"
 		attribute<int32> TRI_sqr_2_CD(CompactedDomainSub) := sum(sqr(compacted_elevation[CdomainSub_x_pot1k/first_rel] - compacted_elevation[CdomainSub_x_pot1k/third_rel]), CdomainSub_x_pot1k/first_rel);
 		attribute<int32> TRI_sqr_2 := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_2_CD);
 		
-		attribute<TRI_Classes> TRI_K_rel              := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
+		attribute<TRI_Classes> TRI_K_rel              := Classify(TRI_sqr_2, TRI_Classes/ClassBreaks_sqr);
 		
 		attribute<float32>     TRI_mean_1k             (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
 		attribute<TRI_Classes> Write_TRI_Class_mean_1k (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
-		//attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
-		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= '%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		// attribute<TRI_Classes> TRI_Class_mean_1k       (domain) : StorageName     = "= '%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 		parameter<string> Generate := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
