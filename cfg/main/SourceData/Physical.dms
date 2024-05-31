@@ -27,6 +27,9 @@ container Physical : using = "geography"
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
 		attribute<int32>   Elevation := Physical/Elevation_new/ReadData;
+		
+		attribute<int32>   Test      := max(Elevation[cdomain_x_pot1k/third_rel], cdomain_x_pot1k/first_rel); 
+		
 		attribute<int32>   TRI_sqr       := 
 											  sqr(elevation - N)
 											+ sqr(elevation - NE)
@@ -61,6 +64,8 @@ container Physical : using = "geography"
 		attribute<int32>   SW                   := elevation[sub_or_null(id(.) + point_yx(1i, 0i, ipoint), point_yx(0i, 1i, ipoint))];
 		attribute<int32>   W                    := elevation[sub_or_null(id(.), point_yx(0i, 1i, ipoint))];
 		attribute<int32>   NW                   := elevation[sub_or_null(id(.), point_yx(1i, 1i, ipoint))];
+		
+		
 	}
 	
 	unit<ipoint> Slope_2021

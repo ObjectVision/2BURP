@@ -89,24 +89,56 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/South_America];}
 
 		//countries
-		unit<dpoint> LatLong_test                     := range(LatLong_Base, point_yx(52.04, 5.04), point_yx(52.06, 5.06));//De Meern - Netherlands. Only 4 cells
-		unit<dpoint> LatLong_Utrecht                  := range(LatLong_Base, point_yx( 51.8,  4.7), point_yx(52.3, 5.7));
 		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
 		unit<dpoint> LatLong_Nicaragua                := range(LatLong_Base, point_yx( 8.66, -90.0), point_yx(15.0, -80.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nicaragua];}
 		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0), point_yx(17.0, 20.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
+	}
+
+	unit<wpoint> ProtoDomain :=
+		gridset(
+			LatLong
+			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong) 
+			, point_yx(90d, -180d, LatLong) //top left
+			, wpoint
+		);
+		
+	unit<ipoint> ProtoDomain_sub :=
+		gridset(
+			LatLong
+			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong) 
+			, point_yx(90d, -180d, LatLong) //top left
+			, ipoint
+		);
+		
+	parameter<ProtoDomain> TileSize   := Point_yx(1024w, 1024w, ProtoDomain);
+	parameter<ProtoDomain> TileOffset := Point_yx(   0w,    0w, ProtoDomain);
+	
+	unit<spoint>  Tile := gridset(ProtoDomain, TileSize, TileOffset, spoint)
+	{
+		attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
+		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(LatLong_per_ProtoDomain);
+		
+		attribute<ProtoDomain>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
+		attribute<ProtoDomain>  UB                                    := max(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.])+point_yx(1w, 1w);
+		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, mapping(ProtoDomain, .));
+	}
+
+	unit<uint32> StudyAreaTile := select_with_org_rel(Tile/HasStudyArea)
+	{
+		attribute<ProtoDomain>     LB     := Tile/LB[org_rel];
+		attribute<ProtoDomain>     UB     := Tile/UB[org_rel];
+		
+		attribute<ProtoDomain_sub> LB_sub := LB[ProtoDomain_sub];
+		attribute<ProtoDomain_sub> UB_sub := UB[ProtoDomain_sub];
 	}
 
 
 
 
 
-	unit<wpoint> domain :=
-		gridset(
-			range(LatLong, LowerBound(LatLong),UpperBound(LatLong))
-			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong) 
-			, point_yx(90d, -180d, LatLong) //top left
-			, wpoint
-		), spatialReference = "EPSG:4326"
+
+
+	unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
 	{
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
@@ -127,16 +159,7 @@ container Geography : using = "units"
 		attribute<bool>    IsCompactedDomain := GridData/FreeLand;
 	}
 
-	unit<ipoint> domain_sub :=
-		gridset(
-			range(LatLong, 
-				LowerBound(LatLong) + point_yx(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong), 
-				UpperBound(LatLong) - point_yx(0.5 * SourceRasterSubFactor, 0.5 * SourceRasterSubFactor, LatLong)
-			)
-			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong)
-			, point_yx(90d, -180d, LatLong)
-			, ipoint
-		)
+	unit<ipoint> domain_sub := TiledUnit(StudyAreaTile/LB_sub, StudyAreaTile/UB_sub)
 	{
 		attribute<domain> domain_rel := mapping(., domain);
 		
