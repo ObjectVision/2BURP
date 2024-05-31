@@ -69,6 +69,7 @@ container Classifications : using = "units"
 			0.000
 		];
 		attribute<Float32> Moving_up_probability := MakeDefined(Moving_up_probability_data, 0f);
+		attribute<uint32>  BrushColor := BU_DensityBin/BrushColor[DensityBin_rel];
 	}
 	
 	unit<uint8> BU_DensityBin := cat_range(0b, 15b)
@@ -76,5 +77,24 @@ container Classifications : using = "units"
 		attribute<AllShares>  LB: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
 		attribute<uint8>  UB    := id(.) == last(id(.)) ? 101b : LB[id(.)+1b];
+		
+		attribute<uint32> BrushColor := switch( 
+											case(LB == 0b, rgb(255,255,255))
+											, case(LB == 1b, rgb(171,213,213))
+											, case(LB == 2b, rgb(188,221,170))
+											, case(LB == 3b, rgb(205,230,127))
+											, case(LB == 4b, rgb(221,235,85))
+											, case(LB == 5b, rgb(238,246,42))
+											, case(LB == 10b, rgb(255,255,0))
+											, case(LB == 15b, rgb(250,230,0))
+											, case(LB == 20b, rgb(243,205,12))
+											, case(LB == 25b, rgb(237,180,20))
+											, case(LB == 30b, rgb(231,157,30))
+											, case(LB == 35b, rgb(225,133,34))
+											, case(LB == 40b, rgb(219,100,40))
+											, case(LB == 45b, rgb(213,84,48))
+											, case(LB == 50b, rgb(200,60,50))
+											, rgb(200,200,200)
+										), DialogType = "BrushColor";
 	}
 }
