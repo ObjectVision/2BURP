@@ -39,8 +39,12 @@ container Physical : using = "geography"
 											+ sqr(elevation - SW)
 											+ sqr(elevation - W)
 											+ sqr(elevation - NW)
-										;
-										
+											;
+											
+		attribute<int32> compacted_elevation(CompactedDomainSub) := elevation[CompactedDomainSub/org_rel];
+		attribute<int32> TRI_sqr_2_CD(CompactedDomainSub) := sum(sqr(compacted_elevation[CdomainSub_x_pot1k/first_rel] - compacted_elevation[CdomainSub_x_pot1k/third_rel]), CdomainSub_x_pot1k/first_rel);
+		attribute<int32> TRI_sqr_2 := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_2_CD);
+		
 		attribute<TRI_Classes> TRI_K_rel              := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
 		
 		attribute<float32>     TRI_mean_1k             (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
