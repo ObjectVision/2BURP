@@ -120,7 +120,7 @@ container Geography : using = "units"
 		attribute<ProtoDomain_sub>  UB_sub := UB[ProtoDomain_sub];
 	}
 
-	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_new.dbf'" // decouple by renaming this file when produced
+	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'.dbf'" // decouple by renaming this file when produced
 	{
 		attribute<uint16>           LB_X := pointcol(LB);
 		attribute<uint16>           LB_y := pointrow(LB);

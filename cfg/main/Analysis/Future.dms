@@ -314,40 +314,40 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
 		}
 		
-		container BuiltUp_Density_Distribution
-		{
-			container Per_ClaimRegion := 
-				for_each_ne(
-					ClaimRegion/item_name
-					, 'BuiltUp_Density_Distribution_Per_ClaimRegion_T('+string(id(ClaimRegion))+'[ClaimRegion], CurrState/Builtup_Total_Share)'
-				);
+		// container BuiltUp_Density_Distribution
+		// {
+			// container Per_ClaimRegion := 
+				// for_each_ne(
+					// ClaimRegion/item_name
+					// , 'BuiltUp_Density_Distribution_Per_ClaimRegion_T('+string(id(ClaimRegion))+'[ClaimRegion], CurrState/Builtup_Total_Share)'
+				// );
 				
-			container Initial :=
-				for_each_nedv(
-					ClaimRegion/item_name
-					, 'Per_ClaimRegion/'+ClaimRegion/item_name+'/DensityBins/density'
-					, BU_DensityBins
-					, float32
-				)
-			{
-				attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
-				attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
-			} 
+			// container Initial :=
+				// for_each_nedv(
+					// ClaimRegion/item_name
+					// , 'Per_ClaimRegion/'+ClaimRegion/item_name+'/DensityBins/density'
+					// , BU_DensityBins
+					// , float32
+				// )
+			// {
+				// attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
+				// attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
+			// } 
 			
-			parameter<float32> nroftimestepsleft := max_elem(float32(max(id(ProjectionYears)) - rlookup(ThisYear, ProjectionYears/name)), 1f);
+			// parameter<float32> nroftimestepsleft := max_elem(float32(max(id(ProjectionYears)) - rlookup(ThisYear, ProjectionYears/name)), 1f);
 			
-			container Convergence :=
-				for_each_nedv(
-					ClaimRegion/item_name
-					, 'Initial/'+ClaimRegion/item_name+' + ((Initial/Average - Initial/'+ClaimRegion/item_name+') / nroftimestepsleft)'
-					, BU_DensityBins
-					, float32
-				)
-			{
-				attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
-				attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
-			} 
-		}
+			// container Convergence :=
+				// for_each_nedv(
+					// ClaimRegion/item_name
+					// , 'Initial/'+ClaimRegion/item_name+' + ((Initial/Average - Initial/'+ClaimRegion/item_name+') / nroftimestepsleft)'
+					// , BU_DensityBins
+					// , float32
+				// )
+			// {
+				// attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
+				// attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
+			// } 
+		// }
 		
 		container Suitability
 		{
