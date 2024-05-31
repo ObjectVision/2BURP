@@ -6,8 +6,7 @@ container Geography : using = "units"
 		parameter<float32> ViewPortMinSize       := 1f / 3600f;
 		parameter<float32> PenWorldWidth         := 100f / 3600f, DialogType = "PenWorldWidth";
 		parameter<float32> LabelWorldSize        := 10f / 3600f, DialogType = "LabelWorldSize";
-		
-		parameter<km>      lengthdegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
+		parameter<km>      LengthDegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
 	}
 	unit<ipoint> LatLong_ip             := gridset(LatLong,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
 	unit<dpoint> WorldMollweide         : SpatialReference = "ESRI:54009";
@@ -34,7 +33,7 @@ container Geography : using = "units"
 	
 	unit<ipoint> LatLong_mdegrees := gridset(LatLong, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
 
-	unit<ipoint> Mollweide_grid_base //:= /SourceData/population/Past/Big_raster_domain
+	unit<ipoint> Mollweide_grid_base
 	 {
 		parameter<float64> x_min := -18040095.7d;
 		parameter<float64> x_max := 18040095.7d;
@@ -67,22 +66,13 @@ container Geography : using = "units"
 		}
 	}
 
-
 	container StudyAreas
 	{
 		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= union_polygon(ipolygon(SourceData/RegionalUnits/Countries/Geometry_LL));}
-
-		//For fast testing with extent of 1 country (no other country within extent)
-		unit<dpoint> LatLong_Iceland                  := range(LatLong_Base, point_yx( 62.0, -25.0), point_yx(68.0,-12.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Iceland];}
-
-		unit<dpoint> LatLong_Europe_Africa            := range(LatLong_Base, point_yx(-51.0, -40.0), point_yx(85.0, 71.0));
-		unit<dpoint> LatLong_Europe_Africa_America    := range(LatLong_Base, point_yx(-66.0, 170.0), point_yx(85.0, 75.0));
 		
 		//continents
-		//unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(61.0, 30.0));
 		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
 		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
-//		unit<dpoint> LatLong_Antarctica               := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(-11.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Antarctica];}
 		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
 		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}
 		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/North_America];}
@@ -117,26 +107,50 @@ container Geography : using = "units"
 	{
 		attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
 		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(LatLong_per_ProtoDomain);
-		
 		attribute<ProtoDomain>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
 		attribute<ProtoDomain>  UB                                    := max(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.])+point_yx(1w, 1w);
 		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, mapping(ProtoDomain, .));
 	}
 
-	unit<uint32> StudyAreaTile := select_with_org_rel(Tile/HasStudyArea)
+	unit<uint32> StudyAreaTile_Select := select_with_org_rel(Tile/HasStudyArea)
 	{
-		attribute<ProtoDomain>     LB     := Tile/LB[org_rel];
-		attribute<ProtoDomain>     UB     := Tile/UB[org_rel];
-		
-		attribute<ProtoDomain_sub> LB_sub := LB[ProtoDomain_sub];
-		attribute<ProtoDomain_sub> UB_sub := UB[ProtoDomain_sub];
+		attribute<ProtoDomain>      LB     := Tile/LB[org_rel];
+		attribute<ProtoDomain>      UB     := Tile/UB[org_rel];
+		attribute<ProtoDomain_sub>  LB_sub := LB[ProtoDomain_sub];
+		attribute<ProtoDomain_sub>  UB_sub := UB[ProtoDomain_sub];
 	}
 
+	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_new.dbf'" // decouple by renaming this file when produced
+	{
+		attribute<uint16>           LB_X := pointcol(LB);
+		attribute<uint16>           LB_y := pointrow(LB);
+		attribute<uint16>           UB_X := pointcol(UB);
+		attribute<uint16>           UB_y := pointrow(UB);
+		
+		attribute<int32>            LB_sub_X := pointcol(LB_sub);
+		attribute<int32>            LB_sub_y := pointrow(LB_sub);
+		attribute<int32>            UB_sub_X := pointcol(UB_sub);
+		attribute<int32>            UB_sub_y := pointrow(UB_sub);
+	} 
 
-
-
-
-
+	// from here on, we only use the decoupled study area tiles and no longer have to process the full extent of the study area.
+	unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'.dbf'", StorageReadOnly = "true", FreeData = "False"
+	{
+		attribute<int32>            LB_X;
+		attribute<int32>            LB_y;
+		attribute<int32>            UB_X;
+		attribute<int32>            UB_y;
+		attribute<int32>            LB_sub_X;
+		attribute<int32>            LB_sub_y;
+		attribute<int32>            UB_sub_X;
+		attribute<int32>            UB_sub_y;
+		
+		attribute<ProtoDomain>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain);
+		attribute<ProtoDomain>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain);
+		
+		attribute<ProtoDomain_sub>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub);
+		attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
+	} 
 
 	unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
 	{
@@ -178,19 +192,14 @@ container Geography : using = "units"
 	{
 		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
-
-		// attribute<Bool>   InRegion               (domain) := IsDefined(Countries/per_domain);
 		attribute<Bool>   InStudyArea            (domain) := poly2grid(LatLong/geometry, domain);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
-		attribute<Bool>	  InPop_5kmClip          (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Population/Total_sums_5km/'+ModelParameters/StartYear+' > 0f)';
 
 		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 
-		// attribute<Bool>   InRegionHasPopHasUrb   (domain) := (InRegion || HasPop || HasBuiltup);
-																
 		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
 																&& InBU_5kmClip                         // within certain distance from bu-area.
 																&& (IsNotLake || HasBuiltup || HasPop)  // it is not a lake, unless there is builtup or population in a cell categorised as a lake
@@ -201,7 +210,6 @@ container Geography : using = "units"
 	{
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
-//		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
 		attribute<float32>           lat_factor            := domain_rel->lat_factor;
 		attribute<km2>               area                  := domain_rel->area;
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
@@ -213,12 +221,7 @@ container Geography : using = "units"
 	{
 		attribute<domain_sub>        domain_sub_rel        := org_rel;
 		attribute<.>                 BaseGrid  (domain_sub):= invert(domain_sub_rel);
-//		attribute<bool>              IsCD      (domain_sub):= MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
-//		attribute<float32>           lat_factor            := domain/lat_factor[domain_sub_rel];
 		attribute<km2>               area                  := domain_sub_rel->area;
-//		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_sub_rel], SphericalMercator);
-//		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
-//		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
 	}
 	
 	container Distmatrices
@@ -255,7 +258,7 @@ container Geography : using = "units"
 		attribute<ipoint> delta := union_data(., point_xy(-1, -1), point_xy(-1, 0i), point_xy(-1, 1i), point_xy(0i, 1i), point_xy(1i, 1i), point_xy(1i, 0i), point_xy(1i, -1), point_xy(0i, -1));
 	}
 	
-	unit<uint32> CdomainSub_x_pot1k := combine(CompactedDomainSub, KingStep) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	unit<uint64> CdomainSub_x_pot1k := combine_uint64(CompactedDomainSub, KingStep) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
 	{	
 		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + second_rel -> delta;
 		attribute<CompactedDomainSub> third_rel  := CompactedDomainSub/basegrid[third_rel_i];
