@@ -97,9 +97,6 @@ container Geography : using = "units"
 	}
 
 
-
-
-
 	unit<wpoint> domain :=
 		gridset(
 			range(LatLong, LowerBound(LatLong),UpperBound(LatLong))
@@ -176,15 +173,26 @@ container Geography : using = "units"
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(domain/IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
-		attribute<.>                 id                    := id(.);
 		attribute<domain>            domain_rel            := org_rel;
 		attribute<.>                 BaseGrid  (domain)    := invert(domain_rel);
-		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
-		attribute<float32>           lat_factor            := domain/lat_factor[domain_rel];
-		attribute<km2>               area                  := domain/area[domain_rel];
+//		attribute<bool>              IsCD      (domain)    := MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
+		attribute<float32>           lat_factor            := domain_rel->lat_factor;
+		attribute<km2>               area                  := domain_rel->area;
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
 		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
+	}
+	
+	unit<uint64> CompactedDomainSub := select_with_org_rel(domain_sub/domain_rel->IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
+	{
+		attribute<domain_sub>        domain_sub_rel        := org_rel;
+		attribute<.>                 BaseGrid  (domain_sub):= invert(domain_sub_rel);
+//		attribute<bool>              IsCD      (domain_sub):= MakeDefined(BaseGrid[int64],-1[int64]) = -1[int64] ? false : true;
+//		attribute<float32>           lat_factor            := domain/lat_factor[domain_sub_rel];
+		attribute<km2>               area                  := domain_sub_rel->area;
+//		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_sub_rel], SphericalMercator);
+//		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
+//		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
 	}
 	
 	container Distmatrices
@@ -214,6 +222,17 @@ container Geography : using = "units"
 		unit<spoint> pot40km :=Impl/pot40km/PotRange;
 		unit<spoint> pot50km :=Impl/pot50km/PotRange;
 		unit<spoint> pot250km:=Impl/pot250km/PotRange;
+	}
+	
+	unit<uint8> KingStep := range(0b, 8b) 
+	{ 
+		attribute<ipoint> delta := union_data(., point_xy(-1, -1), point_xy(-1, 0i), point_xy(-1, 1i), point_xy(0i, 1i), point_xy(1i, 1i), point_xy(1i, 0i), point_xy(1i, -1), point_xy(0i, -1));
+	}
+	
+	unit<uint32> CdomainSub_x_pot1k := combine(CompactedDomainSub, KingStep) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + second_rel -> delta;
+		attribute<CompactedDomainSub> third_rel  := CompactedDomainSub/basegrid[third_rel_i];
 	}
 	
 	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
