@@ -307,7 +307,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, median(max_saturation, CurrState/BuiltUp_Total_Share, CurrState/BuiltUp_Total_Share + (LocalMaxima/IsLocalMaximum ? r_if_LocalMax: r_if_notLocalMax))
 				);
 				
-			attribute<float32> MaxAllowed_Builtup_Total_Share_extraRestrictie   (CompactedDomain) := (26.605f * exp(-0.047f*CurrState/BuiltUp_Total_Share*100f)) / 100f + CurrState/BuiltUp_Total_Share;
+			attribute<float32> MaxAllowed_Builtup_Total_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f[km2 / BuiltUpKm2])*CurrState/BuiltUp_Total_Share) + CurrState/BuiltUp_Total_Share;
 			attribute<float32> MaxAllowed_Builtup_Total_Share                   (CompactedDomain) := min_elem(MaxAllowed_Builtup_Total_Share_extraRestrictie, MaxAllowed_Builtup_Total_Share0);
 			
 			//adhoc
