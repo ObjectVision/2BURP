@@ -1,3 +1,4 @@
+// container Geography : using = "units;SourceData/RegionalUnits"
 container Geography : using = "units"
 {
 	unit<dpoint> LatLong       := ='StudyAreas/LatLong_'+ModelParameters/StudyArea;
@@ -71,16 +72,18 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/World/Geometry[SourceData/RegionalUnits/World/V/World];}
 		
 		//continents
-		// unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
-		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
+		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry;}
+		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry;}
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry;}
+		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry;}
+		unit<dpoint> LatLong_North_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry;}
+		unit<dpoint> LatLong_South_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry;}
 		
-		parameter<LatLong> LB := Lower_Bound(/SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry);
-		
-		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
-		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
-		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}
-		unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/North_America];}
-		unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/South_America];}
+		// unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
+		// unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
+		// unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}
+		// unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/North_America];}
+		// unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/South_America];}
 
 		//countries
 		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
@@ -90,17 +93,17 @@ container Geography : using = "units"
 
 	unit<wpoint> ProtoDomain :=
 		gridset(
-			LatLong
-			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong) 
-			, point_yx(90d, -180d, LatLong) //top left
+			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
+			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong_base) 
+			, point_yx(90d, -180d, LatLong_base) //top left
 			, wpoint
 		);
 		
 	unit<ipoint> ProtoDomain_sub :=
 		gridset(
-			LatLong
-			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong) 
-			, point_yx(90d, -180d, LatLong) //top left
+			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
+			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong_base) 
+			, point_yx(90d, -180d, LatLong_base) //top left
 			, ipoint
 		);
 		

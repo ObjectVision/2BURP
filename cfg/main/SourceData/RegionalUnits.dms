@@ -44,7 +44,7 @@ container RegionalUnits
 	unit<uint8> Continents := Classifications/Continents
 	, storagename = "= propvalue(store_Continents, 'storagename')", storagereadonly = "True"
 	{
-		attribute<LatLong>  geometry       (poly);
+		attribute<LatLong_base>  geometry       (poly);
 		attribute<string>   name                  := Classifications/Continents/name;
 		attribute<.>        per_grid     (domain) := poly2grid(geometry , domain);
 		attribute<World>    World_rel             := const(0[WOrld],.);
@@ -62,7 +62,7 @@ container RegionalUnits
 		{
 			parameter<string> name;
 			///
-			parameter<LatLong> geometry (poly) := ='Continents/geometry[Continents/v/'+name+']';
+			parameter<LatLong_base> geometry (poly) := ='Continents/geometry[Continents/v/'+name+']';
 		}
 	}
 	
