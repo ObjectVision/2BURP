@@ -1,4 +1,3 @@
-// container Geography : using = "units;SourceData/RegionalUnits"
 container Geography : using = "units"
 {
 	unit<dpoint> LatLong       := ='StudyAreas/LatLong_'+ModelParameters/StudyArea;
@@ -55,7 +54,7 @@ container Geography : using = "units"
 			)
 			,point_xy(0i, 0i)
 			,point_xy(Mollweide_grid_base/nr_cols, Mollweide_grid_base/nr_rows)
-		),	DialogData = "mollweide_grid_base"
+		)
 	{
 		attribute<WorldMollWeide> point       := mapping(., WorldMollWeide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, WorldMollWeide);
 		attribute<LatLong>        domain_rel  := convert(point, LatLong);
@@ -78,17 +77,11 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry;}
 		unit<dpoint> LatLong_North_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry;}
 		unit<dpoint> LatLong_South_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry;}
-		
-		// unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
-		// unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
-		// unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}
-		// unit<dpoint> LatLong_North_America            := range(LatLong_Base, point_yx(  5.0,-180.0), point_yx( 84.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/North_America];}
-		// unit<dpoint> LatLong_South_America            := range(LatLong_Base, point_yx(-56.0,-110.0), point_yx( 18.0,-28.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/South_America];}
 
 		//countries
-		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0), point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
+		unit<dpoint> LatLong_Netherlands              := range(LatLong_Base, point_yx( 45.0, -2.0),  point_yx(54.0,11.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Netherlands];}
 		unit<dpoint> LatLong_Nicaragua                := range(LatLong_Base, point_yx( 8.66, -90.0), point_yx(15.0, -80.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nicaragua];}
-		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0), point_yx(17.0, 20.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
+		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0),   point_yx(17.0, 20.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
 	}
 
 	unit<wpoint> ProtoDomain :=
@@ -116,7 +109,9 @@ container Geography : using = "units"
 		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(LatLong_per_ProtoDomain);
 		attribute<ProtoDomain>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
 		attribute<ProtoDomain>  UB                                    := max(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.])+point_yx(1w, 1w);
-		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, mapping(ProtoDomain, .));
+		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, ProtoDomain_rel);
+		
+		attribute<.>            ProtoDomain_rel         (ProtoDomain) := mapping(ProtoDomain, .);
 	}
 
 	unit<uint32> StudyAreaTile_Select := select_with_org_rel(Tile/HasStudyArea)
@@ -224,7 +219,7 @@ container Geography : using = "units"
 		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
 	}
 	
-	unit<uint64> CompactedDomainSub := select_with_org_rel(domain_sub/domain_rel->IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
+	unit<uint64> CompactedDomainSub := select_with_org_rel(domain_sub/domain_rel->IsCompactedDomain), DialogType = "Map", DialogData = "BaseGrid"
 	{
 		attribute<domain_sub>        domain_sub_rel        := org_rel;
 		attribute<.>                 BaseGrid  (domain_sub):= invert(domain_sub_rel);

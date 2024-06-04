@@ -1,4 +1,4 @@
-container Physical : using = "geography"
+container Physical : using = "geography;classifications"
 {
 	unit<ipoint> Elevation
 	:	StorageName     = "%ToBURPDataDir%/physical/Elevation/gtopo30_NOAA_NGDC.tif"
@@ -48,26 +48,28 @@ container Physical : using = "geography"
 		
 		container Read_PerContinentFiles :=
 			for_each_ndnvat(
-				Classifications/Continents/name
+				Continents/name
 				, Domain_perContinent
-				, Classifications/Continents/name
+				, Continents/name
 				, TRI_Classes
-				, '%ToBURPDataDir%/physical/TRI_mean_1k/'+Classifications/Continents/name+'.tif'
+				, '%ToBURPDataDir%/physical/TRI_mean_1k/'+Continents/name+'.tif'
 				, 'gdal.grid'
-			);
-			
-			
+			)
+		{	
+			// attribute<Continents>  Continent_rel (ProtoDomain) := 
+			attribute<TRI_Classes> Mozaic        (ProtoDomain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
+		}
 
 		container MakeDomain_perContinent :=
 			for_each_ne(
-				Classifications/Continents/name
-				, 'MakeDomain_perContinent_T('+quote(Classifications/Continents/name)+')'
+				Continents/name
+				, 'MakeDomain_perContinent_T('+quote(Continents/name)+')'
 			);
 			
 		container Domain_perContinent :=
 			for_each_nex(
-				Classifications/Continents/name
-				, 'MakeDomain_perContinent/'+Classifications/Continents/name+'/domain'
+				Continents/name
+				, 'MakeDomain_perContinent/'+Continents/name+'/domain'
 				, wpoint
 			);
 			
