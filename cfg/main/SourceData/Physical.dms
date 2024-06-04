@@ -45,6 +45,76 @@ container Physical : using = "geography"
 			attribute<float32> ClassBreaks_org   : [0, 81, 117, 162, 240, 498, 959];
 			attribute<int32>   ClassBreaks_sqr   := int32(sqr(ClassBreaks_org));
  		}
+		
+		container Read_PerContinentFiles :=
+			for_each_ndnvat(
+				Classifications/Continents/name
+				, Domain_perContinent
+				, Classifications/Continents/name
+				, TRI_Classes
+				, '%ToBURPDataDir%/physical/TRI_mean_1k/'+Classifications/Continents/name+'.tif'
+				, 'gdal.grid'
+			);
+			
+			
+
+		container MakeDomain_perContinent :=
+			for_each_ne(
+				Classifications/Continents/name
+				, 'MakeDomain_perContinent_T('+quote(Classifications/Continents/name)+')'
+			);
+			
+		container Domain_perContinent :=
+			for_each_nex(
+				Classifications/Continents/name
+				, 'MakeDomain_perContinent/'+Classifications/Continents/name+'/domain'
+				, wpoint
+			);
+			
+		
+		Template MakeDomain_perContinent_T
+		{
+			parameter<string> Continent_name;
+			///
+			
+			unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+Continent_name+'.dbf'", StorageReadOnly = "true", FreeData = "False"
+			{
+				attribute<int32>            LB_X;
+				attribute<int32>            LB_y;
+				attribute<int32>            UB_X;
+				attribute<int32>            UB_y;
+				attribute<int32>            LB_sub_X;
+				attribute<int32>            LB_sub_y;
+				attribute<int32>            UB_sub_X;
+				attribute<int32>            UB_sub_y;
+				
+				attribute<ProtoDomain>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain);
+				attribute<ProtoDomain>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain);
+				
+				attribute<ProtoDomain_sub>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub);
+				attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
+			} 
+
+			unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
+			{
+				unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
+				{
+					attribute<float64> lat_top         := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
+					attribute<float64> lat_mid         := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
+					attribute<Float32> lat_factor      := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+					parameter<km2>     Equatorial_Area := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
+					attribute<km2>     area            := lat_factor * Equatorial_Area;
+				}
+				
+				attribute<LatLong>        geometry      := id(.)[LatLong];
+				attribute<Mollweide_grid> mollweide_rel := convert(geometry, Mollweide_grid);
+				attribute<WebMercator_grid> webmercator_rel:= convert(geometry, WebMercator_grid);
+
+				parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
+				attribute<Float32> lat_factor   := rowset/lat_factor[pointrow(ID(.))];
+				attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
+			}
+		}
 	}
 	
 	unit<ipoint> Slope_2021

@@ -68,10 +68,14 @@ container Geography : using = "units"
 
 	container StudyAreas
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= union_polygon(ipolygon(SourceData/RegionalUnits/Countries/Geometry_LL));}
+		unit<dpoint> LatLong_World                    := range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/World/Geometry[SourceData/RegionalUnits/World/V/World];}
 		
 		//continents
+		// unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
 		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, point_yx( 29.0, -11.0), point_yx(81.0, 40.5))  {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Europe];}
+		
+		parameter<LatLong> LB := Lower_Bound(/SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry);
+		
 		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, point_yx(-47.0, -26.0), point_yx( 38.0, 64.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Africa];}
 		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, point_yx(-13.0,-180.0), point_yx( 82.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Asia];}
 		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, point_yx(-56.0,-180.0), point_yx( 29.0,180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/Continents/Geometry[SourceData/RegionalUnits/Continents/V/Australia_Oceania];}

@@ -9,7 +9,7 @@ container SourceData : using = "geography;units"
 		parameter<bool> b6_TRI                   := true, explicitsuppliers = "Physical/TerrainRoughnessIndex/Write_TRI_Class_mean_1k";
 	
 		parameter<bool> Countries                := true, explicitsuppliers = "RegionalUnits/store_Countries";
-		parameter<bool> Continents               := true, explicitsuppliers = "RegionalUnits/Continents/store_geometry";
+		parameter<bool> Continents               := true, explicitsuppliers = "RegionalUnits/store_Continents";
 	}
 	
 	container Claims : using = "RegionalUnits"

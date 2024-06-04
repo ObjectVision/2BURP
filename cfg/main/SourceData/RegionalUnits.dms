@@ -1,34 +1,7 @@
 container RegionalUnits
 {
-	unit<uint32> CIESIN 
-	: StorageName = "%ToBURPDataDir%/Regions/Global_admin0.shp"
-	, StorageType = "gdal.vect"
-	, StorageReadOnly = "true"
-	{
-		attribute<LatLong>           Geometry          (poly);
-		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry, SphericalMercator);
-		attribute<SphericalMercator> Geometry_WM_Simpl (poly) := bg_simplify_multi_polygon(Geometry_WM, 100.0);
-		unit<uint32>                 seq2p                    := sequence2points(geometry);
-		unit<uint32>                 seq2p_smpl               := sequence2points(Geometry_WM_Simpl);
-		attribute<string>            ISO3                     := FIRST_ISOA;
-		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/values);
-	}
-	
-/*	unit<uint32> GADM 
-	: StorageName = "%ToBURPDataDir%/Regions/gadm_410.gpkg"
-	, StorageType = "gdal.vect"
-	, StorageReadOnly = "true"
-	{
-		attribute<LatLong>           Geometry          (poly);
-		attribute<LatLong>           Geometry_LL_Simpl (poly) := bg_simplify_multi_polygon(Geometry, 0.0005);
-		attribute<string>            ISO3                     := GID_0;
-		attribute<Continents>  store_continents_rel     := rlookup(AsItemName(continent_name), Continents/name);
-		attribute<string>            continent_name           := switch(case(continent == 'Australia' || continent == 'Oceania', 'Australia_Oceania'), case(GID_0 = 'TUR', 'Europe'), continent);
-		attribute<store_Countries>   store_countries_rel      := rlookup(ISO3, store_Countries/ISO3);
-	}*/
-	
 	unit<uint32> store_Countries := set_countries
-	, storagename = "%ToBURPDataDir%/Regions/fss/Countries.fss"
+	, storagename = "%ToBURPDataDir%/Regions/Countries.fss"
 	{
 		attribute<string>            Label                    := set_countries/Label;
 		attribute<string>            ISO3                     := ZoneId;
@@ -38,6 +11,13 @@ container RegionalUnits
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
 		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
 		attribute<string>            continent_name           := Continent;
+	}
+	
+	unit<uint8> store_Continents := Classifications/Continents
+	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
+	{
+		attribute<LatLong>  geometry       (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong];
+		attribute<string>   name                  := Classifications/Continents/name;
 	}
 	
 	unit<uint32> Countries
@@ -52,7 +32,7 @@ container RegionalUnits
 		attribute<SphericalMercator> Geometry_WM (poly); 
 		attribute<WorldMollweide>    Geometry_MW (poly); 
 		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly);
-		attribute<Continents>  		 Continents_rel;
+		attribute<Continents>        Continents_rel;
 		attribute<string>            continent_name;
 		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
 		attribute<.>                 per_domain              (domain) := poly2grid(geometry_LL , domain);
@@ -60,14 +40,30 @@ container RegionalUnits
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
 
+	
 	unit<uint8> Continents := Classifications/Continents
+	, storagename = "= propvalue(store_Continents, 'storagename')", storagereadonly = "True"
 	{
-		attribute<LatLong>  geometry (poly): storagename = "= propvalue(store_geometry, 'storagename')", storagereadonly = "True";
-		attribute<string>   name            := Classifications/Continents/name;
-		attribute<.>        per_grid        (domain) := poly2grid(geometry , domain);
+		attribute<LatLong>  geometry       (poly);
+		attribute<string>   name                  := Classifications/Continents/name;
+		attribute<.>        per_grid     (domain) := poly2grid(geometry , domain);
+		attribute<World>    World_rel             := const(0[WOrld],.);
+		
 		container V := for_each_nedv(AsItemName(name), String(ID(.))+'[..]', void, .);
-		// attribute<LatLong>  store_geometry (poly) := partitioned_union_polygon(store_Countries/geometry_LL[LatLong_ip], store_Countries/continents_rel)[LatLong], storagename = "%ToBURPDataDir%/Regions/fss/Continents/Geom.fss";
-		attribute<LatLong>  store_geometry (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong], storagename = "%ToBURPDataDir%/Regions/fss/Continents/Geom.fss";
+		
+		
+		container GetPerContinentGeometry := 
+			for_each_ne(
+				name
+				, 'GetPerContinentGeometry_T('+quote(name)+')'
+			);
+			
+		Template GetPerContinentGeometry_T
+		{
+			parameter<string> name;
+			///
+			parameter<LatLong> geometry (poly) := ='Continents/geometry[Continents/v/'+name+']';
+		}
 	}
 	
 	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
@@ -77,7 +73,8 @@ container RegionalUnits
 	
 	unit<uint8> World : nrofrows = 1
 	{
-		attribute<string> Label  := const('World',.);
+		attribute<string>     Label           := const('World',.);
+		attribute<LatLong>    geometry (poly) := partitioned_union_polygon(Continents/geometry[LatLong_ip], continents/World_rel)[LatLong];
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
@@ -96,6 +93,8 @@ container RegionalUnits
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 		attribute<bool>           IsStudyArea                           := pcount(per_CompactedDomain) > 1000;
+		attribute<string>         Continent                             := rjoin(country, set_countries/zoneid, set_countries/continent);
+		attribute<set_countries>  Country_rel                           := rlookup(country, set_countries/zoneid);
 	}
 	
 	unit<uint32> FunctionalAreas := select_with_org_rel_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
@@ -107,15 +106,15 @@ container RegionalUnits
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 	}
 
-	unit<uint32> set_countries: nrofrows = 238 
+	unit<uint32> set_countries: nrofrows = 239 
 	{
 		attribute<string>   ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
 		attribute<string>   Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
 		attribute<string>   Continent       := inMatrix/data[(id(.)*3+2)[inMatrix]];
-		attribute<LatLong>  Geometry (poly) := rjoin(ZoneId, CIESIN/FIRST_ISOA, CIESIN/Geometry);
+		attribute<LatLong>  Geometry (poly) := partitioned_union_polygon(FunctionalAreas_all/geometry_LL[LatLong_ip], FunctionalAreas_all/Country_rel)[LatLong];
 		
-		unit<uint32> inMatrix:= range(uint32, 0, 239*3) {
-		
+		unit<uint32> inMatrix:= range(uint32, 0, #.*3) 
+		{
 			attribute<string> data: [
 			//'Code',	'Label',	'Continent',
 			'ABW',	'Aruba',	'South_America',
@@ -299,7 +298,8 @@ container RegionalUnits
 			'QAT',	'Qatar',	'Asia',
 			'REU',	'Réunion',	'Africa',
 			'ROU',	'Romania',	'Europe',
-			'RUS',	'Russia',	'Asia',   // Asia in 2UP, split into two in the networkmodel_world
+			'ARUS',	'Asian_Russia',	'Asia',
+			'ERUS',	'European_Russia',	'Europe',
 			'RWA',	'Rwanda',	'Africa',
 			'SAU',	'Saudi Arabia',	'Asia',
 			'SDN',	'Sudan',	'Africa',
@@ -334,7 +334,7 @@ container RegionalUnits
 			'TON',	'Tonga',	'Australia_Oceania',
 			'TTO',	'Trinidad and Tobago',	'South_America',
 			'TUN',	'Tunisia',	'Africa',
-			'TUR',	'Turkey',	'Asia', //Asia in 2UP, Europe in networkmodel_world
+			'TUR',	'Turkey',	'Europe',
 			'TUV',	'Tuvalu',	'Australia_Oceania',
 			'TWN',	'Taiwan',	'Asia',
 			'TZA',	'Tanzania',	'Africa',
