@@ -23,8 +23,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		attribute<uint8>      IsFloodProneArea_RP100                  := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
 		
 		attribute<uint8>      Earthquakes_MMI_Index                   := Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
-		attribute<uint16>     NrOfLandslides_Precipitation            := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/ReadData[CompactedDomain/org_rel];
-		attribute<uint16>     NrOfLandslides_Earthquakes              := Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/ReadData[CompactedDomain/org_rel];
+		attribute<int16>      LandSlide_risk  	 			          := Physical/Natural_Hazards/Landslide/LS_risk[CompactedDomain/org_rel];
 		
 		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
 		attribute<float32>    Distance2AnyInlandWater                 := Physical/Water/AllWater/Dist_AllInland_km/GridData[CompactedDomain/org_rel];
@@ -42,10 +41,10 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		
 		
 		// needs to be first of containers with template variables
-		container access_to_settlements   := for_each_nedv('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
+		// container access_to_settlements   := for_each_nedv('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
 		container gridcost_to_settlements := for_each_nedv('Grid_costs_atleast_to_'+Accessibility_Variants/Label, 'uint32(Preprocessing/GridDistances/Y2000/Grid_costs_atleast_to/'+Accessibility_Variants/Label+'[CompactedDomain/org_rel])', CompactedDomain, uint32);
-		container pots_pop_2000           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
-		container pots_pop_2020           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
+		//container pots_pop_2000           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
+		//container pots_pop_2020           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
 	}
 	container Export_DataForCalibration 
 	{
@@ -61,17 +60,17 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		
 		//parameter<string> fieldnamelist:= aslist(directnames/name, fieldseparator)+fieldseparator+aslist(Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		parameter<string> fieldnamelist:= aslist(directnames/isvalue ? directnames/name : '', fieldseparator)
-			+fieldseparator+aslist('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
+		//	+fieldseparator+aslist('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
 			+fieldseparator+aslist('Grid_costs_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
-			+fieldseparator+aslist('pop2000_'+pot_fields/label, fieldseparator)
-			+fieldseparator+aslist('pop2020_'+pot_fields/label, fieldseparator)	
+		//	+fieldseparator+aslist('pop2000_'+pot_fields/label, fieldseparator)
+		//	+fieldseparator+aslist('pop2020_'+pot_fields/label, fieldseparator)	
 			;
 		//parameter<string> fieldreflist:= aslist('Create_DataForCalibration/'+directnames/name, fieldseparator)+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator);
 		parameter<string> fieldreflist:= aslist(directnames/isvalue ? 'Create_DataForCalibration/'+directnames/name : '', fieldseparator)
-			+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
+		//	+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/gridcost_to_settlements/Grid_costs_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
-			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
-			+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
+		//	+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
+		//	+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
 			;
 
 		// assume ExportDomain is a configured domain unit with two attributes as subitems: id & dist

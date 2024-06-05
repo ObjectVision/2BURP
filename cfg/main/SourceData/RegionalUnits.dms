@@ -5,7 +5,7 @@ container RegionalUnits
 	{
 		attribute<string>            Label                    := set_countries/Label;
 		attribute<string>            ISO3                     := ZoneId;
-		attribute<LatLong>           Geometry_LL       (poly) := Geometry;
+		attribute<LatLong_base>      Geometry_LL       (poly) := Geometry;
 		attribute<WorldMollweide>    Geometry_MW       (poly) := convert(Geometry_LL, WorldMollweide);
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
 		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[Impl/LatLong_mdegrees];
@@ -16,7 +16,7 @@ container RegionalUnits
 	unit<uint8> store_Continents := Classifications/Continents
 	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
 	{
-		attribute<LatLong>  geometry       (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong];
+		attribute<LatLong_base>  geometry       (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
 	
@@ -28,7 +28,7 @@ container RegionalUnits
 	{
 		attribute<string>            Label; 
 		attribute<string>            ISO3; 
-		attribute<LatLong>           geometry_LL (poly);
+		attribute<LatLong_base>      geometry_LL (poly);
 		attribute<SphericalMercator> Geometry_WM (poly); 
 		attribute<WorldMollweide>    Geometry_MW (poly); 
 		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly);
@@ -88,7 +88,7 @@ container RegionalUnits
 	, DialogType      = "map"
 	{
 		attribute<WorldMollweide> geometry (poly);
-		attribute<LatLong>        geometry_LL (poly)                    := convert(geometry, LatLong);
+		attribute<LatLong_base>   geometry_LL (poly)                    := convert(geometry, LatLong_base);
 		attribute<string>         Label                                 := name;
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
@@ -111,7 +111,7 @@ container RegionalUnits
 		attribute<string>   ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
 		attribute<string>   Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
 		attribute<string>   Continent       := inMatrix/data[(id(.)*3+2)[inMatrix]];
-		attribute<LatLong>  Geometry (poly) := partitioned_union_polygon(FunctionalAreas_all/geometry_LL[LatLong_ip], FunctionalAreas_all/Country_rel)[LatLong];
+		attribute<LatLong_base>  Geometry (poly) := partitioned_union_polygon(FunctionalAreas_all/geometry_LL[LatLong_ip], FunctionalAreas_all/Country_rel)[LatLong_base];
 		
 		unit<uint32> inMatrix:= range(uint32, 0, #.*3) 
 		{
