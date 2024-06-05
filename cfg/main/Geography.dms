@@ -10,7 +10,7 @@ container Geography : using = "units"
 		parameter<float32> LabelWorldSize        := 10f / 3600f, DialogType = "LabelWorldSize";
 		parameter<km>      LengthDegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
 	}
-	unit<ipoint> LatLong_ip             := gridset(LatLong,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
+	unit<ipoint> LatLong_ip             := gridset(LatLong_Base,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
 	unit<dpoint> WorldMollweide         : SpatialReference = "ESRI:54009";
 	Unit<dpoint> SphericalMercator_base : SpatialReference = "EPSG:3857", DialogData = "tms_layer_osm_webmercator";
 	Unit<dpoint> SphericalMercator      := range(SphericalMercator_base, point_yx(-16000000.0, -20000000.0),  point_yx(16000000.0, 20000000.0));
