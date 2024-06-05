@@ -23,7 +23,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<Person_BuiltUpKm2> Population_inTot_Density_org   (CompactedDomain) := Population_org / BuiltUp_Total_Area; // DO NOT USE!
 		attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := min_elem_alldefined(Population_inRes_Density_org, maxmax_saturation);
 		attribute<Person_BuiltUpKm2> Population_inTot_Density       (CompactedDomain) := min_elem_alldefined(Population_inTot_Density_org, maxmax_saturation);
-		attribute<Person>            Population                     (CompactedDomain) := Population_inRes_Density * BuiltUp_Residential_Area; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+		
+		attribute<Person>            Population_base                (CompactedDomain) := Population_inRes_Density * BuiltUp_Residential_Area;
+		// use nth_element to find a rounding cutoff that makes population an interger version of population_base with the same sum per ClaimRegion
+		attribute<uint32>            Population_trunc               (CompactedDomain) := uint32(Population_base);
+		attribute<Person>            Population_frac_rank           (CompactedDomain) := float32(Population_trunc +1) - Population_base;
+		attribute<Person>            RegionalDeficit                (ClaimRegion    ) := sum(Population_base, region_rel) - float32(sum(Population_trunc, region_rel));
+		attribute<Person>            Max_rank                       (ClaimRegion    ) := nth_element(Population_frac_rank, uint32(RegionalDeficit), region_rel);
+		attribute<Person>            Population                     (CompactedDomain) := convert(Population_trunc + uint32(Population_frac_rank < Max_rank[region_rel]), Person);
 		
 		parameter<Person_BuiltUpKm2> maxmax_saturation                                := 1000000[Person_BuiltUpKm2];
 		container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T((Population_Trunc_domain / domain/area)[float64]);
