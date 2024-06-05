@@ -27,7 +27,7 @@ container Physical : using = "geography;classifications"
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
 		attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation_new/ReadData[CompactedDomainSub/org_rel];
-		attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[CdomainSub_x_pot1k/first_rel] - Elevation[CdomainSub_x_pot1k/third_rel]), CdomainSub_x_pot1k/first_rel);
+		attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel] - Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel]), DistMatrices/CdomainSub_x_pot1k/first_rel);
 		attribute<int32>       TRI_sqr                            := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_CD);
 		
 		attribute<TRI_Classes> TRI_K_rel                          := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
@@ -56,67 +56,16 @@ container Physical : using = "geography;classifications"
 				, 'gdal.grid'
 			)
 		{	
-			// attribute<Continents>  Continent_rel (ProtoDomain) := 
-			attribute<TRI_Classes> Mozaic        (ProtoDomain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
+			// attribute<Continents>  Continent_rel (Impl/ProtoDomain) := 
+			attribute<TRI_Classes> Mozaic        (Impl/ProtoDomain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
 		}
 
-		container MakeDomain_perContinent :=
-			for_each_ne(
-				Continents/name
-				, 'MakeDomain_perContinent_T('+quote(Continents/name)+')'
-			);
-			
 		container Domain_perContinent :=
 			for_each_nex(
 				Continents/name
-				, 'MakeDomain_perContinent/'+Continents/name+'/domain'
+				, 'Geography/Impl/MakeDomain_perContinent/'+Continents/name+'/domain'   
 				, wpoint
 			);
-			
-		
-		Template MakeDomain_perContinent_T
-		{
-			parameter<string> Continent_name;
-			///
-			
-			unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+Continent_name+'.dbf'", StorageReadOnly = "true", FreeData = "False"
-			{
-				attribute<int32>            LB_X;
-				attribute<int32>            LB_y;
-				attribute<int32>            UB_X;
-				attribute<int32>            UB_y;
-				attribute<int32>            LB_sub_X;
-				attribute<int32>            LB_sub_y;
-				attribute<int32>            UB_sub_X;
-				attribute<int32>            UB_sub_y;
-				
-				attribute<ProtoDomain>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain);
-				attribute<ProtoDomain>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain);
-				
-				attribute<ProtoDomain_sub>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub);
-				attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
-			} 
-
-			unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
-			{
-				unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
-				{
-					attribute<float64> lat_top         := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
-					attribute<float64> lat_mid         := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
-					attribute<Float32> lat_factor      := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-					parameter<km2>     Equatorial_Area := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
-					attribute<km2>     area            := lat_factor * Equatorial_Area;
-				}
-				
-				attribute<LatLong>        geometry      := id(.)[LatLong];
-				attribute<Mollweide_grid> mollweide_rel := convert(geometry, Mollweide_grid);
-				attribute<WebMercator_grid> webmercator_rel:= convert(geometry, WebMercator_grid);
-
-				parameter<uint32>  boundrange_c := uint32(PointCol(boundrange(domain)));
-				attribute<Float32> lat_factor   := rowset/lat_factor[pointrow(ID(.))];
-				attribute<km2>     area         := rowset/area[pointrow(ID(.))]; //use rowset area
-			}
-		}
 	}
 	
 	unit<ipoint> Slope_2021
@@ -169,60 +118,33 @@ container Physical : using = "geography;classifications"
 		
 		container AllWater
 		{
-			attribute<bool>   LandMass      (domain_sub) := Coast/Coastline/Read_per_subgrid;
-			attribute<bool>   IsInlandWater (domain_sub) := Water/Inland_Water/Read_per_subgrid;
-			attribute<bool>   IsOcean       (domain_sub) := not(LandMass);
-			attribute<bool>   IsWater       (domain_sub) := IsInlandWater || IsOcean;
+			attribute<bool>    LandMass           (domain_sub) := Coast/Coastline/Read_per_subgrid;
+			attribute<bool>    IsInlandWater      (domain_sub) := Water/Inland_Water/Read_per_subgrid;
+			attribute<bool>    IsOcean            (domain_sub) := not(LandMass);
+			attribute<bool>    IsWater            (domain_sub) := IsInlandWater || IsOcean;
 			
-			attribute<uint32> Fraction_InlandWater0  (domain) := sum(IsInlandWater[uint32], domain_sub/domain_rel);
-			attribute<uint32> Fraction_InlandWater   (domain) := ((Fraction_InlandWater0[float32] / 36f) * 100f)[uint32];
+			attribute<uint32>  Fraction_InlandWater0  (domain) := sum(IsInlandWater[uint32], domain_sub/domain_rel);
+			attribute<uint32>  Fraction_InlandWater   (domain) := ((Fraction_InlandWater0[float32] / 36f) * 100f)[uint32];
 			
-			attribute<uint32> Fraction_Water0  (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
-			attribute<uint32> Fraction_Water   (domain) := ((Fraction_Water0[float32] / 36f) * 100f)[uint32];
+			attribute<uint32>  Fraction_Water0        (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
+			attribute<uint32>  Fraction_Water         (domain) := ((Fraction_Water0[float32] / 36f) * 100f)[uint32];
 			
-			//attribute<float32>inv_dist_all_inland_water (domain):= 1f / proximity(float32(Fraction_InlandWater>0), Distmatrices/pot250km/inv_EDM), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
-			//attribute<float32>inv_dist_large_inland_water (domain):= 1f / proximity(float32(Fraction_InlandWater>50), Distmatrices/pot250km/inv_EDM), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
-			
-			//unit<ipoint> Dist_AllInland_km: StorageName     = "= PropValue(inv_dist_all_inland_water, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			//unit<ipoint> Dist_LargeInland_km: StorageName     = "= PropValue(inv_dist_large_inland_water, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			
-			unit<uint32> large_inland_water:= select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) 
+			unit<uint32> large_inland_water := select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) 
 			{
-				attribute<SphericalMercator> geometry_mer (polygon):= org_rel->Geometry[SphericalMercator];
+				attribute<SphericalMercator> geometry_mer (poly) := org_rel->Geometry[SphericalMercator];
 			}
-			attribute<Float32> sqr_dist                				(CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
+			attribute<Float32> sqr_dist                    (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
 			
-			attribute<Float32> Location2AllInland_distInfo (CompactedDomain) := dist_info(Inland_Water/Geometry[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
-			attribute<km>      Location2AllInland_km       (CompactedDomain) := (Location2AllInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2AllInland_km_domain_export (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
+			attribute<Float32> Location2AllInland_distInfo   (CompactedDomain) := dist_info(Inland_Water/Geometry[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
+			attribute<km>      Location2AllInland_km         (CompactedDomain) := (Location2AllInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
+			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
 			
 			attribute<Float32> Location2LargeInland_distInfo (CompactedDomain) := dist_info(large_inland_water/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
 			attribute<km>      Location2LargeInland_km       (CompactedDomain) := (Location2LargeInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2LargeInland_km_domain_export (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'";
+			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'";
 			
-			unit<ipoint> Dist_AllInland_km: StorageName     = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			unit<ipoint> Dist_LargeInland_km: StorageName     = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			
-			
-		/*	unit<uint32> all_inland_water:= select_with_org_rel(Fraction_InlandWater>0) {
-				attribute<LatLong>           Geometry:= org_rel[LatLong];
-				attribute<SphericalMercator> geometry_mer:= Geometry[SphericalMercator];
-			}
-			unit<uint32> large_inland_water:= select_with_org_rel(Fraction_InlandWater>50) {
-				attribute<LatLong>           Geometry:= org_rel[LatLong];
-				attribute<SphericalMercator> geometry_mer:= Geometry[SphericalMercator];
-			}
-			attribute<Float32> sqr_dist                				(CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
-			attribute<all_inland_water> Location2AllInland_dest 	(CompactedDomain) := connect(all_inland_water/geometry_mer, CompactedDomain/Geometry_mer);
-			attribute<km>      Location2AllInland_km       			(CompactedDomain) := (dist(CompactedDomain/Geometry_mer, all_inland_water/geometry_mer[Location2AllInland_dest]) * CompactedDomain/lat_factor[float64])[meter] * 0.001[km / meter];
-			attribute<km>      Location2AllInland_km_domain_export  (domain) :=	min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
-			attribute<large_inland_water> Location2LargeInland_distInfo 		(CompactedDomain) := connect(large_inland_water/geometry_mer, CompactedDomain/Geometry_mer);
-			attribute<km>      Location2LargeInland_km       		(CompactedDomain) := (dist(CompactedDomain/Geometry_mer, large_inland_water/geometry_mer[Location2LargeInland_distInfo]) * CompactedDomain/lat_factor[float64])[meter] * 0.001[km / meter];
-			attribute<km>      Location2LargeInland_km_domain_export(domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'";
-			
-			unit<ipoint> Dist_AllInland_km: StorageName     = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			unit<ipoint> Dist_LargeInland_km: StorageName     = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", DialogData      = "LatLong" {attribute<km> GridData (domain);}
-			*/
+			unit<ipoint> Dist_AllInland_km   : StorageName = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
+			unit<ipoint> Dist_LargeInland_km : StorageName = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
 		}
 	}
 }

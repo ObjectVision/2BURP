@@ -80,7 +80,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 		
 			// All cells resulting from 3x3 median filtering 
-			attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[Cdomain_x_pot1k/third_rel], Cdomain_x_pot1k/first_rel); 
+			attribute<bool>        ToBeAdded_DueToMedianFiltering           (CompactedDomain) := modus(IsLargeEnoughGroup[DistMatrices/Cdomain_x_pot1k/third_rel], DistMatrices/Cdomain_x_pot1k/first_rel); 
 			
 			// Gap filling: lake < 15km2
 			unit<uint32> GapFilling := district(uint8(recollect_by_cond(domain/IsCompactedDomain, IsLargeEnoughGroup)))
@@ -151,7 +151,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 																									|| Dense_Urban_Cluster/Typology == TypologyK/v/Dense_Urban_Cluster
 																								);
 			attribute<bool>        IsDUCorUC                                (CompactedDomain) := Urban_Centre/Result || Dense_Urban_Cluster/Result;
-			attribute<bool>        IsFarEnoughFrom_DUC_UC                   (CompactedDomain) := sum_uint32(IsDUCorUC[Cdomain_x_pot2k/third_rel], Cdomain_x_pot2k/first_rel) == 0; 
+			attribute<bool>        IsFarEnoughFrom_DUC_UC                   (CompactedDomain) := sum_uint32(IsDUCorUC[DistMatrices/Cdomain_x_pot2k/third_rel], DistMatrices/Cdomain_x_pot2k/first_rel) == 0; 
 			
 			attribute<bool>        Result                                   (CompactedDomain) := IsLargeEnoughGroup && IsNotOtherTypology && IsFarEnoughFrom_DUC_UC;
 			attribute<TypologyK>   Typology                                 (CompactedDomain) := Result ? TypologyK/v/Semi_dense_urban_cluster : null_b;
@@ -185,7 +185,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 			attribute<bool>        IsLargeEnoughGroup                       (CompactedDomain) := FindContiguousCells/GroupPopulationSize[CompactedDomain/domain_rel] >= Parameters/Min_Total_Pop;
 			
 			attribute<bool>        IsDUCorSDUC                              (CompactedDomain) := Dense_Urban_Cluster/Result || Semi_Dense_Urban_Cluster/Result;
-			attribute<bool>        IsCloseEnoughTo_DUC_SDUC                 (CompactedDomain) := sum_uint32(IsDUCorSDUC[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel) > 0; 
+			attribute<bool>        IsCloseEnoughTo_DUC_SDUC                 (CompactedDomain) := sum_uint32(IsDUCorSDUC[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel) > 0; 
 			
 			attribute<bool>        IsNotOtherTypology                       (CompactedDomain) := NOT(
 																									Urban_Centre/Typology == TypologyK/v/Urban_Centre 

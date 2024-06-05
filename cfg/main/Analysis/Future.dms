@@ -294,7 +294,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		
 		container LocalMaxima
 		{
-			attribute<float32> Current_LocalMaximum_Share (CompactedDomain) := max(CurrState/BuiltUp_Total_Share[cdomain_x_pot1k/third_rel], cdomain_x_pot1k/first_rel); 
+			attribute<float32> Current_LocalMaximum_Share (CompactedDomain) := max(CurrState/BuiltUp_Total_Share[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
 			attribute<bool>    IsLocalMaximum             (CompactedDomain) := Current_LocalMaximum_Share == CurrState/BuiltUp_Total_Share;
 			attribute<bool>    HasNoBuiltUp               (CompactedDomain) := CurrState/BuiltUp_Total_Share == 0f;
 			
@@ -468,7 +468,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated := 7000[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 			parameter<Person_BuiltUpKm2>         max_saturation    := 100000[Person_BuiltUpKm2];
 			
-			attribute<Person_BuiltUpKm2>  Current_LocalMaximum          (CompactedDomain) := max(CurrState/Population_inRes_Density[cdomain_x_pot1k/third_rel], cdomain_x_pot1k/first_rel); 
+			attribute<Person_BuiltUpKm2>  Current_LocalMaximum          (CompactedDomain) := max(CurrState/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
 			attribute<bool>               IsLocalMaximum                (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density;
 			attribute<bool>               HasNoPopulation               (CompactedDomain) := CurrState/Population == 0f;
 			
@@ -528,8 +528,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Person>            Reduced_Population                     (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
 			
 			//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
-			attribute<Person>            Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel); 
-			attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(BuiltUp_Residential_Area[cdomain_x_pot3k/third_rel], cdomain_x_pot3k/first_rel); 
+			attribute<Person>            Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
+			attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(BuiltUp_Residential_Area[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
 			attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density     (CompactedDomain) := Avg_Local_Population_inRes_Density_Num / Avg_Local_Population_inRes_Density_Den; 
 			attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 			attribute<BuiltUpKm2>        BuiltUp_Residential_Area               (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 

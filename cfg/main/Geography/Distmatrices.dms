@@ -1,0 +1,60 @@
+container Distmatrices
+{
+	container Impl
+	{
+		container pot1km   :=Templates/potrange_T(value(1, km), value(  1, km));
+		container pot2km   :=Templates/potrange_T(value(1, km), value(  2, km));
+		container pot3km   :=Templates/potrange_T(value(1, km), value(  3, km));
+		container pot5km   :=Templates/potrange_T(value(1, km), value(  5, km));
+		container pot10km  :=Templates/potrange_T(value(1, km), value(10, km));
+		container pot15km  :=Templates/potrange_T(value(1, km), value(15, km));
+		container pot20km  :=Templates/potrange_T(value(1, km), value(20, km));
+		container pot25km  :=Templates/potrange_T(value(1, km), value(25, km));
+		container pot40km  :=Templates/potrange_T(value(1, km), value(40, km));
+		container pot50km  :=Templates/potrange_T(value(1, km), value(50, km));
+		container pot250km :=Templates/potrange_T(value(1, km), value(250,km));
+	}
+	unit<spoint> pot1km  :=Impl/pot1km/PotRange;
+	unit<spoint> pot2km  :=Impl/pot2km/PotRange;
+	unit<spoint> pot3km  :=Impl/pot3km/PotRange;
+	unit<spoint> pot5km  :=Impl/pot5km/PotRange;
+	unit<spoint> pot10km :=Impl/pot10km/PotRange;
+	unit<spoint> pot15km :=Impl/pot15km/PotRange;
+	unit<spoint> pot20km :=Impl/pot20km/PotRange;
+	unit<spoint> pot25km :=Impl/pot25km/PotRange;
+	unit<spoint> pot40km :=Impl/pot40km/PotRange;
+	unit<spoint> pot50km :=Impl/pot50km/PotRange;
+	unit<spoint> pot250km:=Impl/pot250km/PotRange;
+	
+	unit<uint8> KingStep := range(0b, 8b) 
+	{ 
+		attribute<ipoint> delta := union_data(., point_xy(-1, -1), point_xy(-1, 0i), point_xy(-1, 1i), point_xy(0i, 1i), point_xy(1i, 1i), point_xy(1i, 0i), point_xy(1i, -1), point_xy(0i, -1));
+	}
+	
+	unit<uint64> CdomainSub_x_pot1k := combine_uint64(CompactedDomainSub, KingStep) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + second_rel -> delta;
+		attribute<CompactedDomainSub> third_rel  := CompactedDomainSub/basegrid[third_rel_i];
+	}
+	
+	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := value(third_rel_i, domain);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
+	unit<uint32> Cdomain_x_pot2k := combine(CompactedDomain, Distmatrices/pot2km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := value(third_rel_i, domain);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+	
+	unit<uint32> Cdomain_x_pot3k := combine(CompactedDomain, Distmatrices/pot3km/Buffer_NonNull_Cells)//pot3km == 7x7 cellen zonder diagonalen, met gekke vervorming
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
+		attribute<domain>          third_rel_d   := value(third_rel_i, domain);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
+}
