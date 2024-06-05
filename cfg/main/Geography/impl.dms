@@ -80,6 +80,7 @@ container Impl
 			SourceData/RegionalUnits/Continents/name
 			, 'MakeDomain_perStudyArea_T('+quote(SourceData/RegionalUnits/Continents/name)+')'
 		);
+	container MakeDomain_World := MakeDomain_perStudyArea_T('World');
 	
 	Template MakeDomain_perStudyArea_T
 	{
@@ -102,7 +103,10 @@ container Impl
 			attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
 		} 
 
-		unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB);
+		unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
+		{
+			attribute<LatLong>        geometry      := id(.)[LatLong];
+		}
 	}
 
 	container GridData : using = "SourceData/RegionalUnits"

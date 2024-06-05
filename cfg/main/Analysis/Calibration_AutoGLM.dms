@@ -17,7 +17,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		
 		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>      TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[CompactedDomain/org_rel];
+		attribute<uint8>      TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_mean_1k_World[CompactedDomain/org_rel];
 		
 		attribute<uint8>      IsProtectedArea                         := Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
 		attribute<uint8>      IsFloodProneArea_RP100                  := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];

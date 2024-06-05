@@ -38,6 +38,8 @@ container Physical : using = "geography;classifications"
 		
 		parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
 		
+		attribute<TRI_Classes> TRI_mean_1k_World         (domain) : StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif", StorageReadOnly = "True", LazyCalculated = "True";
+		
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
 			attribute<uint8>   Class             := id(.) + 1b;
@@ -56,8 +58,8 @@ container Physical : using = "geography;classifications"
 				, 'gdal.grid'
 			)
 		{	
-			// attribute<Continents>  Continent_rel (Impl/ProtoDomain) := 
-			attribute<TRI_Classes> Mozaic        (Impl/ProtoDomain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
+			attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry, impl/MakeDomain_World/domain);
+			attribute<TRI_Classes> Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
 		}
 
 		container Domain_perContinent :=
