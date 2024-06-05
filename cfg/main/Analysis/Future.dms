@@ -314,41 +314,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
 		}
 		
-		// container BuiltUp_Density_Distribution
-		// {
-			// container Per_ClaimRegion := 
-				// for_each_ne(
-					// ClaimRegion/item_name
-					// , 'BuiltUp_Density_Distribution_Per_ClaimRegion_T('+string(id(ClaimRegion))+'[ClaimRegion], CurrState/Builtup_Total_Share)'
-				// );
-				
-			// container Initial :=
-				// for_each_nedv(
-					// ClaimRegion/item_name
-					// , 'Per_ClaimRegion/'+ClaimRegion/item_name+'/DensityBins/density'
-					// , BU_DensityBins
-					// , float32
-				// )
-			// {
-				// attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
-				// attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
-			// } 
-			
-			// parameter<float32> nroftimestepsleft := max_elem(float32(max(id(ProjectionYears)) - rlookup(ThisYear, ProjectionYears/name)), 1f);
-			
-			// container Convergence :=
-				// for_each_nedv(
-					// ClaimRegion/item_name
-					// , 'Initial/'+ClaimRegion/item_name+' + ((Initial/Average - Initial/'+ClaimRegion/item_name+') / nroftimestepsleft)'
-					// , BU_DensityBins
-					// , float32
-				// )
-			// {
-				// attribute<string>  Label    (BU_DensityBins) := BU_DensityBins/label;
-				// attribute<float32> Average  (BU_DensityBins) := ='add('+AsItemList(ClaimRegion/item_name)+') / float32(#ClaimRegion)';
-			// } 
-		// }
-		
 		container Suitability
 		{
 			container        AutoGLM_Coeffs            := Analysis/Calibration/ReadCoffecients/coef2domain/domain; 
@@ -414,32 +379,31 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container RoundedState
 		{
 			// use nth_element to assign fractions according to maximizing the actual built-up size that each percent represents, similar to residual seat distribution in Dutch Parliament.
-			attribute<AllShares>  Perc_BuiltUp_Total        (CompactedDomain) := (100.0f * NewState/BuiltUp_Total_Share)[Classifications/AllShares];
-			attribute<BU_DensityBin> DensityBin_rel         (CompactedDomain) := Perc_BuiltUp_Total->DensityBin_rel;
-			attribute<bool>  UnmatchedBins(CompactedDomain) := not(IsDefined(DensityBin_rel));
+			attribute<AllShares>     Perc_BuiltUp_Total    (CompactedDomain) := (100.0f * NewState/BuiltUp_Total_Share)[Classifications/AllShares];
+			attribute<BU_DensityBin> DensityBin_rel        (CompactedDomain) := Perc_BuiltUp_Total->DensityBin_rel;
+			attribute<bool>          UnmatchedBins         (CompactedDomain) := not(IsDefined(DensityBin_rel));
+			
 			unit<uint32> DensityBin_x_region := combine(BU_DensityBin, ClaimRegion)
 			{
 				attribute<BU_DensityBin> first_rel;
 				attribute<ClaimRegion>   second_rel;
-				
-				attribute<.> per_CompactedDomain(CompactedDomain) := combine_data(., DensityBin_rel, region_rel);
-				
-				attribute<BuiltUpKm2> TotalArea := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
-				attribute<uint32> CellCount := pcount(per_CompactedDomain);
+				attribute<.>             per_CompactedDomain (CompactedDomain)  := combine_data(., DensityBin_rel, region_rel);
+				attribute<BuiltUpKm2>    TotalArea                              := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
+				attribute<uint32>        CellCount                              := pcount(per_CompactedDomain);
 				
 				// for evaluation purposes
-				attribute<float32>    Rounded_Realisation := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, per_CompactedDomain);
-				attribute<float32>    Claim_Realisation   := Rounded_Realisation / TotalArea; //Check if around 1.0
+				attribute<float32>       Rounded_Realisation                    := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, per_CompactedDomain);
+				attribute<float32>       Claim_Realisation                      := Rounded_Realisation / TotalArea; //Check if around 1.0
 			}
 			
-			attribute<float32   > Rest_Share                  (CompactedDomain) := (NewState/BuiltUp_Total_Share - (0.01[BuiltUpKm2] / 1[km2]) * float32(Perc_BuiltUp_Total));
+			attribute<float32>    Rest_Share                  (CompactedDomain) := (NewState/BuiltUp_Total_Share - (0.01[BuiltUpKm2] / 1[km2]) * float32(Perc_BuiltUp_Total));
 			attribute<BuiltUpKm2> Rest_Area                   (CompactedDomain) := Rest_Share * CompactedDomain/area;
 			attribute<BuiltUpKm2> sum_rounded_area        (DensityBin_x_region) := sum(float32(Perc_BuiltUp_Total) * CompactedDomain/area, DensityBin_x_region/per_CompactedDomain) * (0.01[BuiltUpKm2 / km2]);
 			attribute<BuiltUpKm2> Rest_claim              (DensityBin_x_region) := DensityBin_x_region/TotalArea - sum_rounded_area;
 			attribute<float32>    Rank                        (CompactedDomain) := 1.0[BuiltUpKm2 / km2] - Rest_Share;
 			attribute<float32>    roundoff_breakpoint     (DensityBin_x_region) := 1.0[BuiltUpKm2 / km2] - nth_element_weighted(Rank, Rest_claim, CompactedDomain/area * (0.01[BuiltUpKm2] / 1[km2]), DensityBin_x_region/per_CompactedDomain);
 			
-			attribute<bool >      above_breakpoint      (CompactedDomain) := Rest_Share > roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
+			attribute<bool >      above_breakpoint            (CompactedDomain) := Rest_Share > roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
 			attribute<AllShares>  Perc_BuiltUp_Total_Balanced (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[Classifications/AllShares];
 			attribute<BuiltUpKm2> Rounded_Realisation             (ClaimRegion) := sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, Region_rel) * (0.01[BuiltUpKm2 / km2]);
 			attribute<BuiltUpKm2> UnmatchedArea                   (ClaimRegion) := sum_float32(NewState/BuiltUp_Total_area * Float32(UnmatchedBins), Region_rel);
@@ -463,14 +427,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		
 		container LocalMaxima
 		{
-			parameter<Person_BuiltUpKm2_decade>  r_if_LocalMax     := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2_decade>  r_if_notLocalMax  := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated := 7000[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2>         max_saturation    := 100000[Person_BuiltUpKm2];
+			parameter<Person_BuiltUpKm2_decade>  r_if_LocalMax                           := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
+			parameter<Person_BuiltUpKm2_decade>  r_if_notLocalMax                        := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
+			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated                       := 7000[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
+			parameter<Person_BuiltUpKm2>         max_saturation                          := 100000[Person_BuiltUpKm2];
 			
-			attribute<Person_BuiltUpKm2>  Current_LocalMaximum          (CompactedDomain) := max(CurrState/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
-			attribute<bool>               IsLocalMaximum                (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density;
-			attribute<bool>               HasNoPopulation               (CompactedDomain) := CurrState/Population == 0f;
+			attribute<Person_BuiltUpKm2>         Current_LocalMaximum  (CompactedDomain) := max(CurrState/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
+			attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density;
+			attribute<bool>                      HasNoPopulation       (CompactedDomain) := CurrState/Population == 0f;
 			
 			// If a cell has the highest local population in T1, it can only increase by 3.5K people in T2 (or by [100K - local pop] if this is smaller than 3.5K people)
 			// If a cell is populated but it doesn’t have the highest local population in T1, it can only increase in T2 to the local maximum in T1 + 2.5K people (or by [100K - local pop] if this is smaller than the local maximum in T1 + 2.5K people) 
@@ -595,22 +559,6 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					attribute<float32>  Perc_New_BuiltUp             := sum(New_BuiltUp_Area[float32], Region_rel)[org_rel] / sum(BuiltUp_Total_Area[float32], Region_rel)[org_rel];
 				}
 			}
-		}
-	}
-	
-	Template BuiltUp_Density_Distribution_Per_ClaimRegion_T
-	{
-		parameter<ClaimRegion> ClaimRegion_rel;
-		attribute<float32>     Builtup_Total_Share (CompactedDomain);
-		///
-		attribute<uint8>       Builtup_Total_Share_int (CompactedDomain) := ClaimRegion/per_CompactedDomain == ClaimRegion_rel ? uint8(Builtup_Total_Share * 100f) : null_b;
-		
-		attribute<BU_DensityBins> Classified              (CompactedDomain) := lookup(Builtup_Total_Share_int, AllShares/DensityBins_rel);
-		
-		unit<uint8> DensityBins := BU_DensityBins
-		{
-			attribute<uint32>  count   := pcount(Classified); 
-			attribute<float32> density := float32(count) / float32(sum(count));
 		}
 	}
 }

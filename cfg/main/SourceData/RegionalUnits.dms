@@ -8,7 +8,7 @@ container RegionalUnits
 		attribute<LatLong>           Geometry_LL       (poly) := Geometry;
 		attribute<WorldMollweide>    Geometry_MW       (poly) := convert(Geometry_LL, WorldMollweide);
 		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
-		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[LatLong_mdegrees];
+		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[Impl/LatLong_mdegrees];
 		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
 		attribute<string>            continent_name           := Continent;
 	}
@@ -31,7 +31,7 @@ container RegionalUnits
 		attribute<LatLong>           geometry_LL (poly);
 		attribute<SphericalMercator> Geometry_WM (poly); 
 		attribute<WorldMollweide>    Geometry_MW (poly); 
-		attribute<LatLong_mdegrees>  Geometry_mdegrees (poly);
+		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly);
 		attribute<Continents>        Continents_rel;
 		attribute<string>            continent_name;
 		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
