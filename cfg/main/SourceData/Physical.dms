@@ -16,7 +16,7 @@ container Physical : using = "geography;classifications"
 	
 	container Elevation 
 	{
-		unit<ipoint> Elevation_3ss
+		/*unit<ipoint> Elevation_3ss
 		:	StorageName     = "%ToBURPDataDir%/physical/Elevation/GLO_90_3ss_4326.tif"
 		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
@@ -25,25 +25,28 @@ container Physical : using = "geography;classifications"
 		{
 			attribute<int32> ReadData   (domain_sub);
 			attribute<int32> Write_Mean_1k        (domain) := mean(ReadData, domain_sub/domain_rel), StorageName = "='%ToBURPDataDir%/physical/Elevation/'+ModelParameters/StudyArea+'_mean_1k.tif'";
-		}
+		}*/
 	
 		attribute<int32> Mean_1k              (domain) : StorageName = "%ToBURPDataDir%/physical/Elevation/World_mean_1k.tif", StorageType = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 	}
 	
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
-		attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation/Elevation_3ss/ReadData[CompactedDomainSub/org_rel];
-		attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel] - Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel]), DistMatrices/CdomainSub_x_pot1k/first_rel);
-		attribute<int32>       TRI_sqr                            := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_CD);
-		
-		attribute<TRI_Classes> TRI_K_rel                          := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
-		attribute<float32>     TRI_mean_1k               (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
-		
-		attribute<TRI_Classes> Write_TRI_Class_mean_1k   (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
-		attribute<TRI_Classes> TRI_Class_mean_1k         (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
-		
-		parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
-		
+		/* only runnable if the original 3ss elevation grid is available locally.
+		container TRI_generation {
+			attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation/Elevation_3ss/ReadData[CompactedDomainSub/org_rel];
+			attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel] - Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel]), DistMatrices/CdomainSub_x_pot1k/first_rel);
+			attribute<int32>       TRI_sqr                            := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_CD);
+			
+			attribute<TRI_Classes> TRI_K_rel                          := Classify(TRI_sqr, TRI_Classes/ClassBreaks_sqr);
+			attribute<float32>     TRI_mean_1k               (domain) := mean(float32(TRI_K_rel), domain_sub/domain_rel);
+			
+			attribute<TRI_Classes> Write_TRI_Class_mean_1k   (domain) := TRI_mean_1k[TRI_Classes], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_1k/'+ModelParameters/StudyArea+'.tif'";
+			attribute<TRI_Classes> TRI_Class_mean_1k         (domain) : StorageName     = "= PropValue(Write_TRI_Class_mean_1k, 'storagename')", StorageType     = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+			
+			parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_Class_mean_1k";
+		}
+		*/
 		attribute<TRI_Classes> TRI_mean_1k_World         (domain) : StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif", StorageReadOnly = "True", LazyCalculated = "True";
 		
 		unit<uint8> TRI_Classes : nrofrows = 7
