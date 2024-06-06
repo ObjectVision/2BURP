@@ -338,9 +338,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
-																	(((Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_Bool ||  
-																		Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_Bool)[float32]) * AutoGLM_Coeffs/Landslide_Prone) + 
-																	AutoGLM_Coeffs/Intercept';
+																	(Physical/Natural_Hazards/Landslide/LS_risk[float32]                                                          * AutoGLM_Coeffs/Landslide_Prone) + 
+																	AutoGLM_Coeffs/Intercept'; 
 					
 			attribute<Suit>      BuiltUp               (CompactedDomain) := MakeDefined(Calc[CompactedDomain/org_rel], -100[suit]);
 			attribute<Suit>      CappedBuiltUp         (CompactedDomain) := min_elem(BuiltUp, 80[suit]);
@@ -477,8 +476,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
-																	((Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_precipitations/LS_pr_uint8[float32] + 
-																		Physical/Natural_Hazards/Landslide/Frequency_of_landslides_triggered_by_earthquakes/LS_EQ_uint8[float32]) * AutoGLM_Coeffs/Landslide_Prone) + 
+																	(Physical/Natural_Hazards/Landslide/LS_risk[float32]                                                          * AutoGLM_Coeffs/Landslide_Prone) + 
 																	AutoGLM_Coeffs/Intercept';
 		
 			attribute<Suit>              BuiltUp                        (CompactedDomain) := Calc[CompactedDomain/org_rel];
