@@ -11,7 +11,7 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		attribute<float32> 	Roughness   := Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32];
 		attribute<float32> 	InWater     := Physical/Water/AllWater/Fraction_Water[float32] / 100f;
 		attribute<float32>	Impedance   := Roughness^2f + (10f * InWater[float32]);
-		attribute<float32>  elevation   := Physical/Elevation/Elevation[float32];
+		attribute<float32>  elevation   := Physical/Elevation/Mean_1k[float32];
 		attribute<float32>  slope       := Physical/Slope_2021/ReadData;
 		attribute<float32>	gradient    := slope > 0f ? tan(slope * float32(pi()) / 180f) : 0f;
 				

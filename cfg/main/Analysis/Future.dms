@@ -332,7 +332,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
-																	(Physical/Elevation/Elevation[float32]                                                                        * AutoGLM_Coeffs/Elevation) + 
+																	(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
@@ -470,7 +470,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
-																	(Physical/Elevation/Elevation[float32]                                                                        * AutoGLM_Coeffs/Elevation) + 
+																	(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 

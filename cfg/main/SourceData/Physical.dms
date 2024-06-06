@@ -1,32 +1,38 @@
 container Physical : using = "geography;classifications"
 {
-	unit<ipoint> Elevation
-	:	StorageName     = "%ToBURPDataDir%/physical/Elevation/gtopo30_NOAA_NGDC.tif"
-	,	StorageType     = "gdal.grid"
-	,	url             = "https://en.wikipedia.org/wiki/GTOPO30"
-	,	Source          = "National Geophysical Data Center - NOAA Data Type:File Geodatabase Raster Dataset, Database: Y:\\data\\PBLbase\\Data\\MondiaalRelief.gdb, Raster: gtopo30_NOAA_NGDC"
-						  "conversion to tif-format in ArcGIS, 16_BIT_SIGNED, LZW-compression"
-	,	StorageReadOnly = "True"
-	,	DialogData      = "LatLong"
-	{
-		attribute<int16> ReadData(domain);
-		attribute<bool>  NoData(domain)   :=!IsDefined(ReadData);//visualtion purposes of nodata (null) values
-		attribute<int16> Elevation(domain):=MakeDefined(ReadData,0s);//0--> oceans/seas - no inland lakes! essential for rank there are values otherwise null in Urban_Cali --> moving of cururb
-	}	
+	// unit<ipoint> Elevation
+	// :	StorageName     = "%ToBURPDataDir%/physical/Elevation/gtopo30_NOAA_NGDC.tif"
+	// ,	StorageType     = "gdal.grid"
+	// ,	url             = "https://en.wikipedia.org/wiki/GTOPO30"
+	// ,	Source          = "National Geophysical Data Center - NOAA Data Type:File Geodatabase Raster Dataset, Database: Y:\\data\\PBLbase\\Data\\MondiaalRelief.gdb, Raster: gtopo30_NOAA_NGDC"
+						  // "conversion to tif-format in ArcGIS, 16_BIT_SIGNED, LZW-compression"
+	// ,	StorageReadOnly = "True"
+	// ,	DialogData      = "LatLong"
+	// {
+		// attribute<int16> ReadData(domain);
+		// attribute<bool>  NoData(domain)   :=!IsDefined(ReadData);//visualtion purposes of nodata (null) values
+		// attribute<int16> Elevation(domain):=MakeDefined(ReadData,0s);//0--> oceans/seas - no inland lakes! essential for rank there are values otherwise null in Urban_Cali --> moving of cururb
+	// }	
 	
-	unit<ipoint> Elevation_new
-	:	StorageName     = "%ToBURPDataDir%/physical/Elevation/GLO_90_3ss_4326.tif"
-	,	StorageType     = "gdal.grid"
-	,	StorageReadOnly = "True"
-	,	DialogData      = "LatLong"
-	, 	LazyCalculated  = "true"
+	container Elevation 
 	{
-		attribute<int32> ReadData (domain_sub);
+		unit<ipoint> Elevation_3ss
+		:	StorageName     = "%ToBURPDataDir%/physical/Elevation/GLO_90_3ss_4326.tif"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "LatLong"
+		, 	LazyCalculated  = "true"
+		{
+			attribute<int32> ReadData   (domain_sub);
+			attribute<int32> Write_Mean_1k        (domain) := mean(ReadData, domain_sub/domain_rel), StorageName = "='%ToBURPDataDir%/physical/Elevation/'+ModelParameters/StudyArea+'_mean_1k.tif'";
+		}
+	
+		attribute<int32> Mean_1k              (domain) : StorageName = "%ToBURPDataDir%/physical/Elevation/World_mean_1k.tif", StorageType = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 	}
 	
 	unit<ipoint> TerrainRoughnessIndex := domain_sub
 	{
-		attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation_new/ReadData[CompactedDomainSub/org_rel];
+		attribute<int32>       Elevation     (CompactedDomainSub) := Physical/Elevation/Elevation_3ss/ReadData[CompactedDomainSub/org_rel];
 		attribute<int32>       TRI_sqr_CD    (CompactedDomainSub) := sum(sqr(Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel] - Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel]), DistMatrices/CdomainSub_x_pot1k/first_rel);
 		attribute<int32>       TRI_sqr                            := recollect_by_cond(domain_sub/domain_rel->IsCompactedDomain, TRI_sqr_CD);
 		
