@@ -2,13 +2,13 @@
 
 <DocType name="GeoDmsMetaInfo">
 <DefaultInfo>
-	<FullName>/Geography/StudyAreaTile_Create/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
 	<GeoDmsVersion>GeoDms 15.2.0 [May 27 2024 11:15:24]
 	</GeoDmsVersion>
-	<SessionStartTime>2024-06-04 15:08:14
+	<SessionStartTime>2024-06-07 16:57:14
 	</SessionStartTime>
-	<CurrentTime>2024-06-04 15:38:12
+	<CurrentTime>2024-06-07 17:23:46
 	</CurrentTime>
 	<StatusFlags>0x6e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
@@ -18,7 +18,7 @@
 	</GeoDmsVersion>
 </Software>
 <Config>
-	<FullName>/Geography/StudyAreaTile_Create/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
 	<Expr>pointrow(UB_sub)
 	</Expr>
@@ -42,11 +42,18 @@
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
 			modified:   cfg/main/Geography.dms<BR/>
+			modified:   cfg/main/Geography/impl.dms<BR/>
 			modified:   cfg/main/ModelParameters.dms<BR/>
-			modified:   cfg/main/SourceData/RegionalUnits.dms<BR/>
+			modified:   cfg/main/SourceData/Physical.dms<BR/>
+			modified:   data/StudyAreaTiles_Nigeria.dbf<BR/>
+			modified:   data/StudyAreaTiles_Nigeria.xml<BR/>
+		<BR/>
+		Untracked files:<BR/>
+		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
+			cfg/main/SourceData/Physical2.dms<BR/>
 		<BR/>
 		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
-		081711b41a5af1dcac3be48f196a33e29982123a<BR/>
+		8de0be49f794fbe32803343562e84ce6df382183<BR/>
 		
 	</RevisionInfo>
 </Git>

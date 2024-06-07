@@ -1,6 +1,6 @@
 container Impl 
 {
-	parameter<float64> SourceRasterSubFactor      := 5.0 / 3600.0;
+	parameter<float64> SourceRasterSubFactor      := 3.0 / 3600.0;
 	parameter<float64> SourceRasterFactor         := 0.00833333333333333333333333333333333333333333333333333333333;
 	unit<ipoint>       LatLong_mdegrees           := gridset(LatLong_Base, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
 	parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);

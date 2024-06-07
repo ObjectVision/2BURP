@@ -2,23 +2,23 @@
 
 <DocType name="GeoDmsMetaInfo">
 <DefaultInfo>
-	<FullName>/Geography/StudyAreaTile_Create/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
-	<GeoDmsVersion>GeoDms 15.1.0 [Apr 29 2024 12:26:07]
+	<GeoDmsVersion>GeoDms 15.2.0 [May 27 2024 11:15:24]
 	</GeoDmsVersion>
-	<SessionStartTime>2024-05-31 10:13:48
+	<SessionStartTime>2024-06-07 16:57:14
 	</SessionStartTime>
-	<CurrentTime>2024-05-31 15:28:05
+	<CurrentTime>2024-06-07 17:26:18
 	</CurrentTime>
 	<StatusFlags>0x6e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
 </DefaultInfo>
 <Software>
-	<GeoDmsVersion>15.1.0
+	<GeoDmsVersion>15.2.0
 	</GeoDmsVersion>
 </Software>
 <Config>
-	<FullName>/Geography/StudyAreaTile_Create/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
 	<Expr>pointrow(UB_sub)
 	</Expr>
@@ -42,24 +42,19 @@
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
 			modified:   cfg/main/Geography.dms<BR/>
-			modified:   cfg/main/ModelParameters.dms<BR/>
+			modified:   cfg/main/Geography/impl.dms<BR/>
+			modified:   cfg/main/SourceData/Physical.dms<BR/>
+			modified:   data/StudyAreaTiles_Asia.dbf<BR/>
+			modified:   data/StudyAreaTiles_Asia.xml<BR/>
+			modified:   data/StudyAreaTiles_Nigeria.dbf<BR/>
+			modified:   data/StudyAreaTiles_Nigeria.xml<BR/>
 		<BR/>
 		Untracked files:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
-			data/StudyAreaTiles_Asia.dbf<BR/>
-			data/StudyAreaTiles_Asia.xml<BR/>
-			data/StudyAreaTiles_Europe.dbf<BR/>
-			data/StudyAreaTiles_Europe.xml<BR/>
-			data/StudyAreaTiles_Netherlands.dbf<BR/>
-			data/StudyAreaTiles_Netherlands.xml<BR/>
-			data/StudyAreaTiles_Nicaragua.dbf<BR/>
-			data/StudyAreaTiles_Nicaragua.xml<BR/>
-			data/StudyAreaTiles_Nigeria.dbf<BR/>
-			data/StudyAreaTiles_Nigeria.xml<BR/>
-			data/StudyAreaTiles_North_America.xml<BR/>
+			cfg/main/SourceData/Physical2.dms<BR/>
 		<BR/>
 		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
-		33e16cbbb618ed734ac8edf6d787a2d5a8a970b1<BR/>
+		8de0be49f794fbe32803343562e84ce6df382183<BR/>
 		
 	</RevisionInfo>
 </Git>

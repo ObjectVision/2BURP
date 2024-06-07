@@ -1,6 +1,6 @@
 container ModelParameters 
 {
-	parameter<string>  StudyArea               := 'Africa'; //  Nicaragua Nigeria Netherlands     Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>  StudyArea               := 'Nicaragua'; //  Nicaragua Nigeria Netherlands     Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<float64> MW_Gridsize             := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<string>  WGS_Gridsize            := '30ss'; //30ss ~ 1km grid 
 	parameter<string>  StartYear               := 'Y2020';
