@@ -38,6 +38,21 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		parameter<float32> Pop_with_no_BU  := sum(float32(NoBuiltUp_butPopulation) * float32(PerYear_CorrectForNoData/Y2020));
 		
 	}
+	
+	unit<uint8> Population_OnLand_Density_Histogram := Pop_Bins
+	{
+		container PerYear_classes := 
+			for_each_nedv(
+				GHS_years/name
+				, 'pcount(Classify(float32(PerYear/'+GHS_years/name+'[CompactedDomain/domain_rel]), ClassBreaks))'
+				, .
+				, uint32
+			)
+		{
+			attribute<string>  Label     (..) := ../label;
+		}
+	}
+	
 	container Total_sums_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/flat2)',  domain, float32);
 	
 	container Pots_lin_5km:=  for_each_nedv(GHS_years/name, 'potential(float32(PerYear/'+GHS_years/name+'), Distmatrices/Impl/pot5km/potRange/RelWeight_ns)',  domain, float32);
