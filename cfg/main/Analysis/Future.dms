@@ -140,7 +140,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population_TotalLand_Density)'
 					, domain
 					, Person_Km2
-				);
+				) {
+					attribute<float32> Initial (domain):= recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population);
+				}
 			container DegreesOfUrbanisation :=
 				for_each_ne(
 					ProjectionYears/name
@@ -215,11 +217,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			) {
 				attribute<uint32> Y2020 (Classifications/AllShares):= pcount(InitialState/Perc_BuiltUp_Total);
 			}
-		unit<uint8> Population_InRes_Density_Histogram : nrofrows = 10
+		unit<uint8> Population_InRes_Density_Histogram := Pop_Bins
 		{
-			attribute<string>  Label             := 'LB_'+string(ClassBreaks);
-			attribute<float32> ClassBreaks       : [0, 1, 250, 500, 1000, 3000, 4000, 5000, 7500, 10000];
-			
 			container PerYear := 
 				for_each_nedv(
 					ProjectionYears/name
@@ -232,11 +231,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			}
  		}
 		
-		unit<uint8> Population_OnLand_Density_Histogram : nrofrows = 10
+		unit<uint8> Population_OnLand_Density_Histogram := Pop_Bins
 		{
-			attribute<string>  Label             := 'LB_'+string(ClassBreaks);
-			attribute<float32> ClassBreaks       : [0, 1, 250, 500, 1000, 3000, 4000, 5000, 7500, 10000];
-			
 			container PerYear := 
 				for_each_nedv(
 					ProjectionYears/name
@@ -245,6 +241,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, uint32
 				)
 			{
+				attribute<uint32> Initial (..):= pcount(Classify(Prep/Population_Onland_Density/Initial, ClassBreaks));
 				attribute<string>  Label     (..) := ../label;
 			}
  		}
@@ -472,7 +469,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
 																	(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
-																	(Physical/TerrainRoughnessIndex/TRI_Class_mean_1k[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
+																	(Physical/TerrainRoughnessIndex/TRI_mean_1k_world[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
