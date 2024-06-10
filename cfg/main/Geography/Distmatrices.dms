@@ -33,8 +33,10 @@ container Distmatrices
 	
 	unit<uint64> CdomainSub_x_pot1k := combine_uint64(CompactedDomainSub, KingStep) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
 	{	
-		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + second_rel -> delta;
-		attribute<CompactedDomainSub> third_rel  := CompactedDomainSub/basegrid[third_rel_i];
+		attribute<domain_sub>      first_org_rel := first_rel -> org_rel, LazyCalculated = "True";
+		attribute<ipoint>          second_rel_delta := second_rel -> delta, LazyCalculated = "True";
+		attribute<domain_sub>      third_rel_i   := first_org_rel + second_rel_delta, LazyCalculated = "True";
+		attribute<CompactedDomainSub> third_rel  := rlookup(third_rel_i, CompactedDomainSub/org_rel), LazyCalculated = "True";
 	}
 	
 	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
