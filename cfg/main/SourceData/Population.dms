@@ -5,7 +5,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			GHS_years/name
 			, domain
 			, float64
-			, '%ToBURPDataDir%/Population/GHS_POP_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			, '%ToBURPDataDir%/Population/GHS_POP_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
 			,'gdal.grid'
 		), URL = "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop";
 		

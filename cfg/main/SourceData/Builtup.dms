@@ -5,7 +5,7 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			GHS_years/name
 			, domain
 			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
 			,'gdal.grid'
 		);
 		
@@ -14,7 +14,7 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			GHS_years/name
 			, domain
 			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
 			,'gdal.grid'
 		);
 	container NonResidential :=
@@ -22,7 +22,7 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			GHS_years/name
 			, domain
 			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_NRES_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'_V1_0.tif'
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_NRES_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
 			,'gdal.grid'
 		);
 	container Residential := 
