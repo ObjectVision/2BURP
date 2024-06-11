@@ -6,7 +6,6 @@ container SourceData : using = "geography;units"
 		parameter<bool> b2_InlandWater           := true, explicitsuppliers = "Physical/Water/Inland_Water/Write_per_grid;Physical/Water/Inland_Water/Write_per_subgrid";
 		parameter<bool> b4_Dist2InlandWater      := true, explicitsuppliers = "Physical/Water/AllWater/Location2AllInland_km_domain_export;Physical/Water/AllWater/Location2LargeInland_km_domain_export";
 		parameter<bool> b5_Dist2Coast            := true, explicitsuppliers = "Physical/Coast/Location2Coast_km_domain_export";
-		parameter<bool> b6_TRI                   := true, explicitsuppliers = "Physical/TerrainRoughnessIndex/Write_TRI_Class_mean_1k";
 	
 		parameter<bool> Countries                := true, explicitsuppliers = "RegionalUnits/store_Countries";
 		parameter<bool> Continents               := true, explicitsuppliers = "RegionalUnits/store_Continents";

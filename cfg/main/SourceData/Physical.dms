@@ -56,7 +56,7 @@ container Physical : using = "geography;classifications"
 			parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_mean_30ss";
 		}
 		// */
-		attribute<TRI_Classes> TRI_mean_30ss_World         (domain) : StorageName = "%ToBURPDataDir%/Physical/TRI_mean_30ss/World.tif", StorageReadOnly = "True", LazyCalculated = "True";
+		attribute<float32> TRI_mean_30ss_World         (domain) : StorageName = "%ToBURPDataDir%/Physical/TRI_mean_from_3ss_to_30ss/World.tif", StorageReadOnly = "True", LazyCalculated = "True";
 		
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
@@ -73,13 +73,13 @@ container Physical : using = "geography;classifications"
 				Continents/name
 				, Domain_perContinent
 				, Continents/name
-				, TRI_Classes
-				, '%ToBURPDataDir%/physical/TRI_mean_1k/'+Continents/name+'.tif'
+				, float32
+				, '%ToBURPDataDir%/physical/TRI_mean_from_3ss_to_30ss/'+Continents/name+'.tif'
 				, 'gdal.grid'
 			)
 		{	
 			attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry, impl/MakeDomain_World/domain);
-			attribute<TRI_Classes> Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, TRI_Classes, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_1k/World.tif";
+			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Continents/name)+')', StorageName = "%ToBURPDataDir%/Physical/TRI_mean_from_3ss_to_30ss/World.tif";
 		}
 
 		container Domain_perContinent :=
