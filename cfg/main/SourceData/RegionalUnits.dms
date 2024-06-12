@@ -64,6 +64,13 @@ container RegionalUnits
 			///
 			parameter<LatLong_base> geometry (poly) := ='Continents/geometry[Continents/v/'+name+']';
 		}
+		
+		// NOTE: only use after 15.3 has been made available
+		container PerContinentGeometry :=  // available in GeoDms 15.3, see https://github.com/ObjectVision/GeoDMS/issues/742; 
+			for_each_nedvvcp(name
+			,	'Continents/geometry[Continents/v/'+name+']'
+			,	void, LatLong_base
+			);
 	}
 	
 	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
