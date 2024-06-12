@@ -331,7 +331,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
 																	(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
-																	(Physical/TerrainRoughnessIndex/TRI_mean_1k_World[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
+																	(Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[float32]                                                  * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
@@ -469,7 +469,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 																	(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
 																	(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																	(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
-																	(Physical/TerrainRoughnessIndex/TRI_mean_1k_world[float32]                                                    * AutoGLM_Coeffs/TRI_mean) + 
+																	(Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[float32]                                                  * AutoGLM_Coeffs/TRI_mean) + 
 																	(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
 																	(Physical/Water/FloodProneArea/RP100/ReadData[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
 																	(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 

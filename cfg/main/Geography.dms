@@ -85,26 +85,24 @@ container Geography : using = "units"
 	{
 		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
 		{
-			attribute<float64> lat_top         := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
-			attribute<float64> lat_mid         := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
-			attribute<Float32> lat_factor      := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-			parameter<km2>     Equatorial_Area := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
-			attribute<km2>     area            := lat_factor * Equatorial_Area;
+			attribute<float64>    lat_top           := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
+			attribute<float64>    lat_mid           := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
+			attribute<Float32>    lat_factor        := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			parameter<km2>        Equatorial_Area   := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
+			attribute<km2>        area              := lat_factor * Equatorial_Area;
 		}
-		attribute<rowset> rowset_rel := pointrow(ID(.)), LazyCalculated = "True";
-		attribute<LatLong>        geometry      := id(.)[LatLong], LazyCalculated = "True";
-		attribute<Mollweide_grid> mollweide_rel := convert(geometry, Mollweide_grid), LazyCalculated = "True";
-		// attribute<WebMercator_grid> webmercator_rel:= convert(geometry, WebMercator_grid);
-
-		attribute<domain>     domain_rel     := mapping(., domain);
-		attribute<domain_sub> domain_sub_rel := mapping(., domain_sub);  
-
-		parameter<uint32>  boundrange_c      := uint32(PointCol(boundrange(domain)));
-		attribute<Float32> lat_factor        := rowset_rel->lat_factor, LazyCalculated = "True";
-		attribute<km2>     area              := rowset_rel->area, LazyCalculated = "True";
-		attribute<bool>    IsCompactedDomain := Impl/GridData/FreeLand;
 		
-		attribute<uint64>  count_sub_cellen  := pcount(domain_sub/domain_rel);
+		attribute<rowset>         rowset_rel        := pointrow(ID(.)), LazyCalculated = "True";
+		attribute<LatLong>        geometry          := id(.)[LatLong], LazyCalculated = "True";
+		attribute<Mollweide_grid> mollweide_rel     := convert(geometry, Mollweide_grid), LazyCalculated = "True";
+
+		attribute<domain>         domain_rel        := mapping(., domain);
+		attribute<domain_sub>     domain_sub_rel    := mapping(., domain_sub);  
+
+		parameter<uint32>         boundrange_c      := uint32(PointCol(boundrange(domain)));
+		attribute<Float32>        lat_factor        := rowset_rel->lat_factor, LazyCalculated = "True";
+		attribute<km2>            area              := rowset_rel->area, LazyCalculated = "True";
+		attribute<bool>           IsCompactedDomain := Impl/GridData/FreeLand;
 	}
 
 	unit<ipoint> domain_sub := TiledUnit(Impl/StudyAreaTile/LB_sub, Impl/StudyAreaTile/UB_sub)
@@ -119,25 +117,19 @@ container Geography : using = "units"
 			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
 			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain_sub)[LatLong])) * LatLong_base/lengthdegree));
 		}
-		attribute<rowset> rowset_rel := pointrow(ID(.)), LazyCalculated = "True";
-		attribute<km2> area         := rowset_rel->area, LazyCalculated = "True"; //use rowset area
+		attribute<rowset>     rowset_rel   := pointrow(ID(.)), LazyCalculated = "True";
+		attribute<km2>        area         := rowset_rel->area, LazyCalculated = "True"; //use rowset area
 	}
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(domain/IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
 		attribute<.>                 BaseGrid  (domain)    := recollect_by_cond(domain/IsCompactedDomain, ID(.));
-		attribute<float32>           lat_factor            := collect_by_cond(domain, domain/lat_factor);
+		attribute<float32>           lat_factor            := collect_by_cond(CompactedDomain, domain/lat_factor);
 		attribute<km2>               area                  := domain_rel->area;
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
 		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
-		
-		attribute<domain>             domain_rel               := org_rel;
-//		attribute<domain_sub>         domain_sub_rel           := domain/domain_sub_rel[domain_rel]; 
-//		attribute<.>                  CompactedDomain_rel      := id(.);
-//      attribute<CompactedDomainSub> CompactedDomainSub_rel   := rlookup(domain_sub_rel, CompactedDomainSub/domain_sub_rel);
-		
-		attribute<uint64>  count_sub_cellen  := pcount(CompactedDomainSub/CompactedDomain_rel);
+		attribute<domain>            domain_rel            := org_rel;
 	}
 	
 	unit<uint64> CompactedDomainSub := select_with_org_rel(domain_sub/domain_rel->IsCompactedDomain), DialogType = "Map", DialogData = "BaseGrid"
@@ -147,10 +139,7 @@ container Geography : using = "units"
 		attribute<domain>            domain_rel             := domain_sub/domain_rel[domain_sub_rel], LazyCalculated = "True"; 
 		attribute<domain_sub>        domain_sub_rel         := org_rel;
 		attribute<CompactedDomain>   CompactedDomain_rel    := lookup(domain_rel, CompactedDomain/BaseGrid), LazyCalculated = "True";
-//		attribute<.>                 CompactedDomainSub_rel := id(.), KeepData = "true";
 	}
-	
-
 	
 	#include <DistMatrices.dms>
 	#include <wms_layer_latlong.dms>

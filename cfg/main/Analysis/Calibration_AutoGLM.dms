@@ -15,9 +15,9 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
 		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
 		
-		attribute<int16>      Elevation                               := Physical/Elevation/Elevation[CompactedDomain/org_rel];
+		attribute<int32>      Elevation                               := Physical/Elevation/Mean_1k[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>      TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_mean_1k_World[CompactedDomain/org_rel];
+		attribute<float32>    TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[CompactedDomain/org_rel];
 		
 		attribute<uint8>      IsProtectedArea                         := Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
 		attribute<uint8>      IsFloodProneArea_RP100                  := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
