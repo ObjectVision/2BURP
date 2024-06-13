@@ -34,7 +34,7 @@ container Templates
 			
 			attribute<uint8>      buffer            := iif(distMatr <= vertical_radius * vertical_radius, 1b, 0b);
 			
-			unit<uint32> Buffer_NonNull_Cells := select_with_org_rel(buffer == 1b); 
+			unit<uint32> Buffer_NonNull_Cells := select_with_org_rel(buffer == 1b);
 		}
 	}
 
