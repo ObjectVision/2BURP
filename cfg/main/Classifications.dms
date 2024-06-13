@@ -54,8 +54,10 @@ container Classifications : using = "units"
 			
 	unit<uint8> AllShares := cat_range(0b, 101b)
 	{
-		attribute<BU_DensityBin> DensityBin_rel := Classify(id(.), BU_DensityBin/LB);
-		attribute<Float32> Moving_up_probability_data : [ 
+		attribute<string>         label                      := string(id(.));
+		attribute<BU_DensityBins> DensityBins_rel            := Classify(id(.), BU_DensityBins/LB);
+		attribute<Float32>        Moving_up_probability_data : 
+		[ 
 			0.024179 ,0.557334 ,0.833489 ,0.9228637,0.9508959,
 			0.9647802,0.9698947,0.9700665,0.9718882,0.9717724,
 			0.9667857,0.9626678,0.952769,0.9487741,0.9290178,
@@ -68,11 +70,11 @@ container Classifications : using = "units"
 			0.024179,0.020,0.015,0.010,0.005,
 			0.000
 		];
-		attribute<Float32> Moving_up_probability := MakeDefined(Moving_up_probability_data, 0f);
-		attribute<uint32>  BrushColor := BU_DensityBin/BrushColor[DensityBin_rel];
+		attribute<Float32>        Moving_up_probability      := MakeDefined(Moving_up_probability_data, 0f);
+		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	
-	unit<uint8> BU_DensityBin := cat_range(0b, 15b)
+	unit<uint8> BU_DensityBins := cat_range(0b, 15b)
 	{
 		attribute<AllShares>  LB: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
@@ -97,9 +99,30 @@ container Classifications : using = "units"
 											, rgb(200,200,200)
 										), DialogType = "BrushColor";
 	}
-	unit<uint8> Pop_Bins := cat_range(0b, 17b) 
+	// unit<uint8> Pop_DensityBins := cat_range(0b, 17b) 
+	unit<uint8> Pop_DensityBins := cat_range(0b, 29b) 
+	{
+		attribute<string>  UB                := string(ClassBreaks[id(.) + 1b]);
+		attribute<string>  label             := IsNull(UB) ? string(ClassBreaks)+ ' < '  : string(ClassBreaks)+' - '+string(UB);
+		// attribute<float32> ClassBreaks       : [0, 1, 10, 25, 50, 100, 200, 300, 600, 900, 1500, 3000, 4500, 6000, 7500, 10000, 20000];
+		attribute<float32> ClassBreaks       : [0, 1, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 5000, 10000];
+	}
+	
+	unit<uint8> Pop_Bins := cat_range(0b, 10b) 
 	{
 		attribute<string>  Label             := 'LB_'+string(ClassBreaks);
-		attribute<float32> ClassBreaks       : [0, 1, 10, 25, 50, 100, 200, 300, 600, 900, 1500, 3000, 4500, 6000, 7500, 10000, 20000];
+		attribute<float32> ClassBreaks       : [0, 1, 25, 50, 100, 500, 1000, 2000, 3000, 5000];
+	}
+	
+	unit<uint8> BU_Residential_Area_Bins := cat_range(0b, 10b) 
+	{
+		attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+		attribute<float32> ClassBreaks       : [0, 0.0001, 0.001, 0.01, 0.05, 0.075, 0.1, 0.15, 0.2, 0.25];
+	}
+	
+	unit<uint8> BU_Total_Share_Bins := cat_range(0b, 10b) 
+	{
+		attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+		attribute<float32> ClassBreaks       : [0, 0.0001, 0.001, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25];
 	}
 }
