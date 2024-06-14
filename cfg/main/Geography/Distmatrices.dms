@@ -38,7 +38,12 @@ container Distmatrices
 		attribute<domain_sub>      third_rel_i   := first_org_rel + second_rel_delta, LazyCalculated = "True";
 		attribute<CompactedDomainSub> third_rel  := rlookup(third_rel_i, CompactedDomainSub/org_rel), LazyCalculated = "True";
 	}
-	
+	unit<uint32> Cdomain_x_pot1k_3x3 := combine(CompactedDomain, Distmatrices/pot1km) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
+	{	
+		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel);
+		attribute<domain>          third_rel_d   := value(third_rel_i, domain);
+		attribute<CompactedDomain> third_rel     := CompactedDomain/basegrid[third_rel_d];
+	}
 	unit<uint32> Cdomain_x_pot1k := combine(CompactedDomain, Distmatrices/pot1km/Buffer_NonNull_Cells) //pot1km == 3x3 cellen zonder diagonalen, pot2km == 5x5 cellen
 	{	
 		attribute<ipoint>          third_rel_i   := ipoint(first_rel -> org_rel) + ipoint(second_rel -> org_rel);
