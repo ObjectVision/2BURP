@@ -99,17 +99,16 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 	container ReadCoffecients
 	{
 		container Read_XLSX 
-		// : StorageName = "%ProjDir%/Data/Calibration/Calibration_continents_20240425.xlsx"
-		: StorageName = "%ProjDir%/Data/Calibration/Calibration_continents_20240527.xlsx"
+		: StorageName = "='%ProjDir%/Data/Calibration/Calibration_continents_'+ModelParameters/Calibration_filedate+'.xlsx'"
 		, StorageType = "gdal.vect"
 		, StorageReadOnly = "true"
 		{
-			unit<uint32> Calib_results;
+			unit<uint32> continent_15_6_full_sample;
 		}
 		
-		unit<uint32> Calibration_variables := Read_XLSX/Calib_results
+		unit<uint32> Calibration_variables := Read_XLSX/continent_15_6_full_sample
 		{
-			attribute<string> name := AsItemName(Dependent);
+			attribute<string> name := AsItemName(Variables);
 			container V := for_each_nedv(name, string(id(.))+'[..]', void, .);
 		}
 		

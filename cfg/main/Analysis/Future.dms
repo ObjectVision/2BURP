@@ -529,6 +529,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			
 			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
 			attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := New_BuiltUp_Area * Avg_Local_Population_inRes_Density;
+			
+			// attribute<Person>            RestClaim_AfterReductionPlusNewBU          (ClaimRegion) := Claims/Population - sum(Reduced_Population + Population_in_New_BuiltUp_Area_src, Region_rel);
+			// attribute<Person>            Pop_in_New_BU_Area_src_Augm            (CompactedDomain) := RestClaim_AfterReductionPlusNewBU[Region_rel] < 0[Person]
+																										// ? Population_in_New_BuiltUp_Area_src
+																										// : scalesum(
+																											// Population_in_New_BuiltUp_Area_src
+																											// , Region_rel
+																											// , max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]));
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
 			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area;
@@ -536,6 +544,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
 			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := Rescale(Room_for_Population, 0f, 1f);
 			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Population_beforeAllocation, Region_rel), 0[Person]);
+			// attribute<Person>            RestClaim                                  (ClaimRegion) := Claims/Population - sum(Population_beforeAllocation, Region_rel);
 			attribute<float32>           ScaleFactor_0                              (ClaimRegion) := RestClaim / Sum_Suitability; //Number of persons per suitability value. 
 			
 			attribute<Person>            Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!

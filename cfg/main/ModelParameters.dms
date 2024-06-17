@@ -5,4 +5,6 @@ container ModelParameters
 	parameter<float64> WGS_Gridsize            := 30d; //arc seconden: 30ss ~ 1km grid 
 	parameter<float64> WGS_Subgridsize         := 3d;  //arc seconden: 3ss ~ 100m grid 
 	parameter<string>  StartYear               := 'Y2020';
+	
+	parameter<string>  Calibration_filedate    := '20240615';
 }
