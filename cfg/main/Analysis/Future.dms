@@ -195,7 +195,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				}
 			}
 				
-			parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+			// parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
 			parameter<string> Generate_Population                := 'Ready', ExplicitSuppliers = "=AsList('Population/'+ProjectionYears/name, ';')";
 			parameter<string> Generate_BuiltUp_Total_Shares      := 'Ready', ExplicitSuppliers = "=AsList('BuiltUp_Total_Share/'+ProjectionYears/name, ';')";
 			
@@ -224,9 +224,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			container GridDistances := 
 				for_each_ne(
 					ProjectionYears/name
-					, Use_Tifs 
-						? 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
-						: 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+					// , Use_Tifs 
+						// ? 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
+						// : 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+						, 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
 				)
 			{
 				container Y2020 := /Preprocessing/GridDistances/Y2020;
@@ -558,10 +559,11 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
 			attribute<Person>            Population_in_New_BuiltUp_Area_src     (CompactedDomain) := New_BuiltUp_Area * Avg_Local_Population_inRes_Density;
 			
-			attribute<Person>            Pop_in_New_BU_Area_Augm                (CompactedDomain) := scalesum( //needed to not exceed the claim, if the regional growth is less than the new pop in new BU.
-																											Population_in_New_BuiltUp_Area_src
-																											, Region_rel
-																											, max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]));
+			attribute<Person>            Pop_in_New_BU_Area_Augm_Teller             (ClaimRegion) := max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]) * ModelParameters/Pop_New_BU_PopulationDensity_Factor;
+			attribute<Person>            Pop_in_New_BU_Area_Augm_Noemer             (ClaimRegion) := sum(Population_in_New_BuiltUp_Area_src, Region_rel) ;
+			attribute<float32>           Factor                                     (ClaimRegion) := min_elem(1f, Pop_in_New_BU_Area_Augm_Teller / Pop_in_New_BU_Area_Augm_Noemer);
+			
+			attribute<Person>            Pop_in_New_BU_Area_Augm                (CompactedDomain) := Population_in_New_BuiltUp_Area_src * Factor[Region_rel];
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
 			attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + (Pop_in_New_BU_Area_Augm * ModelParameters/Pop_New_BU_PopulationDensity_Factor), Region_rel) <= Claims/Population;
