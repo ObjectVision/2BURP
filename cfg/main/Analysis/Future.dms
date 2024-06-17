@@ -21,7 +21,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := min_elem_alldefined(Population_inRes_Density_org, maxmax_saturation);
 			attribute<Person_BuiltUpKm2> Population_inTot_Density       (CompactedDomain) := min_elem_alldefined(Population_inTot_Density_org, maxmax_saturation);
 
-			parameter<Person_BuiltUpKm2> maxmax_saturation                                := 1000000[Person_BuiltUpKm2];
+			parameter<Person_BuiltUpKm2> maxmax_saturation                                := ModelParameters/Pop_maxmax_saturation;
 		}
 		
 		/// BUILT UP
@@ -97,26 +97,41 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	{
 		container Prep
 		{
+			parameter<bool> Use_Tifs := TRUE;
+			
+			container BuiltUp_Total_Share := 
+				for_each_nedva(
+					ProjectionYears/name
+					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
+					, domain
+					, float32
+					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'.tif'
+				)
+			{
+				attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'";
+			}
+		
 			container Population := 
-				for_each_nedv(
+				for_each_nedva(
 					ProjectionYears/name
 					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 					, domain
 					, Person
+					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
 				)
 			{
-				attribute<Person> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population);
+				attribute<Person> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'";
 			}
 				
 			container BuiltUp_Total_Area := 
 				for_each_nedv(
 					ProjectionYears/name
-					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)'
+					, Use_Tifs ? 'Read_BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area' : 'BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area'
 					, domain
 					, BuiltUpKm2
 				)
 			{
-				attribute<BuiltUpKm2> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Area);
+				attribute<BuiltUpKm2> Initial      (domain) := Use_Tifs ? 'Read_BuiltUp_Total_Share/Initial * domain/area' : 'BuiltUp_Total_Share/Initial * domain/area';
 			}
 				
 			container Delta_BuiltUp_Total_Area := 
@@ -130,21 +145,11 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				attribute<BuiltUpKm2> Y2030 (domain) := BuiltUp_Total_Area/Y2030 - BuiltUp_Total_Area/Initial;
 			}
 				
-			container BuiltUp_Total_Share := 
-				for_each_nedv(
-					ProjectionYears/name
-					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
-					, domain
-					, float32
-				)
-			{
-				attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share);
-			}
 				
 			container BuiltUp_Residential_Area := 
 				for_each_nedv(
 					ProjectionYears/name
-					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)'
+					, 'BuiltUp_Total_Area/'+ProjectionYears/name+' - recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_NonResidential_Area)'
 					, domain
 					, BuiltUpKm2
 				)
@@ -155,24 +160,25 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			container Population_InRes_Density := 
 				for_each_nedv(
 					ProjectionYears/name
-					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population_inRes_Density)'
+					, Use_Tifs ? 'Read_Population/'+ProjectionYears/name+' / BuiltUp_Residential_Area/'+ProjectionYears/name : 'Population/'+ProjectionYears/name+' / BuiltUp_Residential_Area/'+ProjectionYears/name
 					, domain
 					, Person_BuiltUpKm2
 				)
 			{
-				attribute<float32> Initial (domain):= recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population_inRes_Density);
+				attribute<float32> Initial (domain):= Population/Initial / BuiltUp_Residential_Area/Initial;
 			}
-			
+
 			container Population_Onland_Density := 
 				for_each_nedv(
 					ProjectionYears/name
-					, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population_TotalLand_Density)'
+					, Use_Tifs ? 'Read_Population/'+ProjectionYears/name+' / domain/area' : 'Population/'+ProjectionYears/name+' / domain/area'
 					, domain
 					, Person_Km2
 				) 
 			{
-				attribute<float32> Initial (domain):= recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population_TotalLand_Density);
+				attribute<float32> Initial (domain):= Population/Initial / domain/area;
 			}
+			
 			
 			container DegreesOfUrbanisation :=
 				for_each_ne(
@@ -189,12 +195,38 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 				}
 			}
 				
-			parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+			parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+			parameter<string> Generate_Population                := 'Ready', ExplicitSuppliers = "=AsList('Population/'+ProjectionYears/name, ';')";
+			parameter<string> Generate_BuiltUp_Total_Shares      := 'Ready', ExplicitSuppliers = "=AsList('BuiltUp_Total_Share/'+ProjectionYears/name, ';')";
+			
+			container Read_Population := 
+				for_each_ndva(
+					ProjectionYears/name
+					, domain
+					, Person
+					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
+				)
+			{
+				attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
+			}
+			
+			container Read_BuiltUp_Total_Share := 
+				for_each_ndva(
+					ProjectionYears/name
+					, domain
+					, float32
+					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'.tif'
+				)
+			{
+				attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
+			}
 			
 			container GridDistances := 
 				for_each_ne(
 					ProjectionYears/name
-					, 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+					, Use_Tifs 
+						? 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
+						: 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
 				)
 			{
 				container Y2020 := /Preprocessing/GridDistances/Y2020;
@@ -230,13 +262,13 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container Population_Histogram := 
 			for_each_nedv(
 				ProjectionYears/name
-				, 'pcount(Classify(Prep/Population/'+ProjectionYears/name+', Pop_Bins/ClassBreaks))'
+				, 'pcount(Classify(Prep/Read_Population/'+ProjectionYears/name+', Pop_Bins/ClassBreaks))'
 				, Pop_Bins
 				, uint32
 			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 		{
 			attribute<string>  Label     (Pop_Bins) := Pop_Bins/label;
-			attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Population/Initial, Pop_Bins/ClassBreaks));
+			attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Read_Population/Initial, Pop_Bins/ClassBreaks));
 		}
 			
 		// container delta_BuiltUp := 
@@ -274,13 +306,13 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container Population_OnLand_Density_Histogram := 
 			for_each_nedv(
 				ProjectionYears/name
-				, 'pcount(Classify(Prep/Population_Onland_Density/'+ProjectionYears/name+', Pop_DensityBins/ClassBreaks))'
+				, 'pcount(Classify(Prep/Read_Population_Onland_Density/'+ProjectionYears/name+', Pop_DensityBins/ClassBreaks))'
 				, Pop_DensityBins
 				, uint32
 			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 		{
 			attribute<string>  Label   (Pop_DensityBins) := Pop_DensityBins/label;
-			attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Population_Onland_Density/Initial, Pop_DensityBins/ClassBreaks));
+			attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Read_Population_Onland_Density/Initial, Pop_DensityBins/ClassBreaks));
 		}
 		
 		// container BuiltUp_Residential_Area_Histogram := 
@@ -318,10 +350,10 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container             CurrPopState;
 		attribute<BuiltUpKm2> Claim (ClaimRegion);
 		//
-		parameter<float32> r_if_LocalMax    := 0.11f;
-		parameter<float32> r_if_notLocalMax := 0.06f;
-		parameter<float32> r_if_notBU       := 0.02f;
-		parameter<float32> max_saturation   := 0.50f;
+		parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
+		parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
+		parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
+		parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
 		
 		container LocalMaxima
 		{
@@ -393,15 +425,11 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
 			attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area, 0[BuiltUpKm2]);
 			attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
-			
 			attribute<float32>    InitialProb              (CompactedDomain) := Suitability/FinalProb * Weight;
-
 			attribute<BuiltUpKm2> new_BuiltUp_area         (CompactedDomain) := scalesum(InitialProb, Region_rel, Delta_Claim);
-			
 			attribute<float32>    BuiltUp_Total_Share      (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area; 
 			attribute<BuiltUpKm2> BuiltUp_Total_Area       (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area; // / 1[km2] * 1[BuiltUpKm2];
 			attribute<BuiltUpKm2> BuiltUp_Residential_Area (CompactedDomain) := BuiltUp_Total_Area - InitialState/BuiltUp_NonResidential_Area;
-			
 
 			attribute<float32>    Claim_Realisation            (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
 		}
@@ -416,14 +444,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			unit<uint32> DensityBin_x_region := combine(BU_DensityBins, ClaimRegion)
 			{
 				attribute<BU_DensityBins> first_rel;
-				attribute<ClaimRegion>   second_rel;
-				attribute<.>             per_CompactedDomain (CompactedDomain)  := combine_data(., DensityBins_rel, region_rel);
-				attribute<BuiltUpKm2>    TotalArea                              := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
-				attribute<uint32>        CellCount                              := pcount(per_CompactedDomain);
+				attribute<ClaimRegion>    second_rel;
+				attribute<.>              per_CompactedDomain (CompactedDomain)  := combine_data(., DensityBins_rel, region_rel);
+				attribute<BuiltUpKm2>     TotalArea                              := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
+				attribute<uint32>         CellCount                              := pcount(per_CompactedDomain);
 				
 				// for evaluation purposes
-				attribute<float32>       Rounded_Realisation                    := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, per_CompactedDomain);
-				attribute<float32>       Claim_Realisation                      := Rounded_Realisation / TotalArea; //Check if around 1.0
+				attribute<float32>        Rounded_Realisation                    := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, per_CompactedDomain);
+				attribute<float32>        Claim_Realisation                      := Rounded_Realisation / TotalArea; //Check if around 1.0
 			}
 			
 			attribute<float32>    Rest_Share                  (CompactedDomain) := (NewState/BuiltUp_Total_Share - (0.01[BuiltUpKm2] / 1[km2]) * float32(Perc_BuiltUp_Total));
@@ -449,18 +477,18 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		container          NewState_BuiltUp;
 		attribute<Person>  Claim (ClaimRegion);
 		///
-		parameter<float32> Initial_Population_Proportional_Reduction_Rate_base := 0.025f;
-		parameter<float32> Initial_Population_Absolute_Reduction_Rate_base     := 0.025f;
-		attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * 2f, Initial_Population_Proportional_Reduction_Rate_base) : Initial_Population_Proportional_Reduction_Rate_base';
-		attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * 2f, Initial_Population_Absolute_Reduction_Rate_base) : Initial_Population_Absolute_Reduction_Rate_base';
+		parameter<float32> Initial_Population_Proportional_Reduction_Rate_base := ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base;
+		parameter<float32> Initial_Population_Absolute_Reduction_Rate_base     := ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base;
+		attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, Initial_Population_Proportional_Reduction_Rate_base) : Initial_Population_Proportional_Reduction_Rate_base';
+		attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, Initial_Population_Absolute_Reduction_Rate_base) : Initial_Population_Absolute_Reduction_Rate_base';
 		
 		
 		container LocalMaxima
 		{
-			parameter<Person_BuiltUpKm2_decade>  r_if_LocalMax                           := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2_decade>  r_if_notLocalMax                        := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated                       := 7000[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
-			parameter<Person_BuiltUpKm2>         max_saturation                          := 100000[Person_BuiltUpKm2];
+			parameter<Person_BuiltUpKm2_decade>  r_if_LocalMax                           := ModelParameters/pop_r_if_LocalMax;
+			parameter<Person_BuiltUpKm2_decade>  r_if_notLocalMax                        := ModelParameters/pop_r_if_notLocalMax;
+			parameter<Person_BuiltUpKm2_decade>  r_if_notPopulated                       := ModelParameters/pop_r_if_notPopulated;
+			parameter<Person_BuiltUpKm2>         max_saturation                          := ModelParameters/pop_max_saturation;
 			
 			attribute<Person_BuiltUpKm2>         Current_LocalMaximum  (CompactedDomain) := max(CurrState/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
 			attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density;
@@ -528,29 +556,26 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        BuiltUp_Residential_Area               (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
 			
 			attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
-			attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := New_BuiltUp_Area * Avg_Local_Population_inRes_Density;
+			attribute<Person>            Population_in_New_BuiltUp_Area_src     (CompactedDomain) := New_BuiltUp_Area * Avg_Local_Population_inRes_Density;
 			
-			// attribute<Person>            RestClaim_AfterReductionPlusNewBU          (ClaimRegion) := Claims/Population - sum(Reduced_Population + Population_in_New_BuiltUp_Area_src, Region_rel);
-			// attribute<Person>            Pop_in_New_BU_Area_src_Augm            (CompactedDomain) := RestClaim_AfterReductionPlusNewBU[Region_rel] < 0[Person]
-																										// ? Population_in_New_BuiltUp_Area_src
-																										// : scalesum(
-																											// Population_in_New_BuiltUp_Area_src
-																											// , Region_rel
-																											// , max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]));
+			attribute<Person>            Pop_in_New_BU_Area_Augm                (CompactedDomain) := scalesum( //needed to not exceed the claim, if the regional growth is less than the new pop in new BU.
+																											Population_in_New_BuiltUp_Area_src
+																											, Region_rel
+																											, max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]));
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
-			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area;
+			attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + (Pop_in_New_BU_Area_Augm * ModelParameters/Pop_New_BU_PopulationDensity_Factor), Region_rel) <= Claims/Population;
+			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + (Pop_in_New_BU_Area_Augm * ModelParameters/Pop_New_BU_PopulationDensity_Factor), IntegrityCheck = "sum(this, Region_rel) <= Claims/Population";
 			attribute<float32>           Sum_Suitability                            (ClaimRegion) := sum(Suitability/Population * Room_for_Population_Normalised , Region_rel);
 			attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
-			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := Rescale(Room_for_Population, 0f, 1f);
+			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := rescale(Room_for_Population, 0f, 1f);
 			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Population_beforeAllocation, Region_rel), 0[Person]);
-			// attribute<Person>            RestClaim                                  (ClaimRegion) := Claims/Population - sum(Population_beforeAllocation, Region_rel);
 			attribute<float32>           ScaleFactor_0                              (ClaimRegion) := RestClaim / Sum_Suitability; //Number of persons per suitability value. 
 			
 			attribute<Person>            Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!
 			attribute<bool>              Check_for_enough_suitable_locations        (ClaimRegion) := sum(Suitability/Population > 0f ? int32(Room_for_Population)[Person] : 0[Person], Region_rel) >= RestClaim; //for debug purposes
 			
-			unit<uint8> Iter := cat_range(0b,10b) //10 is too little for the Netherlands to meet the regional claim.
+			unit<uint8> Iter := cat_range(0b,10b) 
 			{
 				attribute<string> name      := 'Iter_'+string(id(.));
 				attribute<string> prev_name := MakeDefined(name[sub_or_null(id(.),1b)]+'/ScaleFactor_new', 'ScaleFactor_0');

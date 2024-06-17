@@ -201,13 +201,14 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 				container smoothing_loop:= loop(Loop_MedianFilter, uint16(20));
 			}
 			
-			Template Loop_MedianFilter {
-			
+			Template Loop_MedianFilter 
+			{
 				parameter<uint16> NrIter;
-				
+				///
 				container PrevState:= Apply_smoothing;
 
-				container NextValue {
+				container NextValue 
+				{
 					attribute<uint32> MedianFiltering 	(CompactedDomain):= modus(PrevState/Urban_Cluster[Cdomain_x_pot1k_3x3/third_rel], Cdomain_x_pot1k_3x3/first_rel);
 					//attribute<uint32> MedianFiltering 	(CompactedDomain):= modus(PrevState/Urban_Cluster[MW_Cdomain_x_pot2k/third_rel], MW_Cdomain_x_pot2k/first_rel);
 					attribute<bool>   Add_from_filter 	(CompactedDomain):= MedianFiltering < val_Not_urban_cluster && !PrevState/Urban_Centre && !(PrevState/Urban_Cluster = val_Dense_urban_cluster);
