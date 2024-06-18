@@ -1,0 +1,128 @@
+Template Allocate_Builtup_T
+{
+	parameter<string>     ThisYear;
+	parameter<string>     PrevYear;
+	container             CurrState;
+	container             CurrPopState;
+	attribute<BuiltUpKm2> Claim (ClaimRegion);
+	//
+	parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
+	parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
+	parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
+	parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
+	
+	container LocalMaxima
+	{
+		attribute<float32> Current_LocalMaximum_Share (CompactedDomain) := max(CurrState/BuiltUp_Total_Share[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
+		attribute<bool>    IsLocalMaximum             (CompactedDomain) := Current_LocalMaximum_Share == CurrState/BuiltUp_Total_Share;
+		attribute<bool>    HasNoBuiltUp               (CompactedDomain) := CurrState/BuiltUp_Total_Share == 0f;
+		
+		// If a cell has the highest local share of built-up area in T1, it can only increase by 11 pp in T2 (or by 50% - local share if this is smaller than 11 pp)
+		// If a cell is built-up but it doesn’t have the highest local share of built-up area in T1, it can only increase in T2 to the local maximum in T1 + 6 pp (or by 50% - local share, if this is smaller than local maximum in T1 + 6 pp)
+		// If a cell is not built-up in T1, it can only increase by 2 pp in T2
+		attribute<float32> MaxAllowed_Builtup_Total_Share0   (CompactedDomain) := 
+			iif(HasNoBuiltUp
+				, r_if_notBU
+				, median(max_saturation, CurrState/BuiltUp_Total_Share, CurrState/BuiltUp_Total_Share + (LocalMaxima/IsLocalMaximum ? r_if_LocalMax: r_if_notLocalMax))
+			);
+			
+		attribute<float32> MaxAllowed_Builtup_Total_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f[km2 / BuiltUpKm2])*CurrState/BuiltUp_Total_Share) + CurrState/BuiltUp_Total_Share;
+		attribute<float32> MaxAllowed_Builtup_Total_Share                   (CompactedDomain) := min_elem(MaxAllowed_Builtup_Total_Share_extraRestrictie, MaxAllowed_Builtup_Total_Share0);
+		
+		//adhoc
+		attribute<float32> Diff (CompactedDomain) := MaxAllowed_Builtup_Total_Share0 - MaxAllowed_Builtup_Total_Share_extraRestrictie;
+	}
+	
+	container Suitability
+	{
+		container        AutoGLM_Coeffs            := Analysis/Calibration/ReadCoffecients/coef2domain/domain; 
+		attribute<Suit> Calc (domain) := ='(CurrPopState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                         * AutoGLM_Coeffs/Ln_PopulationDensity_2000_8dir) + '
+																'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                           * AutoGLM_Coeffs/Distance2Coastline) + 
+																(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
+																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
+																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
+																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
+																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
+																(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
+																(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
+																(Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[float32]                                                  * AutoGLM_Coeffs/TRI_mean) + 
+																(Policy/ProtectedAreas/ReadData[float32]                                                                      * AutoGLM_Coeffs/IsProtectedArea) + 
+																(Physical/Water/FloodProneArea/RP100/ReadData_Defined[float32]                                                        * AutoGLM_Coeffs/IsFloodProneArea_RP100) + 
+																(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
+																(Physical/Natural_Hazards/Landslide/LS_risk[float32]                                                          * AutoGLM_Coeffs/Landslide_Prone) + 
+																AutoGLM_Coeffs/Intercept'; 
+		attribute<Suit> Write_Calc (domain) := Calc, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_BU_'+ThisYear+'.tif'";
+		attribute<Suit> Read_Calc  (domain) : StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_BU_'+ThisYear+'.tif'", StorageReadOnly = "True";
+				
+		attribute<Suit>      BuiltUp               (CompactedDomain) := =ModelParameters/Use_TempTifFiles ? 'MakeDefined(Read_Calc[CompactedDomain/org_rel], -100[suit])' : 'MakeDefined(Write_Calc[CompactedDomain/org_rel], -100[suit])';
+		attribute<Suit>      CappedBuiltUp         (CompactedDomain) := min_elem(BuiltUp, 80[suit]);
+		attribute<Suit>      expCappedBuiltUp      (CompactedDomain) := exp(CappedBuiltUp);
+		attribute<float32>   Prob                  (CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
+		attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
+		attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
+
+		// Moving_up_probability is assumed to be a good estimation for expected increase of BuiltUp share.
+		attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc->Moving_up_probability;
+		
+		// to density dependent counterbalance the correlation of suitability with high density, we calculate ProbBalanceFactor that offsets higher average props 
+		// it is now not endogenous as counterbalance drifting away from the idealised distribution doesn't seem required nor desired.			
+		
+		attribute<Float32>   AvgProb                     (AllShares) := mean(Prob, BuiltUp_Share_Perc);
+		attribute<float32>   ProbBalanceFactor     (CompactedDomain) := 1f / (AvgProb[BuiltUp_Share_Perc]); //median(0f, 1f - 2f*BuiltUp_Share, 1f);
+		attribute<float32>   FinalProb             (CompactedDomain) := Prob * Expected_increase * ProbBalanceFactor;
+	}
+	
+	container Claims
+	{
+		attribute<BuiltUpKm2>        Builtup                            (ClaimRegion) := Claim;
+	}
+	
+	container NewState
+	{
+		attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
+		attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area, 0[BuiltUpKm2]);
+		attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
+		attribute<float32>    InitialProb              (CompactedDomain) := Suitability/FinalProb * Weight;
+		attribute<BuiltUpKm2> new_BuiltUp_area         (CompactedDomain) := scalesum(InitialProb, Region_rel, Delta_Claim);
+		attribute<float32>    BuiltUp_Total_Share      (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area; 
+		attribute<BuiltUpKm2> BuiltUp_Total_Area       (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area; // / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> BuiltUp_Residential_Area (CompactedDomain) := max_elem(BuiltUp_Total_Area - InitialState/BuiltUp_NonResidential_Area, 0[BuiltUpKm2]);
+
+		attribute<float32>    Claim_Realisation            (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0
+	}
+	
+	container RoundedState
+	{
+		// use nth_element to assign fractions according to maximizing the actual built-up size that each percent represents, similar to residual seat distribution in Dutch Parliament.
+		attribute<AllShares>     Perc_BuiltUp_Total    (CompactedDomain) := (100.0f * NewState/BuiltUp_Total_Share)[AllShares];
+		attribute<BU_DensityBins>DensityBins_rel       (CompactedDomain) := Perc_BuiltUp_Total->DensityBins_rel;
+		attribute<bool>          UnmatchedBins         (CompactedDomain) := not(IsDefined(DensityBins_rel));
+		
+		unit<uint32> DensityBin_x_region := combine(BU_DensityBins, ClaimRegion)
+		{
+			attribute<BU_DensityBins> first_rel;
+			attribute<ClaimRegion>    second_rel;
+			attribute<.>              per_CompactedDomain (CompactedDomain)  := combine_data(., DensityBins_rel, region_rel);
+			attribute<BuiltUpKm2>     TotalArea                              := sum(NewState/BuiltUp_Total_Area, per_CompactedDomain);
+			attribute<uint32>         CellCount                              := pcount(per_CompactedDomain);
+			
+			// for evaluation purposes
+			attribute<float32>        Rounded_Realisation                    := 0.01f * sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, per_CompactedDomain);
+			attribute<float32>        Claim_Realisation                      := Rounded_Realisation / TotalArea; //Check if around 1.0
+		}
+		
+		attribute<float32>    Rest_Share                  (CompactedDomain) := (NewState/BuiltUp_Total_Share - (0.01[BuiltUpKm2] / 1[km2]) * float32(Perc_BuiltUp_Total));
+		attribute<BuiltUpKm2> Rest_Area                   (CompactedDomain) := Rest_Share * CompactedDomain/area;
+		attribute<BuiltUpKm2> sum_rounded_area        (DensityBin_x_region) := sum(float32(Perc_BuiltUp_Total) * CompactedDomain/area, DensityBin_x_region/per_CompactedDomain) * (0.01[BuiltUpKm2 / km2]);
+		attribute<BuiltUpKm2> Rest_claim              (DensityBin_x_region) := DensityBin_x_region/TotalArea - sum_rounded_area;
+		attribute<float32>    Rank                        (CompactedDomain) := 1.0[BuiltUpKm2 / km2] - Rest_Share;
+		attribute<float32>    roundoff_breakpoint     (DensityBin_x_region) := 1.0[BuiltUpKm2 / km2] - nth_element_weighted(Rank, Rest_claim, CompactedDomain/area * (0.01[BuiltUpKm2] / 1[km2]), DensityBin_x_region/per_CompactedDomain);
+		
+		attribute<bool >      above_breakpoint            (CompactedDomain) := Rest_Share > roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
+		attribute<AllShares>  Perc_BuiltUp_Total_Balanced (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[AllShares];
+		attribute<BuiltUpKm2> Rounded_Realisation             (ClaimRegion) := sum_float32(float32(Perc_BuiltUp_Total_Balanced)* CompactedDomain/area, Region_rel) * (0.01[BuiltUpKm2 / km2]);
+		attribute<BuiltUpKm2> UnmatchedArea                   (ClaimRegion) := sum_float32(NewState/BuiltUp_Total_area * Float32(UnmatchedBins), Region_rel);
+		attribute<float32>    Claim_Realisation               (ClaimRegion) := Rounded_Realisation / Claims/BuiltUp; //Check if around 1.0
+	}
+}
