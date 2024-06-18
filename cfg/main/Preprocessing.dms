@@ -46,7 +46,8 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	container DegreesOfUrbanisation := 
 		for_each_ne(
 			GHS_years/name
-			, 'Calculate_DegreeOfUrbanisation/Gen_T(convert(Builtup/Total/'+GHS_years/name+', km2), convert(Builtup/Residential/'+GHS_years/name+',km2), Population/PerYear/'+GHS_years/name+'[Person])'
+			// , 'Calculate_DegreeOfUrbanisation/Gen_T(convert(Builtup/Total/'+GHS_years/name+', km2), convert(Builtup/Residential/'+GHS_years/name+',km2), Population/PerYear/'+GHS_years/name+'[Person])'
+			, 'Calculate_DegreeOfUrbanisation/Gen_T('+quote(GHS_years/name)+',convert(Builtup/Total/'+GHS_years/name+', km2) / 1[km2] * 1[BuiltUpKm2], convert(Builtup/Residential/'+GHS_years/name+',km2) / 1[km2] * 1[BuiltUpKm2], Population/PerYear/'+GHS_years/name+'[Person])'
 		)
 	{
 		parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+GHS_years/name+'/StoreTypology', ';')";

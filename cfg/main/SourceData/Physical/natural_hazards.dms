@@ -72,7 +72,8 @@ container Natural_Hazards
 		{
 			attribute<int16> Griddata;
 			attribute<int16> ReadData (domain);
-			attribute<int16> Risk (domain):= ReadData < 255[int16] ? ReadData : (0 / 0)[int16];
+			// attribute<int16> Risk (domain):= ReadData < 255[int16] ? ReadData : (0 / 0)[int16];
+			attribute<int16> Risk (domain):= ReadData < 255[int16] ? ReadData : 1[int16];
 		}
 
 		// high landslide_risk

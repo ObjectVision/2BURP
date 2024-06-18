@@ -8,6 +8,7 @@ container FloodProneArea
 	DialogData = "LatLong"
 	{
 		attribute<uint8> ReadData   (domain);//717913896 null
+		attribute<uint8> ReadData_Defined   (domain) := MakeDefined(ReadData, 0b);
 		attribute<bool>  RP100_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
 	}
 
