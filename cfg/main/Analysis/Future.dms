@@ -246,7 +246,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
 				)
 			{
-				attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
+				attribute<Person> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
 			}
 			
 			container Read_BuiltUp_Total_Share := 
@@ -286,17 +286,29 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2> Y2030     (TypologyK) := sum(Prep/Delta_BuiltUp_Total_Area/y2030, Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK);
 		}
 		
+		container Added_BU_perDoU := 
+			for_each_nedv(
+				ProjectionYears_Delta/name
+				, 'sum(Prep/Delta_BuiltUp_Total_Area/'+ProjectionYears_Delta/name+', Prep/DegreesOfUrbanisation/'+ProjectionYears_Delta/name+'/ReadTypologyK)'
+				, TypologyK
+				, BuiltUpKm2
+			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Added_BU_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+		{
+			attribute<string>     Label     (TypologyK) := TypologyK/label;
+			attribute<BuiltUpKm2> Y2030     (TypologyK) := sum(Prep/Delta_BuiltUp_Total_Area/y2030, Prep/DegreesOfUrbanisation/Y2030/ReadTypologyK);
+		}
+		
 		// Future change in population per degree of urbanisation class.
 		container Population_perDoU := 
 			for_each_nedv(
 				ProjectionYears/name
-				, 'sum(Prep/Population/'+ProjectionYears/name+', Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
+				, 'sum(Prep/Read_Population/'+ProjectionYears/name+', Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
 				, TypologyK
 				, Person
 			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 		{
 			attribute<string>  Label     (TypologyK) := TypologyK/label;
-			attribute<Person>  Initial   (TypologyK) := sum(Prep/Population/Initial, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
+			attribute<Person>  Initial   (TypologyK) := sum(Prep/Read_Population/Initial, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
 		}
 		
 		container Population_Histogram := 
@@ -571,7 +583,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					
 			attribute<Suit>              BuiltUp                        (CompactedDomain) := =ModelParameters/Use_TempTifFiles ? 'Read_Calc[CompactedDomain/org_rel]' : 'Write_Calc[CompactedDomain/org_rel]';
 		
-			attribute<Suit>              NonNegative                    (CompactedDomain) := max_elem(BuiltUp, 0[Suit]);
+			// attribute<Suit>              NonNegative                    (CompactedDomain) := max_elem(BuiltUp, 0[Suit]);
+			attribute<Suit>              NonNegative                    (CompactedDomain) := BuiltUp > 0f ? BuiltUp + 1f : exp(BuiltUp);
 			attribute<Suit>              Population                     (CompactedDomain) := NonNegative;
 		}
 		
@@ -604,36 +617,17 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := Population_in_New_BuiltUp_Area_src * Pop_New_BU_PopulationDensity_Factor[Region_rel];
 
 			//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
-			
-			//ad hoc
-			attribute<Person>            Initial_Pop_sum                            (ClaimRegion) := sum(InitialState/Population, Region_rel);
-			attribute<Person>            Prev_Pop_sum                               (ClaimRegion) := sum(CurrState/Population, Region_rel);
-			attribute<Person>            PropReducted_Pop_sum                       (ClaimRegion) := sum(Proportional_Reducted_Population, Region_rel);
-			attribute<Person>            PropAbsReducted_Pop_sum                    (ClaimRegion) := sum(Reduced_Population, Region_rel);
-			attribute<Person>            Population_newBU_sum                       (ClaimRegion) := sum(Population_in_New_BuiltUp_Area, Region_rel) ;
-			attribute<Person>            Population_beforeAllocation_sum            (ClaimRegion) := PropAbsReducted_Pop_sum + Population_newBU_sum ;
-			attribute<Person>            Population_beforeAllocation_Check1         (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel);
-			attribute<uint32>            Population_beforeAllocation_Check1_u32         (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel)[uint32];
-			attribute<uint32>            Population_Claim_u32                           (ClaimRegion) := Claims/Population[uint32];
-			// end ad hoc
-			
 			attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel) <= Claims/Population + (Claims/Population * 0.01f);
 			attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area, IntegrityCheck = "Population_beforeAllocation_Check";
-			attribute<float32>           Sum_Suitability                            (ClaimRegion) := sum(Suitability/Population * Room_for_Population_Normalised , Region_rel);
 			attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
-			
-			//adhoc
-			attribute<Person>            Room_for_Population_sum                    (ClaimRegion) := sum(Room_for_Population, Region_Rel);
-			attribute<float32>            Suitability_sum                            (ClaimRegion) := sum(Suitability/Population, Region_Rel);
-			
-			// end ad hoc
-			
-			attribute<float32>           Room_for_Population_Normalised         (CompactedDomain) := rescale(Room_for_Population, 0f, 1f);
+			attribute<float32>           ProportionalityFactor                  (CompactedDomain) := max_elem(Suitability/population * Room_for_Population, 0f);
+			attribute<float32>           Sum_ProportionalityFactor                  (ClaimRegion) := sum(ProportionalityFactor , Region_rel);
 			attribute<Person>            RestClaim                                  (ClaimRegion) := max_elem(Claims/Population - sum(Population_beforeAllocation, Region_rel), 0[Person]);
-			attribute<float32>           ScaleFactor_0                              (ClaimRegion) := RestClaim / Sum_Suitability; //Number of persons per suitability value. 
+			attribute<float32>           ScaleFactor_0                              (ClaimRegion) := RestClaim / Sum_ProportionalityFactor, IntegrityCheck = "Check_for_enough_suitable_locations"; //Number of persons per suitability value. 
 			
-			attribute<Person>            Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!
-			attribute<bool>              Check_for_enough_suitable_locations        (ClaimRegion) := sum(Suitability/Population > 0f ? int32(Room_for_Population)[Person] : 0[Person], Region_rel) >= RestClaim; //for debug purposes
+			attribute<float32>           Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!
+			attribute<int32>             Sum_Room_for_population                    (ClaimRegion) := sum(Suitability/Population > 0f ? int32(Room_for_Population) : 0i, Region_rel); //for debug purposes
+			attribute<bool>              Check_for_enough_suitable_locations        (ClaimRegion) := Sum_Room_for_population[Person] >= RestClaim; //for debug purposes
 			
 			unit<uint8> Iter := cat_range(0b,10b) 
 			{
@@ -649,13 +643,14 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			{
 				container Last := =last(Iter/name);
 			}
-			
+
 			Template Population_Allocation_T
 			{
 				attribute<float32>       ScaleFactor                  (ClaimRegion);
 				///
-				attribute<Person>        Population               (CompactedDomain) := min_elem(ScaleFactor[Region_rel] * Suitability/Population * Room_for_Population_Normalised, Room_for_Population);
-				attribute<Person>        Population_rounded       (CompactedDomain) := int32(Population)[Person]; //we round here, to omit fractional people which can then reallocated in the next iter.
+				attribute<Person>        Proportional_Population  (CompactedDomain) := ScaleFactor[Region_rel] * ProportionalityFactor;
+				attribute<Person>        Saturated_Population     (CompactedDomain) := min_elem(Proportional_Population, Room_for_Population);
+				attribute<Person>        Population_rounded       (CompactedDomain) := int32(Saturated_Population)[Person]; //we round here, to omit fractional people which can then reallocated in the next iter.
 				attribute<Person>        Realisation                  (ClaimRegion) := sum(Population_rounded, Region_rel);
 				attribute<float32>       RescaleFactor                (ClaimRegion) := RestClaim / Realisation; // We need to correct the scale factor to accomodate left over claims.
 				attribute<float32>       ScaleFactor_new              (ClaimRegion) := IsNull(ScaleFactor) || IsNull(RescaleFactor) ? 0f : ScaleFactor * RescaleFactor;

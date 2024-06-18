@@ -80,6 +80,7 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Nigeria                  := range(LatLong_Base, point_yx( 0.0, -3.0),   point_yx(17.0, 20.0)) {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Nigeria];}
 		unit<dpoint> LatLong_Morocco                  := range(LatLong_Base, point_yx( 23.0, -17.0),   point_yx(37.0, 0.0)) {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Morocco];}
 		unit<dpoint> LatLong_Cabo_Verde               := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Cabo_Verde]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Cabo_Verde]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Cabo_Verde];}
+		unit<dpoint> LatLong_Chad                     := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad];}
 	}
 
 
