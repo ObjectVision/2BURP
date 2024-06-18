@@ -87,15 +87,15 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		container DegreesOfUrbanisation :=
 			for_each_ne(
 				ProjectionYears/name
-				// , 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
-						  // recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
-						// , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
-						// , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
-				, 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
-						'+quote(ProjectionYears/name)+'
-						, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)
-						, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)
-						, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
+				 , 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+						   recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
+						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
+						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
+				//, 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+				//		'+quote(ProjectionYears/name)+'
+				//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)
+				//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)
+				//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
 			)
 		{
 			container Initial
