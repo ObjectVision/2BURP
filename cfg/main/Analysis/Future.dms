@@ -176,20 +176,28 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			{
 				attribute<float32> Initial (domain):= Population/Initial / domain/area;
 			}
-			
+			container Delta_Population := 
+				for_each_nedva(
+					ProjectionYears/name
+					, (Use_TempTifFiles ? 'Read_Population/'+ProjectionYears/name : 'Population/'+ProjectionYears/name) + '- InitialState/Population[CompactedDomain/BaseGrid]'
+					, domain
+					, Person
+					, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Delta_Population_'+ProjectionYears/name+'.tif'
+				);
+
 			
 			container DegreesOfUrbanisation :=
 				for_each_ne(
 					ProjectionYears/name
-					// , 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
-							  // recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
-							// , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
-							// , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
 					, 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
-							'+quote(ProjectionYears/name)+'
-							, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)
-							, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)
-							, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
+							 recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
+							 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
+							 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
+					//, 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+					//		'+quote(ProjectionYears/name)+'
+					//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area)
+					//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area)
+					//		, recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population))'
 				)
 			{
 				container Initial

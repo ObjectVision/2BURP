@@ -4,6 +4,7 @@ container SourceData : using = "geography;units"
 	{
 		parameter<bool> b1_Coastline             := true, explicitsuppliers = "Physical/Coast/Coastline/Write_per_subgrid;Physical/Coast/Coastline/Write_per_grid";
 		parameter<bool> b2_InlandWater           := true, explicitsuppliers = "Physical/Water/Inland_Water/Write_per_grid;Physical/Water/Inland_Water/Write_per_subgrid";
+		parameter<bool> b3_Hasland 		         := true, explicitsuppliers = "Physical/Water/AllWater/HasLand";
 		parameter<bool> b4_Dist2InlandWater      := true, explicitsuppliers = "Physical/Water/AllWater/Location2AllInland_km_domain_export;Physical/Water/AllWater/Location2LargeInland_km_domain_export";
 		parameter<bool> b5_Dist2Coast            := true, explicitsuppliers = "Physical/Coast/Location2Coast_km_domain_export";
 	

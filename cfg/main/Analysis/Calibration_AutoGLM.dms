@@ -86,7 +86,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		parameter<string> newline := '\n';
 		parameter<string> header  := fieldnamelist;
 		attribute<string> body (Create_DataForCalibration) := = AsList(
-			+'string(' + field/ref + ')',' + '+quote(fieldseparator)+' +'
+			+'makedefined(string(' + field/ref + '),'+quote('-9999')+')',' + '+quote(fieldseparator)+' +'
 			);
 		 
 		  parameter<string> result := header + newline + AsList(body, newline)
