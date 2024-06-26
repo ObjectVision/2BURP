@@ -8,6 +8,7 @@ container Units
 	unit<Float32> year                     := BaseUnit('Yr', float32);
 	unit<Float32> decade                   := 10.0 * year;
 	unit<float32> Person                   := BaseUnit('p', float32); //, cdf = "classifications/PopClass/ClassBreak";
+	unit<int32>   NrPerson                 := BaseUnit('p', int32); //, cdf = "classifications/PopClass/ClassBreak";
 	unit<float32> MPerson                  := 1000000.0 * Person;
 	unit<Float32> Person_km2               := Person / km2;
 	unit<Float32> Person_BuiltUpKm2        := Person / BuiltUpKm2;

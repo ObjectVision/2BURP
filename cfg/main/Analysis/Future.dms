@@ -41,9 +41,9 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<Person>            RegionalDeficit                    (ClaimRegion) := sum(Population_base, region_rel) - float32(sum(Population_trunc, region_rel));
 		attribute<Person>            Max_rank                           (ClaimRegion) := nth_element(Population_frac_rank, uint32(RegionalDeficit), region_rel);
 		
-		attribute<Person>            Population                     (CompactedDomain) := Population_trunc + uint32(Population_frac_rank < Max_rank[region_rel])[Person];
-		attribute<Person_Km2>        Population_TotalLand_Density   (CompactedDomain) := (Population / CompactedDomain/area);
-		attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := Population / BuiltUp_Residential_Area; // DO NOT USE!
+		attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[region_rel])[NrPerson];
+		attribute<Person_Km2>        Population_TotalLand_Density   (CompactedDomain) := (Population[Person] / CompactedDomain/area);
+		attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := Population[Person] / BuiltUp_Residential_Area; // DO NOT USE!
 		
 		
 		container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T((Population_Trunc_domain / domain/area)[float64]);
