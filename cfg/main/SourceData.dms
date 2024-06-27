@@ -15,7 +15,7 @@ container SourceData : using = "geography;units"
 	container Claims : using = "RegionalUnits"
 	{
 		container Read_CSV 
-		: StorageName = "%ProjDir%/Data/Claims/FA_BU_POP_projections_v2.xlsx"
+		: StorageName = "='%ProjDir%/Data/Claims/FA_BU_POP_projections_'+ModelParameters/Claim_fileversion+'.xlsx'"
 		, StorageType = "gdal.vect"
 		, StorageReadOnly = "true"
 		{
