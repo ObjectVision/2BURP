@@ -52,8 +52,8 @@ Template Allocate_Builtup_T
 																(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
 																(Physical/Natural_Hazards/Landslide/LS_risk[float32]                                                          * AutoGLM_Coeffs/Landslide_Prone) + 
 																AutoGLM_Coeffs/Intercept'; 
-		attribute<Suit> Write_Calc (domain) := Calc, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_BU_'+ThisYear+'.tif'";
-		attribute<Suit> Read_Calc  (domain) : StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_BU_'+ThisYear+'.tif'", StorageReadOnly = "True";
+		attribute<Suit> Write_Calc (domain) := Calc, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_BU_'+ThisYear+'.tif'";
+		attribute<Suit> Read_Calc  (domain) : StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_BU_'+ThisYear+'.tif'", StorageReadOnly = "True";
 				
 		attribute<Suit>      BuiltUp               (CompactedDomain) := =ModelParameters/Use_TempTifFiles ? 'MakeDefined(Read_Calc[CompactedDomain/org_rel], -100[suit])' : 'MakeDefined(Write_Calc[CompactedDomain/org_rel], -100[suit])';
 		attribute<Suit>      CappedBuiltUp         (CompactedDomain) := min_elem(BuiltUp, 80[suit]);
