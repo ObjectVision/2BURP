@@ -88,7 +88,7 @@ container RegionalUnits
 	
 
 	unit<uint32> FunctionalAreas_all
-	: StorageName = "%ToBURPDataDir%/Regions/fas_combined_20240423.shp"
+	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'.shp'"
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
 	, DialogData      = "geometry_LL"
