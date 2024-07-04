@@ -17,7 +17,7 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy
 
 	container Final_Items : using = "units;geography"
 	{
-		attribute<BuiltUpKm2> BuiltUp_Total_Area (CompactedDomain) := Analysis/Future/Allocate_Builtup/Y2040/NewState/BuiltUp_Total_Area;
+		attribute<BuiltUpKm2>   BuiltUp_Total_Area (CompactedDomain) := Analysis/Future/Allocate_Builtup/Y2040/NewState/BuiltUp_Total_Area;
 		attribute<NrPerson>     Population         (CompactedDomain) := Analysis/Future/Allocate_Population/Y2040/NewState/Population;
 		
 		// parameter<string>     Validation_Pop_Error      := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result";
