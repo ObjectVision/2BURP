@@ -136,7 +136,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			attribute<AllShares>  Perc_BuiltUp_Total_Balanced     (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[AllShares];
 		}
 		
-		parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "='DegreesOfUrbanisation/'+ModelParameters/StartYear+'/StoreTypology;'+AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+		parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "='PreProcessing/DegreesOfUrbanisation/'+ModelParameters/StartYear+'/StoreTypology;'+AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
 		parameter<string> Generate_Population                := 'Ready', ExplicitSuppliers = "='Population/Initial;'+AsList('Population/'+ProjectionYears/name, ';')";
 		parameter<string> Generate_BuiltUp_Total_Shares      := 'Ready', ExplicitSuppliers = "='BuiltUp_Total_Share/Initial;'+AsList('BuiltUp_Total_Share/'+ProjectionYears/name, ';')";
 		
