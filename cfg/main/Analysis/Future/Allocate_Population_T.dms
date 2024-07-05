@@ -101,7 +101,7 @@ Template Allocate_Population_T
 		
 		attribute<float32>           Population_0                           (CompactedDomain) := ScaleFactor_0[Region_rel] * Suitability/Population; //for debug purposes, not really number of persons!
 		attribute<int32>             Sum_Room_for_population                    (ClaimRegion) := sum(Suitability/Population > 0f ? int32(Room_for_Population) : 0i, Region_rel); //for debug purposes
-		attribute<bool>              Check_for_enough_suitable_locations        (ClaimRegion) := Sum_Room_for_population[Person] >= RestClaim; //for debug purposes
+		attribute<bool>              Check_for_enough_suitable_locations        (ClaimRegion) := ClaimRegion/ignore_check_enough_suitable_locations || Sum_Room_for_population[Person] >= RestClaim; //for debug purposes
 		
 		unit<uint8> Iter := cat_range(0b,10b) 
 		{

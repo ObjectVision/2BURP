@@ -30,4 +30,7 @@ container ModelParameters : using = "units"
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person_BuiltUpKm2>         Pop_maxmax_saturation                               := 1000000[Person_BuiltUpKm2];
+	
+	unit<uint32> ignore_Check_for_enough_suitable_locations: nrofrows = 2 {attribute<uint32> org_rels: [712, 792];} //712: sudan, 2030; 792: Congo, 2040
+	
 }

@@ -111,6 +111,7 @@ container RegionalUnits
 		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
+		attribute<bool>			  ignore_check_enough_suitable_locations:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
 	}
 
 	unit<uint32> set_countries: nrofrows = 239 
