@@ -1,4 +1,4 @@
-container ModelParameters : using = "units"
+container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
 	parameter<string>                    StudyArea                                           := 'Africa'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
@@ -10,7 +10,7 @@ container ModelParameters : using = "units"
 	parameter<string>                    Claim_fileversion                                   := 'v5';
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627';
 	
-	parameter<bool>                      Use_TempTifFiles                                    := FALSE; // FALSE TRUE
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE; // FALSE TRUE
 			
 	
 	
@@ -30,4 +30,6 @@ container ModelParameters : using = "units"
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person_BuiltUpKm2>         Pop_maxmax_saturation                               := 1000000[Person_BuiltUpKm2];
+	
+	attribute<bool>                      Exceptions_SuitablityLocations_Restriction (RegionalUnits/FunctionalAreas) := RegionalUnits/FunctionalAreas/item_name == 'South_Sudan_city_4408';
 }

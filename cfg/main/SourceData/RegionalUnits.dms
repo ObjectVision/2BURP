@@ -111,6 +111,8 @@ container RegionalUnits
 		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
 		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
+		
+		container V := for_each_nedv(item_name, String(ID(.))+'[..]', void, .);
 	}
 
 	unit<uint32> set_countries: nrofrows = 239 
