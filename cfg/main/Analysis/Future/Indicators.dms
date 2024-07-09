@@ -29,12 +29,12 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		container BuiltUp_Total_Area := 
 			for_each_nedv(
 				ProjectionYears/name
-				, Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area' : 'BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area '
+				, Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]' : 'BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]'
 				, domain
-				, BuiltUpKm2
+				, float32
 			)
 		{
-			attribute<BuiltUpKm2> Initial               (domain) := =Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/Initial * domain/area' : 'BuiltUp_Total_Share/Initial * domain/area';
+			attribute<float32> Initial               (domain) := =Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/Initial * domain/area[float32]' : 'BuiltUp_Total_Share/Initial * domain/area[float32]';
 			
 		}
 			
@@ -43,10 +43,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears_Delta/name
 				, 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/'+ProjectionYears_Delta/prev_name
 				, domain
-				, BuiltUpKm2
+				, float32
 			)
 		{
-			attribute<BuiltUpKm2> Y2030 (domain) := BuiltUp_Total_Area/Y2030 - BuiltUp_Total_Area/Initial;
+			attribute<float32> Y2030 (domain) := BuiltUp_Total_Area/Y2030 - BuiltUp_Total_Area/Initial;
 		}
 			
 			
@@ -217,25 +217,25 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container Population_perDoU := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'sum(Prep/Read_Population/'+ProjectionYears/name+', Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
+			, 'sum(Prep/Read_Population/'+ProjectionYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
 			, TypologyK
-			, Person
+			, uint64
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
-		attribute<Person>  Initial   (TypologyK) := sum(Prep/Read_Population/Initial, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
+		attribute<uint64>  Initial   (TypologyK) := sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
 	}
 	
 	container Population_Histogram := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'pcount(Classify(Prep/Read_Population/'+ProjectionYears/name+', Pop_Bins/ClassBreaks))'
+			, 'pcount(Classify(Prep/Read_Population/'+ProjectionYears/name+'[float32], Pop_Bins/ClassBreaks))'
 			, Pop_Bins
 			, uint32
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (Pop_Bins) := Pop_Bins/label;
-		attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Read_Population/Initial, Pop_Bins/ClassBreaks));
+		attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Read_Population/Initial[float32], Pop_Bins/ClassBreaks));
 	}
 		
 	// container delta_BuiltUp := 

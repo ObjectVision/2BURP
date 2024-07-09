@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea                                           := 'Africa'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea                                           := 'North_America'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<float64>                   WGS_Gridsize                                        := 30d; //arc seconden: 30ss ~ 1km grid 
@@ -10,7 +10,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Claim_fileversion                                   := 'v5';
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627';
 	
-	parameter<bool>                      Use_TempTifFiles                                    := TRUE; // FALSE TRUE
+	parameter<bool>                      Use_TempTifFiles                                    := True; // FALSE TRUE
 			
 	
 	
@@ -31,6 +31,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person_BuiltUpKm2>         Pop_maxmax_saturation                               := 1000000[Person_BuiltUpKm2];
 	
-	unit<uint32> ignore_Check_for_enough_suitable_locations: nrofrows = 2 {attribute<uint32> org_rels: [712, 792];} //712: sudan, 2030; 792: Congo, 2040
+	unit<uint32> ignore_Check_for_enough_suitable_locations: nrofrows = 6 {attribute<uint32> org_rels: [452, 637, 638, 712, 792, 828];} 
+	//452: Pakistan, 2030; 637: Yemen, 2030; 638: Yemen, 2030; 712: sudan, 2030; 792: Congo, 2040; 828: untitled Europe, 2030.
 	
 }
