@@ -25,4 +25,25 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy
 	}
 	
 	container Desktops;
+	
+	container t720_2BURP_indicator_results
+	{
+		parameter<string> TempDir                  := '%LocalDataDir%/Regression/log';
+		parameter<string> results_folder_filename  := TempDir + '/results_folder.txt';
+		parameter<string> results_folder           :  Storagename =  "= results_folder_filename", StorageType = "str";
+		
+		attribute<bool>   IsUrbanCentre2100 (geography/domain)       := /Analysis/Future/Indicators/Prep/DegreesOfUrbanisation/Y2100/Typology_Domain == /Classifications/TypologyK/V/Urban_Centre;
+		
+		parameter<string> result_html := 
+			'<description>2BURP indicator results, Year:2100, Regio: '+ModelParameters/StudyArea+', <br><I>version</i>: Git Revision: XXXX</description>' + 
+			'<result><BR>' + 
+			' Population 2100 : '    + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Population/Y2100))),'.',',') +' number of persons <br>' + 
+			' BuiltUp cells 2100 : ' + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100 > 0f))),'.',',') +' number of urban cells <br>' + 
+			' BuiltUp area 2100 : '  + replace(string(sum(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100)),'.',',') +' km2</result>' +
+			' Population in urban centre 2100 : ' + replace(string(sum(IsUrbanCentre2100 ? Analysis/Future/Indicators/Prep/Population/Y2100 : 0i)),'.',',') +' number of persons</result>';
+
+		parameter<string> result := result_html
+		,	StorageType = "str"
+		,	storagename = "= results_folder + '/t720_2BURP_indicator_results.txt'";
+	}
 }
