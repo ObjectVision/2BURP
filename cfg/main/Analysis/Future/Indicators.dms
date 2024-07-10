@@ -39,15 +39,13 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		}
 			
 		container Delta_BuiltUp_Total_Area := 
-			for_each_nedv(
+			for_each_nedva(
 				ProjectionYears_Delta/name
-				, 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/'+ProjectionYears_Delta/prev_name
+				, 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/Initial'
 				, domain
 				, float32
-			)
-		{
-			attribute<float32> Y2030 (domain) := BuiltUp_Total_Area/Y2030 - BuiltUp_Total_Area/Initial;
-		}
+				, '%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Delta_BuiltUp_Total_Area_'+ProjectionYears_Delta/name+'.tif'
+			);
 			
 			
 		container BuiltUp_Residential_Area := 
@@ -162,6 +160,17 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
 		}
 		
+		container Read_DegreesOfUrbanisation :=
+			for_each_ndva(
+				ProjectionYears/name
+				, domain
+				, uint8
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+'.tif'
+			)
+		{
+			attribute<uint8> Y2020 (domain): StorageName = "= '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "True";
+		}
+			
 		container GridDistances := 
 			for_each_ne(
 				ProjectionYears/name
@@ -187,7 +196,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		attribute<float32>    Pop_growth_perc      (ClaimRegion) := (Pop_Y2100 - Pop_Initial) / Pop_Initial * 100f;
 		
 	}
-
+	
 	
 	container Added_BU_perDoU2020 := 
 		for_each_nedv(
@@ -282,6 +291,13 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Population_Onland_Density/Initial, Pop_DensityBins/ClassBreaks));
 	}
 	
+	container Assess_City_Clusters:= for_each_ne(ProjectionYears/name, 'T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/'+ProjectionYears/name+', Prep/Read_Population/'+ProjectionYears/name+'[float32])') {
+		container Y2020:= T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/Y2020, Prep/Read_Population/Initial[float32]);
+		container city_count:= for_each_nedv('n_'+ProjectionYears/name, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban))', void, uint32) {parameter<uint32> n_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban));}
+		container city_pop:= for_each_nedv('pop_'+ProjectionYears/name, 'sum(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> pop_Y2020:= sum(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
+		container city_cells:= for_each_nedv('cells_'+ProjectionYears/name, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/GroupCellSize)', void, uint32) {parameter<uint32> cells_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/GroupCellSize);}
+		container biggest_city:= for_each_nedv('max_'+ProjectionYears/name, 'max(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> max_Y2020:= max(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
+	}
 	// container BuiltUp_Residential_Area_Histogram := 
 		// for_each_nedv(
 			// ProjectionYears/name
@@ -305,4 +321,23 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<string>  Label     (BU_Total_Share_Bins) := BU_Total_Share_Bins/label;
 		// attribute<uint32>  Initial   (BU_Total_Share_Bins) := pcount(Classify(Prep/Builtup_Total_Share/Initial, BU_Total_Share_Bins/ClassBreaks));
 	// }
+	
+	Template T_Assess_City_clusters {
+		attribute<uint8> degurba_ref (domain);
+		attribute<float32> population_ref (domain);
+		
+		attribute<bool>  urban (domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Urban_Centre];
+		
+		unit<uint32> FindContiguousCells := district(uint8(urban))
+		{
+			attribute<.>       GroupDomain_rel                                   (domain) := districts;
+			attribute<bool>	   Contains_urban 			                         		  := any(urban, GroupDomain_rel);
+			attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
+			attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
+			attribute<float32>  Cluster_population								 (domain) := (float32(Contains_urban) * Sum_Population_perGroup)[GroupDomain_rel];
+			//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+		}
+			
+		
+	}
 }
