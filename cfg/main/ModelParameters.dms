@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea                                           := 'Asia'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea                                           := 'Asia'; //  Asia Africa Europe Australia_Oceania South_America North_America World Nicaragua Nigeria Netherlands Morocco Chad Tanzania  
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<float64>                   WGS_Gridsize                                        := 30d; //arc seconden: 30ss ~ 1km grid 
@@ -10,7 +10,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Claim_fileversion                                   := 'v5';
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627';
 	
-	parameter<bool>                      Use_TempTifFiles                                    := True; // FALSE TRUE
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE; // FALSE TRUE
 			
 	
 	
