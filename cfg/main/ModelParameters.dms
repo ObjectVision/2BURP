@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea                                           := 'North_America'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea                                           := 'Asia'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<float64>                   WGS_Gridsize                                        := 30d; //arc seconden: 30ss ~ 1km grid 
@@ -25,13 +25,19 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.025f;
 	parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 2f;
 	
+	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 14000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
+	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 10000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
+	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 1400[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
-	parameter<Person_BuiltUpKm2>         Pop_maxmax_saturation                               := 1000000[Person_BuiltUpKm2];
+	//parameter<Person_BuiltUpKm2>         Pop_maxmax_saturation                               := 2000000[Person_BuiltUpKm2];
+	parameter<Person>         		     Pop_maxmax_saturation                               := 1000000[Person];
 	
-	unit<uint32> ignore_Check_for_enough_suitable_locations: nrofrows = 6 {attribute<uint32> org_rels: [452, 637, 638, 712, 792, 828];} 
+	unit<uint32> ignore_Check_for_enough_suitable_locations: nrofrows = 0 {attribute<uint32> org_rels:= const(0 / 0, ., uint32);}
+	
+	//{attribute<uint32> org_rels: [712, 792, 828];} //452, 637, 638,
 	//452: Pakistan, 2030; 637: Yemen, 2030; 638: Yemen, 2030; 712: sudan, 2030; 792: Congo, 2040; 828: Faroer, 2030.
 	
 	

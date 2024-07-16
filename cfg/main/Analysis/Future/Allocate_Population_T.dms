@@ -145,7 +145,7 @@ Template Allocate_Population_T
 			unit<uint32> Relevant_ClaimRegions:= select_with_org_rel(pcount(Region_rel) > 1000) 
 			{
 				attribute<uint32>   ncells                       := pcount(Region_rel)[org_rel];
-				attribute<LatLong>  Geometry              (poly) := ClaimRegion/Geometry_LL[org_rel];
+				attribute<LatLong_Base>  Geometry              (poly) := ClaimRegion/Geometry_LL[org_rel];
 				attribute<Person>   Total_Pop_pool               := (Claims/Population - sum(Reduced_Population, Region_rel))[org_rel];
 				attribute<Person>   Total_In_NewBuiltup          := sum(Population_in_New_BuiltUp_Area, Region_rel)[org_rel];
 				attribute<float32>  Perc_Pop_pool_in_new_builtup := Total_In_NewBuiltup[float32] /  Total_Pop_pool[float32];
