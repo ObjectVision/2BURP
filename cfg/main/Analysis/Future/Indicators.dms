@@ -258,6 +258,18 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		attribute<uint64>  Initial   (TypologyK) := sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
 	}
 	
+	container Area_perDoU :=
+	 for_each_nedv(
+		ProjectionYears/name
+		, 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
+		, TypologyK
+		, km2
+	 ) 
+	 {
+		attribute<string>  Label     (TypologyK) := TypologyK/label;
+		attribute<km2>  Initial   (TypologyK) := sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
+	 }
+	 
 	// container Population_Histogram := 
 		// for_each_nedv(
 			// ProjectionYears/name
@@ -312,6 +324,22 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	{
 		attribute<string>  Label   (Pop_DensityBins) := Pop_DensityBins/label;
 		attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Population_Onland_Density/Initial, Pop_DensityBins/ClassBreaks));
+	}
+	
+	container functional_area_differences {
+		container pop:= for_each_nedv('p_'+ProjectionYears/name, 'sum(float32(Prep/Read_Population/'+ProjectionYears/name+'), RegionalUnits/FunctionalAreas/per_domain)', RegionalUnits/FunctionalAreas, float32) {
+			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Prep/Read_Population/Initial), RegionalUnits/FunctionalAreas/per_domain);
+		}
+		container degurbas:= for_each_ne(ProjectionYears/name, 'T_sum_degurbas('+quote(ProjectionYears/name)+')') {
+			container Initial:= T_sum_degurbas('Initial');
+		}
+		
+		Template T_sum_degurbas {
+			parameter<string> in_year;
+			
+			container sums:= for_each_nedv(TypologyK/name+'_'+in_year, 'sum(Prep/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Geography/domain/area : 0[km2], RegionalUnits/FunctionalAreas/per_domain)', RegionalUnits/FunctionalAreas, km2);
+		}
+		
 	}
 	
 	container Assess_City_Clusters:= for_each_ne(ProjectionYears/name, 'T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/'+ProjectionYears/name+', Prep/Read_Population/'+ProjectionYears/name+'[float32])') {
