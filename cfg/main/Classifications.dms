@@ -56,7 +56,7 @@ container Classifications : using = "units"
 	{
 		attribute<string>         label                      := string(id(.));
 		attribute<BU_DensityBins> DensityBins_rel            := Classify(id(.), BU_DensityBins/LB);
-		attribute<Float32>        Moving_up_probability_data : 
+		attribute<Float32>        Moving_up_probability_data_North_America : 
 		[ 
 			0.024179 ,0.557334 ,0.833489 ,0.9228637,0.9508959,
 			0.9647802,0.9698947,0.9700665,0.9718882,0.9717724,
@@ -70,7 +70,19 @@ container Classifications : using = "units"
 			0.024179,0.020,0.015,0.010,0.005,
 			0.000
 		];
-		attribute<Float32>        Moving_up_probability      := MakeDefined(Moving_up_probability_data, 0f);
+		attribute<float32> 		 Moving_up_probability_data_South_America : 
+		[
+			0.005040, 0.409282, 0.71353, 0.849736, 0.920867, 0.943870,
+			0.964241, 0.975228, 0.979390, 0.985859, 0.984002, 0.987752,
+			0.993914, 0.992173, 0.991525, 0.993569, 0.990914, 0.993351,
+			0.992641, 0.989288, 0.988284, 0.989769, 0.989908, 0.984259,
+			0.981132, 0.978238, 0.957810, 0.953385, 0.927374, 0.898917,
+			0.857143, 0.78933, 0.774245, 0.752071, 0.729897, 0.705128,
+			0.668414, 0.631701, 0.594988, 0.558274, 0.521561, 0.484848,
+			0.424242, 0.363636, 0.30303, 0.242424, 0.15, 0.075, 0.0375, 0.01875,
+			0.000
+		];
+		attribute<Float32>        Moving_up_probability      := ='MakeDefined(Moving_up_probability_data_'+ModelParameters/Move_up_probabilities_spec+', 0f)';
 		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	
