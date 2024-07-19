@@ -61,9 +61,12 @@ Template Allocate_Builtup_T
 		attribute<float32>   Prob                  (CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
 		attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
 		attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
-
+		attribute<Shares_Per_Continent> BuiltUp_Share_Perc_Continent (CompactedDomain):= value(BuiltUp_Share_Perc[uint32] + CompactedDomain/Continent_add_mup, Classifications/Shares_Per_Continent);
+		
+		
 		// Moving_up_probability is assumed to be a good estimation for expected increase of BuiltUp share.
-		attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc->Moving_up_probability;
+		attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc_Continent->Moving_up_probability;
+		//attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc->Moving_up_probability; // for single mup matrix
 		
 		// to density dependent counterbalance the correlation of suitability with high density, we calculate ProbBalanceFactor that offsets higher average props 
 		// it is now not endogenous as counterbalance drifting away from the idealised distribution doesn't seem required nor desired.			

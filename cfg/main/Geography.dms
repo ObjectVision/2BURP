@@ -169,6 +169,8 @@ container Geography : using = "units"
 		attribute<km2>               area                  := domain_rel->area;
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];
+		attribute<Continents>		 Continent_rel		   := Countries/Continents_rel[Country_rel];
+		attribute<uint32>			 Continent_add_mup	   := #Classifications/AllShares[uint32] * Continent_rel[uint32];
 		attribute<FunctionalAreas>   FunctionalAreas_rel   := FunctionalAreas/per_domain[domain_rel];
 		attribute<domain>            domain_rel            := org_rel;
 	}

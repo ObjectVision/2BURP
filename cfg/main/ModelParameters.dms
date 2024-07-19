@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea                                           := 'Africa'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea                                           := 'Europe'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
 	parameter<float64>                   WGS_Gridsize                                        := 30d; //arc seconden: 30ss ~ 1km grid 
@@ -11,11 +11,6 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627';
 	parameter<bool>                      Use_TempTifFiles                                    := TRUE; // FALSE TRUE
 			
-	
-	// DEFINITION OF MOVING UP PROBABILITIES FOR BUILT-UP ALLOCATION
-	parameter<string> 					 Move_up_probabilities_spec							 := 'North_America'; // North_America South_America
-	
-	
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f;
 	parameter<float32>                   BU_r_if_notLocalMax                                 := 0.06f;
