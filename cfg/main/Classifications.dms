@@ -121,7 +121,6 @@ container Classifications : using = "units"
 		attribute<float32> 		Moving_up_probability_data_Australia_Oceania:= Moving_up_probability_data_Europe; 
 		// not enough observations to create a reliable matrix in Aus_Oce, but reasonably similar to Europe moving-up probabilities
 		
-		attribute<Float32>        Moving_up_probability      := ='MakeDefined(Moving_up_probability_data_'+ModelParameters/Move_up_probabilities_spec+', 0f)';
 		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	unit<uint32> Shares_Per_Continent:= range(uint32, 0, #AllShares * #sourcedata/RegionalUnits/Continents) {
