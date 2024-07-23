@@ -370,7 +370,8 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 		attribute<uint8>           ReadTypology                                      (domain) : StorageName = "=Export_name", StorageReadOnly = "true";
 		attribute<TypologyK>       ReadTypologyK                                     (domain) := invert(TypologyK/EK)[ReadTypology];
 		
-		parameter<string> Export_name := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+'.tif';
+		// parameter<string> Export_name := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+'.tif';
+		parameter<string> Export_name := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.tif';
 	}
 
 }
