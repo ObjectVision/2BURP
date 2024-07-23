@@ -161,12 +161,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, NrPerson
-				// , '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
 			)
 		{
-			// attribute<NrPerson> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
-			attribute<NrPerson> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
 		}
 		
 		container Read_BuiltUp_Total_Share := 
@@ -213,21 +211,9 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		attribute<uint32>     Total_cells_in_CD  (ClaimRegion) := pcount(ClaimRegion/per_CompactedDomain);
 		attribute<builtupKm2> BU_area_2020_CD    (ClaimRegion) := sum(/Analysis/Future/InitialState/BuiltUp_Total_Area, ClaimRegion/per_CompactedDomain);
 		attribute<builtupKm2> BU_area_Claim_2100 (ClaimRegion) := Claim/Builtup/Y2100;
-		
-		
-		
-		
-		// attribute<builtupKm2> BU_area_Initial      (ClaimRegion) := sum(Prep/BuiltUp_Total_Area/Initial, ClaimRegion/per_domain);
-		// attribute<builtupKm2> BU_area_Y2100        (ClaimRegion) := sum(Prep/BuiltUp_Total_Area/Y2100, ClaimRegion/per_domain);
-		// attribute<float32>    BU_Area_growth_perc  (ClaimRegion) := (BU_area_Y2100 - BU_area_Initial) / BU_area_Initial * 100f;
-		
-		// attribute<Person>     Pop_Initial          (ClaimRegion) := sum(Prep/Read_Population/Initial, ClaimRegion/per_domain);
-		// attribute<Person>     Pop_Y2100            (ClaimRegion) := sum(Prep/Read_Population/Y2100, ClaimRegion/per_domain);
-		// attribute<float32>    Pop_growth_perc      (ClaimRegion) := (Pop_Y2100 - Pop_Initial) / Pop_Initial * 100f;
-		
 	}
-	parameter<string> Export_CSVs := 'Ready', ExplicitSuppliers = "Added_BU_perDoU;Population_perDoU;BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram";
 	
+	// parameter<string> Export_CSVs := 'Ready', ExplicitSuppliers = "Added_BU_perDoU;Population_perDoU;BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram";
 	
 	container Added_BU_perDoU := 
 		for_each_nedv(
@@ -260,8 +246,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			, 'Population_perDoU/'+ProjectionYears/name+'[float32] / Area_perDoU/'+ProjectionYears/name+'[float32]'
 			, TypologyK
 			, float32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>      Label     (TypologyK) := TypologyK/label;
 		attribute<float32>  Initial   (TypologyK) := Population_perDoU/Initial[float32]  / Area_perDoU/Initial[float32] ;
@@ -273,8 +258,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			, 'Population_perDoU2020/'+ProjectionYears/name+'[float32] / Area_perDoU2020/Initial[float32]'
 			, TypologyK
 			, float32
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU2020_'+ModelParameters/StudyArea+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.csv'", StorageType = "gdalwrite.vect"
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU2020_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU2020_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>      Label     (TypologyK) := TypologyK/label;
 		attribute<float32>  Initial   (TypologyK) := Population_perDoU/Initial[float32]  / Area_perDoU/Initial[float32] ;
@@ -286,8 +270,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			, 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)'
 			, TypologyK
 			, km2
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+'_PropRedR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_AbsRedR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_AddRedR-'+string(ModelParameters/Pop_Additional_Claim_Reduction_Factor)+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	 {
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
 		attribute<km2>  Initial   (TypologyK) := sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);

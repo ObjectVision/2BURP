@@ -18,12 +18,8 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   BU_max_saturation                                   := 0.50f;
 	
 	//POPULATION ALLOCATION
-	// parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.01f;
-	// parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.01f;
-	// parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.025f;
-	// parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.025f;
-	parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.05f;
-	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.05f;
+	parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.025f;
+	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.025f;
 	parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 2f;
 	
 	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 14000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
