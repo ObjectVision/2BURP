@@ -84,8 +84,8 @@ Template Allocate_Population_T
 		attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
 		attribute<Person>            Population_in_New_BuiltUp_Area_src     (CompactedDomain) := MakeDefined(New_BuiltUp_Area * Avg_Local_Population_inRes_Density, 0[Person]);
 		
-		attribute<Person>            Pop_in_New_BU_Area_Augm_Teller             (ClaimRegion) := max_elem(Claims/Population - sum(Reduced_Population, Region_rel), 0[Person]);
-		attribute<Person>            Pop_in_New_BU_Area_Augm_Noemer             (ClaimRegion) := sum(Population_in_New_BuiltUp_Area_src, Region_rel) ;
+		attribute<Person>            Pop_in_New_BU_Area_Augm_Teller             (ClaimRegion) := max_elem((Claims/Population - sum(Reduced_Population, Region_rel)) * ModelParameters/Pop_ShareOfRestclaim_Prefers_newBU, 0[Person]), Descr = "Rest claim per regio that could be allocated to new BU area"; 
+		attribute<Person>            Pop_in_New_BU_Area_Augm_Noemer             (ClaimRegion) := sum(Population_in_New_BuiltUp_Area_src, Region_rel), Descr = "Total possible new population in new BU per region";
 		attribute<float32>           Pop_New_BU_PopulationDensity_Factor        (ClaimRegion) := min_elem(1f, Pop_in_New_BU_Area_Augm_Teller / Pop_in_New_BU_Area_Augm_Noemer);
 		
 		attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := Population_in_New_BuiltUp_Area_src * Pop_New_BU_PopulationDensity_Factor[Region_rel];
