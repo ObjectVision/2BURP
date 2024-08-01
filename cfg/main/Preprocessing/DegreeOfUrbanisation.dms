@@ -196,6 +196,11 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 				parameter<bool>        Proceed:= True;
 				
 				container smoothing_loop := loop(Loop_MedianFilter, uint16(20));
+				
+				unit<uint32> diagnostics: nrofrows = 20 {
+					attribute<bool> proceeded:= ='union_data(.,'+asitemlist('smoothing_loop/iter'+string(id(.))+'/NextValue/Proceed')+')';
+					parameter<uint32> max:= max(uint32(proceeded) * id(.)+1);
+				}
 			}
 			
 			Template Loop_MedianFilter 

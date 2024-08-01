@@ -66,6 +66,18 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	#include <GridDists.dms>
 	#include <DegreeOfUrbanisation.dms>
 	
+	// Future change in population per degree of urbanisation class.
+	container Population_perDoU := 
+		for_each_nedv(
+			GHS_years/name
+			, 'sum(SourceData/population/PerYear/'+GHS_years/name+'[float32], DegreesOfUrbanisation/'+GHS_years/name+'/ReadTypologyK)'
+			, TypologyK
+			, float32
+		), StorageName = "='%LocalDataProjDir%/Historical/Population_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+	{
+		attribute<string>  Label     (TypologyK) := TypologyK/label;
+	}
+	
 	container Population_Neighbourhoods
 	{
 		container Population_8dir_Y1990            := Create_8dir_T(SourceData/Population/PerYear/Y1990);
