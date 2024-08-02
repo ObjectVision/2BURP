@@ -22,7 +22,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.025f;
 	parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 2f;
 	
-	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 0.75f;
+	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1.0f;
 	
 	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 14000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 

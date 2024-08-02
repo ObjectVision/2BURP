@@ -5,9 +5,9 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			GHS_years/name
 			, domain
 			, float64
-			, '%ToBURPDataDir%/Population/GHS_POP_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
+			, '%ToBURPDataDir%/Population/POP_'+string(GHS_years/year)+'_100_WPP2024_EPSG4326_osAdapt_'+string(ModelParameters/WGS_Gridsize)+'ss.tif'
 			,'gdal.grid'
-		), URL = "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop";
+		); //, URL = "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop"; (invalid URL as theses are custom results for 2BURP, aligned with the WPP24 population projections)
 		
 	//adhoc
 	unit<uint32> histogram_population := unique(int32(Import_PerYear/Y2020))
