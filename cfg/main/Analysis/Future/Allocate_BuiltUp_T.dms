@@ -84,12 +84,12 @@ Template Allocate_Builtup_T
 	container NewState
 	{
 		attribute<BuiltUpKm2> Delta_Claim                  (ClaimRegion) := Claims/BuiltUp - sum(CurrState/BuiltUp_Total_Area, Region_rel);
-		attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area, 0[BuiltUpKm2]);
+		attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Total_Share - CurrState/BuiltUp_Total_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
 		attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
 		attribute<float32>    InitialProb              (CompactedDomain) := Suitability/FinalProb * Weight;
 		attribute<BuiltUpKm2> new_BuiltUp_area         (CompactedDomain) := scalesum(InitialProb, Region_rel, Delta_Claim);
-		attribute<float32>    BuiltUp_Total_Share      (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area; 
-		attribute<BuiltUpKm2> BuiltUp_Total_Area       (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area; // / 1[km2] * 1[BuiltUpKm2];
+		attribute<float32>    BuiltUp_Total_Share      (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area * 1[km2] / 1[BuiltUpKm2]; 
+		attribute<BuiltUpKm2> BuiltUp_Total_Area       (CompactedDomain) := BuiltUp_Total_Share * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2];
 		attribute<BuiltUpKm2> BuiltUp_Residential_Area (CompactedDomain) := max_elem(BuiltUp_Total_Area - InitialState/BuiltUp_NonResidential_Area, 0[BuiltUpKm2]);
 
 		attribute<float32>    Claim_Realisation            (ClaimRegion) := sum(BuiltUp_Total_Area, Region_rel) / Claims/BuiltUp; //Check if around 1.0

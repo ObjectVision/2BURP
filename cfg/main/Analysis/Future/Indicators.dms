@@ -72,6 +72,32 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		{
 			attribute<BuiltUpKm2> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Residential_Area);
 		}
+		
+		container BuiltUp_Residential_Area_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] ? BuiltUp_Residential_Area/'+ProjectionYears/name+' : 0[builtupKm2]'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] ? BuiltUp_Residential_Area/'+ProjectionYears/name+' : 0[builtupKm2]'
+				, domain
+				, BuiltUpKm2
+			)
+		{
+			attribute<BuiltUpKm2> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] ? BuiltUp_Residential_Area/Initial : 0[builtupKm2]'
+																: 'Population/Initial[Person] == 0[Person] ? BuiltUp_Residential_Area/Initial : 0[builtupKm2]';
+		}
+		
+		container BuiltUp_Residential_Area_Without_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'BuiltUp_Residential_Area/'+ProjectionYears/name+' - BuiltUp_Residential_Area_Abandoned/'+ProjectionYears/name
+				, domain
+				, BuiltUpKm2
+			)
+		{
+			attribute<BuiltUpKm2> Initial      (domain) := BuiltUp_Residential_Area/Initial - BuiltUp_Residential_Area_Abandoned/Initial;
+		}
 			
 		container Population_InRes_Density := 
 			for_each_nedv(
