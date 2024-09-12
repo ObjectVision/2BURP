@@ -62,10 +62,13 @@ Template Allocate_Builtup_T
 		attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
 		attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
 		attribute<Shares_Per_Continent> BuiltUp_Share_Perc_Continent (CompactedDomain):= value(BuiltUp_Share_Perc[uint32] + CompactedDomain/Continent_add_mup, Classifications/Shares_Per_Continent);
-		
+		// possibly need to parametrize the power by which available_space is transformed
+		attribute<float32>	 Available_Space_Weight (CompactedDomain):= (BuiltUp_Share_Perc[float32] / (Claims/Available_Space[CompactedDomain/FunctionalAreas_rel])^2f) - BuiltUp_Share_Perc[float32];
 		
 		// Moving_up_probability is assumed to be a good estimation for expected increase of BuiltUp share.
 		attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc_Continent->Moving_up_probability;
+		//attribute<float32>   Dynamic_Expected_increase (CompactedDomain):= max_elem(1f, Available_Space_Weight) * Expected_increase;
+		attribute<float32>   Dynamic_Expected_increase (CompactedDomain):= (1f + Available_Space_Weight) * Expected_increase;
 		//attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc->Moving_up_probability; // for single mup matrix
 		
 		// to density dependent counterbalance the correlation of suitability with high density, we calculate ProbBalanceFactor that offsets higher average props 
@@ -73,12 +76,14 @@ Template Allocate_Builtup_T
 		
 		attribute<Float32>   AvgProb                     (AllShares) := mean(Prob, BuiltUp_Share_Perc);
 		attribute<float32>   ProbBalanceFactor     (CompactedDomain) := 1f / (AvgProb[BuiltUp_Share_Perc]); //median(0f, 1f - 2f*BuiltUp_Share, 1f);
-		attribute<float32>   FinalProb             (CompactedDomain) := Prob * Expected_increase * ProbBalanceFactor;
+		//attribute<float32>   FinalProb             (CompactedDomain) := Prob * Expected_increase * ProbBalanceFactor;
+		attribute<float32>   FinalProb             (CompactedDomain) := Prob * Dynamic_Expected_increase * ProbBalanceFactor;
 	}
 	
 	container Claims
 	{
 		attribute<BuiltUpKm2>        Builtup                            (ClaimRegion) := Claim;
+		attribute<float32>			 Available_Space					(ClaimRegion) := 1f - (BuiltUp / ClaimRegion/cd_area);
 	}
 	
 	container NewState

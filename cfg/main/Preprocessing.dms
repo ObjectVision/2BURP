@@ -78,6 +78,7 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
 	}
 	
+
 	container Population_Neighbourhoods
 	{
 		container Population_8dir_Y1990            := Create_8dir_T(SourceData/Population/PerYear/Y1990);
@@ -118,4 +119,5 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			attribute<float64> Ln_mean_8dir        (domain) := log(Mean_8dir + 0.1d);  //Pendula: 0 waarden --> 0.1  -->-2.30259 
 		}
 	}
+	
 }

@@ -4,6 +4,7 @@ container Classifications : using = "units"
 	{
 		attribute<uint16> year: [ 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]; 
 		attribute<string> name := 'Y'+string(year); 
+		attribute<string> prev_name := name[sub_or_null(id(.), 1b)];
 	}
 	
 	unit<uint8> Continents : nrofrows = 6
@@ -26,6 +27,13 @@ container Classifications : using = "units"
 		
 		attribute<string> prev_name      := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ] : ModelParameters/StartYear;
 		attribute<string> prevStateName  := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
+	}
+	
+	unit<uint32> AllYears:= union_unit(GHS_years, ProjectionYears) {
+		attribute<string> Name:= union_data(.,GHS_years/name, ProjectionYears/name);
+		attribute<string> Prev_name:= union_data(., GHS_years/prev_name, ProjectionYears/Prev_name);
+		attribute<Year>   Yr:= union_data(., GHS_years/year[Year], ProjectionYears/Yr);
+		attribute<bool>   modelled:= union_data(., const(false,GHS_years,bool), const(true,ProjectionYears,bool));
 	}
 	
 	unit<uint8> ProjectionYears_Delta := select_with_attr_by_cond(ProjectionYears, id(ProjectionYears) != first(id(ProjectionYears)));
