@@ -72,6 +72,183 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		{
 			attribute<BuiltUpKm2> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Residential_Area);
 		}
+		
+		container BuiltUp_Residential_Area_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] ? BuiltUp_Residential_Area/'+ProjectionYears/name+' : 0[builtupKm2]'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] ? BuiltUp_Residential_Area/'+ProjectionYears/name+' : 0[builtupKm2]'
+				, domain
+				, BuiltUpKm2
+			)
+		{
+			attribute<BuiltUpKm2> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] ? BuiltUp_Residential_Area/Initial : 0[builtupKm2]'
+																: 'Population/Initial[Person] == 0[Person] ? BuiltUp_Residential_Area/Initial : 0[builtupKm2]';
+		}
+		
+		container BuiltUp_Residential_Cells := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'BuiltUp_Residential_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := BuiltUp_Residential_Area/Initial > 0[builtupKm2];
+		}
+		
+		container BuiltUp_Residential_Cells_Threshold := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'BuiltUp_Residential_Area/'+ProjectionYears/name+' > BU_abandoned_threshold'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := BuiltUp_Residential_Area/Initial > BU_abandoned_threshold;
+		}
+		
+		container BuiltUp_Total_Cells := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'BuiltUp_Total_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := BuiltUp_Total_Area/Initial > 0[builtupKm2];
+		}
+		
+		container BuiltUp_Total_Balanced_Cells := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'Builtup_Total_Area_Balanced/'+ProjectionYears/name+' > 0f'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := Builtup_Total_Area_Balanced/Initial > 0f;
+		}
+		
+		container BuiltUp_Residential_Cells_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Area/Initial > 0[builtupKm2]'
+																: 'Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Area/Initial > 0[builtupKm2]';
+		}
+		container BuiltUp_Total_Balanced_Cells_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Total_Area_Balanced/'+ProjectionYears/name+' > 0f'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Total_Area_Balanced/'+ProjectionYears/name+' > 0f'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] && BuiltUp_Total_Area_Balanced/Initial > 0f'
+																: 'Population/Initial[Person] == 0[Person] && BuiltUp_Total_Area_Balanced/Initial > 0f';
+		}
+		
+		parameter<BuiltUpKm2> BU_abandoned_threshold   := 0.0005[BuiltUpKm2]; //==100m2
+		parameter<float32> BU_abandoned_threshold_perc := 0.01f;
+		
+		container BuiltUp_Residential_Cells_Abandoned_BUthreshold := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Area/'+ProjectionYears/name+' > BU_abandoned_threshold'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Area/'+ProjectionYears/name+' > BU_abandoned_threshold'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Area/Initial > BU_abandoned_threshold'
+																: 'Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Area/Initial > BU_abandoned_threshold';
+		}
+		
+		container BuiltUp_Residential_Cells_Abandoned_BUthreshold_perc := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Share/'+ProjectionYears/name+' > BU_abandoned_threshold_perc'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Residential_Share/'+ProjectionYears/name+' > BU_abandoned_threshold_perc'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Share/Initial > BU_abandoned_threshold_perc'
+																: 'Population/Initial[Person] == 0[Person] && BuiltUp_Residential_Share/Initial > BU_abandoned_threshold_perc';
+		}
+		
+		container BuiltUp_Total_Cells_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'Read_Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Total_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+					: 'Population/'+ProjectionYears/name+'[Person] == 0[Person] && BuiltUp_Total_Area/'+ProjectionYears/name+' > 0[builtupKm2]'
+				, domain
+				, bool
+			)
+		{
+			attribute<bool> Initial      (domain) := =Use_TempTifFiles 
+																? 'Read_Population/Initial[Person] == 0[Person] && BuiltUp_Total_Area/Initial > 0[builtupKm2]'
+																: 'Population/Initial[Person] == 0[Person] && BuiltUp_Total_Area/Initial > 0[builtupKm2]';
+		}
+		
+		container InitialPop_LivingInAbandoned_Res := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'BuiltUp_Residential_Cells_Abandoned/'+ProjectionYears/name+' ? Read_Population/Initial[NrPerson] : 0[NrPerson]'
+					: 'BuiltUp_Residential_Cells_Abandoned/'+ProjectionYears/name+' ? Population/Initial[NrPerson] : 0[NrPerson]'
+				, domain
+				, NrPerson
+			);
+		container InitialPop_LivingInAbandoned_Res_Threshold := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'BuiltUp_Residential_Cells_Abandoned_BUthreshold/'+ProjectionYears/name+' ? Read_Population/Initial[NrPerson] : 0[NrPerson]'
+					: 'BuiltUp_Residential_Cells_Abandoned_BUthreshold/'+ProjectionYears/name+' ? Population/Initial[NrPerson] : 0[NrPerson]'
+				, domain
+				, NrPerson
+			);
+		
+		container InitialPop_LivingInAbandoned_Total := 
+			for_each_nedv(
+				ProjectionYears/name
+				, Use_TempTifFiles 
+					? 'BuiltUp_Total_Cells_Abandoned/'+ProjectionYears/name+' ? Read_Population/Initial[NrPerson] : 0[NrPerson]'
+					: 'BuiltUp_Total_Cells_Abandoned/'+ProjectionYears/name+' ? Population/Initial[NrPerson] : 0[NrPerson]'
+				, domain
+				, NrPerson
+			);
+		
+		
+		container BuiltUp_Residential_Area_Without_Abandoned := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'BuiltUp_Residential_Area/'+ProjectionYears/name+' - BuiltUp_Residential_Area_Abandoned/'+ProjectionYears/name
+				, domain
+				, BuiltUpKm2
+			)
+		{
+			attribute<BuiltUpKm2> Initial      (domain) := BuiltUp_Residential_Area/Initial - BuiltUp_Residential_Area_Abandoned/Initial;
+		}
 			
 		container Population_InRes_Density := 
 			for_each_nedv(
@@ -113,11 +290,35 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			}
 		}
 		
-		container BU_RoundedState := 
+		container Get_BU_RoundedState := 
 			for_each_ne(
 				ProjectionYears/name
 				, 'BU_RoundedState_T('+quote(ProjectionYears/name)+',Read_BuiltUp_Total_Share/'+ProjectionYears/name+')'
-			);
+			)
+		{
+			container Initial := BU_RoundedState_T('Initial',Read_BuiltUp_Total_Share/Initial);
+		}
+			
+		container Builtup_Total_Share_Balanced := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Get_BU_RoundedState/'+ProjectionYears/name+'/BuiltUp_Total_Share_Balanced)'
+				, domain
+				, float32
+			)
+		{
+			attribute<float32> Initial (domain):= recollect_by_cond(domain/IsCompactedDomain, Get_BU_RoundedState/Initial/BuiltUp_Total_Share_Balanced);
+		}
+		container Builtup_Total_Area_Balanced := 
+			for_each_nedv(
+				ProjectionYears/name
+				, 'Builtup_Total_Share_Balanced/'+ProjectionYears/name+' * domain/area[float32]'
+				, domain
+				, float32
+			)
+		{
+			attribute<float32> Initial (domain):= Builtup_Total_Share_Balanced/Initial * domain/area[float32];
+		}
 		
 		Template BU_RoundedState_T
 		{
@@ -143,6 +344,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			attribute<float32>    roundoff_breakpoint         (DensityBin_x_region) := 1.0[BuiltUpKm2 / km2] - nth_element_weighted(Rank, Rest_claim, CompactedDomain/area * (0.01[BuiltUpKm2] / 1[km2]), DensityBin_x_region/per_CompactedDomain);
 			attribute<bool >      above_breakpoint                (CompactedDomain) := Rest_Share > roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
 			attribute<AllShares>  Perc_BuiltUp_Total_Balanced     (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[AllShares];
+			attribute<float32>    BuiltUp_Total_Share_Balanced    (CompactedDomain) := Perc_BuiltUp_Total_Balanced[float32] / 100f;
 		}
 		
 		parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "='PreProcessing/DegreesOfUrbanisation/'+ModelParameters/StartYear+'/StoreTypology;'+AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
