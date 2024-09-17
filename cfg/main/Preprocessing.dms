@@ -78,6 +78,16 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
 	}
 	
+	container Area_perDoU :=
+		for_each_nedv(
+			GHS_years/name
+			, 'sum(Geography/domain/area, DegreesOfUrbanisation/'+GHS_years/name+'/ReadTypologyK)'
+			, TypologyK
+			, km2
+		), StorageName = "='%LocalDataProjDir%/Historical/Area_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+	 {
+		attribute<string>  Label     (TypologyK) := TypologyK/label;
+	 }
 
 	container Population_Neighbourhoods
 	{
