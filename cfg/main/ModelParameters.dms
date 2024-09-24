@@ -12,7 +12,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float64>                   WGS_Gridsize                                        := 30d; //arc seconden: 30ss ~ 1km grid 
 	parameter<float64>                   WGS_Subgridsize                                     := 3d;  //arc seconden: 3ss ~ 100m grid 
 	parameter<string>                    Calibration_filedate                                := '20240701';
-	parameter<string>                    Claim_fileversion                                   := 'v7';
+	parameter<string>                    Claim_fileversion                                   := 'v8';
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627';
 	parameter<bool>                      Use_TempTifFiles                                    := TRUE; // FALSE TRUE
 			
