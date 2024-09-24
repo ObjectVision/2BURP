@@ -587,15 +587,30 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	
 	container functional_area_differences 
 	{
+		attribute<string> name 	(RegionalUnits/FunctionalAreas):= RegionalUnits/FunctionalAreas/item_name, StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_outputs.csv'", StorageType = "gdalwrite.vect";
+		attribute<uint32> id  	(RegionalUnits/FunctionalAreas):= RegionalUnits/FunctionalAreas/org_rel[uint32], StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_outputs.csv'", StorageType = "gdalwrite.vect";
+		
+		parameter<bool> store:= True, ExplicitSuppliers = "= 'name;id;pop;bu;degurbas/Initial/store;'+aslist('degurbas/'+ProjectionYears/name+'/store',';')";
+		
 		container pop := 
 			for_each_nedv(
 				'p_'+ProjectionYears/name
 				, 'sum(float32(Prep/Read_Population/'+ProjectionYears/name+'), RegionalUnits/FunctionalAreas/per_domain)'
 				, RegionalUnits/FunctionalAreas
 				, float32
-			) 
+			), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_pop_outputs.csv'", StorageType = "gdalwrite.vect"
 		{
 			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Prep/Read_Population/Initial), RegionalUnits/FunctionalAreas/per_domain);
+		}
+		container bu :=
+			for_each_nedv(
+				'bu_'+ProjectionYears/name
+				, 'sum(Prep/Read_BuiltUp_Total_Share/'+ProjectionYears/name+'[float32] * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain)'
+				, RegionalUnits/FunctionalAreas
+				, float32
+			), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_bu_outputs.csv'", StorageType = "gdalwrite.vect"
+		{
+			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Prep/Read_BuiltUp_Total_Share/Initial) * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain);
 		}
 		container degurbas := 
 			for_each_ne(
@@ -610,13 +625,22 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		{
 			parameter<string> in_year;
 			///
-			container sums := 
+			parameter<bool> store:= True, ExplicitSuppliers = "area_sums; pop_sums;";
+			
+			container area_sums := 
 				for_each_nedv(
-					TypologyK/name+'_'+in_year
+					'area_'+TypologyK/name+'_'+in_year
 					, 'sum(Prep/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Geography/domain/area : 0[km2], RegionalUnits/FunctionalAreas/per_domain)'
 					, RegionalUnits/FunctionalAreas
 					, km2
-				);
+				), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_degurba_area_outputs_'+in_year+'.csv'", StorageType = "gdalwrite.vect";
+			container pop_sums := 
+				for_each_nedv(
+					'pop_'+TypologyK/name+'_'+in_year
+					, 'sum(Prep/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Prep/Read_Population/'+in_year+'[uint64] : 0[uint64], RegionalUnits/FunctionalAreas/per_domain)'
+					, RegionalUnits/FunctionalAreas
+					, uint64
+				), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_degurba_pop_outputs_'+in_year+'.csv'", StorageType = "gdalwrite.vect";
 		}
 		
 	}
