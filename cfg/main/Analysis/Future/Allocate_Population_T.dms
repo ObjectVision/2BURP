@@ -78,10 +78,11 @@ Template Allocate_Population_T
 		attribute<NrPerson>          Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
 		attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(BuiltUp_Residential_Area[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
 		attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density     (CompactedDomain) := Avg_Local_Population_inRes_Density_Num[Person] / Avg_Local_Population_inRes_Density_Den; 
-		attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
+		// attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 		attribute<BuiltUpKm2>        BuiltUp_Residential_Area               (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
 		
-		attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
+		// attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
+		attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Residential_Area - CurrState/BuiltUp_Residential_Area, 0f); 
 		attribute<Person>            Population_in_New_BuiltUp_Area_src     (CompactedDomain) := MakeDefined(New_BuiltUp_Area * Avg_Local_Population_inRes_Density, 0[Person]);
 		
 		attribute<Person>            Pop_in_New_BU_Area_Augm_Teller             (ClaimRegion) := max_elem((Claims/Population - sum(Reduced_Population, Region_rel)) * ModelParameters/Pop_ShareOfRestclaim_Prefers_newBU, 0[Person]), Descr = "Rest claim per regio that could be allocated to new BU area"; 

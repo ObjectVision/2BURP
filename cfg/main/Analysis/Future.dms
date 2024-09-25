@@ -10,6 +10,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			attribute<BuiltUpKm2>        BuiltUp_Residential_Area_domain         (domain) := ='SourceData/BuiltUp/Residential/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
 			attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area_domain      (domain) := ='SourceData/BuiltUp/NonResidential/'+ModelParameters/StartYear+'[km2] / 1[km2] * 1[BuiltUpKm2]';
 			attribute<float32>           BuiltUp_Total_Share_domain              (domain) := BuiltUp_Total_Area_domain / domain/area * 1[km2] / 1[BuiltUpKm2];
+			attribute<float32>           BuiltUp_Residential_Share_domain        (domain) := BuiltUp_Residential_Area_domain / domain/area * 1[km2] / 1[BuiltUpKm2];
 			attribute<Person>            Population_domain                       (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 			attribute<Person_BuiltUpKm2> Population_inRes_Density_domain         (domain) := Population_domain / BuiltUp_Residential_Area_domain; // DO NOT USE!
 			//attribute<Person_BuiltUpKm2> Population_inRes_Density_Trunc_domain   (domain) := min_elem_alldefined(Population_inRes_Density_domain, maxmax_saturation);
@@ -27,6 +28,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		
 		/// BUILT UP
 		attribute<float32>           Builtup_Total_Share            (CompactedDomain) := impl/BuiltUp_Total_Share_domain[CompactedDomain/org_rel];
+		attribute<float32>           Builtup_Residential_Share      (CompactedDomain) := impl/BuiltUp_Residential_Share_domain[CompactedDomain/org_rel];
 		attribute<BuiltUpKm2>        BuiltUp_Total_Area             (CompactedDomain) := impl/BuiltUp_Total_Area_domain[CompactedDomain/org_rel]; 
 		attribute<BuiltUpKm2>        BuiltUp_NonResidential_Area    (CompactedDomain) := impl/BuiltUp_NonResidential_Area_domain[CompactedDomain/org_rel]; 
 		attribute<BuiltUpKm2>        BuiltUp_Residential_Area       (CompactedDomain) := impl/BuiltUp_Residential_Area_domain[CompactedDomain/org_rel]; 
