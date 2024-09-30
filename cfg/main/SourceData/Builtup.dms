@@ -66,11 +66,35 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 	{
 		attribute<float32>           bu_2000_corr    := float32(Builtup/Total/Y2000)[domain_rel] / lat_factor;
 		attribute<float32>           bu_2020_corr    := float32(Builtup/Total/Y2020)[domain_rel] / lat_factor;
- 		attribute<percentages>       bu_1990_perc    := classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		attribute<percentages>       bu_2000_perc    := classify(float32(Builtup/Total/Y2000)[domain_rel], percentages/cutoff);
-		attribute<percentages>       bu_2020_perc    := classify(float32(Builtup/Total/Y2020)[domain_rel], percentages/cutoff);
+		//attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
+		//attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
+ 		attribute<percentages>       bu_1990_perc    := value((Builtup/Total/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
+		attribute<percentages>       bu_2000_perc    := value((Builtup/Total/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       bu_2020_perc    := value((Builtup/Total/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
 		attribute<percentage_matrix> perc_matrix_rel := rlookup(point(bu_1990_perc, bu_2020_perc, upoint), percentage_matrix/unirel);
 		attribute<int32>             d_perc          := int32(bu_2020_perc)+1i - int32(bu_2000_perc)+1i;
+	}
+	unit<uint32> samples: nrofrows = 100 {
+		attribute<string> Label:= 's_'+string(id(.));
+		parameter<uint32> sample_size:= 2500;
+	}
+	
+	container take_distribution_samples:= for_each_ne(samples/Label, 'T_distribution_sampling('+string(id(samples))+')') {
+	
+		unit<uint32> collect_samples:= percentages {
+			attribute<string> Label:= percentages/label;
+			
+			container distr_1990:= for_each_nedv(samples/Label, 'pcount(take_distribution_samples/'+samples/Label+'/sample/bu_1990_perc)', collect_samples, uint32);
+			container distr_2020:= for_each_nedv(samples/Label, 'pcount(take_distribution_samples/'+samples/Label+'/sample/bu_2020_perc)', collect_samples, uint32);
+		}
+	}
+	
+	Template T_distribution_sampling {
+		parameter<uint32> seed;
+		
+		attribute<CompactDomain> rnd (CompactDomain):= rnd_permutation(seed, CompactDomain);
+		
+		unit<uint32> sample:= select_with_attr_by_cond(CompactDomain, rnd < samples/sample_size);
 	}
 	// end ad hoc
 	
