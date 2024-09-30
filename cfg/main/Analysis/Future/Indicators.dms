@@ -645,15 +645,31 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		
 	}
 	
-	container Assess_City_Clusters:= for_each_ne(ProjectionYears/name, 'T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/'+ProjectionYears/name+', Prep/Read_Population/'+ProjectionYears/name+'[float32])') {
-		container Y2020:= T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/Y2020, Prep/Read_Population/Initial[float32]);
-		container city_count:= for_each_nedv('n_'+ProjectionYears/name, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban))', void, uint32) {parameter<uint32> n_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban));}
-		container city_pop:= for_each_nedv('pop_'+ProjectionYears/name, 'sum(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> pop_Y2020:= sum(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
-		container city_cells:= for_each_nedv('cells_'+ProjectionYears/name, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/GroupCellSize)', void, uint32) {parameter<uint32> cells_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/GroupCellSize);}
-		container biggest_city:= for_each_nedv('max_'+ProjectionYears/name, 'max(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> max_Y2020:= max(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
+	container Assess_City_Clusters := 
+		for_each_ne(
+			ProjectionYears/name
+			, 'T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/'+ProjectionYears/name+', Prep/Read_Population/'+ProjectionYears/name+'[float32])'
+		) 
+	{
+		container Y2020         := T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/Y2020, Prep/Read_Population/Initial[float32]);
+		container city_count    := 
+			for_each_nedv(
+				'n_'+ProjectionYears/name
+				, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban))'
+				, void
+				, uint32
+			) 
+		{
+			parameter<uint32> n_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban));
+		}
+		container city_pop      := for_each_nedv('pop_'+ProjectionYears/name, 'sum(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> pop_Y2020:= sum(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
+		container city_cells    := for_each_nedv('cells_'+ProjectionYears/name, 'sum(uint32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/GroupCellSize)', void, uint32) {parameter<uint32> cells_Y2020:= sum(uint32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/GroupCellSize);}
+		container biggest_city  := for_each_nedv('max_'+ProjectionYears/name, 'max(float32('+ProjectionYears/name+'/FindContiguousCells/Contains_urban) * '+ProjectionYears/name+'/FindContiguousCells/Sum_Population_perGroup)', void, float32) {parameter<float32> max_Y2020:= max(float32(Y2020/FindContiguousCells/Contains_urban) * Y2020/FindContiguousCells/Sum_Population_perGroup);}
 	}
 	
-	container long_time_window_analyses {
+	container long_time_window_analyses 
+	{
+		unit<uint32> years_unit := AllYears;
 		
 		
 		unit<uint32> years_unit:= AllYears;
@@ -668,21 +684,20 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			years_unit/modelled ? 'invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+years_unit/name+']' : 'Preprocessing/DegreesOfUrbanisation/'+years_unit/name+'/ReadTypologyK',
 			domain, TypologyK);
 
-		
 		container per_degurba:= for_each_ne(TypologyK/name, 'analyse_degurbas('+string(id(TypologyK))+'[TypologyK])');
 		
-		Template analyse_degurbas {
+		Template analyse_degurbas 
+		{
 			parameter<TypologyK> in_degurba;
-			
+			///
 			container typologies:= for_each_nedv(years_unit/name, 'degurbas/'+years_unit/name+' = '+string(in_degurba)+'[TypologyK]', domain, bool);
 			container moving_set:= for_each_nedv(years_unit/name, 'typologies/'+years_unit/name + (isdefined(years_unit/prev_name) ? ' && !typologies/'+years_unit/prev_name : '') + ' ? '+string(id(years_unit))+'[years_unit] : (0 / 0)[years_unit]', domain, years_unit);
 			attribute<years_unit> first_year (domain):= ='min_elem('+asitemlist('moving_set/'+years_unit/name)+')'; 
-			attribute<float32> moving_area (years_unit):= sum(domain/area[float32] * domain/IsCompactedDomain[float32], first_year);
+			attribute<float32>    moving_area (years_unit):= sum(domain/area[float32] * domain/IsCompactedDomain[float32], first_year);
 			container moving_built_up:= for_each_nedv(years_unit/name, 'sum((builtup/'+years_unit/name+'[km2])[float32] * domain/IsCompactedDomain[float32], first_year)', years_unit, float32);
 			container moving_pop:= for_each_nedv(years_unit/name, 'sum(population/'+years_unit/name+', first_year)', years_unit, float32);
 			
 		}
-	
 	}
 	
 	
@@ -728,6 +743,20 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		}
 			
 		
+	}
+	
+	container Adhoc
+	{
+		attribute<TypologyK>       DoU_y2020            (domain) := Prep/DegreesOfUrbanisation/Initial/Typology_Domain;
+		attribute<TypologyK>       DoU_y2030            (domain) := Prep/DegreesOfUrbanisation/Y2030/Typology_Domain;
+		
+		attribute<bool>            IsNewUrbanCentre     (domain) := DoU_y2030 == TypologyK/V/Urban_Centre && DoU_y2020 != TypologyK/V/Urban_Centre;
+		
+		attribute<float32>         BU_Total_Share_y2020 (domain) := Prep/Builtup_Total_Share/Initial;
+		attribute<float32>         BU_Total_Share_y2030 (domain) := Prep/Builtup_Total_Share/Y2030;
+		
+		attribute<NrPerson>        Population_y2020     (domain) := Prep/Population/Initial;
+		attribute<NrPerson>        Population_y2030     (domain) := Prep/Population/Y2030;
 	}
 	
 }

@@ -146,10 +146,10 @@ container Physical : using = "geography;classifications"
 			attribute<bool>    IsWater            (domain_sub) := IsInlandWater || IsOcean;
 			
 			attribute<uint32>  Fraction_InlandWater0  (domain) := sum(IsInlandWater[uint32], domain_sub/domain_rel);
-			attribute<uint32>  Fraction_InlandWater   (domain) := ((Fraction_InlandWater0[float32] / 36f) * 100f)[uint32];
+			attribute<uint32>  Fraction_InlandWater   (domain) := ((Fraction_InlandWater0[float32] / ((ModelParameters/WGS_Gridsize / ModelParameters/WGS_Subgridsize)^2d)[float32]) * 100f)[uint32];
 			
 			attribute<uint32>  Fraction_Water0        (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
-			attribute<uint32>  Fraction_Water         (domain) := ((Fraction_Water0[float32] / 36f) * 100f)[uint32];
+			attribute<uint32>  Fraction_Water         (domain) := ((Fraction_Water0[float32] / ((ModelParameters/WGS_Gridsize / ModelParameters/WGS_Subgridsize)^2d)[float32]) * 100f)[uint32];
 			
 			attribute<bool>	   HasLand				  (domain) := Fraction_Water0 < pcount(domain_sub/domain_rel)[uint32], storagename = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/HasLand.tif'";
 			attribute<bool>    HasLand_Read			  (domain) : StorageName = "= PropValue(HasLand, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True";
