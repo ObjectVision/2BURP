@@ -83,6 +83,7 @@ container Geography : using = "units"
 		unit<dpoint> LatLong_Chad                     := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Chad];}
 		unit<dpoint> LatLong_Tanzania                 := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Tanzania]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Tanzania]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Tanzania];}
 		unit<dpoint> LatLong_Germany                  := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Germany]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Germany]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Germany];}
+		unit<dpoint> LatLong_Poland                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Poland]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Poland]))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Poland];}
 		unit<dpoint> LatLong_RwandaTanzKen            := range(LatLong_Base, point_yx(-7.41, 26.11),   point_yx(-0.11, 42.65)) 
 		{
 			unit<uint32> comb : nrofrows = 5
@@ -94,7 +95,7 @@ container Geography : using = "units"
 															, SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Burundi]
 															, SourceData/RegionalUnits/Countries/Geometry_LL[SourceData/RegionalUnits/Countries/V/Tanzania]);
 			}
-			parameter<LatLong_base> geometry (polygon) := union_polygon(comb/geometry[latlong_ip])[latlong_base];
+			parameter<LatLong_base> geometry (polygon) := bp_union_polygon(comb/geometry[latlong_ip])[latlong_base];
 		}
 	}
 
