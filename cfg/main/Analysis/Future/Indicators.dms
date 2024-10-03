@@ -670,10 +670,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container long_time_window_analyses 
 	{
 		unit<uint32> years_unit := AllYears;
-		
-		
-		unit<uint32> years_unit:= AllYears;
-		
+				
 		container builtup:= for_each_nedv(years_unit/name, 
 			years_unit/modelled ? '(Prep/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]',
 			domain, km2);
