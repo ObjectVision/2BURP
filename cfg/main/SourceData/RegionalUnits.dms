@@ -16,7 +16,7 @@ container RegionalUnits
 	unit<uint8> store_Continents := Classifications/Continents
 	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
 	{
-		attribute<LatLong_base>  geometry       (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong_base];
+		attribute<LatLong_base>  geometry       (poly) := bp_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
 	
@@ -75,13 +75,13 @@ container RegionalUnits
 	
 	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
 	{
-		attribute<LatLong> geometry (poly) := partitioned_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
+		attribute<LatLong> geometry (poly) := bp_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
 	}
 	
 	unit<uint8> World : nrofrows = 1
 	{
 		attribute<string>     Label           := const('World',.);
-		attribute<LatLong>    geometry (poly) := partitioned_union_polygon(Continents/geometry[LatLong_ip], continents/World_rel)[LatLong];
+		attribute<LatLong>    geometry (poly) := bp_union_polygon(Continents/geometry[LatLong_ip], continents/World_rel)[LatLong];
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
@@ -120,7 +120,7 @@ container RegionalUnits
 		attribute<string>   ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
 		attribute<string>   Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
 		attribute<string>   Continent       := inMatrix/data[(id(.)*3+2)[inMatrix]];
-		attribute<LatLong_base>  Geometry (poly) := partitioned_union_polygon(FunctionalAreas_all/geometry_LL[LatLong_ip], FunctionalAreas_all/Country_rel)[LatLong_base];
+		attribute<LatLong_base>  Geometry (poly) := bp_union_polygon(FunctionalAreas_all/geometry_LL[LatLong_ip], FunctionalAreas_all/Country_rel)[LatLong_base];
 		
 		unit<uint32> inMatrix:= range(uint32, 0, #.*3) 
 		{

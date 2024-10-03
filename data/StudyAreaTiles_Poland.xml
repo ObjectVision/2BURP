@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<DocType name="GeoDmsMetaInfo">
+<DefaultInfo>
+	<FullName>/geography/Impl/StudyAreaTile_Create/UB_sub_y
+	</FullName>
+	<GeoDmsVersion>GeoDms 15.7.1 [Aug 26 2024 13:10:12]
+	</GeoDmsVersion>
+	<SessionStartTime>2024-10-03 09:34:07
+	</SessionStartTime>
+	<CurrentTime>2024-10-03 09:34:56
+	</CurrentTime>
+	<StatusFlags>0x7e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
+	</StatusFlags>
+</DefaultInfo>
+<Software>
+	<GeoDmsVersion>15.7.1
+	</GeoDmsVersion>
+</Software>
+<Config>
+	<FullName>/geography/Impl/StudyAreaTile_Create/UB_sub_y
+	</FullName>
+	<Expr>pointrow(UB_sub)
+	</Expr>
+	<RunFile>c:/projdir/jip/2burp/cfg/main.dms
+	</RunFile>
+</Config>
+<Environment>
+	<Processor>AMD64 Family 25 Model 33 Stepping 0, AuthenticAMD
+	</Processor>
+	<User>Jip Claassens
+	</User>
+	<ComputerName>OVSRV06
+	</ComputerName>
+</Environment>
+<Git>
+	<RevisionInfo>heads/main<BR/>
+		On branch main<BR/>
+		Your branch is up to date with &apos;origin/main&apos;.<BR/>
+		<BR/>
+		Changes not staged for commit:<BR/>
+		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
+		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
+			modified:   cfg/main/Geography.dms<BR/>
+			modified:   cfg/main/ModelParameters.dms<BR/>
+		<BR/>
+		Untracked files:<BR/>
+		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
+			Desktop.ini<BR/>
+		<BR/>
+		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
+		89e0c51f7fc30223eea38a488dd27bdea1b68339<BR/>
+		
+	</RevisionInfo>
+</Git>
+<Parameters>
+	<StudyArea>Poland
+	</StudyArea>
+</Parameters>
+</DocType>
