@@ -671,20 +671,18 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	{
 		unit<uint32> years_unit := AllYears;
 		
-		container builtup := 
-			for_each_nedv(
-				years_unit/name
-				, years_unit/modelled ? '(Prep/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]'
-				, domain
-				, km2
-			);
-		container degurbas := 
-			for_each_nedv(
-				years_unit/name
-				, years_unit/modelled ? 'invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+years_unit/name+']' : 'Preprocessing/DegreesOfUrbanisation/'+years_unit/name+'/ReadTypologyK'
-				, domain
-				, TypologyK
-			);
+		
+		unit<uint32> years_unit:= AllYears;
+		
+		container builtup:= for_each_nedv(years_unit/name, 
+			years_unit/modelled ? '(Prep/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]',
+			domain, km2);
+		container population:= for_each_nedv(years_unit/name,
+			years_unit/modelled ? 'Prep/Read_Population/'+years_unit/name+'[float32]' : '/sourcedata/Population/PerYear/'+years_unit/name+'[float32]',
+			domain, float32);
+		container degurbas:= for_each_nedv(years_unit/name, 
+			years_unit/modelled ? 'invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+years_unit/name+']' : 'Preprocessing/DegreesOfUrbanisation/'+years_unit/name+'/ReadTypologyK',
+			domain, TypologyK);
 
 		container per_degurba:= for_each_ne(TypologyK/name, 'analyse_degurbas('+string(id(TypologyK))+'[TypologyK])');
 		
@@ -697,6 +695,8 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			attribute<years_unit> first_year (domain):= ='min_elem('+asitemlist('moving_set/'+years_unit/name)+')'; 
 			attribute<float32>    moving_area (years_unit):= sum(domain/area[float32] * domain/IsCompactedDomain[float32], first_year);
 			container moving_built_up:= for_each_nedv(years_unit/name, 'sum((builtup/'+years_unit/name+'[km2])[float32] * domain/IsCompactedDomain[float32], first_year)', years_unit, float32);
+			container moving_pop:= for_each_nedv(years_unit/name, 'sum(population/'+years_unit/name+', first_year)', years_unit, float32);
+			
 		}
 	}
 	
