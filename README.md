@@ -2,6 +2,7 @@
 To Build Urban and Rural Projections
 
 For more information on how to install GeoDMS and load a configuration, look here: https://github.com/ObjectVision/GeoDMS_Academy/wiki/Module-0%2C-Install-GeoDMS-GUI-and-setup-a-configuration
+
 This project's configuration can be downloaded from here: https://github.com/ObjectVision/2BURP/archive/refs/heads/main.zip
 
 This model can be used to disaggregate Built-up area and population projections. It is set up so that projections per functional area (created in the NetworkModel_World repo: https://github.com/ObjectVision/NetworkModel_World) are read in from a CSV, which can be found in /SourceData/Claims/Read_CSV.
