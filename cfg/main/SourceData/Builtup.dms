@@ -59,7 +59,8 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 	{
 		attribute<upoint>   unirel := point(first_rel, second_rel, upoint);
 		attribute<uint32>   n      := pcount(compactdomain/perc_matrix_rel);
-		attribute<float32>  rel    := n[float32] / float32(percentages/n1990)[first_rel];
+		attribute<float32>  suit   := sum(Analysis/Future/Allocate_Builtup/Y2030/Suitability/Prob, compactdomain/perc_matrix_rel);
+		attribute<float32>  rel    := makedefined(n[float32] / float32(percentages/n1990)[first_rel], 0f);
 	}
 	
 	unit<uint32> CompactDomain := CompactedDomain 

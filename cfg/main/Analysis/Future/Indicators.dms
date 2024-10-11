@@ -552,11 +552,13 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container BuiltUp_Percentages_Histogram := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'pcount(Prep/BU_RoundedState/'+ProjectionYears/name+'/Perc_BuiltUp_Total_Balanced)'
+			, 'pcount((100f * Prep/Read_BuiltUp_Total_Share/'+ProjectionYears/name+')[AllShares])'
+			//, 'pcount(Prep/BU_RoundedState/'+ProjectionYears/name+'/Perc_BuiltUp_Total_Balanced)'
 			, AllShares
 			, uint32
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/BuiltUp_Percentages_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
+		//(100f * BuiltUp_Total_Share)[AllShares];
 		attribute<string> name  (AllShares) := AllShares/label;
 		attribute<uint32> Y2020 (AllShares) := pcount(InitialState/Perc_BuiltUp_Total);
 	}
@@ -674,6 +676,9 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		container builtup:= for_each_nedv(years_unit/name, 
 			years_unit/modelled ? '(Prep/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]',
 			domain, km2);
+		container builtup_perc_distribution:= for_each_nedv(years_unit/name,
+			'pcount((100f * builtup/'+years_unit/name+')[allshares])',
+			allshares, uint32);
 		container population:= for_each_nedv(years_unit/name,
 			years_unit/modelled ? 'Prep/Read_Population/'+years_unit/name+'[float32]' : '/sourcedata/Population/PerYear/'+years_unit/name+'[float32]',
 			domain, float32);

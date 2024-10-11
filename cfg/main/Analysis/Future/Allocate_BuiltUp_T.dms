@@ -117,7 +117,7 @@ Template Allocate_Builtup_T
 		attribute<BuiltUpKm2> Weight                   (CompactedDomain) := max_elem((LocalMaxima/MaxAllowed_Builtup_Residential_Share - CurrState/BuiltUp_Residential_Share) * CompactedDomain/area / 1[km2] * 1[BuiltUpKm2], 0[BuiltUpKm2]);
 		
 		attribute<bool>       FeasibilityCheck             (ClaimRegion) := sum(Weight, region_rel) >= Delta_Claim;
-		attribute<float32>    InitialProb              (CompactedDomain) := Suitability/FinalProb * Weight;
+		attribute<float32>    InitialProb              (CompactedDomain) := Suitability/FinalProb;// * Weight;
 		attribute<BuiltUpKm2> new_BuiltUp_area         (CompactedDomain) := scalesum(InitialProb, Region_rel, Delta_Claim);
 		
 		// attribute<float32>    BuiltUp_Total_Share      (CompactedDomain) := CurrState/BuiltUp_Total_Share + new_BuiltUp_area  / CompactedDomain/area * 1[km2] / 1[BuiltUpKm2]; 

@@ -5,7 +5,7 @@ container ModelParameters : using = "units;sourcedata"
 	// parameter<string>  file_studyarea:	expr = "readvalue(studyarea_file, string, 0)";
 	
 	//GENERAL
-	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', 'North_America');  //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', 'Asia');  //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	// parameter<string>                    StudyArea                                           := file_studyarea; //'Europe'; //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
