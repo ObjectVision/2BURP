@@ -16,7 +16,7 @@ container RegionalUnits
 	unit<uint8> store_Continents := Classifications/Continents
 	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
 	{
-		attribute<LatLong_base>  geometry       (poly) := bp_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong_base];
+		attribute<LatLong_base>  geometry       (poly) := partitioned_union_polygon(Countries/geometry_LL[LatLong_ip], Countries/continents_rel)[LatLong_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
 	

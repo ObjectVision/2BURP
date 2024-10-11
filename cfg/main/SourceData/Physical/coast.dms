@@ -17,14 +17,14 @@ container Coast
 		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain.tif'";
 		attribute<bool>              Read_per_grid         (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 
-		unit<uint32> split_polygon := bp_split_polygon(Geometry[LatLong_ip])
+		unit<uint32> split_polygon := split_polygon(Geometry[LatLong_ip])
 		{
 			attribute<LatLong> Split (poly) := geometry[LatLOng];
 			attribute<LatLong> Outer (poly) := bg_outer_multi_polygon(Split);
 			
 			attribute<LatLong_ip> Lakes (poly) := Outer[LatLong_ip] - Split[LatLong_ip];
 			
-			unit<uint32> lakes_clean := bp_split_union_polygon(Lakes, id(.));
+			unit<uint32> lakes_clean := split_partitioned_union_polygon(Lakes, id(.));
 		}
 		
 		unit<uint32> union_outer_lakes := union_unit(split_polygon, split_polygon/lakes_clean)
