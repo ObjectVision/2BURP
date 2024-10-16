@@ -8,10 +8,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
 				, domain
 				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'
 			)
 		{
-			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'";
 		}
 	
 		container Population := 
@@ -20,10 +20,11 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 				, domain
 				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'
 			)
 		{
-			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'";
+			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
+			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'";
 		}
 			
 		container BuiltUp_Total_Area := 
@@ -358,10 +359,21 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'
 			)
 		{
-			attribute<NrPerson> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y1975 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y1975.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y1980 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y1980.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y1985 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y1985.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y1990 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y1990.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y1995 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y1995.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y2000 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y2000.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y2005 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y2005.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y2010 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y2010.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y2015 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y2015.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Y2020 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_Y2020.tif'", StorageReadOnly = "true";
+			attribute<NrPerson> Initial (domain) := Y2020;
+			// attribute<NrPerson> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'", StorageReadOnly = "true";
 		}
 		
 		container Read_BuiltUp_Total_Share := 
@@ -369,10 +381,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'
 			)
 		{
-			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "true";
+			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'", StorageReadOnly = "true";
 		}
 		
 		container Read_DegreesOfUrbanisation :=
@@ -380,10 +392,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, uint8
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'
 			)
 		{
-			attribute<uint8> Y2020 (domain): StorageName = "= '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ModelParameters/StartYear+'.tif'", StorageReadOnly = "True";
+			attribute<uint8> Y2020 (domain): StorageName = "= '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ModelParameters/StartYear+'_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'.tif'", StorageReadOnly = "True";
 		}
 			
 		container GridDistances := 
@@ -428,6 +440,22 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		for_each_nedv(
 			ProjectionYears/name
 			, Use_TempTifFiles ? 'sum(Prep/Read_Population/'+ProjectionYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' : 'sum(Prep/Population/'+ProjectionYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+			, TypologyK
+			, uint64
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+	{
+		attribute<string>  Label     (TypologyK) := TypologyK/label;
+		attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
+	}
+	
+	container Population_perDoU_AllYears := 
+		for_each_nedv(
+			AllYears/name
+			, Use_TempTifFiles && AllYears/modelled 
+				? 'sum(Prep/Read_Population/'+AllYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+AllYears/name+'/ReadTypologyK)' 
+				: NOT(Use_TempTifFiles) && AllYears/modelled
+					? 'sum(Prep/Population/'+AllYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+AllYears/name+'/Typology_Domain)'
+					: 'sum(Prep/Read_Population/'+AllYears/name+'[uint64], Preprocessing/DegreesOfUrbanisation/'+AllYears/name+'/ReadTypologyK)'
 			, TypologyK
 			, uint64
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
@@ -514,6 +542,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU2020_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
+		attribute<uint64>  Y2010     (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Y2010[uint64], Prep/DegreesOfUrbanisation/Y2010/ReadTypologyK)' : 'sum(Prep/Population/Y2010[uint64], Prep/DegreesOfUrbanisation/Y2010/ReadTypologyK)';
 		attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)';
 	}
 
