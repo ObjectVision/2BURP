@@ -3,6 +3,7 @@ Template Allocate_Population_T
 	parameter<string>  ThisYear;
 	parameter<string>  PrevYear;
 	container          CurrState;
+	container          OldState_BuiltUp;
 	container          NewState_BuiltUp;
 	attribute<Person>  Claim (ClaimRegion);
 	///
@@ -67,6 +68,26 @@ Template Allocate_Population_T
 		//Reduction step 1: All cells will lose 10% of their initial population. This proportional reduction has the biggest impact in dense cells.
 		attribute<Person>            Proportional_Reducted_Population       (CompactedDomain) := CurrState/Population[Person] * (1f - Initial_Population_Proportional_Reduction_Rate[ClaimRegion/per_CompactedDomain]); 
 		
+		
+		
+		//adhoc
+		attribute<Person>            Amount_of_Proportional_Reducted_Population      (CompactedDomain) := Proportional_Reducted_Population - CurrState/Population[Person]; 
+		attribute<Person>            Amount_of_Absolute_Reducted_Population          (CompactedDomain) := Reduced_Population - Proportional_Reducted_Population; 
+		attribute<Person>            Amount_of_Population_Added_To_New_BU            (CompactedDomain) := Population_in_New_BuiltUp_Area; 
+		attribute<Person>            Amount_of_Population_Added_To_Existing_BU_Cell  (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area > 0f ? Population_Rounded_Balanced[Person] - Population_beforeAllocation : 0[Person]; 
+		attribute<Person>            Amount_of_Population_Added_To_New_BU_Cell_Alloc (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area == 0f ? Population_Rounded_Balanced[Person] - Population_beforeAllocation : 0[Person]; 
+		
+		unit<uint32> PerRegion := ClaimRegion
+		{
+			attribute<Person>            Amount_of_Proportional_Reducted_Population      := sum(../Amount_of_Proportional_Reducted_Population, Region_rel);
+			attribute<Person>            Amount_of_Absolute_Reducted_Population          := sum(../Amount_of_Absolute_Reducted_Population, Region_rel);
+			attribute<Person>            Amount_of_Population_Added_To_New_BU            := sum(../Amount_of_Population_Added_To_New_BU, Region_rel);
+			attribute<Person>            Amount_of_Population_Added_To_Existing_BU_Cell  := sum(../Amount_of_Population_Added_To_Existing_BU_Cell, Region_rel);
+			attribute<Person>            Amount_of_Population_Added_To_New_BU_Cell_Alloc := sum(../Amount_of_Population_Added_To_New_BU_Cell_Alloc, Region_rel);
+		}
+		
+		
+		
 		//Reduction step 2: All inhabited cells will lose up to a fixed (per functional area) number of persons of 10% of the initial average population of the inhabited grid cells. This absolute reduction will have the biggest impact on low-density cells.
 		attribute<NrPerson>          Population_for_Region                      (ClaimRegion) := sum(CurrState/Population, Region_rel);
 		attribute<uint32>            NumberOfCellsWithPopulationPerRegion       (ClaimRegion) := sum_uint32(CurrState/Population > 0[nrPerson], Region_rel);
@@ -95,7 +116,11 @@ Template Allocate_Population_T
 		attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := Population_in_New_BuiltUp_Area_src * Pop_New_BU_PopulationDensity_Factor[Region_rel];
 
 		//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
-		attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel) <= Claims/Population + (Claims/Population * 0.01f);
+		attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel) <= Claims/Population + (Claims/Population * 0.01f)
+		{
+			attribute<Person> Reduced_Population_perRegion             (ClaimRegion) := sum(Reduced_Population, Region_rel);
+			attribute<Person> Population_in_New_BuiltUp_Area_perRegion (ClaimRegion) := sum(Population_in_New_BuiltUp_Area, Region_rel);
+		}
 		attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area, IntegrityCheck = "Population_beforeAllocation_Check";
 		attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
 		attribute<float32>           ProportionalityFactor                  (CompactedDomain) := max_elem(Suitability/population * Room_for_Population, 0f);
@@ -129,17 +154,50 @@ Template Allocate_Population_T
 			attribute<Person>        Proportional_Population  (CompactedDomain) := ScaleFactor[Region_rel] * ProportionalityFactor;
 			attribute<Person>        Saturated_Population     (CompactedDomain) := min_elem(Proportional_Population, Room_for_Population);
 			attribute<Person>        Total_Population         (CompactedDomain) := Saturated_Population + Population_beforeAllocation;
-			attribute<NrPerson>      Total_Population_rounded (CompactedDomain) := int32(Total_Population)[NrPerson]; //we round here, to omit fractional people which can then reallocated in the next iter.
-			attribute<NrPerson>      Realisation                  (ClaimRegion) := sum(Total_Population_rounded, Region_rel);
-			attribute<float32>       RescaleFactor                (ClaimRegion) := Claims/Population / Realisation[Person]; // We need to correct the scale factor to accomodate left over claims.
+			// attribute<NrPerson>      Total_Population_rounded (CompactedDomain) := int32(Total_Population)[NrPerson]; //we round here, to omit fractional people which can then reallocated in the next iter.
+			// attribute<NrPerson>      Realisation                  (ClaimRegion) := sum(Total_Population_rounded, Region_rel);
+			attribute<Person>        Realisation                  (ClaimRegion) := sum(Total_Population, Region_rel);
+			attribute<float32>       RescaleFactor                (ClaimRegion) := Claims/Population / Realisation; // We need to correct the scale factor to accomodate left over claims.
 			attribute<float32>       ScaleFactor_new              (ClaimRegion) := IsNull(ScaleFactor) || IsNull(RescaleFactor) ? 0f : ScaleFactor * RescaleFactor;
 		}
 		
 		//Results  
-		attribute<NrPerson>          Population                   (CompactedDomain) := Population_Allocation/Last/Total_Population_rounded;
-		attribute<Person_BuiltUpKm2> Population_inRes_Density     (CompactedDomain) := Population[Person] / BuiltUp_Residential_Area;
-		attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := (Population[Person] / CompactedDomain/area);
-		attribute<NrPerson>          Population_sum                   (ClaimRegion) := sum(Population, Region_rel);
+		// attribute<NrPerson>          Population_LastIterResult    (CompactedDomain) := Population_Allocation/Last/Total_Population_rounded;
+		attribute<Person>     Population_LastIterResult         (CompactedDomain) := Population_Allocation/Last/Total_Population;
+		
+		//Rounding
+		attribute<NrPerson>   Population_Int                    (CompactedDomain) := Population_LastIterResult[NrPerson];
+		attribute<float32>    Rest_Share                        (CompactedDomain) := Population_LastIterResult - float32(Population_Int);
+		attribute<Person>     sum_rounded_pop                       (ClaimRegion) := sum(float32(Population_Int), Region_rel);
+		attribute<uint32>     Rest_claim                            (ClaimRegion) := uint32(Claims/Population - sum_rounded_pop);
+		attribute<float32>    Rank                              (CompactedDomain) := - Rest_Share;
+		attribute<float32>    roundoff_breakpoint                   (ClaimRegion) := - nth_element(
+																							Rank
+																							, Rest_claim
+																							, Region_rel
+																						);
+		attribute<bool >      above_breakpoint                  (CompactedDomain) := Rest_Share > roundoff_breakpoint[Region_rel];
+		attribute<NrPerson>   Population_Rounded_Balanced       (CompactedDomain) := Population_Int + above_breakpoint[NrPerson];
+		attribute<NrPerson>   Population                        (CompactedDomain) := Population_Rounded_Balanced
+		{
+			attribute<NrPerson> Population_perRegion                  (ClaimRegion) := sum(Population, Region_rel);
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		attribute<Person_BuiltUpKm2> Population_inRes_Density     (CompactedDomain) := Population_Rounded_Balanced[Person] / BuiltUp_Residential_Area;
+		attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := (Population_Rounded_Balanced[Person] / CompactedDomain/area);
+		attribute<NrPerson>          Population_sum                   (ClaimRegion) := sum(Population_Rounded_Balanced, Region_rel);
 		attribute<float32>           Final_ClaimRealisation           (ClaimRegion) := Population_sum[Person] / Claims/Population;
 		
 		container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T(recollect_by_cond(domain/IsCompactedDomain, Population_TotalLand_Density)[float64]);

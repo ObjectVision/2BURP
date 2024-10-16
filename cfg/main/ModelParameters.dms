@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Asia';  //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
+	parameter<string>                    StudyArea_manually                                  := 'China';  //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually);  //  Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World
 	parameter<string>                    StartYear                                           := 'Y2020';
 	parameter<float64>                   MW_Gridsize                                         := 1000d; //1km grid = 1,000,000 m2  // 100m grid = 10,000 m2
@@ -23,7 +23,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.025f;
 	parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 2f;
 	
-	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1.0f;
+	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1f;
 	
 	//parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 14000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 

@@ -84,6 +84,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					+quote(ProjectionYears/name)+
 					','+quote(ProjectionYears/prev_name)+
 					','+ProjectionYears/prevStateName+
+					', Allocate_Builtup/'+ProjectionYears/name+'/CurrState'
 					', Allocate_Builtup/'+ProjectionYears/name+'/NewState'
 					', Claim/Population/'+ProjectionYears/name+
 				')'
