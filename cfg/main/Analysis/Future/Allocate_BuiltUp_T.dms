@@ -6,10 +6,10 @@ Template Allocate_Builtup_T
 	container             CurrPopState;
 	attribute<BuiltUpKm2> Claim (ClaimRegion);
 	//
-	parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
-	parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
-	parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
-	parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
+	// parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
+	// parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
+	// parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
+	// parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
 	
 	container LocalMaxima
 	{

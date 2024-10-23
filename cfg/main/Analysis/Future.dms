@@ -17,7 +17,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			//attribute<Person>            Population_Trunc_domain                 (domain) := Population_inRes_Density_Trunc_domain * BuiltUp_Residential_Area_domain; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
 			
 			attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
-			attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+			attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic population amounts
 			attribute<Person_BuiltUpKm2> Population_inRes_Density_org   (CompactedDomain) := Population_org / BuiltUp_Residential_Area; // DO NOT USE!
 			attribute<Person_BuiltUpKm2> Population_inTot_Density_org   (CompactedDomain) := Population_org / BuiltUp_Total_Area; // DO NOT USE!
 			//attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := min_elem_alldefined(Population_inRes_Density_org, maxmax_saturation);
