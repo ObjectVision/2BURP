@@ -6,10 +6,10 @@ Template Allocate_Builtup_T
 	container             CurrPopState;
 	attribute<BuiltUpKm2> Claim (ClaimRegion);
 	//
-	// parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
-	// parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
-	// parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
-	// parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
+	parameter<float32>    r_if_LocalMax    := ModelParameters/BU_r_if_LocalMax;
+	parameter<float32>    r_if_notLocalMax := ModelParameters/BU_r_if_notLocalMax;
+	parameter<float32>    r_if_notBU       := ModelParameters/BU_r_if_notBU;
+	parameter<float32>    max_saturation   := ModelParameters/BU_max_saturation;
 	
 	container LocalMaxima
 	{
@@ -32,7 +32,7 @@ Template Allocate_Builtup_T
 				, median(max_saturation, CurrState/BuiltUp_Total_Share, CurrState/BuiltUp_Total_Share + (LocalMaxima/IsLocalMaximum ? r_if_LocalMax: r_if_notLocalMax))
 			);
 			
-		attribute<float32> MaxAllowed_Builtup_Total_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f[km2 / BuiltUpKm2])*CurrState/BuiltUp_Total_Share) + CurrState/BuiltUp_Total_Share;
+		attribute<float32> MaxAllowed_Builtup_Total_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f)*CurrState/BuiltUp_Total_Share) + CurrState/BuiltUp_Total_Share;
 		attribute<float32> MaxAllowed_Builtup_Total_Share                   (CompactedDomain) := min_elem(MaxAllowed_Builtup_Total_Share_extraRestrictie, MaxAllowed_Builtup_Total_Share0);
 
 		attribute<float32> MaxAllowed_Builtup_Residential_Share0   (CompactedDomain) := 
@@ -41,7 +41,7 @@ Template Allocate_Builtup_T
 				, median(max_saturation, CurrState/BuiltUp_Residential_Share, CurrState/BuiltUp_Residential_Share + (LocalMaxima/IsLocalMaximum ? r_if_LocalMax: r_if_notLocalMax))
 			);
 			
-		attribute<float32> MaxAllowed_Builtup_Residential_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f[km2 / BuiltUpKm2])*CurrState/BuiltUp_Residential_Share) + CurrState/BuiltUp_Residential_Share;
+		attribute<float32> MaxAllowed_Builtup_Residential_Share_extraRestrictie   (CompactedDomain) := (26.605f / 100f ) * exp((-0.047f*100f)*CurrState/BuiltUp_Residential_Share) + CurrState/BuiltUp_Residential_Share;
 		attribute<float32> MaxAllowed_Builtup_Residential_Share                   (CompactedDomain) := min_elem(MaxAllowed_Builtup_Residential_Share_extraRestrictie, MaxAllowed_Builtup_Residential_Share0);
 		
 		//adhoc
@@ -83,7 +83,7 @@ Template Allocate_Builtup_T
 		attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
 		attribute<Shares_Per_Continent> BuiltUp_Share_Perc_Continent (CompactedDomain):= value(BuiltUp_Share_Perc[uint32] + CompactedDomain/Continent_add_mup, Classifications/Shares_Per_Continent);
 		// possibly need to parametrize the power by which available_space is transformed
-		attribute<float32>	 Available_Space_Weight (CompactedDomain):= (BuiltUp_Share_Perc[float32] / (Claims/Available_Space[CompactedDomain/FunctionalAreas_rel])^2f) - BuiltUp_Share_Perc[float32];
+		attribute<float32>	 Available_Space_Weight (CompactedDomain):= (BuiltUp_Share_Perc[float32] / (Claims/Available_Space[CompactedDomain/FunctionalAreas_rel] / 1[BuiltUpKm2])^2f) - BuiltUp_Share_Perc[float32];
 		
 		// Moving_up_probability is assumed to be a good estimation for expected increase of BuiltUp share.
 		attribute<float32>   Expected_increase     (CompactedDomain) := BuiltUp_Share_Perc_Continent->Moving_up_probability;
@@ -103,7 +103,7 @@ Template Allocate_Builtup_T
 	container Claims
 	{
 		attribute<BuiltUpKm2>        Builtup_Residential_Area           (ClaimRegion) := Claim;
-		attribute<float32>           Available_Space                    (ClaimRegion) := 1f - (Builtup_Residential_Area / ClaimRegion/cd_area);
+		attribute<float32>           Available_Space                    (ClaimRegion) := 1f - (Builtup_Residential_Area / ClaimRegion/cd_area * 1[km2]);
 	}
 	
 	container NewState
