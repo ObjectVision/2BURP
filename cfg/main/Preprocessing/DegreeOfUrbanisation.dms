@@ -379,7 +379,7 @@ Container Calculate_DegreeOfUrbanisation : using = "Geography;SourceData;"
 		
 		parameter<string> Export_name        := =uint32(right(ThisYear, 4)) <= uint32(right(ModelParameters/StartYear, 4)) ? 'Export_name_past' : 'Export_name_future';
 		parameter<string> Export_name_past   := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+'.tif';
-		parameter<string> Export_name_future := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+'_'+ModelParameters/Claim_fileversion+'_PopIPRR-'+string(ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+'.tif';
+		parameter<string> Export_name_future := '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ThisYear+FileSuffix+'.tif';
 	}
 
 }
