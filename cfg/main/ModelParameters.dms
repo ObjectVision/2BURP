@@ -10,15 +10,15 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used";
-	parameter<bool>                      Use_TempTifFiles                                    := FALSE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
 	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";
-	parameter<string>                    Additional_FileSuffix                               := '';          , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above."  //'_UnlimPopIncrease'
+	parameter<string>                    Additional_FileSuffix                               := ''           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
 	parameter<float32>                   BU_r_if_notLocalMax                                 := 0.06f        , Descr = "Set the maximum growth rate of the built-up share if the cell is not a local maximum.";
 	parameter<float32>                   BU_r_if_notBU                                       := 0.02f        , Descr = "Set the maximum growth rate of the built-up share if the cell did not have any built-up share before.";
-	parameter<float32>                   BU_max_saturation                                   := 0.50f        , Descr = "Maximum built-up share to which a cell may grow.";;
+	parameter<float32>                   BU_max_saturation                                   := 0.50f        , Descr = "Maximum built-up share to which a cell may grow.";
 	
 	//POPULATION ALLOCATION
 	parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.025f       , Descr = "All cells will lose a percentage of their initial population to the size of this value. In order to accommodate population decline and to facilitate densification. This proportional reduction has the biggest impact in dense cells.";

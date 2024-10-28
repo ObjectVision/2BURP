@@ -189,33 +189,59 @@ Template Allocate_Population_T
 		//adhoc 
 		container Analyse_tbv_newBU_densities 
 		{
-			attribute<Person>            PrevState_Pop                                   (CompactedDomain) := OldState_Pop/Population[Person];
-			attribute<Person>            NewState_Pop                                    (CompactedDomain) := Population_Rounded_Balanced[Person];
+			// attribute<Person>            PrevState_Pop                                   (CompactedDomain) := OldState_Pop/Population[Person];
+			// attribute<Person>            NewState_Pop                                    (CompactedDomain) := Population_Rounded_Balanced[Person];
 			attribute<BuiltUpKm2>        PrevState_BUres                                 (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area; 
 			attribute<BuiltUpKm2>        NewState_BUres                                  (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
-			attribute<Km2>               Area                                            (CompactedDomain) := CompactedDomain/area;
-			attribute<Suit>              Suitability_NonNegative                         (CompactedDomain) := Suitability/Population;
+			// attribute<Km2>               Area                                            (CompactedDomain) := CompactedDomain/area;
+			// attribute<Suit>              Suitability_NonNegative                         (CompactedDomain) := Suitability/Population;
+			
+			attribute<BuiltUpKm2>        BUres_Y1990                                     (CompactedDomain) := (SourceData/BuiltUp/Residential/Y1990[km2] / 1[km2] * 1[BuiltUpKm2])[CompactedDomain/org_rel];
+			attribute<BuiltUpKm2>        BUres_Y2020                                     (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area; 
+			attribute<BuiltUpKm2>        BUres_Y2030                                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
+			
+			attribute<Person>            Pop_Y1990_org                                   (CompactedDomain) := OldState_Pop/Y1990_pop/Population_org[Person];
+			attribute<Person>            Pop_Y1990                                       (CompactedDomain) := OldState_Pop/Y1990_pop/Population[Person];
+			attribute<Person>            Pop_Y2020                                       (CompactedDomain) := OldState_Pop/Population[Person];
+			attribute<Person>            Pop_Y2030                                       (CompactedDomain) := Population_Rounded_Balanced[Person];
 			
 			attribute<BuiltUPKm2>        BU_Added                                        (CompactedDomain) := NewState_BUres - PrevState_BUres;
 			
-			attribute<Person>            Pop_Reducted_Proportional                       (CompactedDomain) := Proportional_Reducted_Population - PrevState_Pop; 
-			attribute<Person>            Pop_Reducted_Absolute                           (CompactedDomain) := Reduced_Population - Proportional_Reducted_Population; 
-			attribute<Person>            Pop_Added_To_New_BU                             (CompactedDomain) := Population_in_New_BuiltUp_Area; 
-			attribute<Person>            Pop_Added_To_Existing_BU_Cell_InAlloc           (CompactedDomain) := PrevState_BUres > 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
-			attribute<Person>            Pop_Added_To_CompletelyNew_BU_Cell_InAlloc      (CompactedDomain) := PrevState_BUres == 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
+			// attribute<Person>            Pop_Reducted_Proportional                       (CompactedDomain) := Proportional_Reducted_Population - PrevState_Pop; 
+			// attribute<Person>            Pop_Reducted_Absolute                           (CompactedDomain) := Reduced_Population - Proportional_Reducted_Population; 
+			// attribute<Person>            Pop_Added_To_New_BU                             (CompactedDomain) := Population_in_New_BuiltUp_Area; 
+			// attribute<Person>            Pop_Added_To_Existing_BU_Cell_InAlloc           (CompactedDomain) := PrevState_BUres > 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
+			// attribute<Person>            Pop_Added_To_CompletelyNew_BU_Cell_InAlloc      (CompactedDomain) := PrevState_BUres == 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
 			
 			
-			attribute<float32>           Fraction_of_cell_that_is_NewBU                  (CompactedDomain) := NewState_BuiltUp/Builtup_Residential_Share - OldState_BuiltUp/Builtup_Residential_Share;
-			attribute<bool>              NewBU_fraction_0_00001pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0f     && Fraction_of_cell_that_is_NewBU <= 0.0001f;
-			attribute<bool>              NewBU_fraction_00001_1pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0001f  && Fraction_of_cell_that_is_NewBU <= 0.01f;
-			attribute<bool>              NewBU_fraction_1_5pr                            (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.01f  && Fraction_of_cell_that_is_NewBU <= 0.05f;
-			attribute<bool>              NewBU_fraction_5_25pr                           (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.05f  && Fraction_of_cell_that_is_NewBU <= 0.25f; 
+			// attribute<float32>           Fraction_of_cell_that_is_NewBU                  (CompactedDomain) := NewState_BuiltUp/Builtup_Residential_Share - OldState_BuiltUp/Builtup_Residential_Share;
+			// attribute<bool>              NewBU_fraction_0_00001pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0f     && Fraction_of_cell_that_is_NewBU <= 0.0001f;
+			// attribute<bool>              NewBU_fraction_00001_1pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0001f  && Fraction_of_cell_that_is_NewBU <= 0.01f;
+			// attribute<bool>              NewBU_fraction_1_5pr                            (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.01f  && Fraction_of_cell_that_is_NewBU <= 0.05f;
+			// attribute<bool>              NewBU_fraction_5_25pr                           (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.05f  && Fraction_of_cell_that_is_NewBU <= 0.25f; 
 			
-			attribute<Person_km2>        Density_on_land_PrevState                       (CompactedDomain) := PrevState_Pop > 0f ? PrevState_Pop / Area : null_f;
-			attribute<Person_km2>        Density_on_land_NewState                        (CompactedDomain) := NewState_Pop > 0f ? NewState_Pop / Area : null_f;
+			// attribute<Person_km2>        Density_on_land_PrevState                       (CompactedDomain) := PrevState_Pop > 0f ? PrevState_Pop / Area : null_f;
+			// attribute<Person_km2>        Density_on_land_NewState                        (CompactedDomain) := NewState_Pop > 0f ? NewState_Pop / Area : null_f;
 			
 			// attribute<Person_km2>        Density_on_land_of_Totalpop_0_1prNewBU          (CompactedDomain) := NewBU_fraction_0_1pr ? NewState_Pop / Area : null_f,  Descr = "people added in step 3 to new BU divided by land area in the cell. So this is lower, because the cell could already have some population.";
 			// attribute<Person_km2>        Density_on_land_of_Totalpop_1_5prNewBU          (CompactedDomain) := NewBU_fraction_1_5pr ? NewState_Pop / Area : null_f,  Descr = "people added in step 3 to new BU divided by land area in the cell. So this is lower, because the cell could already have some population.";
+			
+			attribute<bool>                 CellOfInterestForExport                         (CompactedDomain) := OR(IsDefined(BUres_Y1990), IsDefined(BUres_Y2020),  IsDefined(BUres_Y2030),  IsDefined(Pop_Y1990_org),  IsDefined(Pop_Y1990),  IsDefined(Pop_Y2020),   IsDefined(Pop_Y2030),  IsDefined(BU_Added));
+		
+			unit<uint32> Export_Chris := select_with_org_rel(CellOfInterestForExport)
+			{
+				attribute<BuiltUpKm2>        BUres_Y1990                                      := MakeDefined(../BUres_Y1990[org_rel], 0[BuiltUpKm2]);
+				attribute<BuiltUpKm2>        BUres_Y2020                                      := MakeDefined(../BUres_Y2020[org_rel], 0[BuiltUpKm2]);
+				attribute<BuiltUpKm2>        BUres_Y2030                                      := MakeDefined(../BUres_Y2030[org_rel], 0[BuiltUpKm2]);
+				
+				attribute<Person>            Pop_Y1990_org                                    := MakeDefined(../Pop_Y1990_org[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y1990                                        := MakeDefined(../Pop_Y1990[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y2020                                        := MakeDefined(../Pop_Y2020[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y2030                                        := MakeDefined(../Pop_Y2030[org_rel], 0[Person]);
+				
+				attribute<BuiltUPKm2>        BU_Added                                         := MakeDefined(../BUres_Y1990[org_rel], 0[BuiltUpKm2]);
+			}
+		
 		
 			unit<uint32> PerRegion := ClaimRegion
 			{
