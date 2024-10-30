@@ -7,8 +7,12 @@ Template Allocate_Population_T
 	container          NewState_BuiltUp;
 	attribute<Person>  Claim (ClaimRegion);
 	///
-	attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base) : ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base';
-	attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base) : ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base';
+	attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f 
+																							? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base) 
+																							: ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base';
+	attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f 
+																							? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base) 
+																							: ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base';
 	
 	
 	container LocalMaxima
@@ -40,8 +44,8 @@ Template Allocate_Population_T
 		attribute<Suit> Calc (domain) := ='(OldState_Pop/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/ln_PopulationDensity_2000_8dir) + '
 																'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                           * AutoGLM_Coeffs/Distance2Coastline) + 
 																(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
-																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
-																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 

@@ -10,116 +10,115 @@
 
 container Infrastructure : using = "Geography"
 {
-	container Road
+	container GRIP4 
+	:  StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/GRIP4_GlobalRoads.gdb"
+	,  StorageType     = "gdal.vect"
+	,  url             = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Global Roads Inventory Project 2018 GRIP4 (PBL) - DataPortaal Explorer_xml.mht"
+	,  StorageReadOnly = "True"
+	,  Source          = "PBL GRIP4_GlobalRoads_NL"
 	{
-		container GRIP4 
-		:  StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads.gdb"
-		,  StorageType     = "gdal.vect"
-		,  url             = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Global Roads Inventory Project 2018 GRIP4 (PBL) - DataPortaal Explorer_xml.mht"
-		,  StorageReadOnly = "True"
-		,  Source          = "PBL GRIP4_GlobalRoads_NL"
-		{
-			unit<uint32> Roads123
-			:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP =1 OR GP_RTP =2 OR GP_RTP =3"
-			{
-				attribute<LatLong> Geometry (arc);
-				parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
-				parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
-			}
-				
-			unit<uint32> Roads45
-			:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP  > 3"
-			{
-				attribute<LatLong> Geometry (arc);
-				parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
-				parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
-			}
-		}
-
-		unit<uint32> MakeFSS123 := GRIP4/Roads123
-		, 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
-		{
-			attribute<LatLong> Geometry (arc) := GRIP4/Roads123/geometry;
-		}
-
-		unit<uint32> MakeFSS45 := GRIP4/Roads45
-		, 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
-		{
-			attribute<LatLong> Geometry (arc) := GRIP4/Roads45/geometry;
-		}
-
 		unit<uint32> Roads123
-		: 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads123.fss"
-		,  StorageReadOnly = "True"
+		:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP =1 OR GP_RTP =2 OR GP_RTP =3"
 		{
-			attribute<LatLong>               Geometry (arc);
+			attribute<LatLong> Geometry (arc);
 			attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
-			
-			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
-			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+			parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+			parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 		}
-
+			
 		unit<uint32> Roads45
-		: 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/GRIP4_GlobalRoads45.fss"
-		,  StorageReadOnly = "True"
+		:	SQLString  = "SELECT * FROM GRIP4_GlobalRoads WHERE GP_RTP  > 3"
 		{
-			attribute<LatLong>               Geometry (arc);
+			attribute<LatLong> Geometry (arc);
 			attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
+			parameter<uint32>  PenColor      := rgb(255,0,0),DialogType = "PenColor";
+			parameter<float64> PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+		}
+	}
+
+	// unit<uint32> MakeFSS123 := GRIP4/Roads123
+	// , 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/GRIP4_GlobalRoads123.fss"
+	// {
+		// attribute<LatLong> Geometry (arc) := GRIP4/Roads123/geometry;
+	// }
+
+	// unit<uint32> MakeFSS45 := GRIP4/Roads45
+	// , 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/GRIP4_GlobalRoads45.fss"
+	// {
+		// attribute<LatLong> Geometry (arc) := GRIP4/Roads45/geometry;
+	// }
+
+	// unit<uint32> Roads123
+	// : 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/GRIP4_GlobalRoads123.fss"
+	// ,  StorageReadOnly = "True"
+	// {
+		// attribute<LatLong>               Geometry (arc);
+		// attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
+		
+		// parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+		// parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+	// }
+
+	// unit<uint32> Roads45
+	// : 	StorageName = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/GRIP4_GlobalRoads45.fss"
+	// ,  StorageReadOnly = "True"
+	// {
+		// attribute<LatLong>               Geometry (arc);
+		// attribute<SphericalMercator>     geometry_mer (arc):= geometry[SphericalMercator];
+		
+		// parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
+		// parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+	// }
+
+	attribute<Float32> Location2Road123_mer     (CompactedDomain) := dist_info(GRIP4/Roads123/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+	attribute<km>      Location2Road123_km      (CompactedDomain) := (Location2Road123_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
+	attribute<km>      Location2Road123_km_domain_export (domain) := Location2Road123_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road123_km.tif";
+
+	attribute<Float32> Location2Road45_mer      (CompactedDomain) := dist_info(GRIP4/Roads45/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
+	attribute<km>      Location2Road45_km       (CompactedDomain) := Location2Road45_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor;
+	attribute<km>      Location2Road45_km_domain_export  (domain) := Location2Road45_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road45_km.tif";
+
+	container GRIP4_grid
+	{
+		unit<ipoint> Road123
+		:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road123_km.tif"
+		,	StorageType     = "gdal.grid"
+		,	Source          = "item /Socioeconomic/Infrastructure/Location2Road123_km_domain_export geodms 7.312 PD 7602 SD 7537"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "LatLong"
+		{
+			attribute<float32>  ReadData  (domain);
+			attribute<float32>  Road123   (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+			attribute<float32>  Road123MD (domain) := Road123;
 			
-			parameter<uint32>                PenColor      := rgb(255,0,0),DialogType = "PenColor";
-			parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
+			unit<uint8> Country := SourceData/RegionalUnits/Countries/Country 
+			{
+				attribute<uint32>  sumRoad123  := sum(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MeanRoad123 := mean(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MinRoad123  := min(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MaxRoad123  := max(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  SDRoad123   := sd(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+			}
 		}
 
-		attribute<Float32> Location2Road123_mer     (CompactedDomain) := dist_info(Roads123/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-		attribute<km>      Location2Road123_km      (CompactedDomain) := (Location2Road123_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-		attribute<km>      Location2Road123_km_domain_export (domain) := Location2Road123_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif";
-
-		attribute<Float32> Location2Road45_mer      (CompactedDomain) := dist_info(Roads45/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-		attribute<km>      Location2Road45_km       (CompactedDomain) := Location2Road45_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor;
-		attribute<km>      Location2Road45_km_domain_export  (domain) := Location2Road45_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif";
-
-		container GRIP4_grid
+		unit<ipoint> Road45
+		:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road45_km.tif"
+		,	StorageType     = "gdal.grid"
+		,	Source          = "item /Socioeconomic/Infrastructure/Location2Road45_km_domain_export geodms 7.312 PD 7602 SD 7537"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "LatLong"
 		{
-			unit<ipoint> Road123
-			:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road123_km.tif"
-			,	StorageType     = "gdal.grid"
-			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road123_km_domain_export geodms 7.312 PD 7602 SD 7537"
-			,	StorageReadOnly = "True"
-			,	DialogData      = "LatLong"
-			{
-				attribute<float32>  ReadData  (domain);
-				attribute<float32>  Road123   (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-				attribute<float32>  Road123MD (domain) := Road123;
-				
-				unit<uint8> Country := SourceData/RegionalUnits/Countries/Country 
-				{
-					attribute<uint32>  sumRoad123  := sum(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MeanRoad123 := mean(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MinRoad123  := min(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MaxRoad123  := max(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  SDRoad123   := sd(Road123,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-				}
-			}
+			attribute<float32> ReadData(domain);
+			attribute<float32>  Road45(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
+			attribute<float32>  Road45MD (domain) := Road45;
 
-			unit<ipoint> Road45
-			:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/roads/GRIP4/Location2Road45_km.tif"
-			,	StorageType     = "gdal.grid"
-			,	Source          = "item /Socioeconomic/Infrastructure/Road/Location2Road45_km_domain_export geodms 7.312 PD 7602 SD 7537"
-			,	StorageReadOnly = "True"
-			,	DialogData      = "LatLong"
+			unit<uint8> Country:=SourceData/RegionalUnits/Countries/Country 
 			{
-				attribute<float32> ReadData(domain);
-				attribute<float32>  Road45(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-				attribute<float32>  Road45MD (domain) := Road45;
-
-				unit<uint8> Country:=SourceData/RegionalUnits/Countries/Country 
-				{
-					attribute<uint32>  sumRoad45  := sum(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MeanRoad45 := mean(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MinRoad45  := min(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  MaxRoad45  := max(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-					attribute<uint32>  SDRoad45   := sd(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
-				}
+				attribute<uint32>  sumRoad45  := sum(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MeanRoad45 := mean(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MinRoad45  := min(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  MaxRoad45  := max(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
+				attribute<uint32>  SDRoad45   := sd(Road45,SourceData/RegionalUnits/Countries/Country_grid)[uint32];
 			}
 		}
 	}
