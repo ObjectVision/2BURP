@@ -17,7 +17,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 			//attribute<Person>            Population_Trunc_domain                 (domain) := Population_inRes_Density_Trunc_domain * BuiltUp_Residential_Area_domain; //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
 			
 			attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
-			attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+			attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic population amounts
 			attribute<Person_BuiltUpKm2> Population_inRes_Density_org   (CompactedDomain) := Population_org / BuiltUp_Residential_Area; // DO NOT USE!
 			attribute<Person_BuiltUpKm2> Population_inTot_Density_org   (CompactedDomain) := Population_org / BuiltUp_Total_Area; // DO NOT USE!
 			//attribute<Person_BuiltUpKm2> Population_inRes_Density       (CompactedDomain) := min_elem_alldefined(Population_inRes_Density_org, maxmax_saturation);
@@ -52,6 +52,22 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		
 		
 		container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T((Population_Trunc_domain / domain/area)[float64]);
+		
+		//adhoc
+		container Y1990_pop
+		{
+			attribute<Person>            Population_domain                       (domain) := ='SourceData/Population/PerYear/Y1990[Person]';
+			attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
+			attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, ModelParameters/Pop_maxmax_saturation); //truncate for unrealistic population amounts
+			attribute<Person>            Population_base                (CompactedDomain) := Population_Trunc_domain;
+			attribute<Person>            Population_trunc               (CompactedDomain) := uint32(Population_base)[Person];
+			attribute<Person>            RegionalDeficit                    (ClaimRegion) := sum(Population_base, region_rel) - float32(sum(Population_trunc, region_rel));
+			attribute<Person>            Population_frac_rank           (CompactedDomain) := float32(Population_trunc + 1f) - Population_base;
+			attribute<Person>            Max_rank                           (ClaimRegion) := nth_element(Population_frac_rank, uint32(RegionalDeficit), region_rel);
+			attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[region_rel])[NrPerson];
+		}
+		
+		
 	}
 
 	unit<uint32> ClaimRegion := FunctionalAreas;
@@ -84,6 +100,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					+quote(ProjectionYears/name)+
 					','+quote(ProjectionYears/prev_name)+
 					','+ProjectionYears/prevStateName+
+					', Allocate_Builtup/'+ProjectionYears/name+'/CurrState'
 					', Allocate_Builtup/'+ProjectionYears/name+'/NewState'
 					', Claim/Population/'+ProjectionYears/name+
 				')'
@@ -93,6 +110,35 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	}
 	
 	#include<Indicators.dms>
+	
+	container Past := 
+		for_each_ne(
+			/Classifications/GHS_years/name
+			, 'Past_T('+quote(Classifications/GHS_years/name)+')'
+		)
+	{
+		parameter<string> Generate := 'Ready', ExplicitSuppliers = "=AsList(Classifications/GHS_years/name, ';')";
+	}	
+		
+	Template Past_T 
+	{
+		parameter<string> Year;
+		///
+		
+		attribute<Person>            Population_domain                       (domain) := ='SourceData/Population/PerYear/'+Year+'[Person]';
+		attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
+		attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
+		parameter<Person>            maxmax_saturation                                := ModelParameters/Pop_maxmax_saturation;
+		attribute<Person>            Population_base                (CompactedDomain) := Population_Trunc_domain;
+		attribute<Person>            Population_trunc               (CompactedDomain) := uint32(Population_base)[Person];
+		attribute<Person>            Population_frac_rank           (CompactedDomain) := float32(Population_trunc + 1f) - Population_base;
+		attribute<Person>            RegionalDeficit                    (ClaimRegion) := sum(Population_base, region_rel) - float32(sum(Population_trunc, region_rel));
+		attribute<Person>            Max_rank                           (ClaimRegion) := nth_element(Population_frac_rank, uint32(RegionalDeficit), region_rel);
+		
+		attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[region_rel])[NrPerson];
+		attribute<NrPerson>          Population_trunc_domain_result          (domain) := recollect_by_cond(domain/IsCompactedDomain, Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'.tif'";
+	}
+	
 	#include<Allocate_Builtup_T.dms>
 	#include<Allocate_Population_T.dms>
 }

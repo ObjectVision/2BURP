@@ -2,19 +2,24 @@ Template Allocate_Population_T
 {
 	parameter<string>  ThisYear;
 	parameter<string>  PrevYear;
-	container          CurrState;
+	container          OldState_Pop; //fka CurrState
+	container          OldState_BuiltUp;
 	container          NewState_BuiltUp;
 	attribute<Person>  Claim (ClaimRegion);
 	///
-	attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base) : ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base';
-	attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f ? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base) : ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base';
+	attribute<float32> Initial_Population_Proportional_Reduction_Rate (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f 
+																							? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base) 
+																							: ModelParameters/Pop_Initial_Proportional_Reduction_Rate_base';
+	attribute<float32> Initial_Population_Absolute_Reduction_Rate     (ClaimRegion) := ='Preprocessing/PercDelta_Claims_Population/'+ThisYear+' < 0f 
+																							? max_elem(abs(Preprocessing/PercDelta_Claims_Population/'+ThisYear+') * ModelParameters/Pop_Additional_Claim_Reduction_Factor, ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base) 
+																							: ModelParameters/Pop_Initial_Absolute_Reduction_Rate_base';
 	
 	
 	container LocalMaxima
 	{
-		attribute<Person_BuiltUpKm2>         Current_LocalMaximum  (CompactedDomain) := max(CurrState/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
-		attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == CurrState/Population_inRes_Density;
-		attribute<bool>                      HasNoPopulation       (CompactedDomain) := CurrState/Population == 0[NrPerson];
+		attribute<Person_BuiltUpKm2>         Current_LocalMaximum  (CompactedDomain) := max(OldState_Pop/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
+		attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == OldState_Pop/Population_inRes_Density;
+		attribute<bool>                      HasNoPopulation       (CompactedDomain) := OldState_Pop/Population == 0[NrPerson];
 		
 		// If a cell has the highest local population in T1, it can only increase by 3.5K people in T2 (or by [100K - local pop] if this is smaller than 3.5K people)
 		// If a cell is populated but it doesn’t have the highest local population in T1, it can only increase in T2 to the local maximum in T1 + 2.5K people (or by [100K - local pop] if this is smaller than the local maximum in T1 + 2.5K people) 
@@ -22,7 +27,7 @@ Template Allocate_Population_T
 		attribute<Person_BuiltUpKm2>  MaxAllowed_Population_Density (CompactedDomain) := 
 			iif(HasNoPopulation
 				, ModelParameters/pop_r_if_notPopulated * 1[decade]
-				, median(ModelParameters/pop_max_saturation, CurrState/Population_inRes_Density, CurrState/Population_inRes_Density + (LocalMaxima/IsLocalMaximum ? ModelParameters/pop_r_if_LocalMax: ModelParameters/pop_r_if_notLocalMax)  * 1[decade])
+				, median(ModelParameters/pop_max_saturation, OldState_Pop/Population_inRes_Density, OldState_Pop/Population_inRes_Density + (LocalMaxima/IsLocalMaximum ? ModelParameters/pop_r_if_LocalMax : ModelParameters/pop_r_if_notLocalMax)  * 1[decade])
 			);
 			
 		attribute<Person>             MaxAllowed_Population         (CompactedDomain) := MaxAllowed_Population_Density * NewState_BuiltUp/BuiltUp_Residential_Area;
@@ -36,11 +41,11 @@ Template Allocate_Population_T
 	container Suitability
 	{
 		container AutoGLM_Coeffs  := Analysis/Calibration/ReadCoffecients/coef2domain/domain;
-		attribute<Suit> Calc (domain) := ='(CurrState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/ln_PopulationDensity_2000_8dir) + '
+		attribute<Suit> Calc (domain) := ='(OldState_Pop/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                            * AutoGLM_Coeffs/ln_PopulationDensity_2000_8dir) + '
 																'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                           * AutoGLM_Coeffs/Distance2Coastline) + 
 																(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
-																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
-																(min_elem(Socioeconomic/Infrastructure/Road/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
@@ -65,27 +70,27 @@ Template Allocate_Population_T
 	container NewState
 	{
 		//Reduction step 1: All cells will lose 10% of their initial population. This proportional reduction has the biggest impact in dense cells.
-		attribute<Person>            Proportional_Reducted_Population       (CompactedDomain) := CurrState/Population[Person] * (1f - Initial_Population_Proportional_Reduction_Rate[ClaimRegion/per_CompactedDomain]); 
+		attribute<Person>            Proportional_Reducted_Population       (CompactedDomain) := OldState_Pop/Population[Person] * (1f - Initial_Population_Proportional_Reduction_Rate[ClaimRegion/per_CompactedDomain]); 
 		
 		//Reduction step 2: All inhabited cells will lose up to a fixed (per functional area) number of persons of 10% of the initial average population of the inhabited grid cells. This absolute reduction will have the biggest impact on low-density cells.
-		attribute<NrPerson>          Population_for_Region                      (ClaimRegion) := sum(CurrState/Population, Region_rel);
-		attribute<uint32>            NumberOfCellsWithPopulationPerRegion       (ClaimRegion) := sum_uint32(CurrState/Population > 0[nrPerson], Region_rel);
+		attribute<NrPerson>          Population_for_Region                      (ClaimRegion) := sum(OldState_Pop/Population, Region_rel);
+		attribute<uint32>            NumberOfCellsWithPopulationPerRegion       (ClaimRegion) := sum_uint32(OldState_Pop/Population > 0[nrPerson], Region_rel);
 		attribute<float32>           Average_Population_per_PopulatedCell       (ClaimRegion) := Population_for_Region[Person] / NumberOfCellsWithPopulationPerRegion[float32];
 		attribute<Person>            Regional_Reduction_per_cell                (ClaimRegion) := Average_Population_per_PopulatedCell * Initial_Population_Absolute_Reduction_Rate;
 		attribute<Person>            Reduced_Population                     (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
 		
 		//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
-		attribute<NrPerson>          Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(CurrState/Population[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
+		attribute<NrPerson>          Avg_Local_Population_inRes_Density_Num (CompactedDomain) := sum(OldState_Pop/Population[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
 		attribute<BuiltUpKm2>        Avg_Local_Population_inRes_Density_Den (CompactedDomain) := sum(BuiltUp_Residential_Area[DistMatrices/cdomain_x_pot3k/third_rel], DistMatrices/cdomain_x_pot3k/first_rel); 
 		attribute<Person_BuiltUpKm2> Avg_Local_Population_inRes_Density     (CompactedDomain) := Avg_Local_Population_inRes_Density_Num[Person] / Avg_Local_Population_inRes_Density_Den; 
 		attribute<BuiltUpKm2>        BuiltUp_Total_Area                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Total_Area; 
 		attribute<BuiltUpKm2>        BuiltUp_Residential_Area               (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
 		
 		// definition in case total area is allocated
-		//attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - CurrState/BuiltUp_Total_Area, 0f); 
+		//attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Total_Area - OldState_BuiltUp/BuiltUp_Total_Area, 0f); 
 		
 		// definition in case residential area is allocated
-		attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Residential_Area - CurrState/BuiltUp_Residential_Area, 0f); 
+		attribute<BuiltUpKm2>        New_BuiltUp_Area                       (CompactedDomain) := max_elem(BuiltUp_Residential_Area - OldState_BuiltUp/BuiltUp_Residential_Area, 0f); 
 		attribute<Person>            Population_in_New_BuiltUp_Area_src     (CompactedDomain) := MakeDefined(New_BuiltUp_Area * Avg_Local_Population_inRes_Density, 0[Person]);
 		
 		attribute<Person>            Pop_in_New_BU_Area_Augm_Teller             (ClaimRegion) := max_elem((Claims/Population - sum(Reduced_Population, Region_rel)) * ModelParameters/Pop_ShareOfRestclaim_Prefers_newBU, 0[Person]), Descr = "Rest claim per regio that could be allocated to new BU area"; 
@@ -95,7 +100,11 @@ Template Allocate_Population_T
 		attribute<Person>            Population_in_New_BuiltUp_Area         (CompactedDomain) := Population_in_New_BuiltUp_Area_src * Pop_New_BU_PopulationDensity_Factor[Region_rel];
 
 		//Adding step 4: To the population we add the difference between the maximum allowed density and the initial density, after scaling it by the suitability, augmented to meet functional area claims.
-		attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel) <= Claims/Population + (Claims/Population * 0.01f);
+		attribute<bool>              Population_beforeAllocation_Check          (ClaimRegion) := sum(Reduced_Population + Population_in_New_BuiltUp_Area, Region_rel) <= Claims/Population + (Claims/Population * 0.01f)
+		{
+			attribute<Person> Reduced_Population_perRegion             (ClaimRegion) := sum(Reduced_Population, Region_rel);
+			attribute<Person> Population_in_New_BuiltUp_Area_perRegion (ClaimRegion) := sum(Population_in_New_BuiltUp_Area, Region_rel);
+		}
 		attribute<Person>            Population_beforeAllocation            (CompactedDomain) := Reduced_Population + Population_in_New_BuiltUp_Area, IntegrityCheck = "Population_beforeAllocation_Check";
 		attribute<Person>            Room_for_Population                    (CompactedDomain) := max_elem(LocalMaxima/MaxAllowed_Population - Population_beforeAllocation, 0f);
 		attribute<float32>           ProportionalityFactor                  (CompactedDomain) := max_elem(Suitability/population * Room_for_Population, 0f);
@@ -129,17 +138,38 @@ Template Allocate_Population_T
 			attribute<Person>        Proportional_Population  (CompactedDomain) := ScaleFactor[Region_rel] * ProportionalityFactor;
 			attribute<Person>        Saturated_Population     (CompactedDomain) := min_elem(Proportional_Population, Room_for_Population);
 			attribute<Person>        Total_Population         (CompactedDomain) := Saturated_Population + Population_beforeAllocation;
-			attribute<NrPerson>      Total_Population_rounded (CompactedDomain) := int32(Total_Population)[NrPerson]; //we round here, to omit fractional people which can then reallocated in the next iter.
-			attribute<NrPerson>      Realisation                  (ClaimRegion) := sum(Total_Population_rounded, Region_rel);
-			attribute<float32>       RescaleFactor                (ClaimRegion) := Claims/Population / Realisation[Person]; // We need to correct the scale factor to accomodate left over claims.
+			// attribute<NrPerson>      Total_Population_rounded (CompactedDomain) := int32(Total_Population)[NrPerson]; //we round here, to omit fractional people which can then reallocated in the next iter.
+			// attribute<NrPerson>      Realisation                  (ClaimRegion) := sum(Total_Population_rounded, Region_rel);
+			attribute<Person>        Realisation                  (ClaimRegion) := sum(Total_Population, Region_rel);
+			attribute<float32>       RescaleFactor                (ClaimRegion) := Claims/Population / Realisation; // We need to correct the scale factor to accomodate left over claims.
 			attribute<float32>       ScaleFactor_new              (ClaimRegion) := IsNull(ScaleFactor) || IsNull(RescaleFactor) ? 0f : ScaleFactor * RescaleFactor;
 		}
 		
 		//Results  
-		attribute<NrPerson>          Population                   (CompactedDomain) := Population_Allocation/Last/Total_Population_rounded;
-		attribute<Person_BuiltUpKm2> Population_inRes_Density     (CompactedDomain) := Population[Person] / BuiltUp_Residential_Area;
-		attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := (Population[Person] / CompactedDomain/area);
-		attribute<NrPerson>          Population_sum                   (ClaimRegion) := sum(Population, Region_rel);
+		// attribute<NrPerson>          Population_LastIterResult    (CompactedDomain) := Population_Allocation/Last/Total_Population_rounded;
+		attribute<Person>     Population_LastIterResult         (CompactedDomain) := Population_Allocation/Last/Total_Population;
+		
+		//Rounding
+		attribute<NrPerson>   Population_Int                    (CompactedDomain) := Population_LastIterResult[NrPerson];
+		attribute<float32>    Rest_Share                        (CompactedDomain) := Population_LastIterResult - float32(Population_Int);
+		attribute<Person>     sum_rounded_pop                       (ClaimRegion) := sum(float32(Population_Int), Region_rel);
+		attribute<uint32>     Rest_claim                            (ClaimRegion) := uint32(Claims/Population - sum_rounded_pop);
+		attribute<float32>    Rank                              (CompactedDomain) := - Rest_Share;
+		attribute<float32>    roundoff_breakpoint                   (ClaimRegion) := - nth_element(
+																							Rank
+																							, Rest_claim
+																							, Region_rel
+																						);
+		attribute<bool >      above_breakpoint                  (CompactedDomain) := Rest_Share > roundoff_breakpoint[Region_rel];
+		attribute<NrPerson>   Population_Rounded_Balanced       (CompactedDomain) := Population_Int + above_breakpoint[NrPerson];
+		attribute<NrPerson>   Population                        (CompactedDomain) := Population_Rounded_Balanced
+		{
+			attribute<NrPerson> Population_perRegion                  (ClaimRegion) := sum(Population, Region_rel);
+		}
+		
+		attribute<Person_BuiltUpKm2> Population_inRes_Density     (CompactedDomain) := Population_Rounded_Balanced[Person] / BuiltUp_Residential_Area;
+		attribute<Person_Km2>        Population_TotalLand_Density (CompactedDomain) := (Population_Rounded_Balanced[Person] / CompactedDomain/area);
+		attribute<NrPerson>          Population_sum                   (ClaimRegion) := sum(Population_Rounded_Balanced, Region_rel);
 		attribute<float32>           Final_ClaimRealisation           (ClaimRegion) := Population_sum[Person] / Claims/Population;
 		
 		container PopulationDensity_8dir  := Preprocessing/Population_Neighbourhoods/Create_8dir_T(recollect_by_cond(domain/IsCompactedDomain, Population_TotalLand_Density)[float64]);
@@ -157,5 +187,89 @@ Template Allocate_Population_T
 				attribute<float32>  Perc_New_BuiltUp             := sum(New_BuiltUp_Area[float32], Region_rel)[org_rel] / sum(BuiltUp_Total_Area[float32], Region_rel)[org_rel];
 			}
 		}
+		
+		
+		
+		//adhoc 
+		container Analyse_tbv_newBU_densities 
+		{
+			// attribute<Person>            PrevState_Pop                                   (CompactedDomain) := OldState_Pop/Population[Person];
+			// attribute<Person>            NewState_Pop                                    (CompactedDomain) := Population_Rounded_Balanced[Person];
+			attribute<BuiltUpKm2>        PrevState_BUres                                 (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area; 
+			attribute<BuiltUpKm2>        NewState_BUres                                  (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
+			// attribute<Km2>               Area                                            (CompactedDomain) := CompactedDomain/area;
+			// attribute<Suit>              Suitability_NonNegative                         (CompactedDomain) := Suitability/Population;
+			
+			attribute<BuiltUpKm2>        BUres_Y1990                                     (CompactedDomain) := (SourceData/BuiltUp/Residential/Y1990[km2] / 1[km2] * 1[BuiltUpKm2])[CompactedDomain/org_rel];
+			attribute<BuiltUpKm2>        BUres_Y2020                                     (CompactedDomain) := OldState_BuiltUp/BuiltUp_Residential_Area; 
+			attribute<BuiltUpKm2>        BUres_Y2030                                     (CompactedDomain) := NewState_BuiltUp/BuiltUp_Residential_Area; 
+			
+			attribute<Person>            Pop_Y1990_org                                   (CompactedDomain) := OldState_Pop/Y1990_pop/Population_org[Person];
+			attribute<Person>            Pop_Y1990                                       (CompactedDomain) := OldState_Pop/Y1990_pop/Population[Person];
+			attribute<Person>            Pop_Y2020                                       (CompactedDomain) := OldState_Pop/Population[Person];
+			attribute<Person>            Pop_Y2030                                       (CompactedDomain) := Population_Rounded_Balanced[Person];
+			
+			attribute<BuiltUPKm2>        BU_Added                                        (CompactedDomain) := NewState_BUres - PrevState_BUres;
+			
+			// attribute<Person>            Pop_Reducted_Proportional                       (CompactedDomain) := Proportional_Reducted_Population - PrevState_Pop; 
+			// attribute<Person>            Pop_Reducted_Absolute                           (CompactedDomain) := Reduced_Population - Proportional_Reducted_Population; 
+			// attribute<Person>            Pop_Added_To_New_BU                             (CompactedDomain) := Population_in_New_BuiltUp_Area; 
+			// attribute<Person>            Pop_Added_To_Existing_BU_Cell_InAlloc           (CompactedDomain) := PrevState_BUres > 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
+			// attribute<Person>            Pop_Added_To_CompletelyNew_BU_Cell_InAlloc      (CompactedDomain) := PrevState_BUres == 0f ? NewState_Pop - Population_beforeAllocation : 0[Person]; 
+			
+			
+			// attribute<float32>           Fraction_of_cell_that_is_NewBU                  (CompactedDomain) := NewState_BuiltUp/Builtup_Residential_Share - OldState_BuiltUp/Builtup_Residential_Share;
+			// attribute<bool>              NewBU_fraction_0_00001pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0f     && Fraction_of_cell_that_is_NewBU <= 0.0001f;
+			// attribute<bool>              NewBU_fraction_00001_1pr                        (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.0001f  && Fraction_of_cell_that_is_NewBU <= 0.01f;
+			// attribute<bool>              NewBU_fraction_1_5pr                            (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.01f  && Fraction_of_cell_that_is_NewBU <= 0.05f;
+			// attribute<bool>              NewBU_fraction_5_25pr                           (CompactedDomain) := Fraction_of_cell_that_is_NewBU >  0.05f  && Fraction_of_cell_that_is_NewBU <= 0.25f; 
+			
+			// attribute<Person_km2>        Density_on_land_PrevState                       (CompactedDomain) := PrevState_Pop > 0f ? PrevState_Pop / Area : null_f;
+			// attribute<Person_km2>        Density_on_land_NewState                        (CompactedDomain) := NewState_Pop > 0f ? NewState_Pop / Area : null_f;
+			
+			// attribute<Person_km2>        Density_on_land_of_Totalpop_0_1prNewBU          (CompactedDomain) := NewBU_fraction_0_1pr ? NewState_Pop / Area : null_f,  Descr = "people added in step 3 to new BU divided by land area in the cell. So this is lower, because the cell could already have some population.";
+			// attribute<Person_km2>        Density_on_land_of_Totalpop_1_5prNewBU          (CompactedDomain) := NewBU_fraction_1_5pr ? NewState_Pop / Area : null_f,  Descr = "people added in step 3 to new BU divided by land area in the cell. So this is lower, because the cell could already have some population.";
+			
+			attribute<bool>                 CellOfInterestForExport                         (CompactedDomain) := OR(IsDefined(BUres_Y1990), IsDefined(BUres_Y2020),  IsDefined(BUres_Y2030),  IsDefined(Pop_Y1990_org),  IsDefined(Pop_Y1990),  IsDefined(Pop_Y2020),   IsDefined(Pop_Y2030),  IsDefined(BU_Added));
+		
+			unit<uint32> Export_Chris := select_with_org_rel(CellOfInterestForExport)
+			{
+				attribute<BuiltUpKm2>        BUres_Y1990                                      := MakeDefined(../BUres_Y1990[org_rel], 0[BuiltUpKm2]);
+				attribute<BuiltUpKm2>        BUres_Y2020                                      := MakeDefined(../BUres_Y2020[org_rel], 0[BuiltUpKm2]);
+				attribute<BuiltUpKm2>        BUres_Y2030                                      := MakeDefined(../BUres_Y2030[org_rel], 0[BuiltUpKm2]);
+				
+				attribute<Person>            Pop_Y1990_org                                    := MakeDefined(../Pop_Y1990_org[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y1990                                        := MakeDefined(../Pop_Y1990[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y2020                                        := MakeDefined(../Pop_Y2020[org_rel], 0[Person]);
+				attribute<Person>            Pop_Y2030                                        := MakeDefined(../Pop_Y2030[org_rel], 0[Person]);
+				
+				attribute<BuiltUPKm2>        BU_Added                                         := MakeDefined(../BUres_Y1990[org_rel], 0[BuiltUpKm2]);
+			}
+		
+		
+			unit<uint32> PerRegion := ClaimRegion
+			{
+				attribute<Person>            Pop_Reducted_Proportional                       := sum(../Pop_Reducted_Proportional, Region_rel);
+				attribute<Person>            Pop_Reducted_Absolute                           := sum(../Pop_Reducted_Absolute, Region_rel);
+				attribute<Person>            Pop_Added_To_New_BU                             := sum(../Pop_Added_To_New_BU, Region_rel);
+				attribute<Person>            Pop_Added_To_Existing_BU_Cell_InAlloc           := sum(../Pop_Added_To_Existing_BU_Cell_InAlloc, Region_rel);
+				attribute<Person>            Pop_Added_To_CompletelyNew_BU_Cell_InAlloc      := sum(../Pop_Added_To_CompletelyNew_BU_Cell_InAlloc, Region_rel);
+				
+				attribute<Person_km2>        Density_on_land_PrevState                       := mean(../Density_on_land_PrevState, Region_rel);
+				attribute<Person_km2>        Density_on_land_NewState                        := mean(../Density_on_land_NewState, Region_rel);
+				 
+				attribute<uint32>            Count_NewBU_fraction_0_00001pr_cells            := sum_uint32(NewBU_fraction_0_00001pr, Region_rel);
+				attribute<uint32>            Count_NewBU_fraction_00001_1pr_cells            := sum_uint32(NewBU_fraction_00001_1pr, Region_rel);
+				attribute<uint32>            Count_NewBU_fraction_1_5pr_cells                := sum_uint32(NewBU_fraction_1_5pr, Region_rel);
+				attribute<uint32>            Count_NewBU_fraction_5_25pr_cells               := sum_uint32(NewBU_fraction_5_25pr, Region_rel);
+				
+				// attribute<Person_km2>        Density_on_land_of_Totalpop_0_1prNewBU          := mean(../Density_on_land_of_Totalpop_0_1prNewBU, Region_rel);
+				// attribute<Person_km2>        Density_on_land_of_Totalpop_1_5prNewBU          := mean(../Density_on_land_of_Totalpop_1_5prNewBU, Region_rel);
+			}
+		}
+		
+		
+		
+		
 	}
 }
