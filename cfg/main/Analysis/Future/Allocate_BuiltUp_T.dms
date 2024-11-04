@@ -98,6 +98,13 @@ Template Allocate_Builtup_T
 		attribute<float32>   ProbBalanceFactor     (CompactedDomain) := 1f / (AvgProb[BuiltUp_Share_Perc]); //median(0f, 1f - 2f*BuiltUp_Share, 1f);
 		//attribute<float32>   FinalProb             (CompactedDomain) := Prob * Expected_increase * ProbBalanceFactor;
 		attribute<float32>   FinalProb             (CompactedDomain) := Prob * Dynamic_Expected_increase * ProbBalanceFactor;
+		
+		container adhoc_export {
+			attribute<float32> Loc_suit (domain) := recollect_by_cond(domain/IsCompactedDomain, Prob), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Locational_suitability_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> ET      	(domain) := recollect_by_cond(domain/IsCompactedDomain, Dynamic_Expected_increase), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Expected_increase_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> ET_x_suit(domain) := Loc_suit * ET, StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/ET_x_suit_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> Def_val  (domain) := recollect_by_cond(domain/IsCompactedDomain, FinalProb), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Balanced_ET_x_suit_'+ModelParameters/StartYear+'.tif'";
+		}
 	}
 	
 	container Claims
