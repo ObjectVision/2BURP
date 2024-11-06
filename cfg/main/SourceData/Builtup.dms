@@ -9,6 +9,15 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			,'gdal.grid'
 		);
 		
+	container Total_src_MW :=
+		for_each_ndvat(
+			GHS_years/name
+			, domain
+			, m2
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_54009_'+string(ModelParameters/MW_Gridsize)+'_V1_0.tif'
+			,'gdal.grid'
+		);
+		
 	container Total :=
 		for_each_ndvat(
 			GHS_years/name
