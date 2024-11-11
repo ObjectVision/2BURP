@@ -38,6 +38,13 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		parameter<float32> Pop_with_no_BU  := sum(float32(NoBuiltUp_butPopulation) * float32(PerYear_CorrectForNoData/Y2020));
 		
 	}
+	container PerYear_in_CD :=
+		for_each_nedv(
+			GHS_years/name
+			, 'PerYear/'+GHS_years/name+' * float64(domain/IsCompactedDomain)'
+			, domain
+			, float64
+		);
 	
 	unit<uint8> Population_OnLand_Density_Histogram := Pop_Bins
 	{
