@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Netherlands'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'World'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
