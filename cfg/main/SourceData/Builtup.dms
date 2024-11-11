@@ -1,29 +1,11 @@
 container Builtup : using = "units;classifications;sourcedata/regionalunits"
 {
-	container Total_src :=
-		for_each_ndvat(
-			GHS_years/name
-			, domain
-			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
-			,'gdal.grid'
-		);
-		
-	container Total_src_MW :=
-		for_each_ndvat(
-			GHS_years/name
-			, domain
-			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_54009_'+string(ModelParameters/MW_Gridsize)+'_V1_0.tif'
-			,'gdal.grid'
-		);
-		
 	container Total :=
 		for_each_ndvat(
 			GHS_years/name
 			, domain
 			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_'+ModelParameters/domain_EPSG+'_'+ModelParameters/gridsize+'_V1_0.tif'
 			,'gdal.grid'
 		);
 	container NonResidential :=
@@ -31,7 +13,7 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			GHS_years/name
 			, domain
 			, m2
-			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_NRES_E'+string(GHS_years/year)+'_GLOBE_R2023A_4326_'+string(ModelParameters/WGS_Gridsize)+'ss_V1_0.tif'
+			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_NRES_E'+string(GHS_years/year)+'_GLOBE_R2023A_'+ModelParameters/domain_EPSG+'_'+ModelParameters/gridsize+'_V1_0.tif'
 			,'gdal.grid'
 		);
 	container Residential := 

@@ -1,13 +1,16 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Europe'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'Netherlands'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   WGS_Gridsize                                        := 30d          , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong grids, represented in arc second. Where 30ss corresponds to roughly a 1km grid at the equator.";
 	parameter<float64>                   WGS_Subgridsize                                     := 3d           , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong subgrids, represented in arc second. Where 3ss corresponds to roughly a 100m grid at the equator.";
+	parameter<string>                    domain_EPSG                                         := '54009'; // 54009 4326
+	parameter<string>                    coordsys_name                                       := domain_EPSG == '54009' ? 'Mollweide' : 'LatLong';
+	parameter<string>                    gridsize                                            := domain_EPSG == '54009' ? string(MW_Gridsize) : string(WGS_Gridsize)+'ss';
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used";

@@ -70,26 +70,24 @@ container Infrastructure : using = "Geography"
 		// parameter<float64>               PenWorldWidth := 0.00001[float64],  DialogType = "PenWorldWidth";
 	// }
 
-	attribute<Float32> Location2Road123_mer     (CompactedDomain) := dist_info(GRIP4/Roads123/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-	attribute<km>      Location2Road123_km      (CompactedDomain) := (Location2Road123_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2Road123_km_domain_export (domain) := Location2Road123_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road123_km.tif";
+	attribute<Float32> Location2Road123_mer     (CompactedDomain) := dist_info(GRIP4/Roads123/geometry_mer, CompactedDomain/Geometry_mer, Sqr(value(250,km)[meter]));
+	attribute<km>      Location2Road123_km      (CompactedDomain) := value(Location2Road123_mer, meter)[km];
+	attribute<km>      Location2Road123_km_domain_export (domain) := Location2Road123_km[CompactedDomain/BaseGrid], StorageName = "='%LocalDataProjDir%/Socioeconomic/Infrastructure/'+ModelParameters/StudyArea+'/Location2Road123_km_'+ModelParameters/domain_EPSG+'.tif'";
+	
+	attribute<Float32> Location2Road45_mer      (CompactedDomain) := dist_info(GRIP4/Roads45/geometry_mer, CompactedDomain/Geometry_mer, Sqr(value(250,km)[meter]));
+	attribute<km>      Location2Road45_km       (CompactedDomain) := value(Location2Road45_mer, meter)[km];
+	attribute<km>      Location2Road45_km_domain_export  (domain) := Location2Road45_km[CompactedDomain/BaseGrid], StorageName = "='%LocalDataProjDir%/Socioeconomic/Infrastructure/'+ModelParameters/StudyArea+'/Location2Road45_km_'+ModelParameters/domain_EPSG+'.tif'";
 
-	attribute<Float32> Location2Road45_mer      (CompactedDomain) := dist_info(GRIP4/Roads45/geometry_mer, CompactedDomain/Geometry_mer, Sqr(250[km] / LatLong_Base/lengthdegree / CompactedDomain/lat_factor));
-	attribute<km>      Location2Road45_km       (CompactedDomain) := Location2Road45_mer * LatLong_Base/lengthdegree * CompactedDomain/lat_factor;
-	attribute<km>      Location2Road45_km_domain_export  (domain) := Location2Road45_km[CompactedDomain/BaseGrid], StorageName = "%LocalDataProjDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road45_km.tif";
-
-	container GRIP4_grid
+	container GRIP4_grid 
 	{
 		unit<ipoint> Road123
-		:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road123_km.tif"
+		:	StorageName     = "=PropValue(Location2Road123_km_domain_export, 'StorageName')"
 		,	StorageType     = "gdal.grid"
-		,	Source          = "item /Socioeconomic/Infrastructure/Location2Road123_km_domain_export geodms 7.312 PD 7602 SD 7537"
 		,	StorageReadOnly = "True"
-		,	DialogData      = "LatLong"
+		, 	LazyCalculated  = "true"
 		{
-			attribute<float32>  ReadData  (domain);
-			attribute<float32>  Road123   (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-			attribute<float32>  Road123MD (domain) := Road123;
+			attribute<float32>  ReadData          (domain);
+			attribute<float32>  Road123_Defined   (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
 			
 			unit<uint8> Country := SourceData/RegionalUnits/Countries/Country 
 			{
@@ -102,15 +100,13 @@ container Infrastructure : using = "Geography"
 		}
 
 		unit<ipoint> Road45
-		:	StorageName     = "%ToBURPDataDir%/Socioeconomic/Infrastructure/Roads/GRIP4/Location2Road45_km.tif"
+		:	StorageName     = "=PropValue(Location2Road45_km_domain_export, 'StorageName')"
 		,	StorageType     = "gdal.grid"
-		,	Source          = "item /Socioeconomic/Infrastructure/Location2Road45_km_domain_export geodms 7.312 PD 7602 SD 7537"
 		,	StorageReadOnly = "True"
-		,	DialogData      = "LatLong"
+		, 	LazyCalculated  = "true"
 		{
-			attribute<float32> ReadData(domain);
-			attribute<float32>  Road45(domain)    := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
-			attribute<float32>  Road45MD (domain) := Road45;
+			attribute<float32>  ReadData       (domain);
+			attribute<float32>  Road45_Defined (domain) := min_elem(MakeDefined(ReadData,250f),250f);//null-->250, INF=Infinity -->250
 
 			unit<uint8> Country:=SourceData/RegionalUnits/Countries/Country 
 			{

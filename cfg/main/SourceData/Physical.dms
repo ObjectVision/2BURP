@@ -26,11 +26,11 @@ container Physical : using = "geography;classifications"
 		{
 			attribute<int32> ReadData_org(domain_sub);
 			attribute<int16> ReadData   (domain_sub) := ReadData_org[int16];
-			attribute<int32> Write_Mean_1k        (domain) := mean_int32(ReadData_org, domain_sub/domain_rel), StorageName = "='%ToBURPDataDir%/physical/Elevation/'+ModelParameters/StudyArea+'_mean_1k.tif'";
+			attribute<int32> Write_Mean_1k        (domain) := mean_int32(ReadData_org, domain_sub/domain_rel), StorageName = "='%ToBURPDataDir%/physical/Elevation/'+ModelParameters/StudyArea+'_mean_1k_'+ModelParameters/domain_EPSG+'.tif'";
 		}
 		// */
 	
-		attribute<int32> Mean_1k              (domain) : StorageName = "%ToBURPDataDir%/physical/Elevation/World_mean_1k.tif", StorageType = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
+		attribute<int32> Mean_1k              (domain) : StorageName = "='%ToBURPDataDir%/physical/Elevation/World_mean_1k_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 	}
 	
 	container TerrainRoughnessIndex
@@ -38,25 +38,25 @@ container Physical : using = "geography;classifications"
 		// /* only runnable if the original 3ss elevation grid is available locally.
 		container TRI_generation 
 		{
-			attribute<int16>       Elevation      (CompactedDomainSub) := collect_by_cond(CompactedDomainSub, Physical/Elevation/Elevation_3ss/ReadData);
-			attribute<int16>       Elevation_fr   (DistMatrices/CdomainSub_x_pot1k) := Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel], LazyCalculated = "True";
-			attribute<int16>       Elevation_tr   (DistMatrices/CdomainSub_x_pot1k) := Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel], LazyCalculated = "True";
-			attribute<int16>       Elevation_delta16(DistMatrices/CdomainSub_x_pot1k) := Elevation_fr - Elevation_tr, LazyCalculated = "True";
-			attribute<int32>       Elevation_delta32(DistMatrices/CdomainSub_x_pot1k) := int32(Elevation_delta16), LazyCalculated = "True";
-			attribute<int32>       Elevation_delta32_sqr(DistMatrices/CdomainSub_x_pot1k) := sqr(Elevation_delta32), LazyCalculated = "True";
-			attribute<int32>       TRI_sqr_CD     (CompactedDomainSub) := sum(Elevation_delta32_sqr, DistMatrices/CdomainSub_x_pot1k/first_rel);
-			attribute<TRI_Classes> TRI_K_rel      (CompactedDomainSub) := Classify(TRI_sqr_CD, TRI_Classes/ClassBreaks_sqr);
+			attribute<int16>       Elevation                          (CompactedDomainSub) := collect_by_cond(CompactedDomainSub, Physical/Elevation/Elevation_3ss/ReadData);
+			attribute<int16>       Elevation_fr          (DistMatrices/CdomainSub_x_pot1k) := Elevation[DistMatrices/CdomainSub_x_pot1k/first_rel], LazyCalculated = "True";
+			attribute<int16>       Elevation_tr          (DistMatrices/CdomainSub_x_pot1k) := Elevation[DistMatrices/CdomainSub_x_pot1k/third_rel], LazyCalculated = "True";
+			attribute<int16>       Elevation_delta16     (DistMatrices/CdomainSub_x_pot1k) := Elevation_fr - Elevation_tr, LazyCalculated = "True";
+			attribute<int32>       Elevation_delta32     (DistMatrices/CdomainSub_x_pot1k) := int32(Elevation_delta16), LazyCalculated = "True";
+			attribute<int32>       Elevation_delta32_sqr (DistMatrices/CdomainSub_x_pot1k) := sqr(Elevation_delta32), LazyCalculated = "True";
+			attribute<int32>       TRI_sqr_CD                         (CompactedDomainSub) := sum(Elevation_delta32_sqr, DistMatrices/CdomainSub_x_pot1k/first_rel);
+			attribute<TRI_Classes> TRI_K_rel                          (CompactedDomainSub) := Classify(TRI_sqr_CD, TRI_Classes/ClassBreaks_sqr);
 			
-			attribute<uint16>      Calc_TRI_mean_30ss_ui16 (CompactedDomain) := sum_uint16(TRI_K_rel +1b, CompactedDomainSub/CompactedDomain_rel);
-			attribute<float32>     Calc_TRI_mean_30ss      (CompactedDomain) := Calc_TRI_mean_30ss_ui16[Float32] * 0.01f;
-			
+			attribute<uint16>      Calc_TRI_mean_30ss_ui16               (CompactedDomain) := sum_uint16(TRI_K_rel +1b, CompactedDomainSub/CompactedDomain_rel);
+			attribute<float32>     Calc_TRI_mean_30ss                    (CompactedDomain) := Calc_TRI_mean_30ss_ui16[Float32] * 0.01f;
+			 
 			attribute<float32>     Write_TRI_mean_30ss   (domain) := Calc_TRI_mean_30ss[CompactedDomain/BaseGrid], StorageName = "='%ToBURPDataDir%/physical/TRI_mean_from_3ss_to_30ss/'+ModelParameters/StudyArea+'.tif'";
 			attribute<float32>     TRI_mean_30ss         (domain) : StorageName     = "= PropValue(Write_TRI_mean_30ss, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", LazyCalculated = "True";
 			
 			parameter<string>      Generate                           := 'Ready', ExplicitSuppliers = "Write_TRI_mean_30ss";
 		}
 		// */
-		attribute<float32> TRI_mean_30ss_World         (domain) : StorageName = "%ToBURPDataDir%/Physical/TRI_mean_from_3ss_to_30ss/World.tif", StorageReadOnly = "True", LazyCalculated = "True";
+		attribute<float32> TRI_mean_30ss_World         (domain) : StorageName = "='%ToBURPDataDir%/Physical/TRI_mean_from_3ss_to_30ss/World_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "True", LazyCalculated = "True";
 		
 		unit<uint8> TRI_Classes : nrofrows = 7
 		{
@@ -91,7 +91,7 @@ container Physical : using = "geography;classifications"
 	}
 	
 	unit<ipoint> Slope_2021
-	:	StorageName = "%ToBURPDataDir%/physical/Slope/gtopo30_degree_planar_zfactor1_ag1061_exportgeodms.tif"
+	:	StorageName = "='%ToBURPDataDir%/physical/Slope/gtopo30_degree_planar_zfactor1_ag1061_exportgeodms_'+ModelParameters/domain_EPSG+'.tif'"
 	,	StorageType = "gdal.grid"
 	,	url         = "%ToBURPDataDir%/physical/slope/USGS EROS Archive - Digital Elevation - Global Multi-resolution Terrain Elevation Data 2010 (GMTED2010).html"
 	,	Source      = "DEM: Database: 	Y:\data\PBLbase\Data\MondiaalRelief.gdb Raster: 	gtopo30_NOAA_NGDC"
@@ -104,13 +104,13 @@ container Physical : using = "geography;classifications"
 	}	
 	
 	unit<ipoint> SnowIceCover
-	:	StorageName     = "%ToBURPDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2.tif"
+	:	StorageName     = "='%ToBURPDataDir%/physical/SnowIceCover/Modis2001_SnowIce_unint2_2_'+ModelParameters/domain_EPSG+'.tif'"
 	,	StorageType     = "gdal.grid"
 	,	url             = "%ToBURPDataDir%/physical/MCD12Q1_UserGuide_07302013.pdf"//MODIS Web
 	,	Source          = "Database: Y:\Data\PBLbase\Data\MODIS_BOS.gdb\MODIS_2001_BOS"
 						  "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "LatLong"
+	,	DialogData      = "LatLOng"
 	{
 		attribute<uint8> ReadData (domain);
 	}	
@@ -124,13 +124,15 @@ container Physical : using = "geography;classifications"
 		:  StorageName      = "%ToBURPDataDir%/physical/Water/InlandWater.shp"
 		,  StorageType      = "gdal.vect"
 		,  StorageReadOnly  = "True"
+		,	DialogData      = "LatLOng"
 		{
-			attribute<LatLong>           Geometry(poly);
-			attribute<m2>                Area                    := area(Geometry[WorldMollweide], float64)[m2];
-			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater.tif'";
+			// attribute<LatLong>           Geometry(poly);
+			attribute<Mollweide>         Geometry_MW (poly)      := convert(geometry, Mollweide);
+			attribute<m2>                Area                    := area(Geometry_MW, float64)[m2];
+			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Geometry_MW, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_'+ModelParameters/domain_EPSG+'.tif'";
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 			
-			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain.tif'";
+			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry_MW, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
 			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		}
 
@@ -151,22 +153,22 @@ container Physical : using = "geography;classifications"
 			attribute<uint32>  Fraction_Water0        (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
 			attribute<uint32>  Fraction_Water         (domain) := ((Fraction_Water0[float32] / ((ModelParameters/WGS_Gridsize / ModelParameters/WGS_Subgridsize)^2d)[float32]) * 100f)[uint32];
 			
-			attribute<bool>	   HasLand				  (domain) := Fraction_Water0 < pcount(domain_sub/domain_rel)[uint32], storagename = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/HasLand.tif'";
-			attribute<bool>    HasLand_Read			  (domain) : StorageName = "= PropValue(HasLand, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True";
+			attribute<bool>	   Write_HasLand          (domain) := Fraction_Water0 < pcount(domain_sub/domain_rel)[uint32], storagename = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/HasLand_'+ModelParameters/domain_EPSG+'.tif'";
+			attribute<bool>    Read_HasLand           (domain) : StorageName = "= PropValue(Write_HasLand, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True";
 			
 			unit<uint32> large_inland_water := select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) 
 			{
 				attribute<SphericalMercator> geometry_mer (poly) := org_rel->Geometry[SphericalMercator];
 			}
-			attribute<Float32> sqr_dist                    (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
+			parameter<Float32> sqr_dist                                        := Sqr(250000[meter]);
 			
-			attribute<Float32> Location2AllInland_distInfo   (CompactedDomain) := dist_info(Inland_Water/Geometry[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
-			attribute<km>      Location2AllInland_km         (CompactedDomain) := (Location2AllInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
+			attribute<Float32> Location2AllInland_distInfo   (CompactedDomain) := dist_info(Inland_Water/Geometry_MW[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
+			attribute<km>      Location2AllInland_km         (CompactedDomain) := value(Location2AllInland_distInfo,meter)[km];
+			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km_'+ModelParameters/domain_EPSG+'.tif'";
 			
 			attribute<Float32> Location2LargeInland_distInfo (CompactedDomain) := dist_info(large_inland_water/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
-			attribute<km>      Location2LargeInland_km       (CompactedDomain) := (Location2LargeInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'";
+			attribute<km>      Location2LargeInland_km       (CompactedDomain) := value(Location2LargeInland_distInfo,meter)[km];
+			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km_'+ModelParameters/domain_EPSG+'.tif'";
 			
 			unit<ipoint> Dist_AllInland_km   : StorageName = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
 			unit<ipoint> Dist_LargeInland_km : StorageName = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}

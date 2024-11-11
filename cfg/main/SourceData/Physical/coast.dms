@@ -9,42 +9,63 @@ container Coast
 	
 	unit<uint32> Coastline := Read_Coastline/out
 	{
-		attribute<LatLong>           Geometry     (poly)   := Read_Coastline/out/geometry;
-		// attribute<bool>              IsCoastline  (domain) := IsDefined(poly2grid(geometry,domain));
-		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain.tif'";
+		attribute<LatLong>           Geometry        (poly)   := Read_Coastline/out/geometry;
+		attribute<LatLong>           Geometry_simpl  (poly)   := bg_simplify_multi_polygon(Geometry, 1d / 3600d); 
+		
+		
+		
+		
+		attribute<Mollweide>         Geometry_MW     (poly)   := convert(Geometry, Mollweide);
+		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry_MW, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
 		attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		
-		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain.tif'";
+		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(Geometry_MW, domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain_'+ModelParameters/domain_EPSG+'.tif'";
 		attribute<bool>              Read_per_grid         (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 
-		unit<uint32> split_polygon := split_polygon(Geometry[LatLong_ip])
+		// find sea coast line. However, the coastline gpkg also has lakes, like big ones such as the Caspian Sea. We would like to include those coast lines, but what about small lakes? For example in Denmark and Norway, we could omit those.
+		
+		unit<uint32> split_polygon := bp_split_polygon(Geometry[LatLong_base_ip])
+		, Descr = "split multi polygons, identify lakes by subtracing the polygon layer from the outer polygon, and take a subset of the lakes and then the lakes large enough to be considered."
 		{
-			attribute<LatLong> Split (poly) := geometry[LatLOng];
-			attribute<LatLong> Outer (poly) := bg_outer_multi_polygon(Split);
+			attribute<LatLong>         Split (poly) := geometry[LatLong];
+			attribute<LatLong>         Outer (poly) := bg_outer_multi_polygon(Split);
+			attribute<LatLong_base_ip> Lakes (poly) := Outer[LatLong_base_ip] - Split[LatLong_base_ip];
 			
-			attribute<LatLong_ip> Lakes (poly) := Outer[LatLong_ip] - Split[LatLong_ip];
+			unit<uint32> lakes_clean := bp_split_union_polygon(Lakes, id(.))
+			{
+				attribute<SphericalMercator> Geometry_mer (poly) := convert(Geometry, SphericalMercator);
+				attribute<km2_f64>           area                := area(Geometry_mer, m2_f64)[km2_f64];
+			}
 			
-			unit<uint32> lakes_clean := split_partitioned_union_polygon(Lakes, id(.));
+			unit<uint32> large_lakes := select_with_org_rel(lakes_clean/area > 100000[km2_f64])
+			, Descr = "this results in only the Caspian Sea"
+			{
+				attribute<LatLong_base_ip> geometry (poly) := lakes_clean/geometry[org_rel];
+			}
 		}
 		
-		unit<uint32> union_outer_lakes := union_unit(split_polygon, split_polygon/lakes_clean)
+		unit<uint32> union_outer_lakes := union_unit(split_polygon, split_polygon/large_lakes)
+		, Descr = "union outer polygons with large lakes"
 		{
-			attribute<LatLong>           geometry     (poly) := union_data(.,split_polygon/Outer, split_polygon/lakes_clean/Geometry[LatLong]);
+			attribute<LatLong>           geometry     (poly) := union_data(.,split_polygon/Outer, split_polygon/large_lakes/Geometry[LatLong]);
 			attribute<SphericalMercator> Geometry_mer (poly) := convert(Geometry, SphericalMercator);
 		}
-
+		
 		unit<uint32> CoastArcSet := arc2segm(union_outer_lakes/Geometry_mer)
+		, Descr = "to prepare for a coast pointset, we need to split up the coastlines into smaller segments to ensure enough points."
 		{
-			unit<uint32> pointset := union_unit(.,.)
-			{
-				attribute<SphericalMercator> point    := union_data(., ../point, ../nextpoint);
-				attribute<..>                sequence := union_data(., id(..), id(..));
-				attribute<uint32>            ordinal  := union_data(., const(0,..), const(1,..));
-			}
-			attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
+			// unit<uint32> pointset := union_unit(.,.)
+			// {
+				// attribute<SphericalMercator> point    := union_data(., ../point, ../nextpoint);
+				// attribute<..>                sequence := union_data(., id(..), id(..));
+				// attribute<uint32>            ordinal  := union_data(., const(0,..), const(1,..));
+			// }
+			// attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
 		}
 		
-		unit<uint32> DynaPoints := dyna_point_with_ends(CoastArcSet/point, CoastArcSet/nextpoint, 100d);
+		unit<uint32> DynaPoints   := dyna_point_with_ends(CoastArcSet/point, CoastArcSet/nextpoint, 100d)
+		, Descr ="Create coastline pointset with small enough steps, say every 100m";
+		
 		unit<uint32> UqDynaPoints := unique(DynaPoints/point);
 	}
 	
@@ -62,8 +83,8 @@ container Coast
 	}  	
 	
 	attribute<float32> Location2Coast_mer_segm   (CompactedDomain) := from_domain/dist[float32]; 
-	attribute<km>      Location2Coast_km_CD      (CompactedDomain) := (Location2Coast_mer_segm * latlong_base/lengthdegree * CompactedDomain/lat_factor);
-	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km_CD[CompactedDomain/BaseGrid], StorageName = "='%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/Location2Coast_km.tif'";
+	attribute<km>      Location2Coast_km_CD      (CompactedDomain) := value(Location2Coast_mer_segm, meter)[km];
+	attribute<km>      Location2Coast_km_domain_export    (domain) := Location2Coast_km_CD[CompactedDomain/BaseGrid], StorageName = "='%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/Location2Coast_km_'+ModelParameters/domain_EPSG+'.tif'";
 
 	unit<ipoint> Location2Coast_km
 	:	StorageName     = "=PropValue(Location2Coast_km_domain_export, 'StorageName')"
@@ -72,9 +93,10 @@ container Coast
 	,	DialogData      = "LatLong"
 	, 	LazyCalculated  = "true"
 	{
-		attribute<km>      GridData (domain);
-		attribute<km>      ReadData (domain) := MakeDefined(GridData,250[km]);
-		attribute<float32> Coastline(domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
+		attribute<km>      ReadData  (domain);
+		// attribute<km>      ReadData  (domain) := MakeDefined(GridData,250[km]);
+		attribute<km>      Coastline (domain) := min_elem(MakeDefined(ReadData, 250[km]), 250[km]);//null-->250, INF=Infinity -->250
+		// attribute<float32> Coastline (domain) := min_elem(ReadData,250f);//null-->250, INF=Infinity -->250
 
 		unit<uint32> Country:= SourceData/RegionalUnits/Countries 
 		{

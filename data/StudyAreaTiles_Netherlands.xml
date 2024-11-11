@@ -4,17 +4,17 @@
 <DefaultInfo>
 	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
-	<GeoDmsVersion>GeoDms 15.2.0 [May 27 2024 11:15:24]
+	<GeoDmsVersion>GeoDms 15.10.2 [Oct 18 2024 17:07:21]
 	</GeoDmsVersion>
-	<SessionStartTime>2024-06-07 16:57:14
+	<SessionStartTime>2024-11-11 11:07:15
 	</SessionStartTime>
-	<CurrentTime>2024-06-07 17:33:56
+	<CurrentTime>2024-11-11 12:12:22
 	</CurrentTime>
-	<StatusFlags>0x6e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
+	<StatusFlags>0x17e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
 </DefaultInfo>
 <Software>
-	<GeoDmsVersion>15.2.0
+	<GeoDmsVersion>15.10.2
 	</GeoDmsVersion>
 </Software>
 <Config>
@@ -34,40 +34,34 @@
 	</ComputerName>
 </Environment>
 <Git>
-	<RevisionInfo>heads/main<BR/>
-		On branch main<BR/>
-		Your branch is up to date with &apos;origin/main&apos;.<BR/>
-		<BR/>
+	<RevisionInfo>heads/MollweideImpl<BR/>
+		On branch MollweideImpl<BR/>
 		Changes not staged for commit:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
 			modified:   cfg/main/Geography.dms<BR/>
 			modified:   cfg/main/Geography/impl.dms<BR/>
 			modified:   cfg/main/ModelParameters.dms<BR/>
+			modified:   cfg/main/SourceData.dms<BR/>
+			modified:   cfg/main/SourceData/Builtup.dms<BR/>
 			modified:   cfg/main/SourceData/Physical.dms<BR/>
-			modified:   data/StudyAreaTiles_Africa.dbf<BR/>
-			modified:   data/StudyAreaTiles_Africa.xml<BR/>
-			modified:   data/StudyAreaTiles_Asia.dbf<BR/>
-			modified:   data/StudyAreaTiles_Asia.xml<BR/>
-			modified:   data/StudyAreaTiles_Australia_Oceania.dbf<BR/>
-			modified:   data/StudyAreaTiles_Australia_Oceania.xml<BR/>
+			modified:   cfg/main/SourceData/Physical/coast.dms<BR/>
+			modified:   cfg/main/SourceData/Physical/natural_hazards.dms<BR/>
+			modified:   cfg/main/SourceData/Policy.dms<BR/>
+			modified:   cfg/main/SourceData/Population.dms<BR/>
+			modified:   cfg/main/SourceData/RegionalUnits.dms<BR/>
+			modified:   cfg/main/SourceData/Socioeconomic.dms<BR/>
+			modified:   cfg/main/SourceData/Socioeconomic/infrastructure.dms<BR/>
+			modified:   cfg/main/Units.dms<BR/>
 			modified:   data/StudyAreaTiles_Europe.dbf<BR/>
 			modified:   data/StudyAreaTiles_Europe.xml<BR/>
-			modified:   data/StudyAreaTiles_Nigeria.dbf<BR/>
-			modified:   data/StudyAreaTiles_Nigeria.xml<BR/>
-			modified:   data/StudyAreaTiles_North_America.dbf<BR/>
-			modified:   data/StudyAreaTiles_North_America.xml<BR/>
-			modified:   data/StudyAreaTiles_South_America.dbf<BR/>
-			modified:   data/StudyAreaTiles_South_America.xml<BR/>
-			modified:   data/StudyAreaTiles_World.dbf<BR/>
-			modified:   data/StudyAreaTiles_World.xml<BR/>
 		<BR/>
 		Untracked files:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
-			cfg/main/SourceData/Physical2.dms<BR/>
+			Desktop.ini<BR/>
 		<BR/>
 		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
-		8de0be49f794fbe32803343562e84ce6df382183<BR/>
+		4de9f19d0c1c967a594cda526beb82ff94ae8ab1<BR/>
 		
 	</RevisionInfo>
 </Git>

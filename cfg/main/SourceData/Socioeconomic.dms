@@ -1,22 +1,22 @@
 container Socioeconomic
 {
-	unit<ipoint> TravelTime :
-	StorageName     = "%ToBURPDataDir%/Socioeconomic/TravelTime/TravelTime_minutes_int.tif",
-	StorageType     = "gdal.grid",
-	Source          = "PBL Database: 	Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\TravelTime.gdb"
-					  "Raster: 	tt_pop50k_30sec"
-					  "Result of analyses at road-network (GRIP) and POI-file (tt_pop50k_30secCenterpoint --> 8407 records world)"
-					  "Database:	Y:\data\PBLbase\Data\GRIP_global_roads_vs2.gdb"
-					  "Feature Class:	grip_global_vs2_2009_new",
-	StorageReadOnly = "True",
-	DialogData      = "Geography/LatLong"
-	{
-		attribute<uint8>   GridData   (Geography/domain);
-		attribute<float32> ReadData32 (Geography/domain) :=  value(GridData,float32);
-		attribute<uint8>   TravelTime (Geography/domain) :=  MakeDefined(GridData,60b);
-	}
+	// unit<ipoint> TravelTime :
+	// StorageName     = "%ToBURPDataDir%/Socioeconomic/TravelTime/TravelTime_minutes_int.tif",
+	// StorageType     = "gdal.grid",
+	// Source          = "PBL Database: 	Y:\Kennisbasis\Leefomgeving\data_Leefomgeving\Data\Project\Temp M500337AA\Simcity\Modellenwerk2\Basisdata\TravelTime.gdb"
+					  // "Raster: 	tt_pop50k_30sec"
+					  // "Result of analyses at road-network (GRIP) and POI-file (tt_pop50k_30secCenterpoint --> 8407 records world)"
+					  // "Database:	Y:\data\PBLbase\Data\GRIP_global_roads_vs2.gdb"
+					  // "Feature Class:	grip_global_vs2_2009_new",
+	// StorageReadOnly = "True",
+	// DialogData      = "Geography/LatLong"
+	// {
+		// attribute<uint8>   GridData   (Geography/domain);
+		// attribute<float32> ReadData32 (Geography/domain) :=  value(GridData,float32);
+		// attribute<uint8>   TravelTime (Geography/domain) :=  MakeDefined(GridData,60b);
+	// }
 	
-	container access_to_settlements 
+/* 	container access_to_settlements 
 	{
 		container readgrids:= for_each_ne(gridslist/label, 'load_access_grids('+quote(gridslist/path)+')');
 
@@ -39,6 +39,6 @@ container Socioeconomic
 			}
 		}
 	}
-	
+ */	
 	#include <infrastructure.dms>
 }

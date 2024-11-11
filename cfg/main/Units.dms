@@ -16,4 +16,9 @@ container Units
 	unit<Float32> Person_BuiltUpKm2_decade := Person / BuiltUpKm2 / decade;
 	unit<float32> Suit;
 	unit<float32> SuitNeg;
+	
+	unit<Float64> Meter_f64                    := BaseUnit('m', float64);
+	unit<Float64> m2_f64                       := Meter_f64 * Meter_f64;
+	unit<Float64> km_f64                       := 1000.0 * Meter_f64;
+	unit<Float64> km2_f64                      := km_f64 * km_f64;
 }

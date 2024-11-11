@@ -1,23 +1,18 @@
 container Impl 
 {
-	parameter<float64> SourceRasterSubFactor      := ModelParameters/WGS_Subgridsize / 3600.0;
-	parameter<float64> SourceRasterFactor         := ModelParameters/WGS_Gridsize / 3600.0;
-	unit<ipoint>       LatLong_mdegrees           := gridset(LatLong_Base, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
-	parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
-		
 	unit<wpoint> ProtoDomain :=
 		gridset(
-			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
-			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong_base) 
-			, point_yx(90d, -180d, LatLong_base) //top left
+			range(Mollweide_Base, Mollweide_grid_base/LB, Mollweide_grid_base/UB)
+			, point_yx(-ModelParameters/MW_Gridsize, ModelParameters/MW_Gridsize, Mollweide_Base) 
+			, Mollweide_grid_base/TopLeft //top left
 			, wpoint
 		);
 		
 	unit<ipoint> ProtoDomain_sub :=
 		gridset(
-			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
-			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong_base) 
-			, point_yx(90d, -180d, LatLong_base) //top left
+			range(Mollweide_Base, Mollweide_grid_base/LB, Mollweide_grid_base/UB)
+			, point_yx(-ModelParameters/MW_Subgridsize, ModelParameters/MW_Subgridsize, Mollweide_Base) 
+			, Mollweide_grid_base/TopLeft //top left
 			, ipoint
 		);
 		
@@ -26,11 +21,12 @@ container Impl
 	
 	unit<spoint>  Tile := gridset(ProtoDomain, TileSize, TileOffset, spoint)
 	{
-		attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
-		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(LatLong_per_ProtoDomain);
+		// attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
+		attribute<bool>         MW_per_ProtoDomain      (ProtoDomain) := poly2grid(Mollweide/geometry, ProtoDomain);
+		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(MW_per_ProtoDomain);
 		attribute<ProtoDomain>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
 		attribute<ProtoDomain>  UB                                    := max(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.])+point_yx(1w, 1w);
-		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, ProtoDomain_rel);
+		attribute<bool>         HasStudyArea                          := any(MW_per_ProtoDomain, ProtoDomain_rel);
 		
 		attribute<.>            ProtoDomain_rel         (ProtoDomain) := mapping(ProtoDomain, .);
 	}
@@ -43,7 +39,7 @@ container Impl
 		attribute<ProtoDomain_sub>  UB_sub := UB[ProtoDomain_sub];
 	}
 
-	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'.dbf'" // decouple by renaming this file when produced
+	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'" // decouple by renaming this file when produced
 	{
 		attribute<uint16>           LB_X := pointcol(LB);
 		attribute<uint16>           LB_y := pointrow(LB);
@@ -57,7 +53,7 @@ container Impl
 	} 
 
 	// from here on, we only use the decoupled study area tiles and no longer have to process the full extent of the study area.
-	unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'.dbf'", StorageReadOnly = "true"
+	unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
 	{
 		attribute<int32>            LB_X;
 		attribute<int32>            LB_y;
@@ -87,7 +83,7 @@ container Impl
 		parameter<string> StudyArea_name;
 		///
 		
-		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'.dbf'", StorageReadOnly = "true"
+		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
 		{
 			attribute<int32>            LB_X;
 			attribute<int32>            LB_y;
@@ -105,7 +101,8 @@ container Impl
 
 		unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
 		{
-			attribute<LatLong>        geometry      := id(.)[LatLong];
+			// attribute<LatLong>        geometry      := id(.)[LatLong];
+			attribute<Mollweide>      geometry      := id(.)[Mollweide];
 		}
 	}
 
@@ -113,14 +110,14 @@ container Impl
 	{
 		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
 		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
-		attribute<Bool>   InStudyArea            (domain) := poly2grid(LatLong/geometry, domain);
+		attribute<Bool>   InStudyArea            (domain) := poly2grid(Mollweide/geometry, domain);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
 
 		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
-		attribute<bool>   HasLand				 (domain) := SourceData/Physical/Water/AllWater/HasLand_Read;
+		attribute<bool>   HasLand				 (domain) := SourceData/Physical/Water/AllWater/Read_HasLand;
 		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
 																&& InBU_5kmClip                         // within certain distance from bu-area.
 																&& (HasLand || HasBuiltup || HasPop)	// needs to contain some land, or built-up, or population
@@ -128,4 +125,74 @@ container Impl
 																&& (IsNotIce || HasBuiltup || HasPop);  // it is not ice, unless there is builtup or population in a cell categorised as a ice
 	}
 
+	parameter<float64> SourceRasterSubFactor      := ModelParameters/WGS_Subgridsize / 3600.0;
+	parameter<float64> SourceRasterFactor         := ModelParameters/WGS_Gridsize / 3600.0;
+	// unit<ipoint>       LatLong_mdegrees           := gridset(LatLong_Base, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
+	// parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
+		
+	unit<wpoint> ProtoDomain_LatLong :=
+		gridset(
+			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
+			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong_base) 
+			, point_yx(90d, -180d, LatLong_base) //top left
+			, wpoint
+		);
+		
+	unit<ipoint> ProtoDomain_sub_LatLong :=
+		gridset(
+			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
+			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong_base) 
+			, point_yx(90d, -180d, LatLong_base) //top left
+			, ipoint
+		);
+
+	unit<spoint>  Tile_LatLong := gridset(ProtoDomain_LatLong, TileSize, TileOffset, spoint)
+	{
+		attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain_LatLong) := poly2grid(LatLong/geometry, ProtoDomain_LatLong);
+		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(LatLong_per_ProtoDomain);
+		attribute<ProtoDomain_LatLong>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
+		attribute<ProtoDomain_LatLong>  UB                                    := max(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.])+point_yx(1w, 1w);
+		attribute<bool>         HasStudyArea                          := any(LatLong_per_ProtoDomain, ProtoDomain_rel);
+		
+		attribute<.>            ProtoDomain_rel         (ProtoDomain_LatLong) := mapping(ProtoDomain_LatLong, .);
+	}
+	unit<uint32> StudyAreaTile_Select_LatLong := select_with_org_rel(Tile_LatLong/HasStudyArea)
+	{
+		attribute<ProtoDomain_LatLong>      LB     := Tile_LatLong/LB[org_rel];
+		attribute<ProtoDomain_LatLong>      UB     := Tile_LatLong/UB[org_rel];
+		attribute<ProtoDomain_sub_LatLong>  LB_sub := LB[ProtoDomain_sub_LatLong];
+		attribute<ProtoDomain_sub_LatLong>  UB_sub := UB[ProtoDomain_sub_LatLong];
+	}
+
+	unit<uint32> StudyAreaTile_Create_LatLong := StudyAreaTile_Select_LatLong, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_LatLong.dbf'" // decouple by renaming this file when produced
+	{
+		attribute<uint16>           LB_X := pointcol(LB);
+		attribute<uint16>           LB_y := pointrow(LB);
+		attribute<uint16>           UB_X := pointcol(UB);
+		attribute<uint16>           UB_y := pointrow(UB);
+		
+		attribute<int32>            LB_sub_X := pointcol(LB_sub);
+		attribute<int32>            LB_sub_y := pointrow(LB_sub);
+		attribute<int32>            UB_sub_X := pointcol(UB_sub);
+		attribute<int32>            UB_sub_y := pointrow(UB_sub);
+	} 
+
+	// from here on, we only use the decoupled study area tiles and no longer have to process the full extent of the study area.
+	unit<uint32> StudyAreaTile_LatLong: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_LatLong.dbf'", StorageReadOnly = "true"
+	{
+		attribute<int32>            LB_X;
+		attribute<int32>            LB_y;
+		attribute<int32>            UB_X;
+		attribute<int32>            UB_y;
+		attribute<int32>            LB_sub_X;
+		attribute<int32>            LB_sub_y;
+		attribute<int32>            UB_sub_X;
+		attribute<int32>            UB_sub_y;
+		
+		attribute<ProtoDomain_LatLong>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain_LatLong);
+		attribute<ProtoDomain_LatLong>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain_LatLong);
+		
+		attribute<ProtoDomain_sub_LatLong>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub_LatLong);
+		attribute<ProtoDomain_sub_LatLong>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub_LatLong);
+	}
 }

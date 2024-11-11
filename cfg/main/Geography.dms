@@ -3,7 +3,7 @@ container Geography : using = "units"
 	#include<impl.dms>
 	
 	unit<dpoint> LatLong       := ='StudyAreas/LatLong_'+ModelParameters/StudyArea;
-	unit<dpoint> LatLong_Base  : SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong"
+	unit<dpoint> LatLong_Base  : SpatialReference = "EPSG:4326", DialogData = "wms_layer_latlong", Descr = "1 degree = 60 arc min; 1 arc min = 60 arc seconds; 1 degree = 3600 arc seconds; 1 arc second is about 30m at the equator."
 	{
 		parameter<float32> ViewPortMinSize       := 1f / 3600f;
 		parameter<float32> PenWorldWidth         := 100f / 3600f, DialogType = "PenWorldWidth";
@@ -19,48 +19,46 @@ container Geography : using = "units"
 	
 
 	unit<ipoint> Mollweide_grid_base
-	 {
+	{
 		parameter<float64> x_min := -18040095.7d;
 		parameter<float64> x_max := 18040095.7d;
 		parameter<float64> y_min := -9020047.85d;
 		parameter<float64> y_max := 9020047.85d;
 		
+		parameter<Mollweide_base> LB := point_xy(x_min, y_min, Mollweide_base);
+		parameter<Mollweide_base> UB := point_xy(x_max, y_max, Mollweide_base);
+		parameter<Mollweide_base> TopLeft := point_xy(x_min, y_max, Mollweide_base);
+		
 		parameter<int32> nr_cols := int32((x_max - x_min) / ModelParameters/MW_Gridsize);
 		parameter<int32> nr_rows := int32((y_max - y_min) / ModelParameters/MW_Gridsize);
 	}
 	
-	unit<ipoint> Mollweide_grid :=
-		range(
-			gridset(
-				Mollweide
-				,point_xy(ModelParameters/MW_Gridsize, -ModelParameters/MW_Gridsize, Mollweide)
-				,point_xy(Mollweide_grid_base/x_min, Mollweide_grid_base/y_max, Mollweide) //topleft
-				,ipoint
-			)
-			,point_xy(0i, 0i)
-			,point_xy(Mollweide_grid_base/nr_cols, Mollweide_grid_base/nr_rows)
-		)
-	{
-		attribute<Mollweide> geometry       := mapping(., Mollweide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, Mollweide);
-		// attribute<LatLong>   LatLong_coord  := point_xy(MW_LL_conversion_table/Read_LL_x, MW_LL_conversion_table/Read_LL_y, LatLong);
-		attribute<LatLong>   LatLong_coord  := MW_LL_conversion_table/Calc_LatLong_coord;
+	// unit<ipoint> Mollweide_grid :=
+		// range(
+			// gridset(
+				// Mollweide
+				// ,point_xy(ModelParameters/MW_Gridsize, -ModelParameters/MW_Gridsize, Mollweide)
+				// ,point_xy(Mollweide_grid_base/x_min, Mollweide_grid_base/y_max, Mollweide) //topleft
+				// ,ipoint
+			// )
+			// ,point_xy(0i, 0i)
+			// ,point_xy(Mollweide_grid_base/nr_cols, Mollweide_grid_base/nr_rows)
+		// )
+	// {
+		// attribute<Mollweide> geometry       := mapping(., Mollweide) + point_yx(-0.5d * ModelParameters/MW_Gridsize, 0.5d * ModelParameters/MW_Gridsize, Mollweide);
+		// attribute<LatLong>   LatLong_coord  := MW_LL_conversion_table/Calc_LatLong_coord;
 		
-		unit<uint64> points := select_with_org_rel(isDefined(geometry))
-		{
-			attribute<Mollweide>            geometry  := org_rel -> geometry;
-			attribute<Mollweide_grid>       grid_rel  := geometry[Mollweide_grid];	
-		}
+		// unit<uint64> points := select_with_org_rel(isDefined(geometry))
+		// {
+			// attribute<Mollweide>            geometry  := org_rel -> geometry;
+			// attribute<Mollweide_grid>       grid_rel  := geometry[Mollweide_grid];	
+		// }
 		
-		container MW_LL_conversion_table
-		{
-			attribute<LatLong>   Calc_LatLong_coord  (..) := convert(geometry, LatLong);
-			// attribute<float64>   Write_LL_x          (..) := PointCol(Calc_LatLong_coord), StorageName = "='%ToBURPDataDir%/Geography/Mollweide_LatLong_Conversion_Xcoord_'+ModelParameters/StudyArea+'.tif'";
-			// attribute<float64>   Write_LL_y          (..) := PointRow(Calc_LatLong_coord), StorageName = "='%ToBURPDataDir%/Geography/Mollweide_LatLong_Conversion_Ycoord_'+ModelParameters/StudyArea+'.tif'";
-			// attribute<float64>   Read_LL_x           (..) : StorageName = "='%ToBURPDataDir%/Geography/Mollweide_LatLong_Conversion_Xcoord_'+ModelParameters/StudyArea+'.tif'", StorageReadOnly = "true";
-			// attribute<float64>   Read_LL_y           (..) : StorageName = "='%ToBURPDataDir%/Geography/Mollweide_LatLong_Conversion_Ycoord_'+ModelParameters/StudyArea+'.tif'", StorageReadOnly = "true";
-			
-		}
-	}
+		// container MW_LL_conversion_table
+		// {
+			// attribute<LatLong>   Calc_LatLong_coord  (..) := convert(geometry, LatLong);
+		// }
+	// }
 
 	container StudyAreas
 	{
@@ -104,30 +102,29 @@ container Geography : using = "units"
 		}
 	}
 
-
-
 	unit<wpoint> domain := TiledUnit(Impl/StudyAreaTile/LB, Impl/StudyAreaTile/UB)
 	{
-		unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
-		{
-			attribute<float64>    lat_top           := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
-			attribute<float64>    lat_mid           := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
-			attribute<Float32>    lat_factor        := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-			parameter<km2>        Equatorial_Area   := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
-			attribute<km2>        area              := lat_factor * Equatorial_Area;
-		}
+		// unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
+		// {
+			// attribute<float64>    lat_top           := pointrow( point_yx(ID(.), const(0w, .), domain)[Mollweide] );
+			// attribute<float64>    lat_mid           := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[Mollweide]);
+			// attribute<Float32>    lat_factor        := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			// parameter<km2>        Equatorial_Area   := sqr(Float32(pointrow(getprojectionfactor(domain)[Mollweide])) * LatLong_base/lengthdegree);
+			// attribute<km2>        area              := lat_factor * Equatorial_Area;
+		// }
 		
-		attribute<rowset>         rowset_rel        := pointrow(ID(.)), LazyCalculated = "True";
-		attribute<LatLong>        geometry          := id(.)[LatLong], LazyCalculated = "True";
-		attribute<Mollweide_grid> mollweide_rel     := convert(geometry, Mollweide_grid), LazyCalculated = "True";
+		// attribute<rowset>         rowset_rel        := pointrow(ID(.)), LazyCalculated = "True";
+		attribute<Mollweide>      geometry          := id(.)[Mollweide], LazyCalculated = "True";
+		// attribute<Mollweide_grid> mollweide_rel     := convert(geometry, Mollweide_grid), LazyCalculated = "True";
 
 		attribute<domain>         domain_rel        := mapping(., domain);
 		attribute<domain_sub>     domain_sub_rel    := mapping(., domain_sub);  
 
-		parameter<uint32>         boundrange_c      := uint32(PointCol(boundrange(domain)));
-		attribute<Float32>        lat_factor        := rowset_rel->lat_factor, LazyCalculated = "True";
-		attribute<km2>            area              := rowset_rel->area, LazyCalculated = "True";
-		attribute<bool>           IsCompactedDomain := Impl/GridData/FreeLand, StorageName = "='%LocalDataProjDir%/Temp/CD/'+/ModelParameters/StudyArea+'.tif'";
+		// parameter<uint32>         boundrange_c      := uint32(PointCol(boundrange(domain)));
+		// attribute<Float32>        lat_factor        := rowset_rel->lat_factor, LazyCalculated = "True";
+		// attribute<km2>            area              := rowset_rel->area, LazyCalculated = "True";
+		attribute<km2>            area              := const(1[km2], .);
+		attribute<bool>           IsCompactedDomain := Impl/GridData/FreeLand; //, StorageName = "='%LocalDataProjDir%/Temp/CD/'+/ModelParameters/StudyArea+'.tif'";
 		
 		container Read_PerContinentFiles :=
 			for_each_ndnvat(
@@ -139,7 +136,7 @@ container Geography : using = "units"
 				, 'gdal.grid'
 			)
 		{	
-			attribute<Classifications/Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry, impl/MakeDomain_World/domain);
+			attribute<Classifications/Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
 			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif";
 		}
 
@@ -151,27 +148,73 @@ container Geography : using = "units"
 			);
 		
 	}
+	
+	// unit<wpoint> domain := TiledUnit(Impl/StudyAreaTile/LB, Impl/StudyAreaTile/UB)
+	// {
+		// unit<uint16> rowset := range(uint16, pointrow(Lowerbound(domain)), pointrow(Upperbound(domain)))
+		// {
+			// attribute<float64>    lat_top           := pointrow( point_yx(ID(.), const(0w, .), domain)[LatLong] );
+			// attribute<float64>    lat_mid           := lat_top  + 0.5 * pointrow(getprojectionfactor(domain)[LatLong]);
+			// attribute<Float32>    lat_factor        := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			// parameter<km2>        Equatorial_Area   := sqr(Float32(pointrow(getprojectionfactor(domain)[LatLong])) * LatLong_base/lengthdegree);
+			// attribute<km2>        area              := lat_factor * Equatorial_Area;
+		// }
+		
+		// attribute<rowset>         rowset_rel        := pointrow(ID(.)), LazyCalculated = "True";
+		// attribute<LatLong>        geometry          := id(.)[LatLong], LazyCalculated = "True";
+		// attribute<Mollweide_grid> mollweide_rel     := convert(geometry, Mollweide_grid), LazyCalculated = "True";
+
+		// attribute<domain>         domain_rel        := mapping(., domain);
+		// attribute<domain_sub>     domain_sub_rel    := mapping(., domain_sub);  
+
+		// parameter<uint32>         boundrange_c      := uint32(PointCol(boundrange(domain)));
+		// attribute<Float32>        lat_factor        := rowset_rel->lat_factor, LazyCalculated = "True";
+		// attribute<km2>            area              := rowset_rel->area, LazyCalculated = "True";
+		// attribute<bool>           IsCompactedDomain := Impl/GridData/FreeLand, StorageName = "='%LocalDataProjDir%/Temp/CD/'+/ModelParameters/StudyArea+'.tif'";
+		
+		// container Read_PerContinentFiles :=
+			// for_each_ndnvat(
+				// Classifications/Continents/name
+				// , Domain_perContinent
+				// , Classifications/Continents/name
+				// , float32
+				// , '%LocalDataProjDir%/Temp/CD/'+Classifications/Continents/name+'.tif'
+				// , 'gdal.grid'
+			// )
+		// {	
+			// attribute<Classifications/Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry, impl/MakeDomain_World/domain);
+			// attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif";
+		// }
+
+		// container Domain_perContinent :=
+			// for_each_nex(
+				// Classifications/Continents/name
+				// , 'Geography/Impl/MakeDomain_perContinent/'+Classifications/Continents/name+'/domain'   
+				// , wpoint
+			// );
+		
+	// }
 
 	unit<ipoint> domain_sub := TiledUnit(Impl/StudyAreaTile/LB_sub, Impl/StudyAreaTile/UB_sub)
 	{
 		attribute<domain>     domain_rel     := mapping(., domain);
 		attribute<domain_sub> domain_sub_rel := mapping(., domain_sub);  
 		
-		unit<int32> rowset := range(int32, pointrow(Lowerbound(domain_sub)), pointrow(Upperbound(domain_sub)))
-		{
-			attribute<float64> lat_top    := pointrow( point_yx(ID(.), const(0i, .), domain_sub)[LatLong] );
-			attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain_sub)[LatLong]);
-			attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
-			attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain_sub)[LatLong])) * LatLong_base/lengthdegree));
-		}
-		attribute<rowset>     rowset_rel   := pointrow(ID(.)), LazyCalculated = "True";
-		attribute<km2>        area         := rowset_rel->area, LazyCalculated = "True"; //use rowset area
+		// unit<int32> rowset := range(int32, pointrow(Lowerbound(domain_sub)), pointrow(Upperbound(domain_sub)))
+		// {
+			// attribute<float64> lat_top    := pointrow( point_yx(ID(.), const(0i, .), domain_sub)[LatLong] );
+			// attribute<float64> lat_mid    := lat_top  + 0.5 * pointrow(getprojectionfactor(domain_sub)[LatLong]);
+			// attribute<Float32> lat_factor := Float32( cos(lat_mid * 2d*pi() / 360d ) );
+			// attribute<km2>     area       := (lat_factor * sqr(Float32(pointrow(getprojectionfactor(domain_sub)[LatLong])) * LatLong_base/lengthdegree));
+		// }
+		// attribute<rowset>     rowset_rel   := pointrow(ID(.)), LazyCalculated = "True";
+		attribute<km2>        area         := const(0.01[km2],.);
 	}
 	
 	unit<uint32> CompactedDomain := select_with_org_rel(domain/IsCompactedDomain), label = "allocation domain", DialogType = "Map", DialogData = "BaseGrid", using = "SourceData/RegionalUnits"
 	{
 		attribute<.>                 BaseGrid  (domain)    := recollect_by_cond(domain/IsCompactedDomain, ID(.));
-		attribute<float32>           lat_factor            := collect_by_cond(CompactedDomain, domain/lat_factor);
+		// attribute<float32>           lat_factor            := collect_by_cond(CompactedDomain, domain/lat_factor);
 		attribute<km2>               area                  := domain_rel->area;
 		attribute<SphericalMercator> geometry_mer          := convert(domain/geometry[domain_rel], SphericalMercator);
 		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];

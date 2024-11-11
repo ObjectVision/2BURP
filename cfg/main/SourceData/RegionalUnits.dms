@@ -7,8 +7,8 @@ container RegionalUnits
 		attribute<string>            ISO3                     := ZoneId;
 		attribute<LatLong_base>      Geometry_LL       (poly) := set_countries/Geometry_LL;
 		attribute<Mollweide_base>    Geometry_MW       (poly) := set_countries/geometry_MW;
-		attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
-		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[Impl/LatLong_mdegrees];
+		// attribute<SphericalMercator> Geometry_WM       (poly) := convert(Geometry_LL, SphericalMercator);
+		// attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly) := Geometry_LL[Impl/LatLong_mdegrees];
 		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
 		attribute<string>            continent_name           := Continent;
 	}
@@ -30,13 +30,13 @@ container RegionalUnits
 		attribute<string>            Label; 
 		attribute<string>            ISO3; 
 		attribute<LatLong_base>      geometry_LL (poly);
-		attribute<SphericalMercator> Geometry_WM (poly); 
+		// attribute<SphericalMercator> Geometry_WM (poly); 
 		attribute<Mollweide_base>    Geometry_MW (poly); 
-		attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly);
+		// attribute<Impl/LatLong_mdegrees>  Geometry_mdegrees (poly);
 		attribute<Continents>        Continents_rel;
 		attribute<string>            continent_name;
-		attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
-		attribute<.>                 per_domain              (domain) := poly2grid(geometry_LL , domain);
+		// attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
+		attribute<.>                 per_domain              (domain) := poly2grid(geometry_MW , domain);
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
@@ -71,37 +71,36 @@ container RegionalUnits
 		// NOTE: only use after 15.3 has been made available
 		container PerContinentGeometry :=  // available in GeoDms 15.3, see https://github.com/ObjectVision/GeoDMS/issues/742; 
 			for_each_nedvvcp(name
-			,	'Continents/geometry_LL[Continents/v/'+name+']'
+			,	'Continents/geometry_MW[Continents/v/'+name+']'
 			,	void
 			, LatLong_base
 			);
 	}
 	
-	unit<uint8> Mainland := unique_uint8(const(1u,Countries))
-	{
-		attribute<LatLong> geometry (poly) := bp_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
-	}
+	// unit<uint8> Mainland := unique_uint8(const(1u,Countries))
+	// {
+		// attribute<LatLong> geometry (poly) := bp_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
+	// }
 	
 	unit<uint8> World : nrofrows = 1
 	{
 		attribute<string>     Label           := const('World',.);
-		attribute<LatLong>    geometry (poly) := bp_union_polygon(Continents/geometry[LatLong_ip], continents/World_rel)[LatLong];
+		attribute<Mollweide_base>  geometry_MW (poly) := bp_union_polygon(Continents/geometry_MW[Mollweide_base_ip], continents/World_rel)[Mollweide_base];
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
 	
 
 	unit<uint32> FunctionalAreas_all
-	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'.shp'"
+	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_'+ModelParameters/domain_EPSG+'.shp'"
 	, StorageType = "gdal.vect"
 	, StorageReadOnly = "true"
-	, DialogData      = "geometry_LL"
-	, DialogType      = "map"
+	, DialogData      = "Mollweide_base"
 	{
-		attribute<Mollweide_base> geometry_MW (poly);
+		attribute<Mollweide_base> geometry_MW (poly) := geometry;
 		attribute<LatLong_base>   geometry_LL (poly)                    := convert(geometry_MW, LatLong_base);
 		attribute<string>         Label                                 := name;
-		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
+		attribute<.>              per_domain                   (domain) := poly2grid(geometry_MW, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 		attribute<bool>           IsStudyArea                           := pcount(per_CompactedDomain) > 1000;
 		attribute<string>         Continent                             := rjoin(country, set_countries/zoneid, set_countries/continent);
@@ -113,7 +112,7 @@ container RegionalUnits
 	, DialogType      = "map"
 	{
 		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
-		attribute<.>              per_domain                   (domain) := poly2grid(geometry_LL, domain);
+		attribute<.>              per_domain                   (domain) := poly2grid(geometry_MW, domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 		attribute<bool>			  ignore_check_enough_suitable_locations:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
 		attribute<km2>			  cd_area:= sum(CompactedDomain/area, CompactedDomain/FunctionalAreas_rel);
