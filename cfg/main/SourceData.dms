@@ -5,12 +5,11 @@ container SourceData : using = "geography;units"
 		parameter<bool> a1_Countries             := true, explicitsuppliers = "RegionalUnits/store_Countries", Descr = "Only necessary when running for the first time. This will be written into the SD-directory.";
 		parameter<bool> a2_Continents            := true, explicitsuppliers = "RegionalUnits/store_Continents", Descr = "Only necessary when running for the first time. This will be written into the SD-directory.";
 		
-		parameter<bool> b1_InlandWater           := true, explicitsuppliers = "Physical/Water/Inland_Water/Write_per_grid;Physical/Water/Inland_Water/Write_per_subgrid";
-		parameter<bool> b2_Coastline             := true, explicitsuppliers = "Physical/Coast/Coastline/Write_per_subgrid;Physical/Coast/Coastline/Write_per_grid";
-		parameter<bool> b3_Hasland               := true, explicitsuppliers = "Physical/Water/AllWater/Write_HasLand";
-		parameter<bool> b4_Dist2InlandWater      := true, explicitsuppliers = "Physical/Water/Location2LargeInlandWater_sqr_domain_export;Physical/Water/Location2AnyInlandWater_sqr_domain_export";
-		parameter<bool> b5_Dist2Coast            := true, explicitsuppliers = "Physical/Coast/Location2Coast_sqr_domain_export";
-		parameter<bool> b6_Dist2Roads            := true, explicitsuppliers = "Socioeconomic/Infrastructure/Location2Roads123_sqr_domain_export;Socioeconomic/Infrastructure/Location2Roads45_sqr_domain_export";
+		parameter<bool> b1_Coastline_InlandWater := true, explicitsuppliers = "Physical/Coast/Coastline/Write_per_subgrid;Physical/Coast/Coastline/Write_per_grid;Physical/Water/Inland_Water/Write_per_grid;Physical/Water/Inland_Water/Write_per_subgrid";
+		parameter<bool> b2_Hasland               := true, explicitsuppliers = "Physical/Water/AllWater/Write_HasLand";
+		// parameter<bool> b3_Dist2InlandWater      := true, explicitsuppliers = "Physical/Water/Location2LargeInlandWater_sqr_domain_export;Physical/Water/Location2AnyInlandWater_sqr_domain_export";
+		// parameter<bool> b4_Dist2Coast            := true, explicitsuppliers = "Physical/Coast/Location2Coast_sqr_domain_export";
+		// parameter<bool> b5_Dist2Roads            := true, explicitsuppliers = "Socioeconomic/Infrastructure/Location2Roads123_sqr_domain_export;Socioeconomic/Infrastructure/Location2Roads45_sqr_domain_export";
 	}
 	
 	container Claims : using = "RegionalUnits"
