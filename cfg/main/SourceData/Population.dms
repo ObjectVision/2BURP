@@ -45,6 +45,13 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			, domain
 			, float64
 		);
+	container inhabited_cells:=
+		for_each_nedv(
+			GHS_years/name
+			, 'sum(uint32(PerYear_in_CD/'+GHS_years/name+' > 1d))'
+			, void
+			, uint32
+		);
 	
 	unit<uint8> Population_OnLand_Density_Histogram := Pop_Bins
 	{
