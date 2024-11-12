@@ -98,7 +98,7 @@ container Physical : using = "geography;classifications"
 					  "Slope genereated in ArcGIS 10.6.1 from Slope-syntax DEM in degrees, planar, zfactor1  --> gtopo30_degree_planar_zfactor1_ag1061.tif"
 					  "GeoDMS -3.40282E+38f has been given value 0 --> exported as tif"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "LatLong"
+	,	DialogData      = "Mollweide"
 	{
 		attribute<float32> ReadData (domain);
 	}	
@@ -110,7 +110,7 @@ container Physical : using = "geography;classifications"
 	,	Source          = "Database: Y:\Data\PBLbase\Data\MODIS_BOS.gdb\MODIS_2001_BOS"
 						  "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "LatLOng"
+	,	DialogData      = "Mollweide"
 	{
 		attribute<uint8> ReadData (domain);
 	}	
@@ -127,7 +127,8 @@ container Physical : using = "geography;classifications"
 		,	DialogData      = "LatLOng"
 		{
 			// attribute<LatLong>           Geometry(poly);
-			attribute<Mollweide>         Geometry_MW (poly)      := convert(geometry, Mollweide);
+			attribute<Mollweide>         Geometry_MW      (poly) := convert(geometry, Mollweide);
+			attribute<SphericalMercator> geometry_mer     (poly) := convert(Geometry, SphericalMercator);
 			attribute<m2>                Area                    := area(Geometry_MW, float64)[m2];
 			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Geometry_MW, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_'+ModelParameters/domain_EPSG+'.tif'";
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
@@ -160,18 +161,38 @@ container Physical : using = "geography;classifications"
 			{
 				attribute<SphericalMercator> geometry_mer (poly) := org_rel->Geometry[SphericalMercator];
 			}
-			parameter<Float32> sqr_dist                                        := Sqr(250000[meter]);
-			
-			attribute<Float32> Location2AllInland_distInfo   (CompactedDomain) := dist_info(Inland_Water/Geometry_MW[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
-			attribute<km>      Location2AllInland_km         (CompactedDomain) := value(Location2AllInland_distInfo,meter)[km];
-			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km_'+ModelParameters/domain_EPSG+'.tif'";
-			
-			attribute<Float32> Location2LargeInland_distInfo (CompactedDomain) := dist_info(large_inland_water/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
-			attribute<km>      Location2LargeInland_km       (CompactedDomain) := value(Location2LargeInland_distInfo,meter)[km];
-			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km_'+ModelParameters/domain_EPSG+'.tif'";
-			
-			unit<ipoint> Dist_AllInland_km   : StorageName = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
-			unit<ipoint> Dist_LargeInland_km : StorageName = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
+		}
+		
+		container Location2LargeInlandWater := Templates/GetDistance_T(AllWater/large_inland_water);
+		container Location2AllInlandWater   := Templates/GetDistance_T(Inland_Water);
+		
+		attribute<float32> Location2LargeInlandWater_sqr_domain_export    (domain) := Location2LargeInlandWater/Location2_sqr_domain_export
+		, StorageName = "='%ToBURPDataDir%/physical/water/'+ModelParameters/StudyArea+'/Location2LargeInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'";
+		attribute<float32> Location2AnyInlandWater_sqr_domain_export      (domain) := Location2AllInlandWater/Location2_sqr_domain_export
+		, StorageName = "='%ToBURPDataDir%/physical/water/'+ModelParameters/StudyArea+'/Location2AnyInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'";
+
+
+		unit<ipoint> Location2LargeInlandWater_m_sqr
+		:	StorageName     = "=PropValue(Location2LargeInlandWater_sqr_domain_export, 'StorageName')"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "Mollweide"
+		, 	LazyCalculated  = "true"
+		{
+			attribute<float32> ReadData       (domain);
+			attribute<float32> Corr_latfactor (domain) := sqrt(ReadData) * domain/lat_factor;
+			attribute<km>      Result         (domain) := MakeDefined(min_elem(Corr_latfactor[meter], 250000[meter])[km], 250[km]);
+		}
+		unit<ipoint> Location2AnyInlandWater_m_sqr
+		:	StorageName     = "=PropValue(Location2AnyInlandWater_sqr_domain_export, 'StorageName')"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "Mollweide"
+		, 	LazyCalculated  = "true"
+		{
+			attribute<float32> ReadData       (domain);
+			attribute<float32> Corr_latfactor (domain) := sqrt(ReadData) * domain/lat_factor;
+			attribute<km>      Result         (domain) := MakeDefined(min_elem(Corr_latfactor[meter], 250000[meter])[km], 250[km]);
 		}
 	}
 }

@@ -21,4 +21,6 @@ container Units
 	unit<Float64> m2_f64                       := Meter_f64 * Meter_f64;
 	unit<Float64> km_f64                       := 1000.0 * Meter_f64;
 	unit<Float64> km2_f64                      := km_f64 * km_f64;
+	
+	// unit<float64> Radiaal2
 }

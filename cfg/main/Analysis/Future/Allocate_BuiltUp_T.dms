@@ -52,10 +52,10 @@ Template Allocate_Builtup_T
 	{
 		container        AutoGLM_Coeffs            := Analysis/Calibration/ReadCoffecients/coef2domain/domain; 
 		attribute<Suit> Calc (domain) := ='(CurrPopState/PopulationDensity_8dir/Ln_mean_8dir[float32]                                                                         * AutoGLM_Coeffs/Ln_PopulationDensity_2000_8dir) + '
-																'(min_elem(Physical/Coast/Location2Coast_km/ReadData[float32],250f)                                           * AutoGLM_Coeffs/Distance2Coastline) + 
-																(min_elem(Physical/Water/AllWater/Dist_LargeInland_km/GridData[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
-																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road123/Road123[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
-																(min_elem(Socioeconomic/Infrastructure/GRIP4_grid/Road45/Road45[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
+																'(min_elem(Physical/Coast/Location2Coast_m_sqr/Result[float32],250f)                                           * AutoGLM_Coeffs/Distance2Coastline) + 
+																(min_elem(Physical/Water/Location2LargeInlandWater_m_sqr/Result[float32],250f)                                 * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
+																(min_elem(Socioeconomic/Infrastructure/Location2Roads123_m_sqr/Result[float32],250f)                         * AutoGLM_Coeffs/Distance2MajorRoads) + 
+																(min_elem(Socioeconomic/Infrastructure/Location2Roads45_m_sqr/Result[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/towns                                       * AutoGLM_Coeffs/gc_towns) + 
 																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 

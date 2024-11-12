@@ -1,5 +1,45 @@
 container Templates
 {
+	Template GetDistance_T
+	{
+		unit<uint32> poly_set;
+		///
+	
+		unit<uint32> segments := arc2segm(poly_set/Geometry_mer)
+		, Descr = "to prepare for a pointset, we need to split up the lines into smaller segments to ensure enough points."
+		{
+			unit<uint32> pointset := union_unit(.,.)
+			{
+				attribute<SphericalMercator> point    := union_data(., ../point, ../nextpoint);
+				attribute<..>                sequence := union_data(., id(..), id(..));
+				attribute<uint32>            ordinal  := union_data(., const(0,..), const(1,..));
+			}
+			attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
+		}
+	
+		unit<uint32> DynaPoints   := dyna_point_with_ends(segments/point, segments/nextpoint, 100d)
+		, Descr ="Create pointset with small enough steps, say every 100m";
+			
+		unit<uint32> UqDynaPoints := unique(DynaPoints/point);
+
+		unit<uint32> from_domain  := CompactedDomain 
+		{
+			attribute<SphericalMercator> geometry      := CompactedDomain/Geometry_mer;
+			attribute<to_domain>         to_domain_rel := connect(to_domain/geometry, from_domain/geometry);
+			attribute<SphericalMercator> geometry_to   := to_domain/geometry[to_domain_rel];
+			attribute<float64>           sqrdist       := sqrdist(geometry_to, geometry);
+		}
+
+		unit<uint32> to_domain  := UqDynaPoints
+		{
+			attribute<SphericalMercator> geometry      := values;
+		}
+		
+		attribute<float32> Location2_sqr         (CompactedDomain) := from_domain/sqrdist[float32]; 
+		attribute<float32> Location2_sqr_domain_export    (domain) := Location2_sqr[CompactedDomain/BaseGrid];
+	}
+
+
 	Template potrange_T
 	{
 		//begin of case parameters
