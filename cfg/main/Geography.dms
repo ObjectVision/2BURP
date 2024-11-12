@@ -78,7 +78,9 @@ container Geography : using = "units"
 
 	unit<wpoint> domain := TiledUnit(Impl/StudyAreaTile/LB, Impl/StudyAreaTile/UB)
 	{
-		attribute<Mollweide>      geometry          := id(.)[Mollweide] + point_xy(0.5 * /ModelParameters/MW_Gridsize,0.5 * /ModelParameters/MW_Gridsize, Mollweide), LazyCalculated = "True";
+
+		attribute<Mollweide>      geometry          := id(.)[Mollweide] + point_xy(0.5 * /ModelParameters/MW_Gridsize,0.5 * /ModelParameters/MW_Gridsize, Mollweide), LazyCalculated = "True", Dialogdata = "Mollweide";
+
 		attribute<LatLong>        geometry_LL       := convert(geometry, LatLong);
 		attribute<Float32>        lat_factor        := Float32(cos(pointrow(geometry_LL) * 2d*pi() / 360d));
 

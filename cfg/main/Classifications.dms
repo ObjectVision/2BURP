@@ -165,10 +165,11 @@ container Classifications : using = "units"
 		parameter<uint32> binsize :=100;
 	}
 	
-	unit<uint8> Pop_Bins := cat_range(0b, 10b) 
+	unit<uint8> Pop_Bins := cat_range(0b, 16b) //10
 	{
 		attribute<string>  Label             := 'LB_'+string(ClassBreaks);
-		attribute<float32> ClassBreaks       : [0, 1, 25, 50, 100, 500, 1000, 2000, 3000, 5000];
+		// attribute<float32> ClassBreaks       : [0, 1, 25, 50, 100, 500, 1000, 2000, 3000, 5000];
+		attribute<float32> ClassBreaks       : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 500, 3000, 5000];
 	}
 	
 	unit<uint8> BU_Residential_Area_Bins := cat_range(0b, 10b) 
