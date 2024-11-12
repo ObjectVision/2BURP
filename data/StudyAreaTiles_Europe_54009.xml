@@ -4,17 +4,17 @@
 <DefaultInfo>
 	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
 	</FullName>
-	<GeoDmsVersion>GeoDms 16.0.0 [Oct 28 2024 09:15:42]
+	<GeoDmsVersion>GeoDms 15.10.2 [Oct 18 2024 17:07:21]
 	</GeoDmsVersion>
-	<SessionStartTime>2024-11-06 12:48:49
+	<SessionStartTime>2024-11-11 11:07:15
 	</SessionStartTime>
-	<CurrentTime>2024-11-06 13:31:57
+	<CurrentTime>2024-11-11 12:40:43
 	</CurrentTime>
 	<StatusFlags>0x17e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
 </DefaultInfo>
 <Software>
-	<GeoDmsVersion>16.0.0
+	<GeoDmsVersion>15.10.2
 	</GeoDmsVersion>
 </Software>
 <Config>
@@ -36,19 +36,20 @@
 <Git>
 	<RevisionInfo>heads/MollweideImpl<BR/>
 		On branch MollweideImpl<BR/>
+		Your branch is up to date with &apos;origin/MollweideImpl&apos;.<BR/>
+		<BR/>
 		Changes not staged for commit:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
-			modified:   cfg/main/Geography.dms<BR/>
-			modified:   cfg/main/Geography/impl.dms<BR/>
-			modified:   cfg/main/SourceData/Builtup.dms<BR/>
+			modified:   cfg/main/ModelParameters.dms<BR/>
+			modified:   cfg/main/SourceData.dms<BR/>
 		<BR/>
 		Untracked files:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
 			Desktop.ini<BR/>
 		<BR/>
 		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
-		4de9f19d0c1c967a594cda526beb82ff94ae8ab1<BR/>
+		df09092de4e3c38c116f95b31fd3969b1214736d<BR/>
 		
 	</RevisionInfo>
 </Git>

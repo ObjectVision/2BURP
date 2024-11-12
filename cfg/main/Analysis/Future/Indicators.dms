@@ -8,10 +8,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
 				, domain
 				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
 		{
-			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'.tif'";
+			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
 		}
 	
 		container Population := 
@@ -20,11 +20,11 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 				, domain
 				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
 		{
 			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
-			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'.tif'";
+			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
 		}
 			
 		container BuiltUp_Total_Area := 
@@ -196,7 +196,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
 		{
 			attribute<NrPerson> Y1975 (domain) := round(sourcedata/Population/PerYear_in_CD/Y1975)[NrPerson];
@@ -217,10 +217,10 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
 		{
-			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'.tif'", StorageReadOnly = "true";
+			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
 		}
 		
 		container Read_DegreesOfUrbanisation :=
@@ -231,16 +231,16 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
 			)
 		{
-			attribute<uint8> Y1975 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1975.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1980 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1980.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1985 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1985.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1990 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1990.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1995 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1995.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2000 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2000.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2005 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2005.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2010 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2010.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2015 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2015.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2020 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2020.tif'", StorageReadOnly = "True";
+			attribute<uint8> Y1975 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1975_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y1980 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1980_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y1985 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1985_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y1990 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1990_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y1995 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1995_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y2000 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2000_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y2005 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2005_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y2010 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2010_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y2015 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2015_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+			attribute<uint8> Y2020 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2020_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "True";
 		}
 			
 		container GridDistances := 
@@ -477,17 +477,17 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<float32>    Y2030     (TypologyK) := sum(Prep/Delta_BuiltUp_Total_Area/y2030, Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK);
 	// }
 
-// container Population_Histogram := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , 'pcount(Classify(Prep/Read_Population/'+ProjectionYears/name+'[float32], Pop_Bins/ClassBreaks))'
-			// , Pop_Bins
-			// , uint32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>  Label     (Pop_Bins) := Pop_Bins/label;
+	container Population_Histogram := 
+		for_each_nedv(
+			AllYears/name
+			, 'pcount(Classify(Prep/Read_Population/'+AllYears/name+'[float32], Pop_Bins/ClassBreaks))'
+			, Pop_Bins
+			, uint32
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
+	{
+		attribute<string>  Label     (Pop_Bins) := Pop_Bins/label;
 		// attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Read_Population/Initial[float32], Pop_Bins/ClassBreaks));
-	// }
+	}
 		
 	// container delta_BuiltUp := 
 		// for_each_nedv(

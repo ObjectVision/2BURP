@@ -13,7 +13,7 @@ container Natural_Hazards
 	container Earthquake
 	{
 		unit<ipoint> Earthquakes_Modified_Mercalli_Intensity
-		: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency.tif"
+		: StorageName     = "='%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/eq_frequency_'+ModelParameters/domain_EPSG+'.tif'"
 		, StorageType     = "gdal.grid"
 		, Descr           = "Earthquakes Modified Mercalli Intensity by UNEP/DEWA/GRID-Europe for the Global Assessment Report on Risk Reduction (GAR)."
 								"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
@@ -21,7 +21,7 @@ container Natural_Hazards
 								"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
 		, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht"
 		, StorageReadOnly = "True"
-		, DialogData      = "LatLong"
+		, DialogData      = "Mollweide"
 		{
 			attribute<uint8> ReadData_org(domain);
 			attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);
@@ -32,40 +32,40 @@ container Natural_Hazards
 			attribute<bool> EQ_9 (domain): = (ReadData[uint32]==9 ? 1 :0)[bool];
 		}
 
-		unit<uint16> EQUAGEO
-			:  StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
-			,  StorageType     = "gdal.vect"
-			,  url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.txt"
-			,  StorageReadOnly = "True"
-			,  Source          = "",
-			DialogType         = "Map",
-			DialogData         = "Geometry"
-			{
-				attribute<LatLong> Geometry(polygon);
-			}
+		// unit<uint16> EQUAGEO
+			// :  StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.shp"
+			// ,  StorageType     = "gdal.vect"
+			// ,  url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/EQUAGEO/earthquakes.txt"
+			// ,  StorageReadOnly = "True"
+			// ,  Source          = "",
+			// DialogType         = "Map",
+			// DialogData         = "Geometry"
+			// {
+				// attribute<LatLong> Geometry(polygon);
+			// }
 
-		container Earthquake_Intensity_Zones 
-		{
-			attribute<EQUAGEO> EQUAGEO_grid (domain) := poly2grid(EQUAGEO/Geometry , domain);
-			attribute<uint16> Zone(domain)           := EQUAGEO/Zone[uint16][EQUAGEO_grid];
+		// container Earthquake_Intensity_Zones 
+		// {
+			// attribute<EQUAGEO> EQUAGEO_grid (domain) := poly2grid(EQUAGEO/Geometry , domain);
+			// attribute<uint16> Zone(domain)           := EQUAGEO/Zone[uint16][EQUAGEO_grid];
 
-			attribute<bool> EQUAGEO_0 (domain): = (Zone[uint32]==0 ? 1 :0)[bool];
-			attribute<bool> EQUAGEO_1 (domain): = (Zone[uint32]==1 ? 1 :0)[bool];
-			attribute<bool> EQUAGEO_2 (domain): = (Zone[uint32]==2 ? 1 :0)[bool];
-			attribute<bool> EQUAGEO_3 (domain): = (Zone[uint32]==3 ? 1 :0)[bool];
-			attribute<bool> EQUAGEO_4 (domain): = (Zone[uint32]==4 ? 1 :0)[bool];
-			attribute<bool> EQUAGEO_10 (domain): = (Zone[uint32]==10 ? 1 :0)[bool];
-		}
+			// attribute<bool> EQUAGEO_0 (domain): = (Zone[uint32]==0 ? 1 :0)[bool];
+			// attribute<bool> EQUAGEO_1 (domain): = (Zone[uint32]==1 ? 1 :0)[bool];
+			// attribute<bool> EQUAGEO_2 (domain): = (Zone[uint32]==2 ? 1 :0)[bool];
+			// attribute<bool> EQUAGEO_3 (domain): = (Zone[uint32]==3 ? 1 :0)[bool];
+			// attribute<bool> EQUAGEO_4 (domain): = (Zone[uint32]==4 ? 1 :0)[bool];
+			// attribute<bool> EQUAGEO_10 (domain): = (Zone[uint32]==10 ? 1 :0)[bool];
+		// }
 	}	
 	
 	container Landslide
 	{
 		unit<ipoint> ARUP_landslide_risk
-		: StorageName     = "%ToBURPDataDir%/physical/Natural_Hazards/Landslide/hazard__ls_arup_cjc.tif"
+		: StorageName     = "='%ToBURPDataDir%/physical/Natural_Hazards/Landslide/hazard__ls_arup_cjc_'+ModelParameters/domain_EPSG+'.tif'"
 		, StorageType     = "gdal.grid"
 		, Source          = "ARUP"
 		, StorageReadOnly = "True"
-		, DialogData      = "LatLong"
+		, DialogData      = "Mollweide"
 		, Descr           = "This dataset indicates the present risk of landslides, induced either by earthquakes or precipitation, as estimated by ARUP in 2021. 
 			The original tiff was projected in a latlong projection system that started at the meridian and continued eastwards until +360 deg. 
 			This has been transformed into a regular latlong grid by Chris Jacobs-Crisioni in 2023 for a World Bank project."

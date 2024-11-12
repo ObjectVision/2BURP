@@ -1,17 +1,21 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'China'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania  Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'Europe'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
+	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   WGS_Gridsize                                        := 30d          , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong grids, represented in arc second. Where 30ss corresponds to roughly a 1km grid at the equator.";
 	parameter<float64>                   WGS_Subgridsize                                     := 3d           , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong subgrids, represented in arc second. Where 3ss corresponds to roughly a 100m grid at the equator.";
+	parameter<string>                    domain_EPSG                                         := '54009'; // 54009 4326
+	parameter<string>                    coordsys_name                                       := domain_EPSG == '54009' ? 'Mollweide' : 'LatLong';
+	parameter<string>                    gridsize                                            := domain_EPSG == '54009' ? string(MW_Gridsize) : string(WGS_Gridsize)+'ss';
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used";
-	parameter<bool>                      Use_TempTifFiles                                    := FALSE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
-	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+'_AddClaimReducF-'+string(Pop_Additional_Claim_Reduction_Factor)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";
 	parameter<string>                    Additional_FileSuffix                               := ''           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
@@ -31,6 +35,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
+	
 	// parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 1000000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
 	// parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 1000000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
 	// parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 1000000[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 

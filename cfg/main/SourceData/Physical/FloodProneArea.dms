@@ -1,25 +1,25 @@
 container FloodProneArea
 {
 	unit<ipoint> RP100 
-	: StorageName = "%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP100_area.tif",
-	StorageType = "gdal.grid",
-	Source = "conversion to tif-format in ArcGIS, unsigned integer 8 Bit, LZW-compression with correct extent",
-	StorageReadOnly = "True",
-	DialogData = "LatLong"
+	: StorageName = "='%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP100_area_'+ModelParameters/domain_EPSG+'.tif'"
+	, StorageType = "gdal.grid"
+	, Source = "conversion to tif-format in ArcGIS, unsigned integer 8 Bit, LZW-compression with correct extent"
+	, StorageReadOnly = "True"
+	, DialogData = "Mollweide"
 	{
 		attribute<uint8> ReadData   (domain);//717913896 null
 		attribute<uint8> ReadData_Defined   (domain) := MakeDefined(ReadData, 0b);
 		attribute<bool>  RP100_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
 	}
 
-	unit<ipoint> RP1000:
-	StorageName = "%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP1000_area.tif",
-	StorageType = "gdal.grid",
-	Source = "Provided by Arno Bouwman conversion to tif-format in ArcGIS, LZW-compression with correct extent",
-	StorageReadOnly = "True",
-	DialogData = "LatLong"
-	{
-		attribute<uint8> ReadData(domain);
-		attribute<bool>  RP1000_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
-	}
+	// unit<ipoint> RP1000:
+	// StorageName = "='%ToBURPDataDir%/Physical/Water/FloodProneArea/inun_oecd_2010_RP1000_area_'+ModelParameters/domain_EPSG+'.tif'",
+	// StorageType = "gdal.grid",
+	// Source = "Provided by Arno Bouwman conversion to tif-format in ArcGIS, LZW-compression with correct extent",
+	// StorageReadOnly = "True",
+	// DialogData = "Mollweide"
+	// {
+		// attribute<uint8> ReadData(domain);
+		// attribute<bool>  RP1000_bool (domain): = (ReadData[uint32]==1 ? 1 :0)[bool];
+	// }
 }

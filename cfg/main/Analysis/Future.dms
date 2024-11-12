@@ -136,7 +136,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 		attribute<Person>            Max_rank                           (ClaimRegion) := nth_element(Population_frac_rank, uint32(RegionalDeficit), region_rel);
 		
 		attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[region_rel])[NrPerson];
-		attribute<NrPerson>          Population_trunc_domain_result          (domain) := recollect_by_cond(domain/IsCompactedDomain, Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'.tif'";
+		attribute<NrPerson>          Population_trunc_domain_result          (domain) := recollect_by_cond(domain/IsCompactedDomain, Population)
+		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'";
 	}
 	
 	#include<Allocate_Builtup_T.dms>
