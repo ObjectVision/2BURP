@@ -173,7 +173,7 @@ container Physical : using = "geography;classifications"
 
 
 		unit<ipoint> Location2LargeInlandWater_m_sqr
-		:	StorageName     = "=PropValue(Location2LargeInlandWater_sqr_domain_export, 'StorageName')"
+		:	StorageName     = "='%ToBURPDataDir%/physical/water/World/Location2LargeInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
 		,	DialogData      = "Mollweide"
@@ -184,7 +184,7 @@ container Physical : using = "geography;classifications"
 			attribute<km>      Result         (domain) := MakeDefined(min_elem(Corr_latfactor[meter], 250000[meter])[km], 250[km]);
 		}
 		unit<ipoint> Location2AnyInlandWater_m_sqr
-		:	StorageName     = "=PropValue(Location2AnyInlandWater_sqr_domain_export, 'StorageName')"
+		:	StorageName     = "='%ToBURPDataDir%/physical/water/World/Location2AnyInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
 		,	DialogData      = "Mollweide"

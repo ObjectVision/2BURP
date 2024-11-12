@@ -83,7 +83,7 @@ container Coast
 	, StorageName = "='%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/Location2Coast_m_sqr_'+ModelParameters/domain_EPSG+'.tif'";
 
 	unit<ipoint> Location2Coast_m_sqr
-	:	StorageName     = "=PropValue(Location2Coast_sqr_domain_export, 'StorageName')"
+	:	StorageName     = "='%ToBURPDataDir%/physical/Coast/World/Location2Coast_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 	,	StorageType     = "gdal.grid"
 	,	StorageReadOnly = "True"
 	,	DialogData      = "Mollweide"
