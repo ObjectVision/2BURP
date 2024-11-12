@@ -1,6 +1,6 @@
 container Builtup : using = "units;classifications;sourcedata/regionalunits"
 {
-	container Total :=
+	container Total_src :=
 		for_each_ndvat(
 			GHS_years/name
 			, domain
@@ -8,6 +8,16 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			, '%ToBURPDataDir%/Builtup/GHS_BUILT_S_E'+string(GHS_years/year)+'_GLOBE_R2023A_'+ModelParameters/domain_EPSG+'_'+ModelParameters/gridsize+'_V1_0.tif'
 			,'gdal.grid'
 		);
+		
+	container Total :=
+		for_each_neidv(
+			GHS_years/name
+			, 'Total_src/'+GHS_years/name+' > 1000000[m2] ? null_f : Total_src/'+GHS_years/name
+			, 'This <= 1000000[m2] || IsNull(This)'
+			, domain
+			, m2
+		);
+		
 	container NonResidential :=
 		for_each_ndvat(
 			GHS_years/name
