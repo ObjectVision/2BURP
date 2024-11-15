@@ -108,7 +108,7 @@ container RegionalUnits
 	}
 	
 	unit<uint32> FunctionalAreas := select_with_org_rel_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
-	, DialogData      = "geometry_LL"
+	, DialogData      = "geometry"
 	, DialogType      = "map"
 	{
 		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
