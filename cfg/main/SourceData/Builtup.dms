@@ -60,8 +60,10 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 	{
 		attribute<upoint>   unirel := point(first_rel, second_rel, upoint);
 		attribute<uint32>   n      := pcount(compactdomain/perc_matrix_rel);
-		attribute<float32>  suit   := sum(Analysis/Future/Allocate_Builtup/Y2030/Suitability/Prob, compactdomain/perc_matrix_rel);
+		//attribute<float32>  suit   := sum(Analysis/Future/Allocate_Builtup/Y2030/Suitability/Prob, compactdomain/perc_matrix_rel);
 		attribute<float32>  rel    := makedefined(n[float32] / float32(percentages/n1990)[first_rel], 0f);
+		
+		
 	}
 	
 	unit<uint32> CompactDomain := CompactedDomain 
@@ -73,8 +75,11 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
  		attribute<percentages>       bu_1990_perc    := value((Builtup/Total/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
 		attribute<percentages>       bu_2000_perc    := value((Builtup/Total/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
 		attribute<percentages>       bu_2020_perc    := value((Builtup/Total/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		attribute<percentage_matrix> perc_matrix_rel := rlookup(point(bu_1990_perc, bu_2020_perc, upoint), percentage_matrix/unirel);
-		attribute<int32>             d_perc          := int32(bu_2020_perc)+1i - int32(bu_2000_perc)+1i;
+		attribute<percentages>       res_1990_perc    := value((Builtup/Residential/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
+		attribute<percentages>       res_2000_perc    := value((Builtup/Residential/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       res_2020_perc    := value((Builtup/Residential/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentage_matrix> perc_matrix_rel := rlookup(point(res_1990_perc, res_2020_perc, upoint), percentage_matrix/unirel);
+		attribute<int32>             d_perc          := int32(res_2020_perc)+1i - int32(res_2000_perc)+1i;
 	}
 	unit<uint32> samples: nrofrows = 100 {
 		attribute<string> Label:= 's_'+string(id(.));

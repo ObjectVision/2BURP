@@ -79,7 +79,7 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		attribute<NodeSet> F1             := union_data(., grid/all_Ns/F1, grid/all_NEs/F1, grid/all_Es/F1, grid/all_SEs/F1);
 		attribute<NodeSet> F2             := union_data(., grid/all_Ns/F2, grid/all_NEs/F2, grid/all_Es/F2, grid/all_SEs/F2);
 		attribute<bool>    crosses_border := NodeSet/country[F1] <> NodeSet/country[F2];
-		attribute<float32> Impedance      := (Length[float32] * (NodeSet/Impedance[F1] + NodeSet/Impedance[F2])) + 25f * crosses_border[float32];
+		attribute<float32> Impedance      := (Length[float32] * (0.5f*(NodeSet/Impedance[F1] + NodeSet/Impedance[F2]))) + 25f * crosses_border[float32];
 		
 		attribute<float32> dx             := (PointCol(F2 -> geometry) - PointCol(F1 -> geometry))[float32];
 		attribute<float32> dy             := (PointRow(F2 -> geometry) - PointRow(F1 -> geometry))[float32];

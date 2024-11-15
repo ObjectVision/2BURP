@@ -96,6 +96,26 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		container Export_Tiffs_ForCalibration:= for_each_nedva(field/name, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])',domain,uint32,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif');
 	}
 	
+	container Export_BuiltUp_percentages_matrix {
+		parameter<string> fieldseparator := ';';
+		parameter<string> filename       := '%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/percentages_matrix_'+ModelParameters/StudyArea+'.csv';
+
+		unit<uint32> field: nrofrows = 4
+		{
+			attribute<string> name : ['first_rel', 'second_rel', 'n', 'rel'];
+		}
+
+		parameter<string> newline := '\n';
+		parameter<string> header  := aslist(field/name, ';');
+		attribute<string> body (Builtup/percentage_matrix) := = AsList(
+			+'makedefined(string(Builtup/percentage_matrix/' + field/name + '),'+quote('-9999')+')',' + '+quote(fieldseparator)+' +'
+			);
+		 
+		  parameter<string> result := header + newline + AsList(body, newline)
+		  ,  StorageName = "= filename"
+		  ,  StorageType = "str";
+	}
+	
 	container ReadCoffecients
 	{
 		container Read_XLSX 
