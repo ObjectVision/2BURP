@@ -9,6 +9,7 @@ container Geography : using = "units"
 		parameter<float32> PenWorldWidth         := 100f / 3600f, DialogType = "PenWorldWidth";
 		parameter<float32> LabelWorldSize        := 10f / 3600f, DialogType = "LabelWorldSize";
 		parameter<km>      LengthDegree          := 40000km / 360f; // 40075.017d/360d;//at Equator
+		parameter<string>  eval_lat_factor     	 := 'Float32(cos(pointrow(geometry_LL) * 2d*pi() / 360d))';
 	}
 	unit<ipoint> LatLong_base_ip             := gridset(LatLong_Base,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
 	unit<ipoint> Mollweide_base_ip           := gridset(Mollweide_base,  point_xy(1d, 1d), point_xy(0.0d, 0.0d), ipoint); 
@@ -31,6 +32,8 @@ container Geography : using = "units"
 		
 		parameter<int32> nr_cols := int32((x_max - x_min) / ModelParameters/MW_Gridsize);
 		parameter<int32> nr_rows := int32((y_max - y_min) / ModelParameters/MW_Gridsize);
+		
+		parameter<string>  eval_lat_factor     	 := 'const(1f, .)';
 	}
 
 	container StudyAreas
@@ -40,13 +43,18 @@ container Geography : using = "units"
 		
 		//continents
 		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL),         Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL;}
-		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry),            Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry;}
-		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry),              Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry;}
-		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry;}
-		unit<dpoint> LatLong_North_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry),     Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry;}
-		unit<dpoint> LatLong_South_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry),     Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry;}
+		unit<dpoint> LatLong_Africa                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_LL),            Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_LL;}
+		unit<dpoint> LatLong_Asia                     := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_LL),              Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_LL;}
+		unit<dpoint> LatLong_Australia_Oceania        := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_LL), Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_LL;}
+		unit<dpoint> LatLong_North_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_LL),     Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_LL;}
+		unit<dpoint> LatLong_South_America            := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_LL),     Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_LL))  {parameter<LatLong_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_LL;}
 
-		unit<dpoint> Mollweide_Europe                 := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW),       Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW;}
+		unit<dpoint> Mollweide_Africa                 := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_MW),       		Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Africa/geometry_MW;}
+		unit<dpoint> Mollweide_Asia             	  := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_MW),        		Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Asia/geometry_MW;}
+		unit<dpoint> Mollweide_Australia_Oceania      := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_MW),  Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Australia_Oceania/geometry_MW;}
+		unit<dpoint> Mollweide_Europe                 := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW),       		Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_MW;}
+		unit<dpoint> Mollweide_North_America          := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_MW),      Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/North_America/geometry_MW;}
+		unit<dpoint> Mollweide_South_America          := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_MW),      Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_MW))  {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Continents/GetPerContinentGeometry/South_America/geometry_MW;}
 		
 		//countries
 		unit<dpoint> Mollweide_Netherlands            := range(Mollweide_base, Lower_Bound(SourceData/RegionalUnits/Countries/Geometry_MW[SourceData/RegionalUnits/Countries/V/Netherlands]), Upper_Bound(SourceData/RegionalUnits/Countries/Geometry_MW[SourceData/RegionalUnits/Countries/V/Netherlands])){parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/Countries/Geometry_MW[SourceData/RegionalUnits/Countries/V/Netherlands];}
@@ -82,7 +90,7 @@ container Geography : using = "units"
 		attribute<Mollweide>      geometry          := id(.)[Mollweide] + point_xy(0.5 * /ModelParameters/MW_Gridsize,0.5 * /ModelParameters/MW_Gridsize, Mollweide), LazyCalculated = "True", Dialogdata = "Mollweide";
 
 		attribute<LatLong>        geometry_LL       := convert(geometry, LatLong);
-		attribute<Float32>        lat_factor        := Float32(cos(pointrow(geometry_LL) * 2d*pi() / 360d));
+		attribute<Float32>        lat_factor        := =Mollweide_grid_base/eval_lat_factor;
 
 		attribute<domain>         domain_rel        := mapping(., domain);
 		attribute<domain_sub>     domain_sub_rel    := mapping(., domain_sub);  

@@ -228,7 +228,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				ProjectionYears/name
 				, domain
 				, uint8
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+ModelParameters/FileSuffix+'.tif'
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
 		{
 			attribute<uint8> Y1975 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1975_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";

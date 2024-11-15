@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<DocType name="GeoDmsMetaInfo">
+<DefaultInfo>
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
+	</FullName>
+	<GeoDmsVersion>GeoDms 16.0.0 [Oct 27 2024 14:36:36]
+	</GeoDmsVersion>
+	<SessionStartTime>2024-11-13 22:42:48
+	</SessionStartTime>
+	<CurrentTime>2024-11-13 22:44:22
+	</CurrentTime>
+	<StatusFlags>0x537 = AdminMode SuspendForGUI ShowStateColors TreeViewVisible DetailsVisible MultiThreading1 MultiThreading2 
+	</StatusFlags>
+</DefaultInfo>
+<Software>
+	<GeoDmsVersion>16.0.0
+	</GeoDmsVersion>
+</Software>
+<Config>
+	<FullName>/Geography/Impl/StudyAreaTile_Create/UB_sub_y
+	</FullName>
+	<Expr>pointrow(UB_sub)
+	</Expr>
+	<RunFile>d:/projdir/2burp/cfg/main.dms
+	</RunFile>
+</Config>
+<Environment>
+	<Processor>Intel64 Family 6 Model 79 Stepping 1, GenuineIntel
+	</Processor>
+	<User>jacochr
+	</User>
+	<ComputerName>D01RI1603261
+	</ComputerName>
+</Environment>
+<Git>
+	<RevisionInfo>heads/main<BR/>
+		On branch main<BR/>
+		Your branch is up to date with &apos;origin/main&apos;.<BR/>
+		<BR/>
+		Changes to be committed:<BR/>
+		  (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)<BR/>
+			new file:   Desktop.ini<BR/>
+		<BR/>
+		Changes not staged for commit:<BR/>
+		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
+		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
+			modified:   cfg/main/Analysis/Calibration_AutoGLM.dms<BR/>
+			modified:   cfg/main/Analysis/Future/Indicators.dms<BR/>
+			modified:   cfg/main/Geography.dms<BR/>
+			modified:   cfg/main/ModelParameters.dms<BR/>
+		<BR/>
+		Untracked files:<BR/>
+		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
+			cfg/main/Preprocessing/DegreeOfUrbanisation_old.dms<BR/>
+			cfg/test/<BR/>
+			data/Claims/FA_BU_POP_projections_v4 - Copy.xlsx<BR/>
+			data/Claims/FA_BU_POP_projections_v8_fixed_bucap.xlsx<BR/>
+			data/StudyAreaTiles_Africa_54009.dbf<BR/>
+			data/StudyAreaTiles_Africa_54009.xml<BR/>
+		<BR/>
+		de13f1b43287eb3b4dd8e465e74102455d3df5f3<BR/>
+		
+	</RevisionInfo>
+</Git>
+<Parameters>
+	<StudyArea>Asia
+	</StudyArea>
+</Parameters>
+</DocType>

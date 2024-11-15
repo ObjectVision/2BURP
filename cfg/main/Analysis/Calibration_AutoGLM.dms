@@ -25,11 +25,11 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		attribute<uint8>      Earthquakes_MMI_Index                   := Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
 		attribute<int16>      LandSlide_risk  	 			          := Physical/Natural_Hazards/Landslide/LS_risk[CompactedDomain/org_rel];
 		
-		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_km/Coastline[CompactedDomain/org_rel];
-		attribute<float32>    Distance2AnyInlandWater                 := Physical/Water/AllWater/Dist_AllInland_km/GridData[CompactedDomain/org_rel];
-		attribute<float32>    Distance2LargeInlandWater               := Physical/Water/AllWater/Dist_LargeInland_km/GridData[CompactedDomain/org_rel];
-		attribute<float32>    Distance2MajorRoads                     := Socioeconomic/Infrastructure/GRIP4_grid/Road123/Road123[CompactedDomain/org_rel];
-		attribute<float32>    Distance2SecundaryRoads                 := Socioeconomic/Infrastructure/GRIP4_grid/Road45/Road45[CompactedDomain/org_rel];
+		attribute<float32>    Distance2Coastline                      := Physical/Coast/Location2Coast_m_sqr/Result[CompactedDomain/org_rel];
+		attribute<float32>    Distance2AnyInlandWater                 := Physical/Water/Location2AnyInlandWater_m_sqr/Result[CompactedDomain/org_rel];
+		attribute<float32>    Distance2LargeInlandWater               := Physical/Water/Location2LargeInlandWater_m_sqr/Result[CompactedDomain/org_rel];
+		attribute<float32>    Distance2MajorRoads                     := Socioeconomic/Infrastructure/Location2Roads123_m_sqr/Result[CompactedDomain/org_rel];
+		attribute<float32>    Distance2SecundaryRoads                 := Socioeconomic/Infrastructure/Location2Roads45_m_sqr/Result[CompactedDomain/org_rel];
 		
 		//attribute<float32>    Distance2Villages_GridBased             := Preprocessing/GridDists/AccessGrids_grid/villages/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
 		//attribute<float32>    Distance2Town_GridBased                 := Preprocessing/GridDists/AccessGrids_grid/towns/costsgrid_untiled_maximp_latitude_specific[CompactedDomain/org_rel];
