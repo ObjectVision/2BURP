@@ -1,6 +1,33 @@
 container Impl 
 {
-	unit<wpoint> ProtoDomain :=
+	container GridData : using = "SourceData/RegionalUnits"
+	{
+		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
+		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
+		attribute<Bool>   InStudyArea            (domain) := poly2grid(CurrentProjection/geometry, domain);
+		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
+		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
+		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
+
+		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
+		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
+		attribute<bool>   HasLand                (domain) := SourceData/Physical/Water/AllWater/Read_HasLand;
+		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
+																&& InBU_5kmClip                         // within certain distance from bu-area.
+																&& (HasLand || HasBuiltup || HasPop)	// needs to contain some land, or built-up, or population
+																//&& (IsNotLake || HasBuiltup || HasPop)  // it is not a lake, unless there is builtup or population in a cell categorised as a lake
+																&& (IsNotIce || HasBuiltup || HasPop);  // it is not ice, unless there is builtup or population in a cell categorised as a ice
+	}
+	
+	unit<wpoint> ProtoDomain     := =ModelParameters/domain_EPSG == '54009' ? 'ProtoDomain_Mollweide' : 'ProtoDomain_LatLong';
+	unit<ipoint> ProtoDomain_sub := =ModelParameters/domain_EPSG == '54009' ? 'ProtoDomain_sub_Mollweide' : 'ProtoDomain_sub_LatLong';
+	
+	parameter<ProtoDomain> TileSize   := Point_yx(1024w, 1024w, ProtoDomain);
+	parameter<ProtoDomain> TileOffset := Point_yx(   0w,    0w, ProtoDomain);
+	
+	unit<uint32> StudyAreaTile := =ModelParameters/domain_EPSG == '54009' ? 'StudyAreaTile_Mollweide' : 'StudyAreaTile_LatLong';
+	
+	unit<wpoint> ProtoDomain_Mollweide :=
 		gridset(
 			range(Mollweide_Base, Mollweide_grid_base/LB, Mollweide_grid_base/UB)
 			, point_yx(-ModelParameters/MW_Gridsize, ModelParameters/MW_Gridsize, Mollweide_Base) 
@@ -8,20 +35,17 @@ container Impl
 			, wpoint
 		);
 		
-	unit<ipoint> ProtoDomain_sub :=
+	unit<ipoint> ProtoDomain_sub_Mollweide :=
 		gridset(
 			range(Mollweide_Base, Mollweide_grid_base/LB, Mollweide_grid_base/UB)
 			, point_yx(-ModelParameters/MW_Subgridsize, ModelParameters/MW_Subgridsize, Mollweide_Base) 
 			, Mollweide_grid_base/TopLeft //top left
 			, ipoint
 		);
-		
-	parameter<ProtoDomain> TileSize   := Point_yx(1024w, 1024w, ProtoDomain);
-	parameter<ProtoDomain> TileOffset := Point_yx(   0w,    0w, ProtoDomain);
 	
-	unit<spoint>  Tile := gridset(ProtoDomain, TileSize, TileOffset, spoint)
+	unit<spoint>  Tile_Mollweide := gridset(ProtoDomain, TileSize, TileOffset, spoint)
 	{
-		// attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
+		attribute<bool>         LatLong_per_ProtoDomain (ProtoDomain) := poly2grid(LatLong/geometry, ProtoDomain);
 		attribute<bool>         MW_per_ProtoDomain      (ProtoDomain) := poly2grid(Mollweide/geometry, ProtoDomain);
 		unit<uint32>            PD_StudyAreaSelection                 := select_with_org_rel(MW_per_ProtoDomain);
 		attribute<ProtoDomain>  LB                                    := min(PD_StudyAreaSelection/org_rel, PD_StudyAreaSelection/org_rel[.]);
@@ -31,15 +55,15 @@ container Impl
 		attribute<.>            ProtoDomain_rel         (ProtoDomain) := mapping(ProtoDomain, .);
 	}
 
-	unit<uint32> StudyAreaTile_Select := select_with_org_rel(Tile/HasStudyArea)
+	unit<uint32> StudyAreaTile_Select_Mollweide := select_with_org_rel(Tile_Mollweide/HasStudyArea)
 	{
-		attribute<ProtoDomain>      LB     := Tile/LB[org_rel];
-		attribute<ProtoDomain>      UB     := Tile/UB[org_rel];
+		attribute<ProtoDomain>      LB     := Tile_Mollweide/LB[org_rel];
+		attribute<ProtoDomain>      UB     := Tile_Mollweide/UB[org_rel];
 		attribute<ProtoDomain_sub>  LB_sub := LB[ProtoDomain_sub];
 		attribute<ProtoDomain_sub>  UB_sub := UB[ProtoDomain_sub];
 	}
 
-	unit<uint32> StudyAreaTile_Create := StudyAreaTile_Select, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'" // decouple by renaming this file when produced
+	unit<uint32> StudyAreaTile_Create_Mollweide := StudyAreaTile_Select_Mollweide, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'" // decouple by renaming this file when produced
 	{
 		attribute<uint16>           LB_X := pointcol(LB);
 		attribute<uint16>           LB_y := pointrow(LB);
@@ -53,7 +77,7 @@ container Impl
 	} 
 
 	// from here on, we only use the decoupled study area tiles and no longer have to process the full extent of the study area.
-	unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
+	unit<uint32> StudyAreaTile_Mollweide: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
 	{
 		attribute<int32>            LB_X;
 		attribute<int32>            LB_y;
@@ -71,69 +95,16 @@ container Impl
 		attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
 	} 
 
-	container MakeDomain_perContinent :=
-		for_each_ne(
-			SourceData/RegionalUnits/Continents/name
-			, 'MakeDomain_perStudyArea_T('+quote(SourceData/RegionalUnits/Continents/name)+')'
-		);
-	container MakeDomain_World := MakeDomain_perStudyArea_T('World');
-	
-	Template MakeDomain_perStudyArea_T
-	{
-		parameter<string> StudyArea_name;
-		///
-		
-		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
-		{
-			attribute<int32>            LB_X;
-			attribute<int32>            LB_y;
-			attribute<int32>            UB_X;
-			attribute<int32>            UB_y;
-			attribute<int32>            LB_sub_X;
-			attribute<int32>            LB_sub_y;
-			attribute<int32>            UB_sub_X;
-			attribute<int32>            UB_sub_y;
-			attribute<ProtoDomain>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain);
-			attribute<ProtoDomain>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain);
-			attribute<ProtoDomain_sub>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub);
-			attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
-		} 
 
-		unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
-		{
-			// attribute<LatLong>        geometry      := id(.)[LatLong];
-			attribute<Mollweide>      geometry      := id(.)[Mollweide];
-		}
-	}
-
-	container GridData : using = "SourceData/RegionalUnits"
-	{
-		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
-		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
-		attribute<Bool>   InStudyArea            (domain) := poly2grid(Mollweide/geometry, domain);
-		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
-		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
-		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
-
-		attribute<bool>   IsNotLake              (domain) := not(Physical/Water/Inland_Water/Read_per_grid);
-		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
-		attribute<bool>   HasLand				 (domain) := SourceData/Physical/Water/AllWater/Read_HasLand;
-		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
-																&& InBU_5kmClip                         // within certain distance from bu-area.
-																&& (HasLand || HasBuiltup || HasPop)	// needs to contain some land, or built-up, or population
-																//&& (IsNotLake || HasBuiltup || HasPop)  // it is not a lake, unless there is builtup or population in a cell categorised as a lake
-																&& (IsNotIce || HasBuiltup || HasPop);  // it is not ice, unless there is builtup or population in a cell categorised as a ice
-	}
-
-	parameter<float64> SourceRasterSubFactor      := ModelParameters/WGS_Subgridsize / 3600.0;
-	parameter<float64> SourceRasterFactor         := ModelParameters/WGS_Gridsize / 3600.0;
+	// parameter<float64> SourceRasterSubFactor      := ModelParameters/WGS_Subgridsize / 3600.0;
+	// parameter<float64> SourceRasterFactor         := ModelParameters/WGS_Gridsize / 3600.0;
 	// unit<ipoint>       LatLong_mdegrees           := gridset(LatLong_Base, point_yx(0.0000001, 0.0000001), point_yx(0.0,0.0), ipoint);
 	// parameter<float64> SourceRasterFactor_in_eq_m := SourceRasterFactor * (40000000.0 / 360.0);
 		
 	unit<wpoint> ProtoDomain_LatLong :=
 		gridset(
 			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
-			, point_yx(-SourceRasterFactor, SourceRasterFactor, LatLong_base) 
+			, point_yx(-ModelParameters/WGS_Gridsize / 3600.0, ModelParameters/WGS_Gridsize / 3600.0, LatLong_base) 
 			, point_yx(90d, -180d, LatLong_base) //top left
 			, wpoint
 		);
@@ -141,7 +112,7 @@ container Impl
 	unit<ipoint> ProtoDomain_sub_LatLong :=
 		gridset(
 			range(LatLong_Base, point_yx(-90.0,-180.0), point_yx(90.0, 180.0))
-			, point_yx(-SourceRasterSubFactor, SourceRasterSubFactor, LatLong_base) 
+			, point_yx(-ModelParameters/WGS_Subgridsize / 3600.0, ModelParameters/WGS_Subgridsize / 3600.0, LatLong_base) 
 			, point_yx(90d, -180d, LatLong_base) //top left
 			, ipoint
 		);
@@ -195,4 +166,42 @@ container Impl
 		attribute<ProtoDomain_sub_LatLong>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub_LatLong);
 		attribute<ProtoDomain_sub_LatLong>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub_LatLong);
 	}
+	
+	container MakeDomain_perContinent :=
+		for_each_ne(
+			SourceData/RegionalUnits/Continents/name
+			, 'MakeDomain_perStudyArea_T('+quote(SourceData/RegionalUnits/Continents/name)+')'
+		);
+	container MakeDomain_World := MakeDomain_perStudyArea_T('World');
+	
+	Template MakeDomain_perStudyArea_T
+	{
+		parameter<string> StudyArea_name;
+		///
+		
+		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
+		{
+			attribute<int32>            LB_X;
+			attribute<int32>            LB_y;
+			attribute<int32>            UB_X;
+			attribute<int32>            UB_y;
+			attribute<int32>            LB_sub_X;
+			attribute<int32>            LB_sub_y;
+			attribute<int32>            UB_sub_X;
+			attribute<int32>            UB_sub_y;
+			attribute<ProtoDomain>      LB    := point_yx(uint16(LB_y), uint16(LB_x), ProtoDomain);
+			attribute<ProtoDomain>      UB    := point_yx(uint16(UB_y), uint16(UB_x), ProtoDomain);
+			attribute<ProtoDomain_sub>  LB_sub    := point_yx(LB_sub_y, LB_sub_x, ProtoDomain_sub);
+			attribute<ProtoDomain_sub>  UB_sub    := point_yx(UB_sub_y, UB_sub_x, ProtoDomain_sub);
+		} 
+
+		unit<wpoint> domain := TiledUnit(StudyAreaTile/LB, StudyAreaTile/UB)
+		{
+			// attribute<LatLong>        geometry      := id(.)[LatLong];
+			attribute<Mollweide>      geometry      := id(.)[Mollweide];
+		}
+	}
+
+	
+	
 }

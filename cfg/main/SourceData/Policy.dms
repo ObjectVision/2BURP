@@ -6,7 +6,7 @@ container Policy : using = "geography"
 	, Descr = "from the World Database on Protected Areas (WDPA)" 
 	, StorageType = "gdal.grid"
 	, StorageReadOnly = "True"
-	, DialogData = "Mollweide"
+	, DialogData = "CurrentProjection"
 	{
 		attribute<uint8> ReadData(domain);
 		attribute<bool>  ReadData_bool(domain) := ReadData[bool];

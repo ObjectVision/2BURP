@@ -1,14 +1,25 @@
 container Population  : using = "units;geography;classifications;sourcedata/regionalunits"
 {
-	container Import_PerYear := 
+	container Import_PerYear_Mollweide := 
 		for_each_ndvat(
 			GHS_years/name
 			, domain
 			, float64
-			// , '%ToBURPDataDir%/Population/POP_'+string(GHS_years/year)+'_100_WPP2024_EPSG4326_osAdapt_'+string(ModelParameters/WGS_Gridsize)+'ss.tif'  POP_1980_1000_WPP2024
 			, '%ToBURPDataDir%/Population/POP_'+string(GHS_years/year)+'_'+ModelParameters/Gridsize+'_WPP2024.tif'  
 			,'gdal.grid'
 		); //, URL = "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop"; (invalid URL as theses are custom results for 2BURP, aligned with the WPP24 population projections)
+
+	container Import_PerYear_LatLong := 
+		for_each_ndvat(
+			GHS_years/name
+			, domain
+			, float64
+			, '%ToBURPDataDir%/Population/POP_'+string(GHS_years/year)+'_100_WPP2024_EPSG4326_osAdapt_'+string(ModelParameters/WGS_Gridsize)+'ss.tif'  
+			,'gdal.grid'
+		); //, URL = "https://human-settlement.emergency.copernicus.eu/download.php?ds=pop"; (invalid URL as theses are custom results for 2BURP, aligned with the WPP24 population projections)
+
+	container Import_PerYear := =ModelParameters/domain_EPSG == '54009' ? 'Import_PerYear_Mollweide' : 'Import_PerYear_LatLong';
+
 
 	//adhoc
 	unit<uint32> histogram_population := unique(int32(Import_PerYear/Y2020))

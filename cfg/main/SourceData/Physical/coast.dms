@@ -5,20 +5,23 @@ container Coast
 	,  StorageType      = "gdal.vect"
 	,  StorageReadOnly  = "True"
 	,  SyncMode         = "AllTables"
-	,	DialogData      = "LatLong";
+	,	DialogData      = "LatLong_base";
 	
 	unit<uint32> Coastline := Read_Coastline/out
 	{
-		attribute<LatLong>           Geometry                (poly) := Read_Coastline/out/geometry;
-		attribute<Mollweide>         Geometry_MW             (poly) := convert(Geometry, Mollweide);
-		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry_MW, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
+		attribute<LatLong_base>      Geometry_LL             (poly) := Read_Coastline/out/geometry;
+		attribute<Mollweide_base>    Geometry_MW             (poly) := convert(Geometry_LL, Mollweide_base);
+		
+		attribute<CurrentProjection_base> Geometry           (poly) := =ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'Geometry_LL';
+		
+		attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry[CurrentProjection], domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
 		attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		
-		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(Geometry_MW, domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain_'+ModelParameters/domain_EPSG+'.tif'";
+		attribute<bool>              Write_per_grid        (domain) := IsDefined(poly2grid(Geometry[CurrentProjection], domain)), StorageName = "= '%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/IsLandMass_domain_'+ModelParameters/domain_EPSG+'.tif'";
 		attribute<bool>              Read_per_grid         (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 
 		// find sea coast line. However, the coastline gpkg also has lakes, like big ones such as the Caspian Sea. We would like to include those coast lines, but what about small lakes? For example in Denmark and Norway, we could omit those.
-		unit<uint32> Split := bp_split_polygon(Geometry[LatLong_base_ip])
+		unit<uint32> Split := bp_split_polygon(Geometry_LL[LatLong_base_ip])
 		, Descr = "split multipolygons, want anders krijg je later verbindingslijnen na de arc2segments"
 		{
 			attribute<LatLong_base_ip>   Outer            (poly) := bg_outer_multi_polygon(Geometry);
@@ -28,7 +31,7 @@ container Coast
 		unit<uint32> Split_Lakes := bp_split_polygon(Split/FindLakes)
 		, Descr = "Nogmaals split, want na de minus zijn de meerdere meren in een continent opnieuw een multipolygon. Dit geeft later problemen met verbindingslijnen na de arc2segments"
 		{
-			attribute<SphericalMercator> geometry_mer (poly) := convert(geometry[LatLong], SphericalMercator);
+			attribute<SphericalMercator> geometry_mer (poly) := convert(geometry[LatLong_base], SphericalMercator);
 			attribute<km2_f64>           area                := area(geometry_mer, m2_f64)[km2_f64];
 		}
 		
@@ -41,52 +44,21 @@ container Coast
 		unit<uint32> Union_Outer_w_LargeLakes := union_unit(Split, Large_lakes)
 		, Descr = "union outer polygons with large lakes"
 		{
-			attribute<LatLong>           geometry     (poly) := union_data(.,Split/Outer, Large_lakes/Geometry)[LatLong];
+			attribute<LatLong_base>      geometry     (poly) := union_data(.,Split/Outer, Large_lakes/Geometry)[LatLong_base];
 			attribute<SphericalMercator> Geometry_mer (poly) := convert(Geometry, SphericalMercator);
 		}
 	}
 	
 	container Location2Coast   := Templates/GetDistance_T(Coastline/Union_Outer_w_LargeLakes);
-		
-		// unit<uint32> CoastArcSet := arc2segm(Union_Outer_w_LargeLakes/Geometry_mer)
-		// , Descr = "to prepare for a coast pointset, we need to split up the coastlines into smaller segments to ensure enough points."
-		// {
-			// unit<uint32> pointset := union_unit(.,.)
-			// {
-				// attribute<SphericalMercator> point    := union_data(., ../point, ../nextpoint);
-				// attribute<..>                sequence := union_data(., id(..), id(..));
-				// attribute<uint32>            ordinal  := union_data(., const(0,..), const(1,..));
-			// }
-			// attribute<SphericalMercator> geometry_mer_segm (arc)   := points2sequence(pointset/point, pointset/sequence, pointset/ordinal);
-		// }
-		
-		// unit<uint32> DynaPoints   := dyna_point_with_ends(CoastArcSet/point, CoastArcSet/nextpoint, 100d)
-		// , Descr ="Create coastline pointset with small enough steps, say every 100m";
-		
-		// unit<uint32> UqDynaPoints := unique(DynaPoints/point);
-	// }
-	
-	// unit<uint32> from_domain  := CompactedDomain 
-	// {
-	   // attribute<SphericalMercator> geometry      := CompactedDomain/Geometry_mer;
-	   // attribute<to_domain>         to_domain_rel := connect(to_domain/geometry, from_domain/geometry);
-	   // attribute<SphericalMercator> geometry_to   := to_domain/geometry[to_domain_rel];
-	   // attribute<float64>           sqrdist       := sqrdist(geometry_to, geometry);
-	// }
-
-	// unit<uint32> to_domain  := Coastline/UqDynaPoints
-	// {
-	   // attribute<SphericalMercator> geometry := Coastline/UqDynaPoints/values;
-	// }  	
 	
 	attribute<float32> Location2Coast_sqr_domain_export    (domain) := Location2Coast/Location2_sqr_domain_export
 	, StorageName = "='%ToBURPDataDir%/physical/Coast/'+ModelParameters/StudyArea+'/Location2Coast_m_sqr_'+ModelParameters/domain_EPSG+'.tif'";
 
 	unit<ipoint> Location2Coast_m_sqr
-	:	StorageName     = "='%ToBURPDataDir%/physical/Coast/World/Location2Coast_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
+	:	StorageName     = "='%ToBURPDataDir%/physical/Coast/Europe/Location2Coast_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 	,	StorageType     = "gdal.grid"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "Mollweide"
+	,	DialogData      = "CurrentProjection"
 	, 	LazyCalculated  = "true"
 	{
 		attribute<float32> ReadData       (domain);

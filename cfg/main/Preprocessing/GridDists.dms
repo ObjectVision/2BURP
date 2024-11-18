@@ -69,21 +69,72 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 	
 	unit<uint32> NodeSet:= select_with_org_rel(IsDefined(id(domain))) 
 	{
-		attribute<LatLong>                 Geometry  := org_rel[LatLong];
+		attribute<LatLong>                 Geometry_LL  := org_rel[LatLong];
+		attribute<bool>                    HasLatLongNullGeometry := IsNull(org_rel[LatLong]);
 		attribute<float32>	               Impedance := collect_by_cond(., grid/impedance_all);
 		attribute<RegionalUnits/Countries> country   := collect_by_cond(., RegionalUnits/Countries/per_domain);
 	}
 	
-	unit<uint32> Network:= union_unit(grid/all_Ns, grid/all_NEs, grid/all_Es, grid/all_SEs) 
+	unit<uint32> Network_src:= union_unit(grid/all_Ns, grid/all_NEs, grid/all_Es, grid/all_SEs) 
 	{
 		attribute<NodeSet> F1             := union_data(., grid/all_Ns/F1, grid/all_NEs/F1, grid/all_Es/F1, grid/all_SEs/F1);
 		attribute<NodeSet> F2             := union_data(., grid/all_Ns/F2, grid/all_NEs/F2, grid/all_Es/F2, grid/all_SEs/F2);
 		attribute<bool>    crosses_border := NodeSet/country[F1] <> NodeSet/country[F2];
 		attribute<float32> Impedance      := (Length[float32] * (0.5f*(NodeSet/Impedance[F1] + NodeSet/Impedance[F2]))) + 25f * crosses_border[float32];
 		
-		attribute<float32> dx             := (PointCol(F2 -> geometry) - PointCol(F1 -> geometry))[float32];
-		attribute<float32> dy             := (PointRow(F2 -> geometry) - PointRow(F1 -> geometry))[float32];
-		attribute<float32> Sy             := (PointRow(F2 -> geometry) + PointRow(F1 -> geometry))[float32], Descr = "som Y";
+		attribute<Mollweide>  F1_geometry_MW  := (F1 -> org_rel)[Mollweide];
+		attribute<Mollweide > F2_geometry_MW  := (F2 -> org_rel)[Mollweide];
+		attribute<LatLong>    F1_geometry_LL  := F1 -> Geometry_LL;
+		attribute<LatLong>    F2_geometry_LL  := F2 -> Geometry_LL;
+		
+		attribute<bool>    IsGrensgeval      := IsDefined(F1_geometry_LL) != IsDefined(F2_geometry_LL);
+		
+		unit<uint32> Set_with_Null_Coordinates :=  select_with_org_rel(IsGrensgeval)
+		{ 
+			attribute<bool>      IsGrensgeval_1     := IsNull(org_rel -> F1_geometry_LL);
+			attribute<bool>      IsGrensgeval_2     := IsNull(org_rel -> F2_geometry_LL);
+		
+			attribute<float64>   x_f1               := PointCol(org_rel -> F1_geometry_MW)[float64], Descr = "Mollweide X-coordinaat van het F1-punt";
+			attribute<float64>   x_f2               := PointCol(org_rel -> F2_geometry_MW)[float64], Descr = "Mollweide X-coordinaat van het F2-punt";
+			attribute<float64>   y_f1               := PointRow(org_rel -> F1_geometry_MW)[float64], Descr = "Mollweide Y-coordinaat van het F1-punt";
+			attribute<float64>   y_f2               := PointRow(org_rel -> F2_geometry_MW)[float64], Descr = "Mollweide Y-coordinaat van het F2-punt";
+			
+			parameter<float64>   sqrt2R             := 9020047.85d      , Descr = "from the Mollweide range: x-range. Which is sqrt(2R)";
+			parameter<float64>   _2R2               := sqr(sqrt2R)      , Descr = "2 R^2";
+			parameter<float64>   R                  := sqrt2R / sqrt(2d), Descr = "Earth's radius";
+			parameter<float64>   C                  := 2d * pi() * R    , Descr = "Earth's equatorial circumference";
+			
+			attribute<float64>   x_f1_d             := 4d * sqrt(_2R2 - sqr(y_f1)) - 1000d, Descr = "de x afstand die moet worden afgelegd om het punt aan de andere kant van de projectie grens te bereiken voor het F1-punt";
+			attribute<float64>   x_f2_d             := 4d * sqrt(_2R2 - sqr(y_f2)) - 1000d, Descr = "de x afstand die moet worden afgelegd om het punt aan de andere kant van de projectie grens te bereiken voor het F2-punt";
+			
+			attribute<float64>   x_f1_corr          := IsGrensgeval_1 ? x_f1 > 0d ? x_f1 - x_f1_d : x_f1 + x_f1_d : x_f1, Descr = "x-coord van de F1 aan de andere kant van de projectie grens";
+			attribute<float64>   x_f2_corr          := IsGrensgeval_2 ? x_f2 > 0d ? x_f2 - x_f2_d : x_f2 + x_f2_d : x_f2, Descr = "x-coord van de F2 aan de andere kant van de projectie grens";
+			
+			attribute<Mollweide> F1_coord_corr      := point_xy(x_f1_corr, y_f1, Mollweide), Descr = "Mollweide grid coordinaat van F1 na corr";
+			attribute<Mollweide> F2_coord_corr      := point_xy(x_f2_corr, y_f2, Mollweide), Descr = "Mollweide grid coordinaat van F2 na corr";
+			
+			attribute<domain>    F1_coord_corr_grid := F1_coord_corr[domain];
+			attribute<domain>    F2_coord_corr_grid := F2_coord_corr[domain];
+			
+			attribute<NodeSet>   F1                 := rlookup(F1_coord_corr_grid, NodeSet/org_rel);
+			attribute<NodeSet>   F2                 := rlookup(F2_coord_corr_grid, NodeSet/org_rel);
+			
+			attribute<float64>   dx_raw             := (PointCol(F2 -> Geometry_LL) - PointCol(F1 -> Geometry_LL))[float64], Descr = "x distance in degrees, but could need to be flipped";
+			attribute<float64>   dx                 := dx_raw > 180d ? dx_raw - 360d : dx_raw < -180d ? dx_raw + 360d : dx_raw, Descr = "x distance in degrees. Deze kan nog undefined zijn wanneer de gridcel aan de andere zijde niet in het tiled grid domain zit. Deze zullen we er dan uit filteren.";
+			
+			//146: F1_coord_corr_grid == {10,512;249} en F1 == null
+			// dit coordinaat komt idd niet voor in Nodeset/Org_rel sorted list geeft {10,511;35,832} gevolgd door {10,512;1,024}
+			// X= -17790789.92; Y= -1491682.21; ZL=       0.00
+		}
+		
+		attribute<NodeSet> F1_new             := recollect_by_cond(IsGrensgeval, Set_with_Null_Coordinates/F1, F1);
+		attribute<NodeSet> F2_new             := recollect_by_cond(IsGrensgeval, Set_with_Null_Coordinates/F2, F2);
+		
+		attribute<float32> dx_org         := (PointCol(F2_new -> Geometry_LL) - PointCol(F1_new -> Geometry_LL))[float32];
+		attribute<float32> dx             := recollect_by_cond(IsGrensgeval, Set_with_Null_Coordinates/dx[float32], dx_org);
+		
+		attribute<float32> dy             := (PointRow(F2_new -> Geometry_LL) - PointRow(F1_new -> Geometry_LL))[float32];
+		attribute<float32> Sy             := (PointRow(F2_new -> Geometry_LL) + PointRow(F1_new -> Geometry_LL))[float32], Descr = "som Y";
 		
 		attribute<float32> Length         := 	sqrt(
 													sqr(
@@ -93,8 +144,17 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 												+	sqr(
 														dy * (40000f / 360f)             // vertaling naar km
 													)
-												); 
+												);
+												
+		attribute<bool>  RaarGeval := IsNull(length) && (IsDefined(F1_geometry_LL) || isdefined(F2_geometry_LL));
 	}
+	
+	unit<uint32> Nework := select_with_attr_by_cond(Network_src, IsDefined(Network_src/length))
+	{
+		
+	
+	}
+	
 	
 	Template T_AllVariants_instantiation  
 	{

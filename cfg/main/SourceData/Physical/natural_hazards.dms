@@ -21,7 +21,7 @@ container Natural_Hazards
 								"Based on Shakemap Atlas from USGS. Unit is expected number of events per 1000 years."
 		, url             = "%ToBURPDataDir%/physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/Global Risk Data Platform.mht"
 		, StorageReadOnly = "True"
-		, DialogData      = "Mollweide"
+		, DialogData      = "CurrentProjection"
 		{
 			attribute<uint8> ReadData_org(domain);
 			attribute<uint8> ReadData(domain):=MakeDefined(ReadData_org,0b);
@@ -65,7 +65,7 @@ container Natural_Hazards
 		, StorageType     = "gdal.grid"
 		, Source          = "ARUP"
 		, StorageReadOnly = "True"
-		, DialogData      = "Mollweide"
+		, DialogData      = "CurrentProjection"
 		, Descr           = "This dataset indicates the present risk of landslides, induced either by earthquakes or precipitation, as estimated by ARUP in 2021. 
 			The original tiff was projected in a latlong projection system that started at the meridian and continued eastwards until +360 deg. 
 			This has been transformed into a regular latlong grid by Chris Jacobs-Crisioni in 2023 for a World Bank project."
