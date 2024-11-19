@@ -71,13 +71,13 @@ Template Allocate_Population_T
 		attribute<Suit> Read_Calc  (domain) : StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_Pop_'+ThisYear+'.tif'", StorageReadOnly = "True";
 				
 		attribute<Suit>              BuiltUp                        (CompactedDomain) := =ModelParameters/Use_TempTifFiles ? 'Read_Calc[CompactedDomain/org_rel]' : 'Write_Calc[CompactedDomain/org_rel]';
-		attribute<Suit>   		     CappedBuiltUp         			(CompactedDomain) := min_elem(BuiltUp, 80[suit]);
-		attribute<Suit>   		     expCappedBuiltUp      			(CompactedDomain) := exp(CappedBuiltUp);
-		attribute<float32>  		 Prob                  			(CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
+		attribute<Suit>              CappedBuiltUp                  (CompactedDomain) := min_elem(BuiltUp, 80[suit]);
+		attribute<Suit>              expCappedBuiltUp               (CompactedDomain) := exp(CappedBuiltUp);
+		attribute<float32>           Prob                           (CompactedDomain) := expCappedBuiltUp / (1f+ expCappedBuiltUp);
 	
 		attribute<Suit>              NonNegative                    (CompactedDomain) := BuiltUp > 0f ? BuiltUp + 1f : exp(BuiltUp);
 		attribute<Suit>              Population                     (CompactedDomain) := NonNegative;
-		attribute<Suit>				 Scaled_Reduction				(CompactedDomain) := (1f - ModelParameters/Pop_Suitability_Reduction_Scale) + (ModelParameters/Pop_Suitability_Reduction_Scale * min_elem(max_elem(1[Suit] - Prob, 0[Suit]), 1[Suit]));
+		attribute<Suit>              Scaled_Reduction               (CompactedDomain) := (1f - ModelParameters/Pop_Suitability_Reduction_Scale) + (ModelParameters/Pop_Suitability_Reduction_Scale * min_elem(max_elem(1[Suit] - Prob, 0[Suit]), 1[Suit]));
 	}
 	
 	container NewState
@@ -95,12 +95,12 @@ Template Allocate_Population_T
 		//attribute<Person>            Reduced_Population                     (CompactedDomain) := max_elem(Proportional_Reducted_Population - Regional_Reduction_per_cell[Region_rel], 0[Person]);
 		
 		// Reduction scaled attempt: cells will lose 
-		attribute<float32>			 Regional_Population_to_draw				(ClaimRegion) := Population_for_Region[float32] * Initial_Population_Scaled_Reduction_Rate;
-		attribute<float32>			 Scaled_Reducible_pop					(CompactedDomain) := Suitability/Scaled_Reduction[float32] * OldState_Pop/Population[float32];
-		attribute<float32> 			 Population_to_reduce						(ClaimRegion) := sum(Scaled_Reducible_pop, Region_rel);
-		attribute<float32> 			 Scaled_Reduction						(CompactedDomain) := scalesum(Scaled_Reducible_pop, Region_rel, Regional_Population_to_draw);
-		attribute<float32>			 Relative_Reduction						(CompactedDomain) := Scaled_Reduction / OldState_Pop/Population[float32];
-		attribute<float32>			 Reduced_Population						(CompactedDomain) := OldState_Pop/Population[float32] - Scaled_Reduction, IntegrityCheck = "Regional_Population_to_draw <= Population_to_reduce";
+		attribute<float32>           Regional_Population_to_draw                (ClaimRegion) := Population_for_Region[float32] * Initial_Population_Scaled_Reduction_Rate;
+		attribute<float32>           Scaled_Reducible_pop                   (CompactedDomain) := Suitability/Scaled_Reduction[float32] * OldState_Pop/Population[float32];
+		attribute<float32>           Population_to_reduce                       (ClaimRegion) := sum(Scaled_Reducible_pop, Region_rel);
+		attribute<float32>           Scaled_Reduction                       (CompactedDomain) := scalesum(Scaled_Reducible_pop, Region_rel, Regional_Population_to_draw);
+		attribute<float32>           Relative_Reduction                     (CompactedDomain) := Scaled_Reduction / OldState_Pop/Population[float32];
+		attribute<float32>           Reduced_Population                     (CompactedDomain) := OldState_Pop/Population[float32] - Scaled_Reduction, IntegrityCheck = "Regional_Population_to_draw <= Population_to_reduce";
 		
 		
 		//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
@@ -293,9 +293,5 @@ Template Allocate_Population_T
 				// attribute<Person_km2>        Density_on_land_of_Totalpop_1_5prNewBU          := mean(../Density_on_land_of_Totalpop_1_5prNewBU, Region_rel);
 			}
 		}
-		
-		
-		
-		
 	}
 }
