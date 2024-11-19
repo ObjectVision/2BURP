@@ -85,6 +85,7 @@ container RegionalUnits
 	{
 		attribute<string>     Label           := const('World',.);
 		attribute<Mollweide_base>  geometry_MW (poly) := bp_union_polygon(Continents/geometry_MW[Mollweide_base_ip], continents/World_rel)[Mollweide_base];
+		attribute<LatLong_base>    geometry_LL (poly) := bp_union_polygon(Continents/geometry_LL[LatLong_base_ip], continents/World_rel)[LatLong_base];
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}

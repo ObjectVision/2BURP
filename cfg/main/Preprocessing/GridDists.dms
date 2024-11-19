@@ -149,7 +149,7 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 		attribute<bool>  RaarGeval := IsNull(length) && (IsDefined(F1_geometry_LL) || isdefined(F2_geometry_LL));
 	}
 	
-	unit<uint32> Nework := select_with_attr_by_cond(Network_src, IsDefined(Network_src/length))
+	unit<uint32> Network := select_with_attr_by_cond(Network_src, IsDefined(Network_src/length))
 	{
 		
 	

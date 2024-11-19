@@ -41,7 +41,7 @@ container Geography : using = "units"
 
 	container StudyAreas
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base,   point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong> geometry (polygon):= SourceData/RegionalUnits/World/Geometry[SourceData/RegionalUnits/World/V/World];}
+		unit<dpoint> LatLong_World                    := range(LatLong_Base,   point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong_Base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_LL[SourceData/RegionalUnits/World/V/World];}
 		unit<dpoint> Mollweide_World                  := range(Mollweide_base, point_yx(Mollweide_grid_base/y_min,Mollweide_grid_base/x_min), point_yx(Mollweide_grid_base/y_max, Mollweide_grid_base/x_max)) {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_MW[SourceData/RegionalUnits/World/V/World];}
 		
 		//continents
@@ -151,7 +151,7 @@ container Geography : using = "units"
 	
 	#include <DistMatrices.dms>
 	#include <wms_layer_latlong.dms>
-	#include <wms_layer_mollweide.dms>
+	// #include <wms_layer_mollweide.dms>
 	#include <tms_layer_osm_webmercator.dms>
 	
 	

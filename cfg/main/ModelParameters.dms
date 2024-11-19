@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Australia_Oceania'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'Europe'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
@@ -11,7 +11,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
-	parameter<bool>                      Use_TempTifFiles                                    := FALSE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
 	parameter<string>                    Additional_FileSuffix                               := ''           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
