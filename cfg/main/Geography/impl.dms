@@ -2,7 +2,7 @@ container Impl
 {
 	container GridData : using = "SourceData/RegionalUnits"
 	{
-		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear/'+ModelParameters/StartYear+'[Person]';
+		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear_Unrounded/'+ModelParameters/StartYear+'[Person]';
 		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 		attribute<Bool>   InStudyArea            (domain) := poly2grid(CurrentProjection/geometry, domain);
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];

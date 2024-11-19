@@ -20,8 +20,8 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			, Person
 		)
 	{
-		attribute<Person> Y2010 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2010[Person], FunctionalAreas/per_domain);
-		attribute<Person> Y2020 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2020[Person], FunctionalAreas/per_domain);
+		attribute<Person> Y2010 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2010/Read_Population[Person], FunctionalAreas/per_domain);
+		attribute<Person> Y2020 (FunctionalAreas) := sum(SourceData/Population/PerYear/Y2020/Read_Population[Person], FunctionalAreas/per_domain);
 	}
 	
 	// container PercDelta_Claims_Builtup := 
@@ -50,7 +50,7 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 				'+quote(GHS_years/name)+'
 				, convert(Builtup/Total/'+GHS_years/name+', km2) 
 				, convert(Builtup/Residential/'+GHS_years/name+',km2) 
-				, Population/PerYear/'+GHS_years/name+'[Person]
+				, Population/PerYear/'+GHS_years/name+'/Read_Population[Person]
 			)'
 		)
 	{
