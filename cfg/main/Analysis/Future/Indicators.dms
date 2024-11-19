@@ -304,7 +304,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 					: 'sum(Population/PerYear_in_CD/'+AllYears/name+'[uint64], Preprocessing/DegreesOfUrbanisation/'+AllYears/name+'/ReadTypologyK)'
 			, TypologyK
 			, uint64
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (TypologyK) := TypologyK/label; //, StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect";
 		// attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
@@ -353,7 +353,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			, 'Population_perDoU_AllYears/'+AllYears/name+'[float32] / Area_perDoU_AllYears/'+AllYears/name+'[float32]'
 			, TypologyK
 			, float32
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>      Label     (TypologyK) := TypologyK/label;
 	}
@@ -367,7 +367,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 					: 'sum(uint64(Population/PerYear_in_CD/'+AllYears/prev_name+'[uint64] >= 1[uint64] && Population/PerYear_in_CD/'+AllYears/name+'[uint64] = 0[uint64]), Preprocessing/DegreesOfUrbanisation/'+AllYears/prev_name+'/ReadTypologyK)'
 			, TypologyK
 			, uint64
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Abandoned_since_prev_decade_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Abandoned_since_prev_decade_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (TypologyK) := TypologyK/label; //, StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect";
 		// attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
@@ -441,7 +441,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			, 'sum(Geography/domain/area, invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'])'
 			, TypologyK
 			, km2
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
 	 {
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
 	 }

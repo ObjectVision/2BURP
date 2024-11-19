@@ -98,7 +98,7 @@ container Physical : using = "geography;classifications"
 					  "Slope genereated in ArcGIS 10.6.1 from Slope-syntax DEM in degrees, planar, zfactor1  --> gtopo30_degree_planar_zfactor1_ag1061.tif"
 					  "GeoDMS -3.40282E+38f has been given value 0 --> exported as tif"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "Mollweide"
+	,	DialogData      = "CurrentProjection"
 	{
 		attribute<float32> ReadData (domain);
 	}	
@@ -110,7 +110,7 @@ container Physical : using = "geography;classifications"
 	,	Source          = "Database: Y:\Data\PBLbase\Data\MODIS_BOS.gdb\MODIS_2001_BOS"
 						  "conversion to tif-format in ArcGIS, unsigned integer 2 Bit, LZW-compression with correct extent"
 	,	StorageReadOnly = "True"
-	,	DialogData      = "Mollweide"
+	,	DialogData      = "CurrentProjection"
 	{
 		attribute<uint8> ReadData (domain);
 	}	
@@ -124,16 +124,18 @@ container Physical : using = "geography;classifications"
 		:  StorageName      = "%ToBURPDataDir%/physical/Water/InlandWater.shp"
 		,  StorageType      = "gdal.vect"
 		,  StorageReadOnly  = "True"
-		,	DialogData      = "LatLOng"
+		,	DialogData      = "LatLong"
 		{
-			// attribute<LatLong>           Geometry(poly);
 			attribute<Mollweide>         Geometry_MW      (poly) := convert(geometry, Mollweide);
 			attribute<SphericalMercator> geometry_mer     (poly) := convert(Geometry, SphericalMercator);
-			attribute<m2>                Area                    := area(Geometry_MW, float64)[m2];
-			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Geometry_MW, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_'+ModelParameters/domain_EPSG+'.tif'";
+			
+			attribute<CurrentProjection> Geometry_        (poly) := =ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'Geometry';
+			
+			attribute<m2>                Area                    := area(geometry_mer, float64)[m2];
+			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Geometry_, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_'+ModelParameters/domain_EPSG+'.tif'";
 			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
 			
-			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry_MW, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
+			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Geometry_, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain_'+ModelParameters/domain_EPSG+'.tif'";
 			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
 		}
 
@@ -173,10 +175,10 @@ container Physical : using = "geography;classifications"
 
 
 		unit<ipoint> Location2LargeInlandWater_m_sqr
-		:	StorageName     = "='%ToBURPDataDir%/physical/water/World/Location2LargeInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
+		:	StorageName     = "='%ToBURPDataDir%/physical/water/Europe/Location2LargeInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
-		,	DialogData      = "Mollweide"
+		,	DialogData      = "CurrentProjection"
 		, 	LazyCalculated  = "true"
 		{
 			attribute<float32> ReadData       (domain);
@@ -184,10 +186,10 @@ container Physical : using = "geography;classifications"
 			attribute<km>      Result         (domain) := MakeDefined(min_elem(Corr_latfactor[meter], 250000[meter])[km], 250[km]);
 		}
 		unit<ipoint> Location2AnyInlandWater_m_sqr
-		:	StorageName     = "='%ToBURPDataDir%/physical/water/World/Location2AnyInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
+		:	StorageName     = "='%ToBURPDataDir%/physical/water/Europe/Location2AnyInlandWater_m_sqr_'+ModelParameters/domain_EPSG+'.tif'"
 		,	StorageType     = "gdal.grid"
 		,	StorageReadOnly = "True"
-		,	DialogData      = "Mollweide"
+		,	DialogData      = "CurrentProjection"
 		, 	LazyCalculated  = "true"
 		{
 			attribute<float32> ReadData       (domain);

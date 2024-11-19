@@ -2,13 +2,13 @@
 
 <DocType name="GeoDmsMetaInfo">
 <DefaultInfo>
-	<FullName>/Geography/Impl/StudyAreaTile_Create_Mollweide/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create_LatLong/UB_sub_y
 	</FullName>
 	<GeoDmsVersion>GeoDms 16.0.0 [Oct 28 2024 09:15:42]
 	</GeoDmsVersion>
 	<SessionStartTime>2024-11-18 10:35:13
 	</SessionStartTime>
-	<CurrentTime>2024-11-18 11:09:14
+	<CurrentTime>2024-11-18 17:48:48
 	</CurrentTime>
 	<StatusFlags>0x17e5ff = AdminMode SuspendForGUI ShowStateColors TraceLogFile TreeViewVisible DetailsVisible EventLogVisible ToolBarVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
@@ -18,7 +18,7 @@
 	</GeoDmsVersion>
 </Software>
 <Config>
-	<FullName>/Geography/Impl/StudyAreaTile_Create_Mollweide/UB_sub_y
+	<FullName>/Geography/Impl/StudyAreaTile_Create_LatLong/UB_sub_y
 	</FullName>
 	<Expr>pointrow(UB_sub)
 	</Expr>
@@ -38,36 +38,21 @@
 		On branch main<BR/>
 		Your branch is up to date with &apos;origin/main&apos;.<BR/>
 		<BR/>
-		Changes to be committed:<BR/>
-		  (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)<BR/>
-			modified:   cfg/main/Geography.dms<BR/>
-			modified:   cfg/main/Geography/impl.dms<BR/>
-			modified:   cfg/main/ModelParameters.dms<BR/>
-			modified:   cfg/main/SourceData/Physical.dms<BR/>
-			modified:   cfg/main/SourceData/Physical/FloodProneArea.dms<BR/>
-			modified:   cfg/main/SourceData/Physical/coast.dms<BR/>
-			modified:   cfg/main/SourceData/Physical/natural_hazards.dms<BR/>
-			modified:   cfg/main/SourceData/Policy.dms<BR/>
-			modified:   cfg/main/SourceData/Population.dms<BR/>
-			modified:   cfg/main/SourceData/RegionalUnits.dms<BR/>
-			modified:   cfg/main/SourceData/Socioeconomic/infrastructure.dms<BR/>
-		<BR/>
 		Changes not staged for commit:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
+			modified:   cfg/main/Geography.dms<BR/>
 			modified:   cfg/main/ModelParameters.dms<BR/>
+			modified:   cfg/main/SourceData/RegionalUnits.dms<BR/>
+			modified:   cfg/main/SourceData/Socioeconomic/infrastructure.dms<BR/>
 		<BR/>
-		Untracked files:<BR/>
-		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
-			data/StudyAreaTiles_Europe_LatLong.dbf<BR/>
-			data/StudyAreaTiles_Europe_LatLong.xml<BR/>
-		<BR/>
-		1d542e55267664af6ca1bf00b2599f28e1dccf49<BR/>
+		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
+		03fde64e4e4754f25a11a832fb64e7843ea672c7<BR/>
 		
 	</RevisionInfo>
 </Git>
 <Parameters>
-	<StudyArea>Australia_Oceania
+	<StudyArea>World
 	</StudyArea>
 </Parameters>
 </DocType>
