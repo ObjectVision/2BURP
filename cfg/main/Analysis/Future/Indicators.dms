@@ -22,7 +22,8 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 				, NrPerson
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 			)
-		{
+		{	
+			attribute<NrPerson> Y2020		 (domain) := Initial;
 			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
 			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
 		}
