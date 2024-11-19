@@ -45,7 +45,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 	{
 		//adhoc
 		attribute<bool> NoBuiltUp_butPopulation (domain) := BuiltUp/Total/Y2020 == 0[m2] && PerYear_CorrectForNoData/Y2020 > 0d;
-		attribute<bool> BuiltUp_wihtPopulation (domain) := BuiltUp/Total/Y2020 > 0[m2] && PerYear_CorrectForNoData/Y2020 > 0d;
+		attribute<bool> BuiltUp_withPopulation  (domain) := BuiltUp/Total/Y2020 > 0[m2]  && PerYear_CorrectForNoData/Y2020 > 0d;
 		
 		parameter<float32> Pop_with_no_BU  := sum(float32(NoBuiltUp_butPopulation) * float32(PerYear_CorrectForNoData/Y2020));
 		
@@ -65,7 +65,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		parameter<string> Year;
 		///
 		
-		attribute<Person>            Population_domain                       (domain) := ='PerYear_Unrounded/'+Year+'[Person]';
+		attribute<Person>            Population_domain                       (domain) := ='FunctionalAreas/IsStudyArea_domain ? PerYear_Unrounded/'+Year+'[Person] : null_f';
 		attribute<Person>            Population_org                 (CompactedDomain) := Population_domain[CompactedDomain/org_rel]; 
 		attribute<Person>            Population_Trunc_domain        (CompactedDomain) := min_elem_alldefined(Population_org, maxmax_saturation); //truncate for unrealistic densities (e.g. very much population in hardly any builtup area).
 		parameter<Person>            maxmax_saturation                                := ModelParameters/Pop_maxmax_saturation;
@@ -84,9 +84,9 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 	container PerYear_in_CD :=
 		for_each_nedv(
 			GHS_years/name
-			, 'PerYear/'+GHS_years/name+'/Read_Population[float64] * float64(domain/IsCompactedDomain)'
-			, domain
-			, float64
+			, 'collect_by_cond(CompactedDomain, domain/IsCompactedDomain, PerYear/'+GHS_years/name+'/Read_Population)'
+			, CompactedDomain
+			, NrPerson
 		);
 	container inhabited_cells:=
 		for_each_nedv(
