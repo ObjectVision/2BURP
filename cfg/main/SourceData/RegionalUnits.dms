@@ -105,7 +105,11 @@ container RegionalUnits
 	{
 		attribute<Mollweide_base>         geometry_MW                    (poly) := geometry;
 		attribute<LatLong_base>           geometry_LL                    (poly) := convert(geometry_MW, LatLong_base);
-		attribute<CurrentProjection_base> Geometry_                      (poly) := = ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'Geometry_LL';
+		attribute<CurrentProjection_base> Geometry_                      (poly) := = ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'Geometry_LL'
+		{
+			parameter<uint32> BrushColor := rgb(255,255,255), DialogType = "BrushColor";
+			parameter<uint32> PenColor   := rgb(255,0,0), DialogType = "PenColor";		
+		}
 		
 		attribute<string>                 Label                                 := name;
 		attribute<.>                      per_domain                   (domain) := poly2grid(Geometry_, domain);
@@ -116,13 +120,21 @@ container RegionalUnits
 		attribute<set_countries>          Country_rel                           := rlookup(country, set_countries/zoneid);
 	}
 	
-	unit<uint32> FunctionalAreas := select_with_org_rel_with_attr_by_cond(FunctionalAreas_all, FunctionalAreas_all/IsStudyArea)
+	unit<uint32> FunctionalAreas := select_with_org_rel(FunctionalAreas_all/IsStudyArea)
+	, DialogData = "Geometry"
+	, DialogType = "map"
 	{
+		attribute<CurrentProjection_base> Geometry                      (poly) := org_rel -> geometry_
+		{
+			parameter<uint32> BrushColor := null_u, DialogType = "BrushColor";
+			parameter<uint32> PenColor   := rgb(10,10,10), DialogType = "PenColor";
+		}
 		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
-		attribute<.>              per_domain                   (domain) := poly2grid(Geometry_, domain);
+		attribute<.>              per_domain                   (domain) := poly2grid(Geometry, domain);
 		attribute<bool>           IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
-		attribute<bool>           ignore_check_enough_suitable_locations:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
+		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
+		attribute<bool>           ignore_Check_for_enough_drawn_population:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_drawn_population/org_rels));
 		attribute<km2>            cd_area                               := sum(CompactedDomain/area, CompactedDomain/FunctionalAreas_rel);
 	}
 

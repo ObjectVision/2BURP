@@ -7,7 +7,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   WGS_Gridsize                                        := 30d          , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong grids, represented in arc second. Where 30ss corresponds to roughly a 1km grid at the equator.";
 	parameter<float64>                   WGS_Subgridsize                                     := 3d           , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong subgrids, represented in arc second. Where 3ss corresponds to roughly a 100m grid at the equator.";
-	parameter<string>                    domain_EPSG                                         := '4326'      , Descr = "Choose the projection to use in the model. Options: 54009 (Mollweide) or 4326 (WGS84)";  
+	parameter<string>                    domain_EPSG                                         := '54009'      , Descr = "Choose the projection to use in the model. Options: 54009 (Mollweide) or 4326 (WGS84)";  
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
@@ -34,6 +34,9 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<Person>                    Pop_maxmax_saturation                               := 1000000[Person];
 	
 	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 0 {attribute<uint32> org_rels := const(null_u, .);}
+	
+	unit<uint32> ignore_Check_for_enough_drawn_population : nrofrows = 1
+	{attribute<uint32> org_rels: [908];} //908: Monaco
 	
 	//{attribute<uint32> org_rels: [712, 792, 828];} //452, 637, 638,
 	//452: Pakistan, 2030; 637: Yemen, 2030; 638: Yemen, 2030; 712: sudan, 2030; 792: Congo, 2040; 828: Faroer, 2030.

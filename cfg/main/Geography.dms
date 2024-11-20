@@ -16,8 +16,8 @@ container Geography : using = "units"
 	}
 	unit<ipoint> LatLong_base_ip             := gridset(LatLong_Base,  point_xy(0.001d, 0.001d), point_xy(0.0d, 0.0d), ipoint); 
 	unit<ipoint> Mollweide_base_ip           := gridset(Mollweide_base,  point_xy(1d, 1d), point_xy(0.0d, 0.0d), ipoint); 
-	unit<dpoint> Mollweide_base         : SpatialReference = "ESRI:54009";
-	unit<dpoint> Mollweide              := ='StudyAreas/Mollweide_'+ModelParameters/StudyArea;
+	unit<dpoint> Mollweide_base         : SpatialReference = "ESRI:54009", DialogData = "/sourcedata/RegionalUnits/FunctionalAreas/Geometry";
+	unit<dpoint> Mollweide              := ='StudyAreas/Mollweide_'+ModelParameters/StudyArea, DialogData = "/sourcedata/RegionalUnits/FunctionalAreas/Geometry";
 	Unit<dpoint> SphericalMercator_base : SpatialReference = "EPSG:3857", DialogData = "tms_layer_osm_webmercator";
 	Unit<dpoint> SphericalMercator      := range(SphericalMercator_base, point_yx(-16000000.0, -20000000.0),  point_yx(16000000.0, 20000000.0));
 	
@@ -41,8 +41,8 @@ container Geography : using = "units"
 
 	container StudyAreas : using = "SourceData/RegionalUnits"
 	{
-		unit<dpoint> LatLong_World                    := range(LatLong_Base,   point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong_Base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_LL[SourceData/RegionalUnits/World/V/World];}
-		unit<dpoint> Mollweide_World                  := range(Mollweide_base, point_yx(Mollweide_grid_base/y_min,Mollweide_grid_base/x_min), point_yx(Mollweide_grid_base/y_max, Mollweide_grid_base/x_max)) {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_MW[SourceData/RegionalUnits/World/V/World];}
+		unit<dpoint> LatLong_World                    := range(LatLong_Base,   point_yx(-90.0,-180.0), point_yx(90.0, 180.0)) {parameter<LatLong_Base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_LL[SourceData/RegionalUnits/World/V/World]; attribute<SourceData/RegionalUnits/World> per_domain (domain) := poly2grid(SourceData/RegionalUnits/World/geometry_LL, domain);}
+		unit<dpoint> Mollweide_World                  := range(Mollweide_base, point_yx(Mollweide_grid_base/y_min,Mollweide_grid_base/x_min), point_yx(Mollweide_grid_base/y_max, Mollweide_grid_base/x_max)) {parameter<Mollweide_base> geometry (polygon):= SourceData/RegionalUnits/World/Geometry_MW[SourceData/RegionalUnits/World/V/World]; attribute<SourceData/RegionalUnits/World> per_domain (domain) := poly2grid(SourceData/RegionalUnits/World/Geometry_MW, domain);}
 		
 		//continents
 		unit<dpoint> LatLong_Europe                   := range(LatLong_Base, Lower_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL),            Upper_Bound(SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL)){ parameter<LatLong_base> geometry     (poly) := SourceData/RegionalUnits/Continents/GetPerContinentGeometry/Europe/geometry_LL; attribute<Continents/GetPerContinentGeometry/Europe/unit> per_domain (domain) := poly2grid(Continents/GetPerContinentGeometry/Europe/unit/geometry_LL, domain);}
@@ -89,7 +89,7 @@ container Geography : using = "units"
 
 	unit<wpoint> domain := =ModelParameters/domain_EPSG == '54009' ? 'domain_Mollweide' : 'domain_LatLong';
 	
-	unit<wpoint> domain_Mollweide := TiledUnit(Impl/StudyAreaTile/LB, Impl/StudyAreaTile/UB)
+	unit<wpoint> domain_Mollweide := TiledUnit(Impl/StudyAreaTile/LB, Impl/StudyAreaTile/UB), DialogData = "/sourcedata/RegionalUnits/FunctionalAreas/Geometry"
 	{
 
 		attribute<Mollweide>      geometry          := id(.)[Mollweide] + point_xy(0.5 * /ModelParameters/MW_Gridsize,0.5 * /ModelParameters/MW_Gridsize, Mollweide), LazyCalculated = "True", Dialogdata = "Mollweide";
