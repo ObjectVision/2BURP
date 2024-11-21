@@ -10,17 +10,17 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		attribute<float32>    BUTOT_2020                              := SourceData/Builtup/Total/Y2020[CompactedDomain/org_rel];
 		attribute<float32>	  BUPERCTOT_2000                          := makedefined(BUTOT_2000 / (1000f * 1000f * latitude_factor), 0f);
 		attribute<float32>	  BUPERCTOT_2020                          := makedefined(BUTOT_2020 / (1000f * 1000f * latitude_factor), 0f);
-		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear/Y2000[CompactedDomain/org_rel];
-		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear/Y2020[CompactedDomain/org_rel];
-		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/ItemOfInterest[CompactedDomain/org_rel];
-		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/ItemOfInterest[CompactedDomain/org_rel];
+		attribute<float64>    Pop_2000                                := SourceData/Population/PerYear_unrounded/Y2000[CompactedDomain/org_rel];
+		attribute<float64>    Pop_2020                                := SourceData/Population/PerYear_unrounded/Y2020[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2000_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_Y2000/Mean_8dir[CompactedDomain/org_rel];
+		attribute<float64>    PopulationDensity_2020_8dir             := Preprocessing/Population_Neighbourhoods/PopulationDensity_8dir_StartYear/Mean_8dir[CompactedDomain/org_rel];
 		
 		attribute<int32>      Elevation                               := Physical/Elevation/Mean_1k[CompactedDomain/org_rel];
 		attribute<float32>    Slope                                   := Physical/Slope_2021/ReadData[CompactedDomain/org_rel];
-		attribute<float32>    TRI_mean                                := Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[CompactedDomain/org_rel];
+		attribute<float32>    TRI_mean                                := makedefined(Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[CompactedDomain/org_rel], 1f);
 		
 		attribute<uint8>      IsProtectedArea                         := Policy/ProtectedAreas/ReadData[CompactedDomain/org_rel];
-		attribute<uint8>      IsFloodProneArea_RP100                  := Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel];
+		attribute<uint8>      IsFloodProneArea_RP100                  := makedefined(Physical/Water/FloodProneArea/RP100/ReadData[CompactedDomain/org_rel], 1[uint8]);
 		
 		attribute<uint8>      Earthquakes_MMI_Index                   := Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[CompactedDomain/org_rel];
 		attribute<int16>      LandSlide_risk  	 			          := Physical/Natural_Hazards/Landslide/LS_risk[CompactedDomain/org_rel];
