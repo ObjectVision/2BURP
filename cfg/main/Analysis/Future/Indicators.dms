@@ -287,7 +287,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<builtupKm2> BU_area_Claim_2100 (ClaimRegion) := Claim/Builtup/Y2100;
 	// }
 	
-	parameter<string> Export_CSVs := 'Ready', ExplicitSuppliers = "Population_perDoU_AllYears;Population_OnLand_Density_perDoU_AllYears;Area_perDoU_AllYears;Population_Abandonment_perDoU_AllYears;"; //BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram;";
+	parameter<string> Export_CSVs := 'Ready', ExplicitSuppliers = "Population_perDoU_AllYears;Population_OnLand_Density_perDoU_AllYears;Area_perDoU_AllYears;Population_Abandonment_perDoU_AllYears;results_per_country/store_button;"; //BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram;";
 	
 	// container Added_BU_perDoU := 
 		// for_each_nedv(
@@ -683,7 +683,59 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		}
 	}
 	
-	
+	container results_per_country {
+		
+		parameter<bool> store_button:= True, explicitsuppliers = "pop_lvl1; area_lvl1;";
+		
+		unit<uint32> countries_x_degurba_lvl2:= combine(Countries_study_area, TypologyK) {
+			attribute<uint8>  EK:= TypologyK/EK[second_rel];
+			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
+			attribute<string> Country:= Countries_study_area/Label[first_rel];
+			attribute<string> Degurba:= TypologyK/label[second_rel];
+			attribute<string> Label:= Country + ' ' + Degurba;
+			attribute<countries_x_degurba_lvl1> cd1_rel:= rlookup(point(first_rel, 10*(EK[uint32] / 10), upoint), countries_x_degurba_lvl1/pt);
+		}
+		unit<uint32> countries_x_degurba_lvl1:= combine(Countries_study_area, Degurba_lvl1) {
+			attribute<uint8>  EK:= Degurba_lvl1/EK[second_rel];
+			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
+			attribute<string> Country:= Countries_study_area/Label[first_rel];
+			attribute<string> Degurba:= Degurba_lvl1/label[second_rel];
+			attribute<string> Label:= Country + ' ' + Degurba;
+		}
+		
+		
+		container grid_rels:= for_each_nedv(AllYears/name
+			, 'rlookup(point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint), countries_x_degurba_lvl2/pt)'
+			//, 'point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint)'
+			, domain
+			, countries_x_degurba_lvl2
+			);
+		
+		container pop_lvl2:= for_each_nedv(AllYears/name
+			, 'sum(Prep/Read_Population/'+AllYears/name+', grid_rels/'+AllYears/name+')'
+			, countries_x_degurba_lvl2
+			, NrPerson
+			);
+		container area_lvl2:= for_each_nedv(AllYears/name
+			, 'sum(domain/area, grid_rels/'+AllYears/name+')'
+			, countries_x_degurba_lvl2
+			, km2
+			);
+		
+		container pop_lvl1:= for_each_nedv(AllYears/name
+			, 'sum(pop_lvl2/'+AllYears/name+', countries_x_degurba_lvl2/cd1_rel)'
+			, countries_x_degurba_lvl1
+			, NrPerson
+			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Pop_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect" 
+			{attribute<string> Country (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Country; attribute<string> Degurba (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Degurba;}
+		container area_lvl1:= for_each_nedv(AllYears/name
+			, 'sum(area_lvl2, countries_x_degurba_lvl2/cd1_rel)'
+			, countries_x_degurba_lvl1
+			, km2
+			) , StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
+			{attribute<string> Country (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Country; attribute<string> Degurba (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Degurba;}
+			
+	}
 	
 	// container BuiltUp_Residential_Area_Histogram := 
 		// for_each_nedv(

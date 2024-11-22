@@ -136,8 +136,19 @@ container RegionalUnits
 		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
 		attribute<bool>           ignore_Check_for_enough_drawn_population:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_drawn_population/org_rels));
 		attribute<km2>            cd_area                               := sum(CompactedDomain/area, CompactedDomain/FunctionalAreas_rel);
+		attribute<string> 		  country								:= FunctionalAreas_all/country[org_rel];
+		attribute<Countries>	  Countries_rel							:= rlookup(country, Countries/ISO3);
 	}
-
+	
+	unit<uint32> Countries_study_area := select_with_org_rel(isdefined(invert(FunctionalAreas/Countries_rel))) {
+		attribute<string>                 Label:= 						Countries/Label[org_rel]; 
+		attribute<string>                 ISO3:=  						Countries/ISO3[org_rel]; 
+		attribute<LatLong_base>           geometry_LL 		(poly):= 	Countries/geometry_LL[org_rel];
+		attribute<Mollweide_base>         Geometry_MW 		(poly):= 	Countries/Geometry_MW[org_rel];
+		attribute<CurrentProjection_base> Geometry 			(poly):= 	=ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'geometry_LL';
+		attribute<.>              		  per_domain        (domain):= 	poly2grid(Geometry, domain);
+	}
+	
 	unit<uint32> set_countries: nrofrows = 239 
 	{
 		attribute<string>          ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
