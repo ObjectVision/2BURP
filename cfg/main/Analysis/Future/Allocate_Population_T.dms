@@ -106,7 +106,7 @@ Template Allocate_Population_T
 		attribute<float32>           Reduced_Population                     (CompactedDomain) := OldState_Pop/Population[float32] - Scaled_Reduction - Additional_Proportional_Reduction, IntegrityCheck = "PopLeftAfterReduction >= 0f || ClaimRegion/ignore_Check_for_enough_drawn_population", Descr = "Initial population minus the reduction due to decline and migration.";
 		
 		attribute<float32>           Population_to_reduce                       (ClaimRegion) := sum(Scaled_Reduction + Additional_Proportional_Reduction, Region_rel), Descr = "";
-		attribute<float32>           PopLeftAfterReduction                      (ClaimRegion) := Population_to_reduce - Regional_Population_to_draw , Descr = "Integrity Check condition to ensure we do not reduce more people than are allowed to be drawn in the region.";
+		attribute<float32>           PopLeftAfterReduction                      (ClaimRegion) := 1f + Population_to_reduce - Regional_Population_to_draw , Descr = "Integrity Check condition to ensure we do not reduce more people than are allowed to be drawn in the region.";
 		
 		
 		//Adding step 3: Newly built-up areas will be populated based on the initial local average built-up population density in a 3x3 or 5x5 cell radius
