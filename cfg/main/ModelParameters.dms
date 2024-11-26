@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Asia'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'Europe'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
@@ -11,8 +11,8 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
-	parameter<bool>                      Use_TempTifFiles                                    := TRUE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
-	parameter<string>                    Additional_FileSuffix                               := ''           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<bool>                      Use_TempTifFiles                                    := FALSE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
@@ -22,9 +22,9 @@ container ModelParameters : using = "units;sourcedata"
 	
 	//POPULATION ALLOCATION
 	parameter<float32>                   Pop_Initial_Proportional_Reduction_Rate_base        := 0.01f        , Descr = "All cells will lose a percentage of their initial population to the size of this value. In order to accommodate population decline and to facilitate densification. This proportional reduction has the biggest impact in dense cells.";
-	parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.01f        , Descr = "All inhabited cells undergo a reduction based on a fixed quota, set at this parameter value of the average initial population across these cells. This step predominantly affects cells with lower densities, as the reduction is absolute.";
-	parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 1f           , Descr = "If there is projected population reduction in the region, the population per cell might be reduced more than the above two parameters indicate. Up to the number of times indicated in this parameter.";
-	parameter<float32>                   Pop_Suitability_Reduction_Scale                     := 0.75f        , Descr = "Fraction of effect of probability-based suitability in proportional population reduction. Can take value between zero and one.";
+	//parameter<float32>                   Pop_Initial_Absolute_Reduction_Rate_base            := 0.01f        , Descr = "All inhabited cells undergo a reduction based on a fixed quota, set at this parameter value of the average initial population across these cells. This step predominantly affects cells with lower densities, as the reduction is absolute.";
+	//parameter<float32>                   Pop_Additional_Claim_Reduction_Factor               := 1f           , Descr = "If there is projected population reduction in the region, the population per cell might be reduced more than the above two parameters indicate. Up to the number of times indicated in this parameter.";
+	parameter<float32>                   Pop_Suitability_Reduction_Scale                     := 0.9f        , Descr = "Fraction of effect of probability-based suitability in proportional population reduction. Can take value between zero and one.";
 	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1f           , Descr = "What share of the rest claim of population after reductions should be maximally allocated to new built-up areas";
 	
 	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
@@ -35,8 +35,9 @@ container ModelParameters : using = "units;sourcedata"
 	
 	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 1 {attribute<uint32> org_rels : [792]; }//=  const(null_u, .);} 792: Congo, 2030
 	
-	unit<uint32> ignore_Check_for_enough_drawn_population : nrofrows = 2
-	{attribute<uint32> org_rels: [908, 480];} //908: Monaco, 480: Philippines islands group (with city)
+	unit<uint32> ignore_Check_for_enough_drawn_population : nrofrows = 0
+	{attribute<uint32> org_rels:= const(null_u, .);}
+	//attribute<uint32> org_rels: [908, 480];} //908: Monaco, 480: Philippines islands group (with city)
 	
 	//{attribute<uint32> org_rels: [712, 792, 828];} //452, 637, 638,
 	//452: Pakistan, 2030; 637: Yemen, 2030; 638: Yemen, 2030; 712: sudan, 2030; 792: Congo, 2040; 828: Faroer, 2030.
@@ -45,5 +46,5 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
 	parameter<string>                    coordsys_name                                       := domain_EPSG == '54009' ? 'Mollweide' : 'LatLong';
 	parameter<string>                    gridsize                                            := domain_EPSG == '54009' ? string(MW_Gridsize) : string(WGS_Gridsize)+'ss';
-	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_PopIPRR-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopIARR-'+string(Pop_Initial_Absolute_Reduction_Rate_base)+'PopRSuitScale-'+string(Pop_Suitability_Reduction_Scale)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+'_AddClaimReducF-'+string(Pop_Additional_Claim_Reduction_Factor)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";
+	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_IntMigr-'+string(Pop_Initial_Proportional_Reduction_Rate_base)+'_PopRSuitScale-'+string(Pop_Suitability_Reduction_Scale)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";
 }

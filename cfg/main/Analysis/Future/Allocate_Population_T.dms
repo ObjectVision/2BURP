@@ -97,11 +97,15 @@ Template Allocate_Population_T
 		// Reduction scaled attempt: cells will lose 
 		attribute<float32>           Regional_Population_to_draw                (ClaimRegion) := Population_in_Region[float32] * Initial_Population_Scaled_Reduction_Rate, Descr = "How many people need to drawn from the region. To accomodate regional decline (if present) and internal migration.";
 		attribute<float32>           Scaled_Reducible_pop                   (CompactedDomain) := OldState_Pop/Population[float32] * Suitability/Scaled_Reduction[float32], Descr = "Initial population times the inverse suitability proxy to get the potential population taken out per cell.";
-		attribute<float32>           Scaled_Reduction                       (CompactedDomain) := scalesum(Scaled_Reducible_pop, Region_rel, Regional_Population_to_draw), Descr = "Disaggregate the to-be-drawn population according to the inverse suitability proxy weigthed by the initial population.";
-		// attribute<float32>           Relative_Reduction                     (CompactedDomain) := Scaled_Reduction / OldState_Pop/Population[float32], Descr "";
-		attribute<float32>           Reduced_Population                     (CompactedDomain) := OldState_Pop/Population[float32] - Scaled_Reduction, IntegrityCheck = "PopLeftAfterReduction >= 0f || ClaimRegion/ignore_Check_for_enough_drawn_population", Descr = "Initial population minus the reduction due to decline and migration.";
+		attribute<float32>           Scaled_Reduction                       (CompactedDomain) := min_elem(scalesum(Scaled_Reducible_pop, Region_rel, Regional_Population_to_draw), OldState_Pop/Population[float32]), Descr = "Disaggregate the to-be-drawn population according to the inverse suitability proxy weigthed by the initial population. Canntot take out more than the present population though.";
+		attribute<float32>			 Regional_Scaled_Reduction					(ClaimRegion) := sum(Scaled_Reduction, Region_rel), Descr = "Sum how many people are drawn from the existing population in the functional area";
+		attribute<float32> 			 Proportion_Potential_Additional_Reduction	(ClaimRegion) := makedefined(max_elem(Regional_Population_to_draw - Regional_Scaled_Reduction, 0f) / (Population_in_Region[float32] - Regional_Scaled_Reduction), 0f), descr = "Calculate the percentage of people that are drawn proportionally if the scaled reduction does not yield sufficient people";
+		attribute<float32>			 Additional_Proportional_Reduction		(CompactedDomain) := Proportion_Potential_Additional_Reduction[Region_rel] * (OldState_Pop/Population[float32] - Scaled_Reduction);
 		
-		attribute<float32>           Population_to_reduce                       (ClaimRegion) := sum(Scaled_Reducible_pop, Region_rel), Descr = "";
+		// attribute<float32>           Relative_Reduction                     (CompactedDomain) := Scaled_Reduction / OldState_Pop/Population[float32], Descr "";
+		attribute<float32>           Reduced_Population                     (CompactedDomain) := OldState_Pop/Population[float32] - Scaled_Reduction - Additional_Proportional_Reduction, IntegrityCheck = "PopLeftAfterReduction >= 0f || ClaimRegion/ignore_Check_for_enough_drawn_population", Descr = "Initial population minus the reduction due to decline and migration.";
+		
+		attribute<float32>           Population_to_reduce                       (ClaimRegion) := sum(Scaled_Reduction + Additional_Proportional_Reduction, Region_rel), Descr = "";
 		attribute<float32>           PopLeftAfterReduction                      (ClaimRegion) := Population_to_reduce - Regional_Population_to_draw , Descr = "Integrity Check condition to ensure we do not reduce more people than are allowed to be drawn in the region.";
 		
 		
