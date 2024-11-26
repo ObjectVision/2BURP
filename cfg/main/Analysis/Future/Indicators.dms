@@ -729,7 +729,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Pop_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect" 
 			{attribute<string> Country (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Country; attribute<string> Degurba (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Degurba;}
 		container area_lvl1:= for_each_nedv(AllYears/name
-			, 'sum(area_lvl2, countries_x_degurba_lvl2/cd1_rel)'
+			, 'sum(area_lvl2/'+AllYears/name+', countries_x_degurba_lvl2/cd1_rel)'
 			, countries_x_degurba_lvl1
 			, km2
 			) , StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
