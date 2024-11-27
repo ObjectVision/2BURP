@@ -133,8 +133,8 @@ container Classifications : using = "units"
 		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	unit<uint32> Shares_Per_Continent:= range(uint32, 0, #AllShares * #sourcedata/RegionalUnits/Continents) {
-		//attribute<float32> Moving_up_probability:= ='MakeDefined(union_data(.,'+AsItemList('AllShares/Moving_up_probability_data_'+sourcedata/RegionalUnits/Continents/name)+'), 0f)';
-		attribute<float32> Moving_up_probability:= MakeDefined(union_data(.,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126), 0f);
+		attribute<float32> Moving_up_probability:= ='MakeDefined(union_data(.,'+AsItemList('AllShares/Moving_up_probability_data_'+sourcedata/RegionalUnits/Continents/name)+'), 0f)';
+		//attribute<float32> Moving_up_probability:= MakeDefined(union_data(.,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126), 0f);
 		attribute<uint32> BrushColor:= ='union_data(., '+AsItemList(const('AllShares/BrushColor',sourcedata/RegionalUnits/Continents, string))+')';
 	}
 	unit<uint8> BU_DensityBins := cat_range(0b, 15b)

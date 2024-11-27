@@ -7,14 +7,16 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy
 		
 		parameter<bool> b1_Coastline_InlandWater := true, explicitsuppliers = "Physical/Coast/Coastline/Write_per_subgrid;Physical/Coast/Coastline/Write_per_grid;Physical/Water/Inland_Water/Write_per_grid;Physical/Water/Inland_Water/Write_per_subgrid";
 		parameter<bool> b2_Hasland               := true, explicitsuppliers = "Physical/Water/AllWater/Write_HasLand";
-		parameter<bool> b3_Dist2InlandWater      := true, explicitsuppliers = "Physical/Water/Location2LargeInlandWater_sqr_domain_export;Physical/Water/Location2AnyInlandWater_sqr_domain_export";
-		parameter<bool> b4_Dist2Coast            := true, explicitsuppliers = "Physical/Coast/Location2Coast_sqr_domain_export";
+		// parameter<bool> b3_Dist2InlandWater      := true, Descr = "All ready in SD", explicitsuppliers = "Physical/Water/Location2LargeInlandWater_sqr_domain_export;Physical/Water/Location2AnyInlandWater_sqr_domain_export";
+		// parameter<bool> b4_Dist2Coast            := true, Descr = "All ready in SD", explicitsuppliers = "Physical/Coast/Location2Coast_sqr_domain_export";
 		// parameter<bool> b5_Dist2Roads            := true, explicitsuppliers = "Socioeconomic/Infrastructure/Location2Roads123_sqr_domain_export;Socioeconomic/Infrastructure/Location2Roads45_sqr_domain_export";
 		
 		parameter<bool> c1_RoundPastPop          := true, explicitsuppliers = "SourceData/Population/PerYear/Generate";
 		parameter<bool> c2_PastDoU               := true, explicitsuppliers = "Preprocessing/DegreesOfUrbanisation/Generate_DegreesOfUrbanisation";
 		
-		parameter<bool> d1_Indicators            := true, explicitsuppliers = "Analysis/Future/Indicators/Prep/Generate_All";
+		parameter<bool> d1_Allocation            := true, explicitsuppliers = "Analysis/Future/Indicators/Prep/Generate_All";
+		
+		parameter<bool> e1_ExportIndicators      := true, explicitsuppliers = "Analysis/Future/Indicators/Export_CSVs";
 
 	}
 	
@@ -33,35 +35,35 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy
 	#include <ExportSettings.dms>
 
 
-	container Final_Items : using = "units;geography"
-	{
-		attribute<BuiltUpKm2>   BuiltUp_Total_Area (CompactedDomain) := Analysis/Future/Allocate_Builtup/Y2040/NewState/BuiltUp_Total_Area;
-		attribute<NrPerson>     Population         (CompactedDomain) := Analysis/Future/Allocate_Population/Y2040/NewState/Population;
+	// container Final_Items : using = "units;geography"
+	// {
+		// attribute<BuiltUpKm2>   BuiltUp_Total_Area (CompactedDomain) := Analysis/Future/Allocate_Builtup/Y2040/NewState/BuiltUp_Total_Area;
+		// attribute<NrPerson>     Population         (CompactedDomain) := Analysis/Future/Allocate_Population/Y2040/NewState/Population;
 		
 		// parameter<string>     Validation_Pop_Error      := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/Population_Error_Indicators/result/export_country_csv/result";
 		// parameter<string>     Validation_Urban_Accuracy := 'Ready', ExplicitSuppliers = "/Postprocessing/Validation/UrbanAccuracy/Country/export_csv/result";
-	}
+	// }
 	
 	container Desktops;
 	
-	container t720_2BURP_indicator_results
-	{
-		parameter<string> TempDir                  := '%LocalDataDir%/Regression/log';
-		parameter<string> results_folder_filename  := TempDir + '/results_folder.txt';
-		parameter<string> results_folder           :  Storagename =  "= results_folder_filename", StorageType = "str";
+	// container t720_2BURP_indicator_results
+	// {
+		// parameter<string> TempDir                  := '%LocalDataDir%/Regression/log';
+		// parameter<string> results_folder_filename  := TempDir + '/results_folder.txt';
+		// parameter<string> results_folder           :  Storagename =  "= results_folder_filename", StorageType = "str";
 		
-		attribute<bool>   IsUrbanCentre2100 (geography/domain)       := /Analysis/Future/Indicators/Prep/DegreesOfUrbanisation/Y2100/Typology_Domain == /Classifications/TypologyK/V/Urban_Centre;
+		// attribute<bool>   IsUrbanCentre2100 (geography/domain)       := /Analysis/Future/Indicators/Prep/DegreesOfUrbanisation/Y2100/Typology_Domain == /Classifications/TypologyK/V/Urban_Centre;
 		
-		parameter<string> result_html := 
-			'<description>2BURP indicator results, Year:2100, Regio: '+ModelParameters/StudyArea+', <br><I>version</i>: Git Revision: XXXX</description>' + 
-			'<result><BR>' + 
-			' Population 2100 : '    + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Population/Y2100))),'.',',') +' number of persons <br>' + 
-			' BuiltUp cells 2100 : ' + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100 > 0f))),'.',',') +' number of urban cells <br>' + 
-			' BuiltUp area 2100 : '  + replace(string(sum(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100)),'.',',') +' km2</result>' +
-			' Population in urban centre 2100 : ' + replace(string(sum(IsUrbanCentre2100 ? Analysis/Future/Indicators/Prep/Population/Y2100 : 0i)),'.',',') +' number of persons</result>';
+		// parameter<string> result_html := 
+			// '<description>2BURP indicator results, Year:2100, Regio: '+ModelParameters/StudyArea+', <br><I>version</i>: Git Revision: XXXX</description>' + 
+			// '<result><BR>' + 
+			// ' Population 2100 : '    + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Population/Y2100))),'.',',') +' number of persons <br>' + 
+			// ' BuiltUp cells 2100 : ' + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100 > 0f))),'.',',') +' number of urban cells <br>' + 
+			// ' BuiltUp area 2100 : '  + replace(string(sum(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100)),'.',',') +' km2</result>' +
+			// ' Population in urban centre 2100 : ' + replace(string(sum(IsUrbanCentre2100 ? Analysis/Future/Indicators/Prep/Population/Y2100 : 0i)),'.',',') +' number of persons</result>';
 
-		parameter<string> result := result_html
-		,	StorageType = "str"
-		,	storagename = "= results_folder + '/t720_2BURP_indicator_results.txt'";
-	}
+		// parameter<string> result := result_html
+		// ,	StorageType = "str"
+		// ,	storagename = "= results_folder + '/t720_2BURP_indicator_results.txt'";
+	// }
 }
