@@ -22,8 +22,8 @@ outputdir<-"C:/Users/jacochr/Documents/global_model/generate_graphs/continentres
 runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
 
 ##### Regions for which results are available and graphs need to be generated
-regionslist<-c("Africa",  "Europe", "North_America", "South_America") #"Asia", "Australia_Oceania"
-#regionslist<-c("Europe")
+#regionslist<-c("Africa",  "Europe", "North_America", "South_America") #"Asia", "Australia_Oceania"
+regionslist<-c("Asia", "Australia_Oceania")
 
 #### Custom colour set for degree of urbanisation level 2
 custom_colour<-c(

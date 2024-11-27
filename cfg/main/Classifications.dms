@@ -121,11 +121,20 @@ container Classifications : using = "units"
 			1.761,1.859,1.957,2.111,2.167,2.350,2.649,2.767,3.106,3.444,3.722,4.000,
 			3.779,3.559,3.338,3.118,2.538,1.959,1.380,0.801,0.222,0.000,0.000,0.000,0.000
 		]; 
-		
+		attribute<float32>		Moving_up_probability_data_stylised_Lewis_20241126:
+		[
+			0.042,1.295,2.440,3.207,3.807,4.304,4.570,4.805,5.061,5.178,5.249,5.331, 
+			5.385,5.315,5.249,5.203,5.066,4.885,4.688,4.552,4.461,4.370,4.278,4.187,
+			4.096,4.005,3.914,3.823,3.732,3.641,3.550,3.459,3.368,3.277,3.186,3.095,
+			3.004,2.913,2.822,2.731,2.640,2.549,2.458,2.367,2.276,2.185,2.094,2.003,
+			1.912,1.821,1.730,1.639,1.548,1.457,1.365,1.274,1.183,1.092,1.001,0.910,
+			0.819,0.728,0.637,0.546,0.455,0.364,0.273,0.182,0.091,0.000,0.000,0.000
+		], Descr = "ETs proposed by Lewis Dijkstra, 26 November 2024, to further concentrate built-up development. Deviation from empirics, with longer and larger tail going into 69%.";
 		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	unit<uint32> Shares_Per_Continent:= range(uint32, 0, #AllShares * #sourcedata/RegionalUnits/Continents) {
-		attribute<float32> Moving_up_probability:= ='MakeDefined(union_data(.,'+AsItemList('AllShares/Moving_up_probability_data_'+sourcedata/RegionalUnits/Continents/name)+'), 0f)';
+		//attribute<float32> Moving_up_probability:= ='MakeDefined(union_data(.,'+AsItemList('AllShares/Moving_up_probability_data_'+sourcedata/RegionalUnits/Continents/name)+'), 0f)';
+		attribute<float32> Moving_up_probability:= MakeDefined(union_data(.,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126,AllShares/Moving_up_probability_data_stylised_Lewis_20241126), 0f);
 		attribute<uint32> BrushColor:= ='union_data(., '+AsItemList(const('AllShares/BrushColor',sourcedata/RegionalUnits/Continents, string))+')';
 	}
 	unit<uint8> BU_DensityBins := cat_range(0b, 15b)
