@@ -58,49 +58,58 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 		// attribute<uint32> count := pcount(rlookup(Builtup/Total/Y2020, values)); 
 	// }
 	
-	// unit<uint32> percentages : nrofrows = 100 
-	// {
-		// attribute<string>   label  := string(id(.)+1)+'%';
-		// attribute<float32>  cutoff := float32(id(.)) * 10000f;
-		// attribute<int32>    max    := max(compactdomain/d_perc, compactdomain/bu_2000_perc);
-		// attribute<uint32>   n1990  := pcount(compactdomain/bu_1990_perc);
-		// attribute<uint32>   n2000  := pcount(compactdomain/bu_2000_perc);
-		// attribute<uint32>   n2020  := pcount(compactdomain/bu_2020_perc);
-		// attribute<int32>    p85    := rth_element(compactdomain/d_perc, 0.85f, compactdomain/bu_2000_perc);
-		// attribute<int32>    p95    := rth_element(compactdomain/d_perc, 0.95f, compactdomain/bu_2000_perc);
-		// attribute<int32>    p99    := rth_element(compactdomain/d_perc, 0.99f, compactdomain/bu_2000_perc);
-		// attribute<int32>    p995   := rth_element(compactdomain/d_perc, 0.995f, compactdomain/bu_2000_perc);
-	// }
+	unit<uint32> percentages : nrofrows = 100 
+	{
+		attribute<string>   label  := string(id(.)+1)+'%';
+		attribute<float32>  cutoff := float32(id(.)) * 10000f;
+		attribute<int32>    max    := max(compactdomain/d_perc, compactdomain/bu_2000_perc);
+		attribute<uint32>   n1990  := pcount(compactdomain/bu_1990_perc);
+		attribute<uint32>   n2000  := pcount(compactdomain/bu_2000_perc);
+		attribute<uint32>   n2010  := pcount(compactdomain/bu_2010_perc);
+		attribute<uint32>   n2020  := pcount(compactdomain/bu_2020_perc);
+		attribute<int32>    p85    := rth_element(compactdomain/d_perc, 0.85f, compactdomain/bu_2000_perc);
+		attribute<int32>    p95    := rth_element(compactdomain/d_perc, 0.95f, compactdomain/bu_2000_perc);
+		attribute<int32>    p99    := rth_element(compactdomain/d_perc, 0.99f, compactdomain/bu_2000_perc);
+		attribute<int32>    p995   := rth_element(compactdomain/d_perc, 0.995f, compactdomain/bu_2000_perc);
+	}
 	
-	// unit<uint32> percentage_matrix := combine(percentages, percentages) 
-	// {
-		// attribute<upoint>   unirel := point(first_rel, second_rel, upoint);
-		// attribute<uint32>   n      := pcount(compactdomain/perc_matrix_rel);
-		// attribute<float32>  suit   := sum(Analysis/Future/Allocate_Builtup/Y2030/Suitability/Prob, compactdomain/perc_matrix_rel);
-		// attribute<float32>  rel    := makedefined(n[float32] / float32(percentages/n1990)[first_rel], 0f);
-		
-		
-	// }
+	unit<uint32> percentage_matrix := combine(percentages, percentages) 
+	{
+		attribute<upoint>   unirel := point(first_rel, second_rel, upoint);
+		attribute<uint32>   n_90_20      := pcount(compactdomain/pmr_90_20);
+		attribute<uint32>   n_90_00      := pcount(compactdomain/pmr_90_00);
+		attribute<uint32>   n_00_10      := pcount(compactdomain/pmr_00_10);
+		attribute<uint32>   n_10_20      := pcount(compactdomain/pmr_10_20);
+		//attribute<float32>  suit   := sum(Analysis/Future/Allocate_Builtup/Y2030/Suitability/Prob, compactdomain/perc_matrix_rel);
+		attribute<float32>  p_90_20    := makedefined(n_90_20[float32] / float32(percentages/n1990)[first_rel], 0f);
+		attribute<float32>  p_90_00    := makedefined(n_90_00[float32] / float32(percentages/n1990)[first_rel], 0f);
+		attribute<float32>  p_00_10    := makedefined(n_00_10[float32] / float32(percentages/n2000)[first_rel], 0f);
+		attribute<float32>  p_10_20    := makedefined(n_10_20[float32] / float32(percentages/n2010)[first_rel], 0f);
+	}
 	
-	// unit<uint32> CompactDomain := CompactedDomain 
-	// {
-		// attribute<float32>           bu_2000_corr    := float32(Builtup/Total/Y2000)[domain_rel] / lat_factor;
-		// attribute<float32>           bu_2020_corr    := float32(Builtup/Total/Y2020)[domain_rel] / lat_factor;
-		//attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
-		//attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
- 		// attribute<percentages>       bu_1990_perc    := value((Builtup/Total/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
-		// attribute<percentages>       bu_2000_perc    := value((Builtup/Total/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		// attribute<percentages>       bu_2020_perc    := value((Builtup/Total/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		// attribute<percentages>       res_1990_perc    := value((Builtup/Residential/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
-		// attribute<percentages>       res_2000_perc    := value((Builtup/Residential/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		// attribute<percentages>       res_2020_perc    := value((Builtup/Residential/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
-		// attribute<percentage_matrix> perc_matrix_rel := rlookup(point(res_1990_perc, res_2020_perc, upoint), percentage_matrix/unirel);
-		// attribute<int32>             d_perc          := int32(res_2020_perc)+1i - int32(res_2000_perc)+1i;
-	// }
-	// unit<uint32> samples: nrofrows = 100 {
-		// attribute<string> Label:= 's_'+string(id(.));
-		// parameter<uint32> sample_size:= 2500;
-	// }
+	unit<uint32> CompactDomain := CompactedDomain 
+	{
+		attribute<float32>           bu_2000_corr    := float32(Builtup/Total/Y2000)[domain_rel] / lat_factor;
+		attribute<float32>           bu_2020_corr    := float32(Builtup/Total/Y2020)[domain_rel] / lat_factor;
+		attribute<float32>   BuiltUp_Share         (CompactedDomain) := CurrState/BuiltUp_Total_Area / CompactedDomain/area;
+		attribute<AllShares> BuiltUp_Share_Perc    (CompactedDomain) := value(BuiltUp_Share * 100f, Classifications/AllShares);
+ 		attribute<percentages>       bu_1990_perc    := value((Builtup/Total/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
+		attribute<percentages>       bu_2000_perc    := value((Builtup/Total/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       bu_2010_perc    := value((Builtup/Total/Y2010[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       bu_2020_perc    := value((Builtup/Total/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       res_1990_perc    := value((Builtup/Residential/Y1990[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); 
+		attribute<percentages>       res_2000_perc    := value((Builtup/Residential/Y2000[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentages>       res_2020_perc    := value((Builtup/Residential/Y2020[domain_rel] * 100f) / float32(CompactedDomain/area[m2]), percentages); //classify(float32(Builtup/Total/Y1990)[domain_rel], percentages/cutoff);
+		attribute<percentage_matrix> pmr_90_20 := rlookup(point(bu_1990_perc, bu_2020_perc, upoint), percentage_matrix/unirel);
+		attribute<percentage_matrix> pmr_90_00 := rlookup(point(bu_1990_perc, bu_2000_perc, upoint), percentage_matrix/unirel);
+		attribute<percentage_matrix> pmr_00_10 := rlookup(point(bu_2000_perc, bu_2010_perc, upoint), percentage_matrix/unirel);
+		attribute<percentage_matrix> pmr_10_20 := rlookup(point(bu_2010_perc, bu_2020_perc, upoint), percentage_matrix/unirel);
+		attribute<int32>             d_perc          := int32(res_2020_perc)+1i - int32(res_2000_perc)+1i;
+	}
+	unit<uint32> samples: nrofrows = 100 {
+		attribute<string> Label:= 's_'+string(id(.));
+		parameter<uint32> sample_size:= 2500;
+	}
 	
 	// container take_distribution_samples:= for_each_ne(samples/Label, 'T_distribution_sampling('+string(id(samples))+')') {
 	

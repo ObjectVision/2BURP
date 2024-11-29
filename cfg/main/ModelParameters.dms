@@ -1,7 +1,7 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Australia_Oceania'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'North_America'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
@@ -11,8 +11,8 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
-	parameter<bool>                      Use_TempTifFiles                                    := TRUE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
-	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_stylised_Lewis_20241126'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<bool>                      Use_TempTifFiles                                    := TRUE         , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_updated_ETs'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
@@ -33,7 +33,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person>                    Pop_maxmax_saturation                               := 1000000[Person];
 	
-	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 1 {attribute<uint32> org_rels : [792]; }//=  const(null_u, .);} 792: Congo, 2030
+	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 3 {attribute<uint32> org_rels : [792, 793, 730]; parameter<bool> Ignore_all:= false;}//=  const(null_u, .);} 792: Congo, 2030; 793: Congo, 2030; 730: Chad, 2030
 	
 	unit<uint32> ignore_Check_for_enough_drawn_population : nrofrows = 0
 	{attribute<uint32> org_rels:= const(null_u, .);}

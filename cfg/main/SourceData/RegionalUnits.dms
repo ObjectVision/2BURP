@@ -133,7 +133,7 @@ container RegionalUnits
 		attribute<.>              per_domain                   (domain) := poly2grid(Geometry, domain);
 		attribute<bool>           IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
-		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
+		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels)) || ModelParameters/ignore_Check_for_enough_suitable_locations/Ignore_all;
 		attribute<bool>           ignore_Check_for_enough_drawn_population:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_drawn_population/org_rels));
 		attribute<km2>            cd_area                               := sum(CompactedDomain/area, CompactedDomain/FunctionalAreas_rel);
 		attribute<string> 		  country								:= FunctionalAreas_all/country[org_rel];

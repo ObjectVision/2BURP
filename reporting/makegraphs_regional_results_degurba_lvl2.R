@@ -7,6 +7,7 @@
 # fig2: loglinear area graph
 # fig3: sum abandoned since prior population grid cells graph
 # fig4: stacked population bar graph
+# fig5: areas as indices line graph
 
 library(ggplot2)
 library(tidyr)
@@ -19,11 +20,14 @@ setwd("E:/LocalData/2BURP/Indicators")
 outputdir<-"C:/Users/jacochr/Documents/global_model/generate_graphs/continentresults/"
 
 ##### File suffix of run of interest
-runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
+runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_stylised_ETs-1_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_stylised_Lewis_20241126_54009"
 
 ##### Regions for which results are available and graphs need to be generated
-#regionslist<-c("Africa",  "Europe", "North_America", "South_America") #"Asia", "Australia_Oceania"
-regionslist<-c("Asia", "Australia_Oceania")
+regionslist<-c("Africa",  "Europe", "North_America", "South_America", "Asia", "Australia_Oceania") #
+#regionslist<-c("Africa")
 
 #### Custom colour set for degree of urbanisation level 2
 custom_colour<-c(
@@ -35,6 +39,8 @@ custom_colour<-c(
   "Low density rural grid cell" = "#6cf32d", 
   "Very low density grid cell" = "#d1f3b1"
 )
+
+counter<-0
 
 #### Loop through all regions in the regions list
 for (region in regionslist) {
@@ -59,6 +65,13 @@ for (region in regionslist) {
   plotdata<-cbind(pop, area)
   plotdata<-subset(plotdata,select=-c(Year, Label))
   plotdata$Year<-as.numeric(substr(plotdata$Year, 2, 5))
+  plotdata$Region<-region
+  
+  if(counter==0) {
+    all_data<-plotdata
+  } else {
+    all_data<-rbind(all_data, plotdata)    
+  }
   
   ##### Set ordering of degrees of urbanisation for graphs
   plotdata$degurb_ordered<-factor(plotdata$Label, levels=c(
@@ -181,5 +194,47 @@ for (region in regionslist) {
   
   ggsave(paste(outputdir, "popshares_",region,runset,".png",sep=""), width=16, height=10)
   
+  # compute percentages
+  tad<-areadata
+  for (i in colnames(areadata)) {
+    if(is.numeric(areadata[[i]])) {
+      areadata[[i]]<-      (tad[[i]] / tad$Y2020)*100
+    }
+  }
+  
+  ###### indexed area per degurba
+  
+  indexed_area<-areadata %>% pivot_longer(
+    cols = !Label, 
+    names_to = "Year", 
+    values_to = "Area"
+  )
+  
+  indexed_area$Year<-as.numeric(substr(indexed_area$Year, 2, 5))
+  indexed_area$degurb_ordered<-factor(indexed_area$Label, levels=c(
+    "Very low density grid cell",
+    "Low density rural grid cell",
+    "Rural cluster",  
+    "Suburban grid cell", 
+    "Semi-dense urban cluster", 
+    "Dense urban cluster",
+    "Urban centre"
+  ))
+  
+  fig5<-ggplot(indexed_area, aes(x=Year,y=Area, color=degurb_ordered))
+  fig5+
+    #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
+    geom_line(size=1) +
+    xlab("Year") + ylab("Area change (2020 = 100)") + labs(color=paste("Results", gsub("_", " ", region)), caption=gsub("_", " ", paste(region, runset))) +
+    scale_colour_manual(values=custom_colour)+
+    geom_vline(xintercept=2020, linetype="dashed")+
+    #scale_x_continuous(labels = scales::percent) +
+    theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
+    theme_light()
+  
+  ggsave(paste(outputdir, "index_area_",region,runset,".png",sep=""), width=16, height=10)
+  
+  counter=counter+1
+  
 }
-
+write.csv(all_data, paste("pop_area_perDoU_",runset,".csv", sep=""))

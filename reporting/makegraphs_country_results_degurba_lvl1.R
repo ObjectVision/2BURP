@@ -17,7 +17,10 @@ setwd("E:/LocalData/2BURP/Indicators")
 outputdir<-"C:/Users/jacochr/Documents/global_model/generate_graphs/countryresults/"
 
 ##### File suffix of run of interest
-runset<-"_v8_PopIPRR-0.01_PopIARR-0.01PopRSuitScale-0.75_PopShareNewBU-1_AddClaimReducF-1_54009"
+runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_stylised_Lewis_20241126_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_stylised_ETs-1_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
 
 ##### Regions for which results are available and graphs need to be generated
 regionslist<-c("Africa", "Asia", "Australia_Oceania", "Europe", "North_America", "South_America")
@@ -29,6 +32,8 @@ custom_colour<-c(
   "Urban cluster" = "#fdf96f", 
   "Rural grid cells" = "#33a02c"
 )
+
+counter<-0
 
 #### Loop through all regions in the regions list
 for (region in regionslist) {
@@ -47,7 +52,7 @@ for (region in regionslist) {
     print(paste(region, selcountry))
     
     #### prep total pop and popdensity graphs by putting them into long form (required by ggplot)
-        popdata<-subset(in_popdata, country==selcountry)
+    popdata<-subset(in_popdata, country==selcountry)
     areadata<-subset(in_areadata, country==selcountry)
     
     pop<-popdata %>% pivot_longer(
@@ -66,6 +71,12 @@ for (region in regionslist) {
     plotdata<-cbind(pop, area)
     plotdata<-subset(plotdata,select=-c(Year, Degurba))
     plotdata$Year<-as.numeric(substr(plotdata$Year, 2, 5))
+    
+    if(counter==0) {
+      all_data<-plotdata
+    } else {
+      all_data<-rbind(all_data, plotdata)    
+    }
     
     ##### Set ordering of degrees of urbanisation for graphs
     plotdata$degurb_ordered<-factor(plotdata$Degurba, levels=c(
@@ -143,7 +154,8 @@ for (region in regionslist) {
      
     ggsave(paste(outputdir, "popshares_",selcountry,runset,".png",sep=""), width=16, height=10)
     
+    counter=counter+1
+ 
   }
-   
-  
 }
+write.csv(all_data, paste("pop_area_countries_perDoU_",runset,".csv", sep=""))
