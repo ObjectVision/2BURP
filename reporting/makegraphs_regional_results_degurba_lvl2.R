@@ -20,6 +20,7 @@ setwd("E:/LocalData/2BURP/Indicators")
 outputdir<-"C:/Users/jacochr/Documents/global_model/generate_graphs/continentresults/"
 
 ##### File suffix of run of interest
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_trunc_bu_landdens_limits_54009" # run with truncation of built-up, new land-based densities. Results not promising.
 runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_54009"
 #runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
 #runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_stylised_ETs-1_54009"
@@ -86,6 +87,7 @@ for (region in regionslist) {
     geom_line(size=1) +
     xlab("Year") + ylab("Population (M)") + labs(color=paste("Results", region), caption=gsub("_", " ", paste(region, runset))) +
     scale_colour_manual(values=custom_colour)+
+    expand_limits(y = 0) +
     geom_vline(xintercept=2020, linetype="dashed")+
     theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
     theme_light()
@@ -142,6 +144,7 @@ for (region in regionslist) {
   fig3+
     #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
     geom_line(size=1) +
+    expand_limits(y = 0) +
     xlab("Year") + ylab("Abandoned since prior (k)") + labs(caption=gsub("_", " ", paste(region, runset))) +
     geom_vline(xintercept=2020, linetype="dashed")+
     #scale_x_continuous(labels = scales::percent) +
@@ -187,6 +190,7 @@ for (region in regionslist) {
     xlab("Year") + ylab("Share of total population") + labs(fill=paste("Results", gsub("_", " ", region)), caption=gsub("_", " ", paste(region, runset))) +
     scale_colour_manual(values=custom_colour)+
     scale_fill_manual(values=custom_colour)+
+    expand_limits(y = 0) +
     geom_vline(xintercept=2020, linetype="dashed")+
     scale_y_continuous(labels = scales::percent) +
     theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +

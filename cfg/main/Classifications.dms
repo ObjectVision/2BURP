@@ -46,7 +46,7 @@ container Classifications : using = "units"
 		attribute<string> name  := AsItemName(label);
 		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
 	}
-	unit<uint8> Degurba_lvl1 : nrofrows = 3, Descr = "Degree of urbanisation levle 1 typologies" {
+	unit<uint8> Degurba_lvl1 : nrofrows = 3, Descr = "Degree of urbanisation level 1 typologies" {
 		attribute<uint8> 	EK :	[30, 20, 10];
 		attribute<string>	Label:  ['Urban centre', 'Urban cluster', 'Rural grid cells'] ;
 		attribute<uint32> 	BrushColor: [rgb(255,0,0),rgb(255,255,0),rgb(55,86,35)];
