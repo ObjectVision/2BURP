@@ -19,29 +19,29 @@ Template Allocate_Population_T
 	
 	container LocalMaxima
 	{
-		attribute<Person_Km2>         Current_LocalMaximum  (CompactedDomain) := max(OldState_Pop/Population_TotalLand_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
-		attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == OldState_Pop/Population_TotalLand_Density;
+		attribute<Person_BuiltUpKm2>         Current_LocalMaximum  (CompactedDomain) := max(OldState_Pop/Population_inRes_Density[DistMatrices/cdomain_x_pot1k/third_rel], DistMatrices/cdomain_x_pot1k/first_rel); 
+		attribute<bool>                      IsLocalMaximum        (CompactedDomain) := Current_LocalMaximum == OldState_Pop/Population_inRes_Density;
 		attribute<bool>                      HasNoPopulation       (CompactedDomain) := OldState_Pop/Population == 0[NrPerson];
 		
 		// If a cell has the highest local population in T1, it can only increase by 3.5K people in T2 (or by [100K - local pop] if this is smaller than 3.5K people)
 		// If a cell is populated but it doesn’t have the highest local population in T1, it can only increase in T2 to the local maximum in T1 + 2.5K people (or by [100K - local pop] if this is smaller than the local maximum in T1 + 2.5K people) 
 		// If a cell is not populated in T1, it can only increase by 350 people in T2
-		attribute<Person_Km2>  MaxAllowed_Population_Density (CompactedDomain) := 
+		attribute<Person_BuiltUpKm2>  MaxAllowed_Population_Density (CompactedDomain) := 
 			iif(
 				HasNoPopulation
 				, ModelParameters/pop_r_if_notPopulated * 1[decade]
 				// , median(ModelParameters/pop_max_saturation, OldState_Pop/Population_inRes_Density, OldState_Pop/Population_inRes_Density + (LocalMaxima/IsLocalMaximum ? ModelParameters/pop_r_if_LocalMax : ModelParameters/pop_r_if_notLocalMax)  * 1[decade])
 				, median(
 					  ModelParameters/pop_max_saturation
-					, OldState_Pop/Population_TotalLand_Density
+					, OldState_Pop/Population_inRes_Density
 					, LocalMaxima/IsLocalMaximum
-						? OldState_Pop/Population_TotalLand_Density + ModelParameters/pop_r_if_LocalMax  * 1[decade] 
+						? OldState_Pop/Population_inRes_Density + ModelParameters/pop_r_if_LocalMax  * 1[decade] 
 						: Current_LocalMaximum + ModelParameters/pop_r_if_LocalMax  * 1[decade]
 				)
 			);
 			
-		// attribute<Person>             MaxAllowed_Population         (CompactedDomain) := MaxAllowed_Population_Density * NewState_BuiltUp/BuiltUp_Residential_Area;
-		attribute<Person>             MaxAllowed_Population         (CompactedDomain) := MaxAllowed_Population_Density *  CompactedDomain/area;
+		attribute<Person>             MaxAllowed_Population         (CompactedDomain) := MaxAllowed_Population_Density * NewState_BuiltUp/BuiltUp_Residential_Area;
+		// attribute<Person>             MaxAllowed_Population         (CompactedDomain) := MaxAllowed_Population_Density *  CompactedDomain/area;
 	}
 	
 	container Claims

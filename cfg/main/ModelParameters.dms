@@ -13,7 +13,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
 
-	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_updated_ETs'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_updated_ETs_bu-truncation'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
@@ -27,10 +27,10 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   Pop_Suitability_Reduction_Scale                     := 0.9f        , Descr = "Fraction of effect of probability-based suitability in proportional population reduction. Can take value between zero and one.";
 	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1f           , Descr = "What share of the rest claim of population after reductions should be maximally allocated to new built-up areas";
 	
-	parameter<Person_Km2_decade>         Pop_r_if_LocalMax                                   := 3500[Person_Km2_decade]; //== 3500 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2_decade>         Pop_r_if_notLocalMax                                := 2500[Person_Km2_decade]; //== 2500 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2_decade>         Pop_r_if_notPopulated                               := 350[Person_Km2_decade];  //== 350 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2>                Pop_max_saturation                                  := 100000[Person_Km2];
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person>                    Pop_maxmax_saturation                               := 1000000[Person];
 	
 	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 3 {attribute<uint32> org_rels : [792, 793, 730]; parameter<bool> Ignore_all:= false;}//=  const(null_u, .);} 792: Congo, 2030; 793: Congo, 2030; 730: Chad, 2030
