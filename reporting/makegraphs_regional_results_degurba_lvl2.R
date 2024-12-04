@@ -8,6 +8,8 @@
 # fig3: sum abandoned since prior population grid cells graph
 # fig4: stacked population bar graph
 # fig5: areas as indices line graph
+# fig6: changes in zero cells (abandonment, emergence, net)
+# fig7: indexed empty cells, empty built-up cells, pop, bu.
 
 library(ggplot2)
 library(tidyr)
@@ -136,12 +138,13 @@ for (region in regionslist) {
   aban<-aban %>% pivot_longer(
     cols= !country,
     names_to = "Year", 
-    values_to = "Abandoned"
+    values_to = "NrOfCells"
   )
   aban$Year<-as.numeric(substr(aban$Year, 2, 5))
+ 
   
-  # Create figure 3: sum abandoned since prior population grid cells graph
-  fig3<-ggplot(aban, aes(x=Year,y=Abandoned / 1000))
+   # Create figure 3: sum abandoned since prior population grid cells graph
+  fig3<-ggplot(aban, aes(x=Year,y=NrOfCells / 1000))
   fig3+
     #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
     geom_line(size=1) +
@@ -154,6 +157,7 @@ for (region in regionslist) {
   
   ggsave(paste(outputdir, "abandoned_",region,runset,".png",sep=""), width=16, height=10)
   
+
   # Create stacked population graph (percentages per degurba)
   popsharesdata<-popdata
   
@@ -238,6 +242,129 @@ for (region in regionslist) {
     theme_light()
   
   ggsave(paste(outputdir, "index_area_",region,runset,".png",sep=""), width=16, height=10)
+  
+  ###### Fig6: Plot emergence, abandonment, net change in zero cells
+  
+  emerdata<-read.csv(paste(region,"/Emergence_since_prev_decade_perDoU_",region,runset,".csv", sep=""))
+  emerdata$c<-1
+  emer<-aggregate(emerdata[, -1], by=list(emerdata$c), FUN="sum")
+  emer<-subset(emer,select=-c(Group.1, c))
+  emer$country<-c(region)
+  
+  # transform to long format
+  emer<-emer %>% pivot_longer(
+    cols= !country,
+    names_to = "Year", 
+    values_to = "NrOfCells"
+  )
+  emer$Year<-as.numeric(substr(emer$Year, 2, 5))
+  
+  zero_net<-popdata<-cbind(emer[c(1,2)], emer[-c(1,2)] - aban[-c(1,2)])
+  zero_net$type<-"Net change"
+  aban$type<-"Abandonment"
+  emer$type<-"Emergence"
+  
+  
+  
+  zero_cell_moves<-rbind(aban, emer, zero_net)
+  
+  # Create figure 6: zero cell movements
+  fig6<-ggplot(zero_cell_moves, aes(x=Year,y=NrOfCells / 1000, color=type, linetype=type, size=type))
+  fig6+
+    #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
+    geom_line() +
+    scale_colour_manual(values = c(
+      "Net change" = "black",
+      "Abandonment" = "red",
+      "Emergence" = "green"
+    )) + 
+    scale_linetype_manual(values = c(
+      "Net change" = "solid",
+      "Abandonment" = "dashed",
+      "Emergence" = "dashed"
+    )) +
+    scale_size_manual(values = c(
+      "Net change" = 1.00, 
+      "Abandonment" = 1.5, 
+      "Emergence" = 1.5)) +
+    expand_limits(y = 0) +
+    labs(x = "Year", y="Nr of cells changed (k)", title=gsub("_", " ", region), caption=gsub("_", " ", paste(region, ", ", runset))) +
+    geom_vline(xintercept=2020, linetype="dashed")+
+    #scale_x_continuous(labels = scales::percent) +
+    theme(legend.title= element_blank())+
+    theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
+    theme_light()
+  
+  ggsave(paste(outputdir, "zero_changes_",region,runset,".png",sep=""), width=16, height=10)
+
+  # create aggregate change indicators
+  
+  agg_data<-read.csv(paste(region,"/Aggregate_",region,runset,".csv", sep=""))
+  agg_data<-subset(agg_data,select=-c(cells))
+  agg_data$inhabited_bu<-(agg_data$inhabited_bu / agg_data$bu[agg_data$Yr==2020])*100
+  agg_data$pop<-(agg_data$pop / agg_data$pop[agg_data$Yr==2020])*100
+  agg_data$bu<-(agg_data$bu / agg_data$bu[agg_data$Yr==2020])*100
+  agg_data$emptycells<-(agg_data$emptycells / agg_data$emptycells[agg_data$Yr==2020])*100
+  agg_data$emptybucells<-(agg_data$emptybucells / agg_data$emptybucells[agg_data$Yr==2020])*100
+  
+  agg<-agg_data %>% pivot_longer(
+    cols= !Yr,
+    names_to = "type", 
+    values_to = "Indices"
+  )
+  
+  agg$type[agg$type=="bu"]<-"Total built-up surface"
+  agg$type[agg$type=="pop"]<-"Total population"
+  agg$type[agg$type=="emptycells"]<-"Unpopulated grid cells"
+  agg$type[agg$type=="emptybucells"]<-"Unpopulated built-up grid cells"
+  agg$type[agg$type=="inhabited_bu"]<-"Total inhabited built-up surface*"
+  
+  #fig7<-ggplot(agg, aes(x=Yr,y=Indices, color=type, linetype = type, size=type))
+  fig7<-ggplot(agg, aes(x=Yr,y=Indices, color=type, linetype=type))
+  fig7+
+    #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
+    geom_line(size=1.25) +
+    #expand_limits(y = 0) +
+    xlab("Year") + ylab("Index of change (2020 = 100)") + labs(title=gsub("_", " ", region), caption=gsub("_", " ", paste(region, ", ", runset,"\nNote: *Total inhabited built-up surface is indexed on total built-up surface in 2020."))) +
+    geom_vline(xintercept=2020, linetype="dashed")+
+    #scale_x_continuous(labels = scales::percent) +
+    theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
+    theme(legend.title= element_blank())+
+    theme_light()
+  
+  ggsave(paste(outputdir, "aggregate_",region,runset,".png",sep=""), width=16, height=10)
+  
+  # cluster analysis
+  clusterdata<-read.csv(paste(region,"/Clusters_",region,runset,".csv", sep=""))
+  nclusters<-subset(clusterdata, select=-c(av_city_size, av_town_size, av_village_size))
+  nc<-nclusters %>% pivot_longer(
+    cols= !Yr,
+    names_to = "Settlements", 
+    values_to = "Number"
+  )
+  nc$Settlements[nc$Settlements=="n_cities"]<-"Cities"
+  nc$Settlements[nc$Settlements=="n_towns"]<-"Towns"
+  nc$Settlements[nc$Settlements=="n_villages"]<-"Villages"
+  
+  #fig8: graph with clusters by settlement type
+  fig8<-ggplot(nc, aes(x=Yr,y=Number, color=Settlements))
+  fig8+
+    #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
+    geom_line(size=1.25) +
+    #expand_limits(y = 0) +
+    xlab("Year") + ylab("Number of settlements") + labs(title=gsub("_", " ", region), caption=gsub("_", " ", paste(region, ", ", runset))) +
+    geom_vline(xintercept=2020, linetype="dashed")+
+    scale_colour_manual(values=c(
+      "Cities" = "red",
+      "Towns" = "#fdf96f", 
+      "Villages" = "#33a02c"
+    ))+
+    #scale_x_continuous(labels = scales::percent) +
+    theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
+    theme(legend.title= element_blank())+
+    theme_light()
+  
+  ggsave(paste(outputdir, "clusters_",region,runset,".png",sep=""), width=16, height=10)
   
   counter=counter+1
   
