@@ -10,6 +10,8 @@
 # fig5: areas as indices line graph
 # fig6: changes in zero cells (abandonment, emergence, net)
 # fig7: indexed empty cells, empty built-up cells, pop, bu.
+# fig8: number of settlements
+# fig9: indexed number of settlements (and sizes)
 
 library(ggplot2)
 library(tidyr)
@@ -22,7 +24,9 @@ setwd("E:/LocalData/2BURP/Indicators")
 outputdir<-"C:/Users/jacochr/Documents/global_model/generate_graphs/continentresults/"
 
 ##### File suffix of run of interest
-runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_bu-truncation_54009"
+runset<-"_v8_fixed_bucap_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_54009"
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_54009" # new calibration, preferred spec?
+#runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_bu-truncation_54009" # old calibration files
 #runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_54009" # preferred option 3/12/2024
 #runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_updated_ETs_trunc_bu_landdens_limits_54009" # run with truncation of built-up, new land-based densities. Results not promising.
 #runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_popdraw_54009"
@@ -365,6 +369,58 @@ for (region in regionslist) {
     theme_light()
   
   ggsave(paste(outputdir, "clusters_",region,runset,".png",sep=""), width=16, height=10)
+  
+  nclusters<-clusterdata
+  nclusters$n_cities<-(nclusters$n_cities / nclusters$n_cities[nclusters$Yr==2020])*100
+  nclusters$n_towns<-(nclusters$n_towns / nclusters$n_towns[nclusters$Yr==2020])*100
+  nclusters$n_villages<-(nclusters$n_villages / nclusters$n_villages[nclusters$Yr==2020])*100
+  nclusters$av_city_size<-(nclusters$av_city_size / nclusters$av_city_size[nclusters$Yr==2020])*100
+  nclusters$av_town_size<-(nclusters$av_town_size / nclusters$av_town_size[nclusters$Yr==2020])*100
+  nclusters$av_village_size<-(nclusters$av_village_size / nclusters$av_village_size[nclusters$Yr==2020])*100
+  
+  nc<-nclusters %>% pivot_longer(
+    cols= !Yr,
+    names_to = "Settlements", 
+    values_to = "Index"
+  )
+  nc$Settlements[nc$Settlements=="n_cities"]<-"Cities count"
+  nc$Settlements[nc$Settlements=="n_towns"]<-"Towns count"
+  nc$Settlements[nc$Settlements=="n_villages"]<-"Villages count"
+  nc$Settlements[nc$Settlements=="av_city_size"]<-"Cities size"
+  nc$Settlements[nc$Settlements=="av_town_size"]<-"Towns size"
+  nc$Settlements[nc$Settlements=="av_village_size"]<-"Villages size"
+  
+  #fig8: graph with clusters by settlement type
+  fig9<-ggplot(nc, aes(x=Yr,y=Index, color=Settlements, linetype=Settlements))
+  fig9+
+    #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
+    geom_line(size=1.25) +
+    #expand_limits(y = 0) +
+    xlab("Year") + ylab("Indexed number of settlements (2020 = 100)") + labs(title=gsub("_", " ", region), caption=gsub("_", " ", paste(region, ", ", runset))) +
+    geom_vline(xintercept=2020, linetype="dashed")+
+    scale_colour_manual(values=c(
+      "Cities count" = "red",
+      "Towns count" = "#fdf96f", 
+      "Villages count" = "#33a02c",
+      "Cities size" = "red",
+      "Towns size" = "#fdf96f", 
+      "Villages size" = "#33a02c"
+    ))+
+    scale_linetype_manual(values=c(
+      "Cities count" = "solid",
+      "Towns count" = "solid", 
+      "Villages count" = "solid",
+      "Cities size" = "dashed",
+      "Towns size" = "dashed", 
+      "Villages size" = "dashed"
+      ))+
+    #scale_x_continuous(labels = scales::percent) +
+    theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
+    theme(legend.title= element_blank())+
+    theme_light()
+  
+  ggsave(paste(outputdir, "clusters_indexed_",region,runset,".png",sep=""), width=16, height=10)
+  
   
   counter=counter+1
   

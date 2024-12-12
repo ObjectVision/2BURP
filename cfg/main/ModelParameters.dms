@@ -9,11 +9,11 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float64>                   WGS_Gridsize                                        := 30d          , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong grids, represented in arc second. Where 30ss corresponds to roughly a 1km grid at the equator.";
 	parameter<float64>                   WGS_Subgridsize                                     := 3d           , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong subgrids, represented in arc second. Where 3ss corresponds to roughly a 100m grid at the equator.";
 	parameter<string>                    domain_EPSG                                         := '54009'      , Descr = "Choose the projection to use in the model. Options: 54009 (Mollweide) or 4326 (WGS84)";  
-	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
+	parameter<string>                    Calibration_filedate                                := '20241205'   , Descr = "Which calibation filedate should be used.";
 	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
 
-	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_updated_ETs_bu-truncation'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_calib_20241205'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
