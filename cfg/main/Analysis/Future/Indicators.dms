@@ -1,291 +1,8 @@
-container Indicators : using = "units;geography;sourcedata/regionalunits;classifications;modelparameters"
+container Indicators : using = "units;geography;sourcedata/regionalunits;classifications;modelparameters", 
+	descr = "Collection of ad-hoc measures that have not yet found a place in the more formal postprocessing module. Some to remain here for ad-hoc checks within study area context,
+	others to be moved later."
 {
-	container Prep
-	{
-		container BuiltUp_Total_Share := 
-			for_each_nedva(
-				ProjectionYears/name
-				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
-				, domain
-				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
-			)
-		{
-			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
-		}
 	
-		container Population := 
-			for_each_nedva(
-				ProjectionYears/name
-				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
-				, domain
-				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
-			)
-		{	
-			attribute<NrPerson> Y2020		 (domain) := Initial;
-			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
-			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
-		}
-			
-		container BuiltUp_Total_Area := 
-			for_each_nedv(
-				ProjectionYears/name
-				, Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]' : 'BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]'
-				, domain
-				, float32
-			)
-		{
-			attribute<float32> Initial               (domain) := =Use_TempTifFiles ? 'Read_BuiltUp_Total_Share/Initial * domain/area[float32]' : 'BuiltUp_Total_Share/Initial * domain/area[float32]';
-			
-		}
-			
-		// container Delta_BuiltUp_Total_Area := 
-			// for_each_nedv(
-				// ProjectionYears_Delta/name
-				// , 'BuiltUp_Total_Area/'+ProjectionYears_Delta/name+' - BuiltUp_Total_Area/'+ProjectionYears_Delta/prev_name
-				// , domain
-				// , float32
-			// )
-		// {
-			// attribute<float32> Y2030      (domain) := BuiltUp_Total_Area/Y2030 - BuiltUp_Total_Area/Initial;
-		// }
-		
-		// container Delta_Population := 
-			// for_each_nedv(
-				// ProjectionYears_Delta/name
-				// , Use_TempTifFiles ? 'Read_Population/'+ProjectionYears_Delta/name+' - Read_Population/'+ProjectionYears_Delta/prev_name : 'Population/'+ProjectionYears_Delta/name+' - Population/'+ProjectionYears_Delta/prev_name
-				// , domain
-				// , NrPerson
-			// )
-		// {
-			// attribute<NrPerson> Y2030      (domain) := Use_TempTifFiles ? Read_Population/Y2030 - Read_Population/Initial : Population/Y2030 - Population/Initial ;
-			// attribute<NrPerson> Y2020_2100 (domain) := Use_TempTifFiles ? Read_Population/Y2100 - Read_Population/Initial : Population/Y2100 - Population/Initial ;
-		// }
-			
-			
-		container BuiltUp_Residential_Area := 
-			for_each_nedv(
-				ProjectionYears/name
-				, 'BuiltUp_Total_Area/'+ProjectionYears/name+' - recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_NonResidential_Area)'
-				, domain
-				, BuiltUpKm2
-			)
-		{
-			attribute<BuiltUpKm2> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Residential_Area);
-			attribute<BuiltUpKm2> Y1975        (domain) := /SourceData/Builtup/Residential/Y1975[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y1980        (domain) := /SourceData/Builtup/Residential/Y1980[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y1985        (domain) := /SourceData/Builtup/Residential/Y1985[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y1990        (domain) := /SourceData/Builtup/Residential/Y1990[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y1995        (domain) := /SourceData/Builtup/Residential/Y1995[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y2000        (domain) := /SourceData/Builtup/Residential/Y2000[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y2005        (domain) := /SourceData/Builtup/Residential/Y2005[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y2010        (domain) := /SourceData/Builtup/Residential/Y2010[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y2015        (domain) := /SourceData/Builtup/Residential/Y2015[km2] / 1[km2] * 1[BuiltUpKm2];
-			attribute<BuiltUpKm2> Y2020        (domain) := /SourceData/Builtup/Residential/Y2020[km2] / 1[km2] * 1[BuiltUpKm2];
-			
-		}
-		
-		// #include<Abandonement.dms>
-		
-		// container Population_InRes_Density := 
-			// for_each_nedv(
-				// ProjectionYears/name
-				// , Use_TempTifFiles ? 'Read_Population/'+ProjectionYears/name+' / BuiltUp_Residential_Area/'+ProjectionYears/name : 'Population/'+ProjectionYears/name+'[Person] / BuiltUp_Residential_Area/'+ProjectionYears/name
-				// , domain
-				// , Person_BuiltUpKm2
-			// )
-		// {
-			// attribute<float32> Initial (domain):= Population/Initial[Person] / BuiltUp_Residential_Area/Initial;
-		// }
-
-		// container Population_Onland_Density := 
-			// for_each_nedv(
-				// ProjectionYears/name
-				// , Use_TempTifFiles ? 'Read_Population/'+ProjectionYears/name+'[Person] / domain/area' : 'Population/'+ProjectionYears/name+'[Person] / domain/area'
-				// , domain
-				// , Person_Km2
-			// ) 
-		// {
-			// attribute<float32> Initial (domain):= Population/Initial[Person] / domain/area;
-		// }
-		
-		
-		container DegreesOfUrbanisation :=
-			for_each_ne(
-				ProjectionYears/name
-				 , 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
-						'+quote(ProjectionYears/name)+'
-						 , recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
-						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
-						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population[Person]))'
-			)
-		{
-			container Y2020:= Initial;
-			container Initial
-			{
-				attribute<TypologyK>       Typology_Domain                                   (domain) := ='Preprocessing/DegreesOfUrbanisation/'+/ModelParameters/StartYear+'/Typology_Domain';
-				attribute<TypologyK>       ReadTypologyK                                     (domain) := ='Preprocessing/DegreesOfUrbanisation/'+/ModelParameters/StartYear+'/ReadTypologyK';
-			}
-		}
-		
-		container Get_BU_RoundedState := 
-			for_each_ne(
-				ProjectionYears/name
-				, 'BU_RoundedState_T('+quote(ProjectionYears/name)+',Read_BuiltUp_Total_Share/'+ProjectionYears/name+')'
-			)
-		{
-			container Initial := BU_RoundedState_T('Initial',Read_BuiltUp_Total_Share/Initial);
-		}
-			
-		container Builtup_Total_Share_Balanced := 
-			for_each_nedv(
-				ProjectionYears/name
-				, 'recollect_by_cond(domain/IsCompactedDomain, Get_BU_RoundedState/'+ProjectionYears/name+'/BuiltUp_Total_Share_Balanced)'
-				, domain
-				, float32
-			)
-		{
-			attribute<float32> Initial (domain):= recollect_by_cond(domain/IsCompactedDomain, Get_BU_RoundedState/Initial/BuiltUp_Total_Share_Balanced);
-		}
-		container Builtup_Total_Area_Balanced := 
-			for_each_nedv(
-				ProjectionYears/name
-				, 'Builtup_Total_Share_Balanced/'+ProjectionYears/name+' * domain/area[float32]'
-				, domain
-				, float32
-			)
-		{
-			attribute<float32> Initial (domain):= Builtup_Total_Share_Balanced/Initial * domain/area[float32];
-		}
-		
-		Template BU_RoundedState_T
-		{
-			parameter<string>         ThisYear;
-			attribute<float32>        BuiltUp_Total_Share_domain           (domain);
-			///
-			attribute<float32>        BuiltUp_Total_Share         (CompactedDomain) := BuiltUp_Total_Share_domain[CompactedDomain/org_rel];
-			attribute<AllShares>      Perc_BuiltUp_Total          (CompactedDomain) := (100.0f * BuiltUp_Total_Share)[AllShares];
-			attribute<BU_DensityBins> DensityBins_rel             (CompactedDomain) := Perc_BuiltUp_Total->DensityBins_rel;
-			
-			unit<uint32> DensityBin_x_region := combine(BU_DensityBins, ClaimRegion)
-			{
-				attribute<BU_DensityBins> first_rel;
-				attribute<ClaimRegion>    second_rel;
-				attribute<.>              per_CompactedDomain     (CompactedDomain) := combine_data(., DensityBins_rel, region_rel);
-				attribute<BuiltUpKm2>     TotalArea                                 := ='sum(BuiltUp_Total_Area/'+ThisYear+'[CompactedDomain/org_rel], per_CompactedDomain)[BuiltUpKm2]';
-			}
-			
-			attribute<float32>    Rest_Share                      (CompactedDomain) := (BuiltUp_Total_Share - (0.01[BuiltUpKm2] / 1[km2]) * float32(Perc_BuiltUp_Total));
-			attribute<BuiltUpKm2> sum_rounded_area            (DensityBin_x_region) := sum(float32(Perc_BuiltUp_Total) * CompactedDomain/area, DensityBin_x_region/per_CompactedDomain) * (0.01[BuiltUpKm2 / km2]);
-			attribute<BuiltUpKm2> Rest_claim                  (DensityBin_x_region) := DensityBin_x_region/TotalArea - sum_rounded_area;
-			attribute<float32>    Rank                            (CompactedDomain) := 1.0[BuiltUpKm2 / km2] - Rest_Share;
-			attribute<float32>    roundoff_breakpoint         (DensityBin_x_region) := 1.0[BuiltUpKm2 / km2] - nth_element_weighted(Rank, Rest_claim, CompactedDomain/area * (0.01[BuiltUpKm2] / 1[km2]), DensityBin_x_region/per_CompactedDomain);
-			attribute<bool >      above_breakpoint                (CompactedDomain) := Rest_Share > roundoff_breakpoint[DensityBin_x_region/per_CompactedDomain];
-			attribute<AllShares>  Perc_BuiltUp_Total_Balanced     (CompactedDomain) := Perc_BuiltUp_Total + above_breakpoint[AllShares];
-			attribute<float32>    BuiltUp_Total_Share_Balanced    (CompactedDomain) := Perc_BuiltUp_Total_Balanced[float32] / 100f;
-		}
-		
-		container Total_Pop_Claims := 
-			for_each_nedv(
-				ProjectionYears/name
-				, 'sum(Preprocessing/Claims_Population/'+ProjectionYears/name+')'
-				, void
-				, Person
-			)
-		{
-			parameter<Person> Y1975 := sum(sourcedata/Population/PerYear/Y1975/Population_domain[Person]);
-			parameter<Person> Y1980 := sum(sourcedata/Population/PerYear/Y1980/Population_domain[Person]);
-			parameter<Person> Y1985 := sum(sourcedata/Population/PerYear/Y1985/Population_domain[Person]);
-			parameter<Person> Y1990 := sum(sourcedata/Population/PerYear/Y1990/Population_domain[Person]);
-			parameter<Person> Y1995 := sum(sourcedata/Population/PerYear/Y1995/Population_domain[Person]);
-			parameter<Person> Y2000 := sum(sourcedata/Population/PerYear/Y2000/Population_domain[Person]);
-			parameter<Person> Y2005 := sum(sourcedata/Population/PerYear/Y2005/Population_domain[Person]);
-			parameter<Person> Y2010 := sum(sourcedata/Population/PerYear/Y2010/Population_domain[Person]);
-			parameter<Person> Y2015 := sum(sourcedata/Population/PerYear/Y2015/Population_domain[Person]);
-			parameter<Person> Y2020 := sum(sourcedata/Population/PerYear/Y2020/Population_domain[Person]);
-		}
-		
-		parameter<string> Generate_DegreesOfUrbanisation     := 'Ready', ExplicitSuppliers = "='PreProcessing/DegreesOfUrbanisation/'+ModelParameters/StartYear+'/StoreTypology;'+AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
-		parameter<string> Generate_Population                := 'Ready', ExplicitSuppliers = "='Population/Initial;'+AsList('Population/'+ProjectionYears/name, ';')";
-		parameter<string> Generate_BuiltUp_Total_Shares      := 'Ready', ExplicitSuppliers = "='BuiltUp_Total_Share/Initial;'+AsList('BuiltUp_Total_Share/'+ProjectionYears/name, ';')";
-		// parameter<string> Generate_DoU_Pop                   := 'Ready', ExplicitSuppliers = "Generate_DegreesOfUrbanisation;Generate_Population";
-		parameter<string> Generate_All                       := 'Ready', ExplicitSuppliers = "Generate_DegreesOfUrbanisation;Generate_Population;Generate_BuiltUp_Total_Shares";
-		
-		container Read_Population := 
-			for_each_ndva(
-				ProjectionYears/name
-				, domain
-				, NrPerson
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
-			)
-		{
-			attribute<NrPerson> Y1975 (domain) := Sourcedata/Population/PerYear/Y1975/Read_Population;
-			attribute<NrPerson> Y1980 (domain) := sourcedata/Population/PerYear/Y1980/Read_Population;
-			attribute<NrPerson> Y1985 (domain) := sourcedata/Population/PerYear/Y1985/Read_Population;
-			attribute<NrPerson> Y1990 (domain) := sourcedata/Population/PerYear/Y1990/Read_Population;
-			attribute<NrPerson> Y1995 (domain) := sourcedata/Population/PerYear/Y1995/Read_Population;
-			attribute<NrPerson> Y2000 (domain) := sourcedata/Population/PerYear/Y2000/Read_Population;
-			attribute<NrPerson> Y2005 (domain) := sourcedata/Population/PerYear/Y2005/Read_Population;
-			attribute<NrPerson> Y2010 (domain) := sourcedata/Population/PerYear/Y2010/Read_Population;
-			attribute<NrPerson> Y2015 (domain) := sourcedata/Population/PerYear/Y2015/Read_Population;
-			attribute<NrPerson> Y2020 (domain) := sourcedata/Population/PerYear/Y2020/Read_Population;
-			attribute<NrPerson> Initial (domain) := Y2020;
-		}
-		
-		container Read_BuiltUp_Total_Share := 
-			for_each_ndva(
-				ProjectionYears/name
-				, domain
-				, float32
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
-			)
-		{	
-			attribute<float32> Y1975 (domain):= float32(sourcedata/Builtup/Total/Y1975[km2]);
-			attribute<float32> Y1980 (domain):= float32(sourcedata/Builtup/Total/Y1980[km2]);
-			attribute<float32> Y1985 (domain):= float32(sourcedata/Builtup/Total/Y1985[km2]);
-			attribute<float32> Y1990 (domain):= float32(sourcedata/Builtup/Total/Y1990[km2]);
-			attribute<float32> Y1995 (domain):= float32(sourcedata/Builtup/Total/Y1995[km2]);
-			attribute<float32> Y2000 (domain):= float32(sourcedata/Builtup/Total/Y2000[km2]);
-			attribute<float32> Y2005 (domain):= float32(sourcedata/Builtup/Total/Y2005[km2]);
-			attribute<float32> Y2010 (domain):= float32(sourcedata/Builtup/Total/Y2010[km2]);
-			attribute<float32> Y2015 (domain):= float32(sourcedata/Builtup/Total/Y2015[km2]);
-			attribute<float32> Y2020 (domain):= float32(sourcedata/Builtup/Total/Y2020[km2]);
-			attribute<float32> Initial (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-		}
-		
-		container Read_DegreesOfUrbanisation :=
-			for_each_ndva(
-				ProjectionYears/name
-				, domain
-				, uint8
-				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
-			)
-		{
-			attribute<uint8> Y1975 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1975_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1980 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1980_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1985 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1985_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1990 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1990_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y1995 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y1995_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2000 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2000_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2005 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2005_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2010 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2010_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2015 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2015_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
-			attribute<uint8> Y2020 (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_Y2020_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "True";
-		}
-			
-		container GridDistances := 
-			for_each_ne(
-				ProjectionYears/name
-				, Use_TempTifFiles 
-					? 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
-					: 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
-			)
-		{
-			container Y2020 := /Preprocessing/GridDistances/Y2020;
-		}
-	}
-
 	//ad hoc
 	// container Checks : StorageName = "= '%LocalDataProjDir%/Temp/CD_Info_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
 	// {
@@ -297,74 +14,54 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<builtupKm2> BU_area_Claim_2100 (ClaimRegion) := Claim/Builtup/Y2100;
 	// }
 	
-	parameter<string> Export_CSVs := 'Ready', 
-		ExplicitSuppliers = "Population_perDoU_AllYears;Population_OnLand_Density_perDoU_AllYears;Area_perDoU_AllYears;Population_Abandonment_perDoU_AllYears;Population_Emergence_perDoU_AllYears;results_per_country/store_button;long_time_window_analyses/cell_counts;long_time_window_analyses/Assess_Clusters/year_results;"; //BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram;";
+	//parameter<string> Export_CSVs := 'Ready', 
+	//	ExplicitSuppliers = "Population_perDoU_AllYears;Population_OnLand_Density_perDoU_AllYears;Area_perDoU_AllYears;Population_Abandonment_perDoU_AllYears;Population_Emergence_perDoU_AllYears;results_per_country/store_button;long_time_window_analyses/cell_counts;long_time_window_analyses/Assess_Clusters/year_results;"; //BuiltUp_Percentages_Histogram;Population_OnLand_Density_Histogram;";
+	container BuiltUp_Total_Area := 
+		for_each_nedv(
+			ProjectionYears/name
+			, Use_TempTifFiles ? 'Store_Results/Read_BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]' : 'Store_Results/BuiltUp_Total_Share/'+ProjectionYears/name+' * domain/area[float32]'
+			, domain
+			, float32
+		)
+	{
+		attribute<float32> Initial               (domain) := =Use_TempTifFiles ? 'Store_Results/Read_BuiltUp_Total_Share/Initial * domain/area[float32]' : 'Store_Results/BuiltUp_Total_Share/Initial * domain/area[float32]';
+		
+	}
+		
+	container BuiltUp_Residential_Area := 
+		for_each_nedv(
+			ProjectionYears/name
+			, 'BuiltUp_Total_Area/'+ProjectionYears/name+' - recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_NonResidential_Area)'
+			, domain
+			, BuiltUpKm2
+		)
+	{
+		attribute<BuiltUpKm2> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Residential_Area);
+		attribute<BuiltUpKm2> Y1975        (domain) := /SourceData/Builtup/Residential/Y1975[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y1980        (domain) := /SourceData/Builtup/Residential/Y1980[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y1985        (domain) := /SourceData/Builtup/Residential/Y1985[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y1990        (domain) := /SourceData/Builtup/Residential/Y1990[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y1995        (domain) := /SourceData/Builtup/Residential/Y1995[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y2000        (domain) := /SourceData/Builtup/Residential/Y2000[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y2005        (domain) := /SourceData/Builtup/Residential/Y2005[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y2010        (domain) := /SourceData/Builtup/Residential/Y2010[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y2015        (domain) := /SourceData/Builtup/Residential/Y2015[km2] / 1[km2] * 1[BuiltUpKm2];
+		attribute<BuiltUpKm2> Y2020        (domain) := /SourceData/Builtup/Residential/Y2020[km2] / 1[km2] * 1[BuiltUpKm2];
+		
+	}
+
 	
-	// container Added_BU_perDoU := 
-		// for_each_nedv(
-			// ProjectionYears_Delta/name
-			// , 'sum(Prep/Delta_BuiltUp_Total_Area/'+ProjectionYears_Delta/name+', Prep/DegreesOfUrbanisation/'+ProjectionYears_Delta/name+'/ReadTypologyK)'
-			// , TypologyK
-			// , float32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Added_BU_perDoU_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>     Label     (TypologyK) := TypologyK/label;
-		// attribute<float32> Y2030     (TypologyK) := sum(Prep/Delta_BuiltUp_Total_Area/y2030, Prep/DegreesOfUrbanisation/Y2030/ReadTypologyK);
-	// }
-	
-	// Future change in population per degree of urbanisation class.
 	container Population_perDoU := 
 		for_each_nedv(
 			ProjectionYears/name
-			, Use_TempTifFiles ? 'sum(Prep/Read_Population/'+ProjectionYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' : 'sum(Prep/Population/'+ProjectionYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+			, Use_TempTifFiles ? 'sum(Store_Results/Read_Population/'+ProjectionYears/name+'[uint64], Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' : 'sum(Store_Results/Population/'+ProjectionYears/name+'[uint64], Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
 			, TypologyK
 			, uint64
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
 	{
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
-		attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
+		attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Store_Results/Read_Population/Initial[uint64], Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Store_Results/Population/Initial[uint64], Store_Results/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
 	}
-	
-	container Population_perDoU_AllYears := 
-		for_each_nedv(
-			AllYears/name
-			, Use_TempTifFiles && AllYears/modelled 
-				? 'sum(Prep/Read_Population/'+AllYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+AllYears/name+'/ReadTypologyK)' 
-				: NOT(Use_TempTifFiles) && AllYears/modelled
-					? 'sum(Prep/Population/'+AllYears/name+'[uint64], Prep/DegreesOfUrbanisation/'+AllYears/name+'/Typology_Domain)'
-					: 'sum(Population/PerYear/'+AllYears/name+'/Read_Population[uint64], Preprocessing/DegreesOfUrbanisation/'+AllYears/name+'/ReadTypologyK)'
-			, TypologyK
-			, uint64
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-	{
-		attribute<string>  Label     (TypologyK) := TypologyK/label; //, StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect";
-		// attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
-	}
-	
-	// container Population_per_ClaimRegion_AllYears := 
-		// for_each_nedv(
-			// AllYears/name
-			// , Use_TempTifFiles && AllYears/modelled 
-				// ? 'sum(Prep/BuiltUp_Residential_Area/'+AllYears/name+'[uint64], ClaimRegion/per_domain)' 
-				// : NOT(Use_TempTifFiles) && AllYears/modelled
-					// ? 'sum(Prep/BuiltUp_Residential_Area/'+AllYears/name+'[uint64], ClaimRegion/per_domain)'
-					// : 'sum(Prep/BuiltUp_Residential_Area/'+AllYears/name+'[uint64], ClaimRegion/per_domain)'
-			// , ClaimRegion
-			// , uint64
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_per_ClaimRegion_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>  Label     (ClaimRegion) := ClaimRegion/label;
-	// }
-	// container BU_ResArea_per_ClaimRegion_AllYears := 
-		// for_each_nedv(
-			// AllYears/name
-			// , 'sum(Prep/BuiltUp_Residential_Area/'+AllYears/name+', ClaimRegion/per_domain)'
-			// , ClaimRegion
-			// , float32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/BU_ResArea_per_ClaimRegion_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>  Label     (ClaimRegion) := ClaimRegion/label;
-	// }
 
 	container Population_OnLand_Density_perDoU := 
 		for_each_nedv(
@@ -378,60 +75,6 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<float32>  Initial   (TypologyK) := Population_perDoU/Initial[float32]  / Area_perDoU/Initial[float32] ;
 	}
 	
-	container Population_OnLand_Density_perDoU_AllYears := 
-		for_each_nedv(
-			AllYears/name
-			, 'Population_perDoU_AllYears/'+AllYears/name+'[float32] / Area_perDoU_AllYears/'+AllYears/name+'[float32]'
-			, TypologyK
-			, float32
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-	{
-		attribute<string>      Label     (TypologyK) := TypologyK/label;
-	}
-	
-	//adhoc
-	container Population_Abandonment_perDoU_AllYears_domain :=
-		for_each_nedv(
-			IsDefined(AllYears/prev_name) ? AllYears/name : ''
-			, Use_TempTifFiles && AllYears/modelled 
-				? 'Prep/Read_Population/'+AllYears/prev_name+'[uint64] >= 1[uint64] && Prep/Read_Population/'+AllYears/name+'[uint64] = 0[uint64]' 
-				: NOT(Use_TempTifFiles) && AllYears/modelled
-					? 'Prep/Population/'+AllYears/prev_name+'[uint64] >= 1[uint64] && Prep/Population/'+AllYears/name+'[uint64] = 0[uint64]'
-					: 'Population/PerYear/'+AllYears/prev_name+'/Read_Population[uint64] >= 1[uint64] && Population/PerYear/'+AllYears/name+'/Read_Population[uint64] = 0[uint64]'
-			, domain
-			, bool
-		);
-	
-	container Population_Abandonment_perDoU_AllYears :=
-		for_each_nedv(
-			IsDefined(AllYears/prev_name) ? AllYears/name : ''
-			, Use_TempTifFiles && AllYears/modelled 
-				? 'sum(uint64(Prep/Read_Population/'+AllYears/prev_name+'[uint64] >= 1[uint64] && Prep/Read_Population/'+AllYears/name+'[uint64] = 0[uint64]), Prep/DegreesOfUrbanisation/'+AllYears/prev_name+'/ReadTypologyK)' 
-				: NOT(Use_TempTifFiles) && AllYears/modelled
-					? 'sum(uint64(Prep/Population/'+AllYears/prev_name+'[uint64] >= 1[uint64] && Prep/Population/'+AllYears/name+'[uint64] = 0[uint64]), Prep/DegreesOfUrbanisation/'+AllYears/prev_name+'/Typology_Domain)'
-					: 'sum(uint64(Population/PerYear/'+AllYears/prev_name+'/Read_Population[uint64] >= 1[uint64] && Population/PerYear/'+AllYears/name+'/Read_Population[uint64] = 0[uint64]), Preprocessing/DegreesOfUrbanisation/'+AllYears/prev_name+'/ReadTypologyK)'
-			, TypologyK
-			, uint64
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Abandoned_since_prev_decade_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-	{
-		attribute<string>  Label     (TypologyK) := TypologyK/label; //, StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect";
-		// attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/Typology_Domain)' ;
-	}
-	
-	container Population_Emergence_perDoU_AllYears :=
-		for_each_nedv(
-			IsDefined(AllYears/prev_name) ? AllYears/name : ''
-			, Use_TempTifFiles && AllYears/modelled 
-				? 'sum(uint64(Prep/Read_Population/'+AllYears/prev_name+'[uint64] == 0[uint64] && Prep/Read_Population/'+AllYears/name+'[uint64] > 0[uint64]), Prep/DegreesOfUrbanisation/'+AllYears/prev_name+'/ReadTypologyK)' 
-				: NOT(Use_TempTifFiles) && AllYears/modelled
-					? 'sum(uint64(Prep/Population/'+AllYears/prev_name+'[uint64] == 0[uint64] && Prep/Population/'+AllYears/name+'[uint64] > 0[uint64]), Prep/DegreesOfUrbanisation/'+AllYears/prev_name+'/Typology_Domain)'
-					: 'sum(uint64(Population/PerYear/'+AllYears/prev_name+'/Read_Population[uint64] == 0[uint64] && Population/PerYear/'+AllYears/name+'/Read_Population[uint64] > 0[uint64]), Preprocessing/DegreesOfUrbanisation/'+AllYears/prev_name+'/ReadTypologyK)'
-			, TypologyK
-			, uint64
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Emergence_since_prev_decade_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-	{
-		attribute<string>  Label     (TypologyK) := TypologyK/label; 
-	}
 	container Population_OnLand_Density_perDoU2020 := 
 		for_each_nedv(
 			ProjectionYears/name
@@ -449,23 +92,23 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		attribute<upoint> uni:= point(uint32(first_rel), uint32(second_rel), upoint);
 		
 		container area:= for_each_nedv(Label
-			, 'sum(float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
+			, 'sum(float32(Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Store_Results/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
 			, void
 			, float32);
 		container popinit:= for_each_nedv(Label
-			, 'sum(Prep/Read_Population/Initial[float32] * float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
+			, 'sum(Store_Results/Read_Population/Initial[float32] * float32(Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Store_Results/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
 			, void
 			, float32);
 		container pop2100:= for_each_nedv(Label
-			, 'sum(Prep/Read_Population/Y2100[float32] * float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
+			, 'sum(Store_Results/Read_Population/Y2100[float32] * float32(Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Store_Results/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
 			, void
 			, float32);
 		container builtupinit:= for_each_nedv(Label
-			, 'sum(Prep/BuiltUp_Total_Area/Initial[float32] * float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
+			, 'sum(Store_Results/BuiltUp_Total_Area/Initial[float32] * float32(Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Store_Results/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
 			, void
 			, float32);	
 		container builtup2100:= for_each_nedv(Label
-			, 'sum(Prep/BuiltUp_Total_Area/Y2100[float32] * float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
+			, 'sum(Store_Results/BuiltUp_Total_Area/Y2100[float32] * float32(Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Store_Results/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
 			, void
 			, float32);	
 	}
@@ -473,116 +116,15 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container Area_perDoU :=
 		for_each_nedv(
 			ProjectionYears/name
-			, Use_TempTifFiles ? 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' : 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+			, Use_TempTifFiles ? 'sum(Geography/domain/area, Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' : 'sum(Geography/domain/area, Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
 			, TypologyK
 			, km2
 		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
 	 {
 		attribute<string>  Label     (TypologyK) := TypologyK/label;
-		attribute<km2>     Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/Typology_Domain)';
+		attribute<km2>     Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Geography/domain/area, Store_Results/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Geography/domain/area, Store_Results/DegreesOfUrbanisation/Initial/Typology_Domain)';
 	 }
-	// container Area_perDoU_AllYears:=
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , Use_TempTifFiles 
-				// ? 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
-				// : 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
-			// , TypologyK
-			// , km2
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
-	 // {
-		// attribute<string>  Label     (TypologyK) := TypologyK/label;
-		// attribute<km2>     Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/Typology_Domain)';
-	 // }
-	 
-	container Area_perDoU_AllYears := 
-		for_each_nedv(
-			AllYears/name 
-			, 'sum(Geography/domain/area, invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'])'
-			, TypologyK
-			, km2
-		), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_perDoU_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-	 {
-		attribute<string>  Label     (TypologyK) := TypologyK/label;
-	 }
-	 
-	// container Area_perDoU2020
-	// {
-		// attribute<string>  Label     (TypologyK) := TypologyK/label;
-		// attribute<km2>     Initial   (TypologyK) := sum(Geography/domain/area, Prep/DegreesOfUrbanisation/Initial/ReadTypologyK);
-	// }
-	 
-	// Future change in population per degree of urbanisation class.
-	// container Population_perDoU2020 := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , Use_TempTifFiles ? 'sum(Prep/Read_Population/'+ProjectionYears/name+'[uint64], Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK)' : 'sum(Prep/Population/'+ProjectionYears/name+'[uint64], Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK)'
-			// , TypologyK
-			// , uint64
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_perDoU2020_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>  Label     (TypologyK) := TypologyK/label;
-		// attribute<uint64>  Y2010     (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Y2010[uint64], Prep/DegreesOfUrbanisation/Y2010/ReadTypologyK)' : 'sum(Prep/Population/Y2010[uint64], Prep/DegreesOfUrbanisation/Y2010/ReadTypologyK)';
-		// attribute<uint64>  Initial   (TypologyK) := =Use_TempTifFiles ? 'sum(Prep/Read_Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)' : 'sum(Prep/Population/Initial[uint64], Prep/DegreesOfUrbanisation/Initial/ReadTypologyK)';
-	// }
 
-	// container Added_BU_perDoU2020 := 
-		// for_each_nedv(
-			// ProjectionYears_Delta/name
-			// , 'sum(Prep/Delta_BuiltUp_Total_Area/'+ProjectionYears_Delta/name+', Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK)'
-			// , TypologyK
-			// , float32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Added_BU_perDoU2020_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>     Label     (TypologyK) := TypologyK/label;
-		// attribute<float32>    Y2030     (TypologyK) := sum(Prep/Delta_BuiltUp_Total_Area/y2030, Preprocessing/DegreesOfUrbanisation/Y2020/ReadTypologyK);
-	// }
-
-
-	// container delta_BuiltUp := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , 'Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share - InitialState/BuiltUp_Total_Share'
-			// , CompactedDomain
-			// , float32
-		// ); 
-	
-	// container BuiltUp_Percentages_Histogram := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , 'pcount((100f * Prep/Read_BuiltUp_Total_Share/'+ProjectionYears/name+')[AllShares])'
-			// , AllShares
-			// , uint32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/BuiltUp_Percentages_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string> name  (AllShares) := AllShares/label;
-		// attribute<uint32> Y2020 (AllShares) := pcount(InitialState/Perc_BuiltUp_Total);
-	// }
-	
-	// container Population_InRes_Density_Histogram := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , 'pcount(Classify(Prep/Population_inRes_Density/'+ProjectionYears/name+', Pop_DensityBins/ClassBreaks))'
-			// , Pop_DensityBins
-			// , uint32
-		// )
-	// {
-		// attribute<string>  Label   (Pop_DensityBins) := Pop_DensityBins/label;
-		// attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Population_inRes_Density/Initial, Pop_DensityBins/ClassBreaks));
-	// }
-	
-	// container Population_OnLand_Density_Histogram := 
-		// for_each_nedv(
-			// ProjectionYears/name
-			// , 'pcount(Classify(Prep/Population_Onland_Density/'+ProjectionYears/name+', Pop_DensityBins/ClassBreaks))'
-			// , Pop_DensityBins
-			// , uint32
-		// ), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_OnLand_Density_Histogram_'+ModelParameters/StudyArea+'.csv'", StorageType = "gdalwrite.vect"
-	// {
-		// attribute<string>  Label   (Pop_DensityBins) := Pop_DensityBins/label;
-		// attribute<uint32>  Initial (Pop_DensityBins) := pcount(Classify(Prep/Population_Onland_Density/Initial, Pop_DensityBins/ClassBreaks));
-	// }
-	
 	container functional_area_differences 
 	{
 		attribute<string> name 	(RegionalUnits/FunctionalAreas):= RegionalUnits/FunctionalAreas/item_name, StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_outputs.csv'", StorageType = "gdalwrite.vect";
@@ -593,22 +135,22 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		container pop := 
 			for_each_nedv(
 				'p_'+ProjectionYears/name
-				, 'sum(float32(Prep/Read_Population/'+ProjectionYears/name+'), RegionalUnits/FunctionalAreas/per_domain)'
+				, 'sum(float32(Store_Results/Read_Population/'+ProjectionYears/name+'), RegionalUnits/FunctionalAreas/per_domain)'
 				, RegionalUnits/FunctionalAreas
 				, float32
 			), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_pop_outputs.csv'", StorageType = "gdalwrite.vect"
 		{
-			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Prep/Read_Population/Initial), RegionalUnits/FunctionalAreas/per_domain);
+			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Store_Results/Read_Population/Initial), RegionalUnits/FunctionalAreas/per_domain);
 		}
 		container bu :=
 			for_each_nedv(
 				'bu_'+ProjectionYears/name
-				, 'sum(Prep/Read_BuiltUp_Total_Share/'+ProjectionYears/name+'[float32] * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain)'
+				, 'sum(Store_Results/Read_BuiltUp_Total_Share/'+ProjectionYears/name+'[float32] * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain)'
 				, RegionalUnits/FunctionalAreas
 				, float32
 			), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_bu_outputs.csv'", StorageType = "gdalwrite.vect"
 		{
-			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Prep/Read_BuiltUp_Total_Share/Initial) * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain);
+			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Store_Results/Read_BuiltUp_Total_Share/Initial) * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain);
 		}
 		container degurbas := 
 			for_each_ne(
@@ -628,14 +170,14 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 			container area_sums := 
 				for_each_nedv(
 					'area_'+TypologyK/name+'_'+in_year
-					, 'sum(Prep/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Geography/domain/area : 0[km2], RegionalUnits/FunctionalAreas/per_domain)'
+					, 'sum(Store_Results/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Geography/domain/area : 0[km2], RegionalUnits/FunctionalAreas/per_domain)'
 					, RegionalUnits/FunctionalAreas
 					, km2
 				), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_degurba_area_outputs_'+in_year+'.csv'", StorageType = "gdalwrite.vect";
 			container pop_sums := 
 				for_each_nedv(
 					'pop_'+TypologyK/name+'_'+in_year
-					, 'sum(Prep/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Prep/Read_Population/'+in_year+'[uint64] : 0[uint64], RegionalUnits/FunctionalAreas/per_domain)'
+					, 'sum(Store_Results/DegreesOfUrbanisation/'+in_year+'/ReadTypologyK = '+string(id(TypologyK))+'b ? Store_Results/Read_Population/'+in_year+'[uint64] : 0[uint64], RegionalUnits/FunctionalAreas/per_domain)'
 					, RegionalUnits/FunctionalAreas
 					, uint64
 				), StorageName = "='%LocalDataProjDir%/Indicators/fa_results/'+ModelParameters/StudyArea+'_degurba_pop_outputs_'+in_year+'.csv'", StorageType = "gdalwrite.vect";
@@ -645,35 +187,26 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	
 	container long_time_window_analyses: Descr="Advanced analyses based on longer time series" 
 	{
-		parameter<bool> store_histograms:= true, explicitsuppliers="builtup_histogram;population_histogram;";
+		//parameter<bool> store_histograms:= true, explicitsuppliers="builtup_histogram;population_histogram;";
 		
 		unit<uint32> years_unit := AllYears;
 				
 		container builtup:= for_each_nedv(years_unit/name, 
-			years_unit/modelled ? '(Prep/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]',
+			years_unit/modelled ? '(Store_Results/Read_BuiltUp_Total_Share/'+years_unit/name+' * domain/area[float32])[km2]' : 'sourcedata/Builtup/Total/'+years_unit/name+'[km2]',
 			domain, km2);
-		container builtup_histogram:= for_each_nedv(years_unit/name,
-			'pcount((100f * builtup/'+years_unit/name+')[allshares])',
-			allshares, uint32) , StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Builtup_Histogram_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-		{
-			attribute<string> Label (allshares):=allshares/Label;
-		}
-		container population:= for_each_nedv(years_unit/name,
-			years_unit/modelled ? 'Prep/Read_Population/'+years_unit/name+'[float32]' : '/sourcedata/Population/PerYear/'+years_unit/name+'/Read_Population[float32]',
-			domain, float32);
-		container population_histogram := 
-			for_each_nedv(
-				AllYears/name
-				, 'pcount(Classify(population/'+AllYears/name+'[float32], Pop_Bins/ClassBreaks))[float32] / Pop_Bins/ClassWidth'
-				, Pop_Bins
-				, float32
-			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Population_Histogram_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-		{
-			attribute<float32>  Label     (Pop_Bins) := Pop_Bins/ClassMiddle;
-			// attribute<uint32>  Initial   (Pop_Bins) := pcount(Classify(Prep/Read_Population/Initial[float32], Pop_Bins/ClassBreaks));
-		}
+		container builtup_classified:= for_each_nedv(years_unit/name 
+			, '(100f * (builtup/'+years_unit/name+' > 0f ? builtup/'+years_unit/name+' + 0.01f : 0f))[allshares]'
+			, domain
+			, allshares);
+		container new_builtup_sums:= for_each_nedv(id(years_unit) > 0 ? years_unit/name : ''
+			,'sum(builtup/'+years_unit/name+' - builtup/'+years_unit/prev_name+', builtup_classified/'+years_unit/prev_name+')'
+			,allshares
+			,km2) {
+			attribute<string> Label (allshares):=allshares/histo_label;
+			}
+	
 		container degurbas:= for_each_nedv(years_unit/name, 
-			years_unit/modelled ? 'invert(TypologyK/EK)[Prep/Read_DegreesOfUrbanisation/'+years_unit/name+']' : 'Preprocessing/DegreesOfUrbanisation/'+years_unit/name+'/ReadTypologyK',
+			years_unit/modelled ? 'invert(TypologyK/EK)[Store_Results/Read_DegreesOfUrbanisation/'+years_unit/name+']' : 'Store_Resultsrocessing/DegreesOfUrbanisation/'+years_unit/name+'/ReadTypologyK',
 			domain, TypologyK);
 
 		container per_degurba:= for_each_ne(TypologyK/name, 'analyse_degurbas('+string(id(TypologyK))+'[TypologyK])');
@@ -704,7 +237,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		container assess_clusters := 
 			for_each_ne(
 				years_unit/name
-				, 'T_Assess_City_clusters(Prep/Read_DegreesOfUrbanisation/'+years_unit/name+', Prep/Read_Population/'+years_unit/name+'[float32])'
+				, 'T_Assess_City_clusters(Store_Results/Read_DegreesOfUrbanisation/'+years_unit/name+', Store_Results/Read_Population/'+years_unit/name+'[float32])'
 			) 
 		{
 			unit<uint32> year_results:= years_unit, StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Clusters_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"  
@@ -723,82 +256,28 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		}
 	}
 	
-	container results_per_country {
-		
-		parameter<bool> store_button:= True, explicitsuppliers = "pop_lvl1; area_lvl1;";
-		
-		unit<uint32> countries_x_degurba_lvl2:= combine(Countries_study_area, TypologyK) {
-			attribute<uint8>  EK:= TypologyK/EK[second_rel];
-			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
-			attribute<string> Country:= Countries_study_area/ISO3[first_rel];
-			attribute<string> Degurba:= TypologyK/label[second_rel];
-			attribute<string> Label:= Country + ' ' + Degurba;
-			attribute<countries_x_degurba_lvl1> cd1_rel:= rlookup(point(first_rel, 10*(EK[uint32] / 10), upoint), countries_x_degurba_lvl1/pt);
-		}
-		unit<uint32> countries_x_degurba_lvl1:= combine(Countries_study_area, Degurba_lvl1) {
-			attribute<uint8>  EK:= Degurba_lvl1/EK[second_rel];
-			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
-			attribute<string> Country:= Countries_study_area/ISO3[first_rel];
-			attribute<string> Degurba:= Degurba_lvl1/label[second_rel];
-			attribute<string> Label:= Country + ' ' + Degurba;
-		}
-		
-		
-		container grid_rels:= for_each_nedv(AllYears/name
-			, 'rlookup(point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint), countries_x_degurba_lvl2/pt)'
-			//, 'point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint)'
-			, domain
-			, countries_x_degurba_lvl2
-			);
-		
-		container pop_lvl2:= for_each_nedv(AllYears/name
-			, 'sum(Prep/Read_Population/'+AllYears/name+', grid_rels/'+AllYears/name+')'
-			, countries_x_degurba_lvl2
-			, NrPerson
-			);
-		container area_lvl2:= for_each_nedv(AllYears/name
-			, 'sum(domain/area, grid_rels/'+AllYears/name+')'
-			, countries_x_degurba_lvl2
-			, km2
-			);
-		
-		container pop_lvl1:= for_each_nedv(AllYears/name
-			, 'sum(pop_lvl2/'+AllYears/name+', countries_x_degurba_lvl2/cd1_rel)'
-			, countries_x_degurba_lvl1
-			, NrPerson
-			), StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Pop_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect" 
-			{attribute<string> Country (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Country; attribute<string> Degurba (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Degurba;}
-		container area_lvl1:= for_each_nedv(AllYears/name
-			, 'sum(area_lvl2/'+AllYears/name+', countries_x_degurba_lvl2/cd1_rel)'
-			, countries_x_degurba_lvl1
-			, km2
-			) , StorageName = "='%LocalDataProjDir%/Indicators/'+ModelParameters/StudyArea+'/Area_per_country_per_DoU_lvl1_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.csv'", StorageType = "gdalwrite.vect"
-			{attribute<string> Country (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Country; attribute<string> Degurba (countries_x_degurba_lvl1):= countries_x_degurba_lvl1/Degurba;}
-			
-	}
-	
 	// container BuiltUp_Residential_Area_Histogram := 
 		// for_each_nedv(
 			// ProjectionYears/name
-			// , 'pcount(Classify(Prep/BuiltUp_Residential_Area/'+ProjectionYears/name+', BU_Residential_Area_Bins/ClassBreaks))'
+			// , 'pcount(Classify(Store_Results/BuiltUp_Residential_Area/'+ProjectionYears/name+', BU_Residential_Area_Bins/ClassBreaks))'
 			// , BU_Residential_Area_Bins
 			// , uint32
 		// )
 	// {
 		// attribute<string>  Label     (BU_Residential_Area_Bins) := BU_Residential_Area_Bins/label;
-		// attribute<uint32>  Initial   (BU_Residential_Area_Bins) := pcount(Classify(Prep/BuiltUp_Residential_Area/Initial, BU_Residential_Area_Bins/ClassBreaks));
+		// attribute<uint32>  Initial   (BU_Residential_Area_Bins) := pcount(Classify(Store_Results/BuiltUp_Residential_Area/Initial, BU_Residential_Area_Bins/ClassBreaks));
 	// }
 	
 	// container BuiltUp_Total_Share_Histogram := 
 		// for_each_nedv(
 			// ProjectionYears/name
-			// , 'pcount(Classify(Prep/Builtup_Total_Share/'+ProjectionYears/name+', BU_Total_Share_Bins/ClassBreaks))'
+			// , 'pcount(Classify(Store_Results/Builtup_Total_Share/'+ProjectionYears/name+', BU_Total_Share_Bins/ClassBreaks))'
 			// , BU_Total_Share_Bins
 			// , uint32
 		// )
 	// {
 		// attribute<string>  Label     (BU_Total_Share_Bins) := BU_Total_Share_Bins/label;
-		// attribute<uint32>  Initial   (BU_Total_Share_Bins) := pcount(Classify(Prep/Builtup_Total_Share/Initial, BU_Total_Share_Bins/ClassBreaks));
+		// attribute<uint32>  Initial   (BU_Total_Share_Bins) := pcount(Classify(Store_Results/Builtup_Total_Share/Initial, BU_Total_Share_Bins/ClassBreaks));
 	// }
 	
 	Template T_Assess_City_clusters {
@@ -842,29 +321,29 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	{	
 		container delta_BuiltUp_export:= for_each_nedva(
 			id(AllYears) > 0 ? AllYears/name : ''
-			, 'Analysis/Future/Indicators/Prep/Read_BuiltUp_Total_Share/'+AllYears/name+' - Analysis/Future/Indicators/Prep/Read_BuiltUp_Total_Share/'+AllYears/prev_name
+			, 'Analysis/Future/Indicators/Store_Results/Read_BuiltUp_Total_Share/'+AllYears/name+' - Analysis/Future/Indicators/Store_Results/Read_BuiltUp_Total_Share/'+AllYears/prev_name
 			, domain
 			, float32
 			, '%LocalDataProjDir%/export/'+ModelParameters/StudyArea+'/delta_builtup_'+AllYears/name+'_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 		);
 		container delta_Pop_export:= for_each_nedva(
 			id(AllYears) > 0 ? AllYears/name : ''
-			, 'Analysis/Future/Indicators/Prep/Read_Population/'+AllYears/name+'[float32] - Analysis/Future/Indicators/Prep/Read_Population/Y1975[float32]' 
+			, 'Analysis/Future/Indicators/Store_Results/Read_Population/'+AllYears/name+'[float32] - Analysis/Future/Indicators/Store_Results/Read_Population/Y1975[float32]' 
 			, domain
 			, float32
 			, '%LocalDataProjDir%/export/'+ModelParameters/StudyArea+'/delta_population_'+AllYears/name+'_'+ModelParameters/StudyArea+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
 		);
 	
-		attribute<TypologyK>       DoU_y2020            (domain) := Prep/DegreesOfUrbanisation/Initial/Typology_Domain;
-		attribute<TypologyK>       DoU_y2030            (domain) := Prep/DegreesOfUrbanisation/Y2030/Typology_Domain;
+		attribute<TypologyK>       DoU_y2020            (domain) := Store_Results/DegreesOfUrbanisation/Initial/Typology_Domain;
+		attribute<TypologyK>       DoU_y2030            (domain) := Store_Results/DegreesOfUrbanisation/Y2030/Typology_Domain;
 		
 		attribute<bool>            IsNewUrbanCentre     (domain) := DoU_y2030 == TypologyK/V/Urban_Centre && DoU_y2020 != TypologyK/V/Urban_Centre;
 		
-		attribute<float32>         BU_Total_Share_y2020 (domain) := Prep/Builtup_Total_Share/Initial;
-		attribute<float32>         BU_Total_Share_y2030 (domain) := Prep/Builtup_Total_Share/Y2030;
+		attribute<float32>         BU_Total_Share_y2020 (domain) := Store_Results/Builtup_Total_Share/Initial;
+		attribute<float32>         BU_Total_Share_y2030 (domain) := Store_Results/Builtup_Total_Share/Y2030;
 		
-		attribute<NrPerson>        Population_y2020     (domain) := Prep/Population/Initial;
-		attribute<NrPerson>        Population_y2030     (domain) := Prep/Population/Y2030;
+		attribute<NrPerson>        Population_y2020     (domain) := Store_Results/Population/Initial;
+		attribute<NrPerson>        Population_y2030     (domain) := Store_Results/Population/Y2030;
 	}
 	
 }

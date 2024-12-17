@@ -68,6 +68,9 @@ for (region in regionslist) {
     #### prep total pop and popdensity graphs by putting them into long form (required by ggplot)
     popdata<-subset(in_popdata, country==selcountry)
     
+    if(selcountry=="ANR") {selcountry<-"AND"}
+    if(selcountry=="KOS") {selcountry<-"XKO"}
+    
     if(selcountry=="ERUS" | selcountry=="ARUS") {
       ruscounter<-ruscounter+1
       if(ruscounter<2) {
@@ -123,7 +126,7 @@ for (region in regionslist) {
     fig0+
       #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
       geom_line(size=1) +
-      xlab("Year") + ylab("Population (M)") + labs(color=paste("Results", selcountry), caption=gsub("_", " ", paste(cname, region, runset, sep=", "))) +
+      xlab("Year") + ylab("Population (M)") + labs(color=paste("Results", selcountry), title=(paste("Total population", cname)), caption=gsub("_", " ", paste(cname, region, runset, sep=", "))) +
       scale_colour_manual(values=custom_colour)+
       expand_limits(y = 0) +
       geom_vline(xintercept=2020, linetype="dashed")+
@@ -147,7 +150,7 @@ for (region in regionslist) {
     fig4<-ggplot(popshares, aes(x=Year-5, y=Pop,  fill=degurb_ordered))
     fig4+
       geom_bar(position="fill", stat="identity", width=10) +
-      xlab("Year") + ylab("Share of total population") + labs(fill=paste("Results", gsub("_", " ", selcountry)), caption=gsub("_", " ", paste(cname, region, runset, sep=", "))) +
+      xlab("Year") + ylab("Share of total population") + labs(fill=paste("Results", gsub("_", " ", selcountry)), title=(paste("Total population", cname)), caption=gsub("_", " ", paste(cname, region, runset, sep=", "))) +
       scale_colour_manual(values=custom_colour)+
       scale_fill_manual(values=custom_colour)+
       expand_limits(y = 0) +

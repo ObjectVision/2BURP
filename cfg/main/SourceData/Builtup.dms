@@ -16,7 +16,22 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			, 'This <= 1000000[m2] || IsNull(This)'
 			, domain
 			, m2
-		);
+		) {
+			container store_domain:= for_each_nedva(
+				GHS_years/name
+				, 'Total/'+GHS_years/name+'[float32]'
+				, domain
+				, float32
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(GHS_years/name)+'_'+ModelParameters/domain_EPSG+'.tif'
+			);
+			container read_domain:= for_each_ndvat(
+				GHS_years/name
+				, domain
+				, float32
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(GHS_years/name)+'_'+ModelParameters/domain_EPSG+'.tif'
+				, 'gdal.grid'
+			);
+		}
 		
 	container NonResidential_src :=
 		for_each_ndvat(

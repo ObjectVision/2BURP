@@ -78,7 +78,17 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 	{
 		container InitialState:= Future/InitialState;
 	}
-	
+	container Calculate_GridDistances := 
+		for_each_ne(
+			ProjectionYears/name
+			, Use_TempTifFiles 
+				? 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/ReadTypologyK)' 
+				: 'Preprocessing/Calculate_GridDistances/T_AllVariants_Instantiation(Store_Results/DegreesOfUrbanisation/'+ProjectionYears/name+'/Typology_Domain)'
+		)
+	{
+		container Y2020 := /Preprocessing/GridDistances/Y2020;
+	}
+	#include<Results_Storage.dms>
 	#include<Indicators.dms>
 	#include<Allocate_Builtup_T.dms>
 	#include<Allocate_Population_T.dms>

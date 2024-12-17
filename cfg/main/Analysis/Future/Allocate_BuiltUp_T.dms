@@ -55,8 +55,8 @@ Template Allocate_Builtup_T
 																'(min_elem(Physical/Coast/Location2Coast_m_sqr/Result[float32],250f)                                          * AutoGLM_Coeffs/Distance2Coastline) + 
 																(min_elem(Physical/Water/Location2LargeInlandWater_m_sqr/Result[float32],250f)                                * AutoGLM_Coeffs/Distance2LargeInlandWater) + 
 																(min_elem(Socioeconomic/Infrastructure/Location2Roads45_m_sqr/Result[float32],250f)                           * AutoGLM_Coeffs/Distance2SecundaryRoads) + 
-																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                                    * AutoGLM_Coeffs/gc_villages) + 
-																(Indicators/Prep/GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities                                      * AutoGLM_Coeffs/gc_cities) + 
+																(Calculate_GridDistances/'+PrevYear+'/Grid_costs_atleast_to/villages                		                  * AutoGLM_Coeffs/gc_villages) + 
+																(Calculate_GridDistances/'+PrevYear+'/Grid_costs_atleast_to/cities            		                          * AutoGLM_Coeffs/gc_cities) + 
 																(Physical/Elevation/Mean_1k[float32]                                                                          * AutoGLM_Coeffs/Elevation) + 
 																(Physical/Slope_2021/ReadData[float32]                                                                        * AutoGLM_Coeffs/Slope) + 
 																(Physical/TerrainRoughnessIndex/TRI_mean_30ss_World[float32]                                                  * AutoGLM_Coeffs/TRI_mean) + 

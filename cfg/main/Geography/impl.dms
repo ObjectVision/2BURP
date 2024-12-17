@@ -199,6 +199,7 @@ container Impl
 		{
 			// attribute<LatLong>        geometry      := id(.)[LatLong];
 			attribute<Mollweide>      geometry      := id(.)[Mollweide];
+			attribute<km2>			  area			:= const(1[km2], .);
 		}
 	}
 

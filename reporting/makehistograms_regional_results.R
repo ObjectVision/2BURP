@@ -72,28 +72,19 @@ for (region in regionslist) {
     #coord_cartesian(xlim=c(0,0.045), ylim=c(-500, 2000)) +
     # geom_bar(stat="identity") +
     geom_line(size=1) + geom_point(size=1.5) +
-    xlab("Middle of population class") + ylab("Amount of observations (log scale)") + labs(color=paste("Results", region), caption=gsub("_", " ", paste(region, runset))) +
+    xlab("Middle of population class") + ylab("Average amount of observations in class (log scale)") + labs(color=paste("Results", region), caption=gsub("_", " ", paste(region, runset))) +
     theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
     theme_light()
   
   ggsave(paste(outputdir, "pophisto_",region,runset,".png",sep=""), width=16, height=10)
-  
-  pophistdata<-read.csv(paste(region,"/Population_Histogram_",region,runset,".csv", sep=""))
-  pophist<-subset(pophistdata, select=c(Label, Y1975, Y2000, Y2020, Y2050, Y2070, Y2100))
-  pop<-pophist %>% pivot_longer(
-    cols = !Label, 
-    names_to = "Year", 
-    values_to = "Number"
-  )
 
-  
   # Create Figure 2: population histogram zoomed in at lowest classes
   fig2<-ggplot(pop, aes(x=pbreak,y=log(Number), color=Year))
   fig2+
     coord_cartesian(xlim=c(0,50)) +
     # geom_bar(stat="identity") +
     geom_line(size=1) + geom_point(size=1.5) +
-    xlab("Middle of population class") + ylab("Amount of observations (log scale)") + labs(color=paste("Results", region), caption=gsub("_", " ", paste(region, runset))) +
+    xlab("Middle of population class") + ylab("Average amount of observations in class (log scale)") + labs(color=paste("Results", region), caption=gsub("_", " ", paste(region, runset))) +
     theme(axis.text=element_text(size=14), axis.title=element_text(size=14), legend.title=element_text(size=14)) +
     theme_light()
   

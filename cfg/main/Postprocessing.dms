@@ -1,4 +1,6 @@
 container Postprocessing
-{
+{	
+	#include<Mozaiking.dms>
+	#include<Indicators.dms>
 	// #include <Validation.dms>
 }

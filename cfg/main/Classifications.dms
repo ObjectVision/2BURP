@@ -41,14 +41,17 @@ container Classifications : using = "units"
 	unit<uint8> TypologyK : nrofrows = 7, Descr = "Degree of urbanisation level 2 typologies", URL = "https://human-settlement.emergency.copernicus.eu/degurbaDefinitions.php"
 	{
 		attribute<uint8>  EK    : [30, 23, 22, 21, 13, 12, 11];
+		attribute<string>   Code:= string(EK);
 		attribute<string> Label : ['Urban centre','Dense urban cluster','Semi-dense urban cluster','Suburban grid cell','Rural cluster','Low density rural grid cell','Very low density grid cell'];
 		attribute<uint32> BrushColor: [rgb(255,0,0),rgb(115,35,0),rgb(168,112,0),rgb(255,255,0),rgb(55,86,35),rgb(171,205,102),rgb(205,245,122)];
 		attribute<string> name  := AsItemName(label);
 		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
 	}
+	unit<uint8> DegUrba_lvl2:= TypologyK;
 	unit<uint8> Degurba_lvl1 : nrofrows = 3, Descr = "Degree of urbanisation level 1 typologies" {
 		attribute<uint8> 	EK :	[30, 20, 10];
 		attribute<string>	Label:  ['Urban centre', 'Urban cluster', 'Rural grid cells'] ;
+		attribute<string>   Code:= string(EK);
 		attribute<uint32> 	BrushColor: [rgb(255,0,0),rgb(255,255,0),rgb(55,86,35)];
 		attribute<string> 	name  := AsItemName(label);
 		container V := for_each_nedv(name, String(ID(.))+'[..]', void, .);
@@ -70,7 +73,8 @@ container Classifications : using = "units"
 	unit<uint8> AllShares := cat_range(0b, 101b)
 	{
 		attribute<string>         label                      := string(id(.));
-		attribute<BU_DensityBins> DensityBins_rel            := Classify(id(.), BU_DensityBins/LB);
+		attribute<string>		  code						 := makedefined(string(sub_or_null(id(.), 1b)), '')+' <= '+string(id(.));
+		attribute<string> 		  histo_label				 := 'max_' + string(id(.));
 		attribute<Float32>        Moving_up_probability_data_North_America : 
 		[ 
 			0.012,0.278,0.642,0.957,1.234,1.476,1.663,1.821,1.933,2.058,2.119,2.186,
@@ -134,7 +138,6 @@ container Classifications : using = "units"
 			1.912,1.821,1.730,1.639,1.548,1.457,1.365,1.274,1.183,1.092,1.001,0.910,
 			0.819,0.728,0.637,0.546,0.455,0.364,0.273,0.182,0.091,0.000,0.000,0.000
 		], Descr = "ETs proposed by Lewis Dijkstra, 26 November 2024, to further concentrate built-up development. Deviation from empirics, with longer and larger tail going into 69%.";
-		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];
 	}
 	unit<uint32> Shares_Per_Continent:= range(uint32, 0, #AllShares * #sourcedata/RegionalUnits/Continents) {
 		attribute<float32> Moving_up_probability:= ='MakeDefined(union_data(.,'+AsItemList('AllShares/Moving_up_probability_data_'+sourcedata/RegionalUnits/Continents/name)+'), 0f)';
@@ -143,31 +146,8 @@ container Classifications : using = "units"
 		attribute<AllShares> perc:= union_data(., id(AllShares), id(AllShares), id(AllShares), id(AllShares), id(AllShares), id(AllShares));
 		attribute<uint32> BrushColor:= ='union_data(., '+AsItemList(const('AllShares/BrushColor',sourcedata/RegionalUnits/Continents, string))+')';
 	}
-	unit<uint8> BU_DensityBins := cat_range(0b, 15b)
-	{
-		attribute<AllShares>  LB: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
-		attribute<string> label := 'Share '+string(LB)+' - '+string(UB);
-		attribute<uint8>  UB    := id(.) == last(id(.)) ? 101b : LB[id(.)+1b];
-		
-		attribute<uint32> BrushColor := switch( 
-											case(LB == 0b, rgb(255,255,255))
-											, case(LB == 1b, rgb(171,213,213))
-											, case(LB == 2b, rgb(188,221,170))
-											, case(LB == 3b, rgb(205,230,127))
-											, case(LB == 4b, rgb(221,235,85))
-											, case(LB == 5b, rgb(238,246,42))
-											, case(LB == 10b, rgb(255,255,0))
-											, case(LB == 15b, rgb(250,230,0))
-											, case(LB == 20b, rgb(243,205,12))
-											, case(LB == 25b, rgb(237,180,20))
-											, case(LB == 30b, rgb(231,157,30))
-											, case(LB == 35b, rgb(225,133,34))
-											, case(LB == 40b, rgb(219,100,40))
-											, case(LB == 45b, rgb(213,84,48))
-											, case(LB == 50b, rgb(200,60,50))
-											, rgb(200,200,200)
-										), DialogType = "BrushColor";
-	}
+	unit<uint8> BU_DensityBins := AllShares;
+	
 	// unit<uint8> Pop_DensityBins := cat_range(0b, 17b) 
 	unit<uint32> Pop_DensityBins := cat_range(0, 502) 
 	{
@@ -184,6 +164,7 @@ container Classifications : using = "units"
 	unit<uint8> Pop_Bins := cat_range(0b, 31b) //10
 	{
 		attribute<string>  Label             := 'LB_'+string(ClassBreaks);
+		attribute<string>  code				 := makedefined(string(sub_or_null(id(.), 1b)), '')+' <= '+string(id(.));
 		attribute<float32> ClassMiddle		 := ClassBreaks + (ClassWidth / 2f);
 		// attribute<float32> ClassBreaks       : [0, 1, 25, 50, 100, 500, 1000, 2000, 3000, 5000];
 		attribute<float32> ClassBreaks       : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 125, 250, 375, 500, 750, 1000, 1500, 2000, 2500, 5000];
