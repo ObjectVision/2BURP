@@ -1,0 +1,114 @@
+Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;", 
+	Descr = "Contains the routines to generate mozaiks from available continent-specific "
+{
+		
+		unit<wpoint> world_domain:= impl/MakeDomain_World/domain;
+		
+		unit<uint32> years:= AllYears {
+			attribute<string> pop_paths:= ='union_data(., '+asitemlist('gen_mozaik_pop/'+name+'/storepath')+')';
+			attribute<string> builtup_paths:= ='union_data(., '+asitemlist('gen_mozaik_builtup/'+name+'/storepath')+')';
+			attribute<string> degurba_paths:= ='union_data(., '+asitemlist('gen_mozaik_degurba/'+name+'/storepath')+')';
+		}
+		
+		container read_population_mozaik:= for_each_ndvat(AllYears/name, world_domain, int32, years/pop_paths, 'gdal.grid'), Descr = "Reads the population mozaiks that first need to be generated through e.g. gen_mozaik_pop/button";
+		container read_builtup_mozaik:= for_each_ndvat(AllYears/name, world_domain, float32, years/builtup_paths, 'gdal.grid'), Descr = "Reads the builtup mozaiks that first need to be generated through e.g. gen_mozaik_builtup/button";
+		container read_degurba_mozaik_files:= for_each_ndvat(AllYears/name, world_domain, uint8, years/degurba_paths, 'gdal.grid'), Descr = "Reads the population mozaiks that first need to be generated through e.g. gen_mozaik_degurba/button";
+		
+		container classify_degurba_mozaik_lvl1:=  for_each_nedv(AllYears/name, 'classify(read_degurba_mozaik_files/'+AllYears/name+', DegUrba_lvl1/EK)', world_domain, DegUrba_lvl1);
+		container classify_degurba_mozaik_lvl2:=  for_each_nedv(AllYears/name, 'rlookup(read_degurba_mozaik_files/'+AllYears/name+', DegUrba_lvl2/EK)', world_domain, DegUrba_lvl2);
+		container classify_builtup_binned:= 	  for_each_nedv(AllYears/name, 
+			AllYears/modelled ? 
+				'(100f * (read_builtup_mozaik/'+AllYears/name+' > 0f ? read_builtup_mozaik/'+AllYears/name+' + 0.01f : 0f))[BU_densitybins]'
+				: '(100f * (read_builtup_mozaik/'+AllYears/name+' > 0f ? (read_builtup_mozaik/'+AllYears/name+' / 1000000f) + 0.01f : 0f))[BU_densitybins]'
+				, world_domain, BU_DensityBins), Descr = "Classified built-up, exceptional treatment as the non-modelled files describe total built-up land in m2, while the modelled files describe built-up land in km2.";
+		container classify_population_binned:= for_each_nedv(AllYears/name
+				//, 'pcount(Classify(population/'+AllYears/name+'[float32], Pop_Bins/ClassBreaks))[float32] / Pop_Bins/ClassWidth' // divided by classwidth for intuitive R histogram visualization
+				, 'Classify(read_population_mozaik/'+AllYears/name+'[float32], Pop_Bins/ClassBreaks)' // not divided by classwidth for discrete visualization
+				, world_domain, Pop_Bins), Descr = "Classified population, choice to either describe bins as the probability that a  grid cells is in a certain class or sum the entire class (to fix issues with varying class widths).";
+		container population_abandonment_grids :=
+			for_each_nedv(AllYears/name
+				, IsDefined(AllYears/prev_name) ? 
+					'read_population_mozaik/'+AllYears/prev_name+'[uint64] >= 1[uint64] && read_population_mozaik/'+AllYears/name+'[uint64] = 0[uint64]'
+					: 'const(False, world_domain)'
+				, world_domain, bool), Descr = "Code to create mozaiked boolean abandonment grids. Used in later reporting.";
+		container population_emergence_grids :=
+			for_each_nedv(AllYears/name 
+				, IsDefined(AllYears/prev_name) ? 
+					'read_population_mozaik/'+AllYears/prev_name+'[uint64] = 0[uint64] && read_population_mozaik/'+AllYears/name+'[uint64] >= 1[uint64]'
+					: 'const(False, world_domain)'
+				, world_domain, bool), Descr = "Code to create mozaiked boolean emergence grids. Used in later reporting.";
+		
+		container gen_mozaik_pop:= for_each_ne(AllYears/name, 'T_MozaikSet_int32('+quote('/Analysis/Future/Indicators/Prep/Read_Population/'+AllYears/name)+')')
+		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
+		container gen_mozaik_builtup:= for_each_ne(AllYears/name, 'T_MozaikSet_float32('+quote('/Analysis/Future/Indicators/Prep/Read_BuiltUp_Total_Share/'+AllYears/name)+')')
+		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
+		container gen_mozaik_degurba:= for_each_ne(AllYears/name, 'T_MozaikSet_uint8('+quote('/Analysis/Future/Indicators/Prep/Read_DegreesOfUrbanisation/'+AllYears/name)+')')
+		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
+		
+		Template T_MozaikSet_int32 {
+			parameter<string> fileread_ref;
+			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
+			
+			container Read_PerContinentFiles :=
+				for_each_ndnvat(
+					Continents/name
+					, Domain_perContinent
+					, Continents/name
+					, int32
+					, replace(in_filepath_eval, ModelParameters/StudyArea, Continents/name)
+					, 'gdal.grid'
+				)
+			{	
+				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
+				attribute<int32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, int32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+			}
+		}
+		Template T_MozaikSet_float32 {
+			parameter<string> fileread_ref;
+			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
+			
+			container Read_PerContinentFiles :=
+				for_each_ndnvat(
+					Continents/name
+					, Domain_perContinent
+					, Continents/name
+					, float32
+					, replace(in_filepath_eval, ModelParameters/StudyArea, Continents/name)
+					, 'gdal.grid'
+				)
+			{	
+				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
+				attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+			}
+		}
+		Template T_MozaikSet_uint8 {
+			parameter<string> fileread_ref;
+			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
+			
+			container Read_PerContinentFiles :=
+				for_each_ndnvat(
+					Continents/name
+					, Domain_perContinent
+					, Continents/name
+					, uint8
+					, replace(in_filepath_eval, ModelParameters/StudyArea, Continents/name)
+					, 'gdal.grid'
+				)
+			{	
+				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
+				attribute<uint8>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, uint8, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+			}
+		}
+		
+		
+		container Domain_perContinent :=
+			for_each_nex(
+				Continents/name
+				, 'Geography/Impl/MakeDomain_perContinent/'+Continents/name+'/domain'   
+				, wpoint
+			);
+	
+}
