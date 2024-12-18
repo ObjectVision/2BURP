@@ -1,0 +1,41 @@
+container MakeUnlinkedData  : using = "geography;units;sourcedata"
+{
+	container CreateFiles:= for_each_nedv(Buttons_List/available && !Buttons_List/files_exist ? Buttons_List/label : ''
+		, Buttons_List/gen_trigger, void, bool), Descr = "List of data items that need to be generated before model can be run.";
+	container RecreateFiles:= for_each_nedv(Buttons_List/available && Buttons_List/files_exist ? Buttons_List/label : ''
+		, Buttons_List/gen_trigger, void, bool), Descr = "List of data items that may need to be regenerated as a consequence of fundamental changes to domain definitions or sourcedata changes.";
+	container Unavailable:= for_each_nedv(!Buttons_List/available ? Buttons_List/label : ''
+		, makedefined(quote('First run '+Buttons_List/label[Buttons_List/depends]), quote('Issue with country boundaries generation in ' + Buttons_List/gen_trigger[0])), void, string),
+		Descr = "List of data items that can only be generated after prior requirements have been met (see CreateFiles list).";
+	
+	unit<uint32> Buttons_List: nrofrows = 8, descr = "Lists all data items that need to be generated requisite before running the model." {
+		attribute<string> 	label: ['a1_Countries','a2_Continents','b1_studyarea_def','b2_Coastline_InlandWater','b3_Hasland','c1_RoundPastPop_and_Builtup','c2_PastDoU', 'd1_Allocation'];
+		attribute<Buttons_List> 	depends: [null, 0, 1, 2, 3, 4, 5, 5]; // check if indeed prior population and built-up grids are a requisite for running gthe model. Ditto for degurba grids (now presumed no, in fact model pushes for start year degurbas explicitly)
+		attribute<bool> 			available:= makedefined(uint32(files_exist)[depends], 1)> 0;
+		attribute<string> checks_location: [
+			'RegionalUnits/check_country_file'
+			, 'RegionalUnits/check_continent_file'
+			, 'Impl/check_studyarea_file'
+			, 'Physical/Coast/Coastline/check_subgrid_file && Physical/Coast/Coastline/check_grid_file && Physical/Water/Inland_Water/check_subgrid_file && Physical/Water/Inland_Water/check_grid_file'
+			, 'Physical/Water/AllWater/check_file'
+			, 'Population/PerYear/check_files && Builtup/Total/file_checks'
+			, 'Preprocessing/DegreesOfUrbanisation/check_files'
+			, 'False'
+			];
+		attribute<bool> files_exist:= ='union_data(., '+asitemlist(checks_location)+')';
+		attribute<string> gen_trigger: [
+			  'RegionalUnits/do_store_countries'
+			, 'RegionalUnits/do_store_continents'
+			, 'Impl/do_store_file'
+			, 'Physical/Coast/Coastline/do_store_files && Physical/Water/Inland_Water/do_store_files'
+			, 'Physical/Water/AllWater/do_store_file'
+			, 'Population/PerYear/Generate && Builtup/Total/Generate'
+			, 'Preprocessing/DegreesOfUrbanisation/Generate_DegreesOfUrbanisation'
+			, 'Analysis/Future/Store_Results/Generate_All' //May need a check on existing suitability files if temptiffiles = True
+		];
+		
+		//attribute<string> 	location:= 
+	}
+	
+}
+	
