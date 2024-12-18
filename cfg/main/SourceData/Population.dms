@@ -57,7 +57,8 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 			, 'Round_T('+quote(GHS_years/name)+')'
 		)
 	{
-		parameter<string> Generate := 'Ready', ExplicitSuppliers = "=AsList(Classifications/GHS_years/name+'/Write_Population_trunc_domain_result', ';')";
+		parameter<bool> Generate := True, ExplicitSuppliers = "=AsList(Classifications/GHS_years/name+'/Write_Population_trunc_domain_result', ';')";
+		parameter<bool>   check_files:= ='all(union_data(Classifications/GHS_years, '+asitemlist(Classifications/GHS_years/name+'/check_file')+'))';
 	}	
 		
 	Template Round_T 
@@ -79,6 +80,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		attribute<NrPerson>          Write_Population_trunc_domain_result    (domain) := recollect_by_cond(domain/IsCompactedDomain, Population)
 		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'";
 		attribute<NrPerson>          Read_Population                         (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
+		parameter<bool> 			 check_file:= ='strlen('+quote(ExistingFile('', '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'))+') > 0';
 	}
 	
 	container PerYear_in_CD :=

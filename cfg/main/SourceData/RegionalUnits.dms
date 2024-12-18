@@ -12,7 +12,8 @@ container RegionalUnits
 		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
 		attribute<string>            continent_name           := Continent;
 	}
-	
+	parameter<bool> do_store_countries:= True, ExplicitSuppliers = "store_Countries;";
+	parameter<bool> check_country_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Countries.fss'))+') > 0';
 	unit<uint8> store_Continents := Classifications/Continents
 	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
 	{
@@ -20,7 +21,8 @@ container RegionalUnits
 		attribute<Mollweide_base>  geometry_MW    (poly) := bp_union_polygon(Countries/geometry_MW[Mollweide_base_ip], Countries/continents_rel)[Mollweide_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
-	
+	parameter<bool> do_store_continents:= True, ExplicitSuppliers = "store_Continents;";
+	parameter<bool> check_continent_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Continents.fss'))+') > 0';
 	unit<uint32> Countries
 	: storagename = "= propvalue(store_Countries, 'StorageName')"
 	, StorageReadOnly = "True"
@@ -38,6 +40,25 @@ container RegionalUnits
 		attribute<.>                 per_domain              (domain) := poly2grid(Geometry , domain);
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
+		container GetPerCountryGeometry := 
+			for_each_ne(
+				AsItemName(Label)
+				, 'GetPerCountryGeometry_T('+quote(AsItemName(Label))+')'
+			);
+			
+		Template GetPerCountryGeometry_T
+		{
+			parameter<string> name;
+			///
+			parameter<LatLong_base>   geometry_LL    (poly) := ='Countries/geometry_LL[Countries/v/'+name+']';
+			parameter<Mollweide_base> geometry_MW    (poly) := ='Countries/geometry_MW[Countries/v/'+name+']';
+			
+			unit<uint32> unit : nrofrows = 1
+			{
+				attribute<LatLong_base>   geometry_LL    (poly) := union_data(., ../geometry_LL);
+				attribute<Mollweide_base> geometry_MW    (poly) := union_data(., ../geometry_MW);
+			}
+		}
 	}
 
 	

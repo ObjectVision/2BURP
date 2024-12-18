@@ -28,10 +28,10 @@ for %%s in (%studyarealist%) do (
 	rem "%ProgramPath%" %config%\main.dms 	/Analysis/Calibration/Export_BuiltUp_percentages_matrix/Result
 	rem "%ProgramPath%" %config%\main.dms 	/Analysis/Calibration/Export_DataForCalibration/Export_Tiffs_ForCalibration
 	rem "%ProgramPath%" %config%\main.dms /Preprocessing/DegreesOfUrbanisation/Generate_DegreesOfUrbanisation /Analysis/Future/Indicators/Prep/Generate_All
-	rem "%ProgramPath%" %config%\main.dms /Analysis/Future/Indicators/Prep/Generate_All
+	rem "%ProgramPath%" %config%\main.dms /MakeUnlinkedData/CreateFiles/d1_Allocation
 	
-	set Use_TempTifFiles=TRUE
+	rem set Use_TempTifFiles=TRUE
 	rem "%ProgramPath%" %config%\main.dms /Analysis/Future/Indicators/Export_CSVs
-	"%ProgramPath%" %config%\main.dms /Analysis/Future/Indicators/long_time_window_analyses/store_histograms
+	rem "%ProgramPath%" %config%\main.dms /Analysis/Future/Indicators/long_time_window_analyses/store_histograms
 )
 pause

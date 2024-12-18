@@ -17,11 +17,12 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 			, domain
 			, m2
 		) {
+			parameter<bool> Generate:= True, explicitsuppliers = "= aslist('store_domain/'+GHS_years/name, ';')";
 			container store_domain:= for_each_nedva(
 				GHS_years/name
-				, 'Total/'+GHS_years/name+'[float32]'
+				, 'Total/'+GHS_years/name+'[km2]'
 				, domain
-				, float32
+				, km2
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(GHS_years/name)+'_'+ModelParameters/domain_EPSG+'.tif'
 			);
 			container read_domain:= for_each_ndvat(
@@ -31,6 +32,13 @@ container Builtup : using = "units;classifications;sourcedata/regionalunits"
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(GHS_years/name)+'_'+ModelParameters/domain_EPSG+'.tif'
 				, 'gdal.grid'
 			);
+			parameter<string> path:= '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_XXXX_'+ModelParameters/domain_EPSG+'.tif';
+			attribute<string> eval (GHS_years):= 'ExistingFile('+quote(const('',GHS_years,string))+', '+quote(replace(path, 'XXXX', GHS_years/name))+')';
+			parameter<bool>   file_checks:= ='all(union_data(GHS_years, '+asitemlist('file_checker/'+GHS_years/name)+'))';
+			
+			container file_checker:= for_each_nedv(GHS_years/name
+				, 'strlen('+eval+') > 0'
+				, void, bool);
 		}
 		
 	container NonResidential_src :=
