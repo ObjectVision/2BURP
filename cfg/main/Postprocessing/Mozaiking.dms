@@ -37,12 +37,24 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 					'read_population_mozaik/'+AllYears/prev_name+'[uint64] = 0[uint64] && read_population_mozaik/'+AllYears/name+'[uint64] >= 1[uint64]'
 					: 'const(False, world_domain)'
 				, world_domain, bool), Descr = "Code to create mozaiked boolean emergence grids. Used in later reporting.";
+		container populated_outside_un:= for_each_nedv(AllYears/name
+			, 'read_population_mozaik/'+AllYears/name+' > 0i && isnull(Countries_UN_definition_grid/UN_rel)'
+			, world_domain, bool);
+		container builtup_outside_un:= for_each_nedv(AllYears/name
+			, 'read_builtup_mozaik/'+AllYears/name+' > 0f && isnull(Countries_UN_definition_grid/UN_rel)'
+			, world_domain, bool);
 		
-		container gen_mozaik_pop:= for_each_ne(AllYears/name, 'T_MozaikSet_int32('+quote('/Analysis/Future/Indicators/Prep/Read_Population/'+AllYears/name)+')')
+		unit<uint32> populated_outside_2100:= select_with_org_rel(populated_outside_un/Y2100) {
+			attribute<Mollweide_base> Geometry:= org_rel[Mollweide_base];
+			attribute<int32>	pop:= read_population_mozaik/Y2100[org_rel];
+			attribute<float32>	bu:= read_builtup_mozaik/Y2100[org_rel];
+		}
+		
+		container gen_mozaik_pop:= for_each_ne(AllYears/name, 'T_MozaikSet_int32('+quote('/Analysis/Future/Store_Results/Read_Population/'+AllYears/name)+')')
 		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
-		container gen_mozaik_builtup:= for_each_ne(AllYears/name, 'T_MozaikSet_float32('+quote('/Analysis/Future/Indicators/Prep/Read_BuiltUp_Total_Share/'+AllYears/name)+')')
+		container gen_mozaik_builtup:= for_each_ne(AllYears/name, 'T_MozaikSet_float32('+quote('/Analysis/Future/Store_Results/Read_BuiltUp_Total_Share/'+AllYears/name)+')')
 		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
-		container gen_mozaik_degurba:= for_each_ne(AllYears/name, 'T_MozaikSet_uint8('+quote('/Analysis/Future/Indicators/Prep/Read_DegreesOfUrbanisation/'+AllYears/name)+')')
+		container gen_mozaik_degurba:= for_each_ne(AllYears/name, 'T_MozaikSet_uint8('+quote('/Analysis/Future/Store_Results/Read_DegreesOfUrbanisation/'+AllYears/name)+')')
 		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
 		
 		Template T_MozaikSet_int32 {

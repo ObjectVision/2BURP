@@ -1,0 +1,96 @@
+Container UN_units: using = "Geography;Units;Classifications;" {
+
+	unit<uint32> Countries_UN_in
+	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_54009_attributes.csv"
+	, storagereadonly = "True"
+	, storagetype = "gdal.vect" {
+		attribute<uint32> RasterId;
+		attribute<string> label:= iso3cd;
+	}
+	unit<wpoint> Countries_UN_definition_grid
+	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_fixVAT_54009_1000_nibblePOPBU_20km.tif"
+	, storagetype = "gdal.grid"
+	, StorageReadOnly = "true"
+	, DialogData = "Mollweide_base"
+	{
+		attribute<uint32> GridData;
+		attribute<uint32> ReadData (Impl/MakeDomain_World/domain);
+		attribute<Countries_UN_in> UN_rel (Impl/MakeDomain_World/domain):= rlookup(ReadData, Countries_UN_in/RasterId);
+		
+		parameter<Mollweide_base> offset:= getprojectionfactor(.)[Mollweide_base];
+		
+		unit<uint64> Countries_land:= select_uint64_with_org_rel(isdefined(UN_rel)) {
+			attribute<Mollweide_base> Geometry (poly):= points2polygon_pso(makepoly/pt, makepoly/rel, makepoly/ord);
+			attribute<Countries_UN_in>Country_rel:= UN_rel[org_rel];
+			attribute<Mollweide_base> topleft:= 	org_rel[Mollweide_base];
+			attribute<Mollweide_base> topright:= 	topleft  	+ 	point(0d, pointcol(offset), Mollweide_base);
+			attribute<Mollweide_base> bottomright:= topright 	+ 	point(pointrow(offset), 0d, Mollweide_base);
+			attribute<Mollweide_base> bottomleft:=  bottomright -	point(0d, pointcol(offset), Mollweide_base);
+			unit<uint64> makepoly:= union_unit_uint64(Countries_land, Countries_land, Countries_land, Countries_land) {
+				attribute<Countries_land> rel:= union_data(., id(Countries_land), id(Countries_land), id(Countries_land), id(Countries_land));
+				attribute<uint32>		  ord:= union_data(., const(0,Countries_land, uint32), const(1,Countries_land, uint32), const(2,Countries_land, uint32), const(3,Countries_land, uint32));
+				attribute<Mollweide_base> pt:=  union_data(., topleft, topright, bottomright, bottomleft);
+			}
+		}
+	}
+	unit<uint32> store_Countries_UN:= Countries_UN_in, storagename = "%ToBURPDataDir%/Regions/Countries_UN.fss" {
+		attribute<Mollweide_base> geometry_MW (poly):= bg_union_polygon(Countries_UN_definition_grid/Countries_land/Geometry, Countries_UN_definition_grid/Countries_land/Country_rel);
+		attribute<string> 		  iso3:= iso3cd, descr = "ISO3 code";
+		attribute<string> 		  m49:= Countries_UN_in/m49;
+		attribute<string> 		  name:= UNnameROM;
+		attribute<string>		  sdg_reg:= UN_SDG_Region;
+		attribute<string>		  un_itm_reg:= UN_intermediate_group;
+		attribute<string>		  wb_inc_reg:= WB_income_group_2020;
+	}
+	parameter<bool> do_store_countries_UN:= True, ExplicitSuppliers = "store_Countries_UN;";
+	parameter<bool> check_countries_UN_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Countries_UN.fss'))+') > 0';
+	unit<uint32> Countries_UN: storagename = "%ToBURPDataDir%/Regions/Countries_UN.fss", storagereadonly = "true" {
+		attribute<Mollweide_base> geometry_MW (poly);
+		attribute<Mollweide_base> geometry (poly):= geometry_MW;
+		attribute<string>		  iso3;
+		attribute<string>		  m49;
+		attribute<string> 		  name;
+		attribute<string>		  sdg_reg;
+		attribute<string>		  un_itm_reg;
+		attribute<string>		  wb_inc_reg;
+		attribute<string>		  Label:= name;
+		attribute<string>		  Code:= iso3 + '_' + m49;
+		attribute<store_UN_intermediate_regions> UN_itm_reg_rel:= rlookup(un_itm_reg, substr(store_UN_intermediate_regions/Label, 3));
+	}
+	unit<uint32> store_UN_intermediate_regions: nrofrows = 20, storagename = "%ToBURPDataDir%/Regions/Intermediate_Regions_UN.fss" {
+		attribute<Mollweide_base> geometry_MW (poly):= bg_union_polygon(Countries_UN/geometry_MW, Countries_UN/UN_itm_reg_rel);
+		attribute<string> Label: [
+			'01_Northern Africa',
+			'02_Middle Africa',
+			'03_Eastern Africa',
+			'04_Western Africa',
+			'05_Southern Africa',
+			'06_Eastern Asia',
+			'07_Western Asia',
+			'08_Central Asia',
+			'09_South-eastern Asia',
+			'10_Southern Asia',
+			'11_Northern America',
+			'12_Central America',
+			'13_Caribbean',
+			'14_South America',
+			'15_Northern Europe',
+			'16_Eastern Europe',
+			'17_Western Europe',
+			'18_Southern Europe',
+			'19_Australia and New Zealand',
+			'20_Melanesia-Micronesia-Polynesia'
+		];
+	}
+	parameter<bool> do_store_regions_UN:= True, ExplicitSuppliers = "store_UN_intermediate_regions;";
+	parameter<bool> check_regions_UN_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Intermediate_Regions_UN.fss'))+') > 0';
+	unit<uint32> UN_intermediate_regions: storagename = "%ToBURPDataDir%/Regions/Intermediate_Regions_UN.fss", storagereadonly = "true" {
+		attribute<Mollweide_base> geometry_MW (poly);
+		attribute<string> Label;
+		attribute<string> code:= asitemname(Label);
+	}
+	
+
+
+
+}

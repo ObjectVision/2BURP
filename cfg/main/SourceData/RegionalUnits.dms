@@ -131,7 +131,6 @@ container RegionalUnits
 		attribute<string> 	label:= org_rel->label;
 		attribute<string>   code:= org_rel->code;
 	}
-
 	unit<uint32> FunctionalAreas_all
 	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009.shp'"
 	, StorageType = "gdal.vect"
@@ -183,6 +182,8 @@ container RegionalUnits
 		attribute<CurrentProjection_base> Geometry 			(poly):= 	=ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'geometry_LL';
 		attribute<.>              		  per_domain        (domain):= 	poly2grid(Geometry, domain);
 	}
+	unit<uint32> UN_countries:= =UN_units/check_countries_UN_file ? 'UN_units/Countries_UN' : 'World';
+	unit<uint32> UN_intermediate_regions:= =UN_units/check_regions_UN_file ? 'UN_units/UN_intermediate_regions' : 'World';
 	
 	unit<uint32> set_countries: nrofrows = 239 
 	{
@@ -437,4 +438,5 @@ container RegionalUnits
 			'ZWE',	'Zimbabwe',	'Africa'];
 		}
 	}
+	#include<UN_units.dms>
 }

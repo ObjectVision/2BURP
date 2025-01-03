@@ -2,11 +2,11 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 	Descr = "This container generates statistics on historic and projected land-use and population changes. Based on mozaiked modelling results which are requisite defined beforehand. 
 		Reporting units are intended to be a flexible definition. All long timespan statistics to be generated here. Output format is the long format preferred by R ggplot()" 
 {	
-	unit<uint32> BoundarySets: nrofrows = 3, descr = "Templated boundary sets for aggregation. Boundaryset units need to be uint32, and contain a code and label variable (string), and a Mollweide polygon geometry." {
-		attribute<string> label: ['Countries', 'Continents_uint32', 'World_uint32'], descr = "Name of set, to be unique and findable in RegionalUnits, adhering to GeoDMS tree item naming conventions.";
+	unit<uint32> BoundarySets: nrofrows = 5, descr = "Templated boundary sets for aggregation. Boundaryset units need to be uint32, and contain a code and label variable (string), and a Mollweide polygon geometry." {
+		attribute<string> label: ['Countries', 'Continents_uint32', 'World_uint32', 'UN_countries', 'UN_intermediate_regions'], descr = "Name of set, to be unique and findable in RegionalUnits, adhering to GeoDMS tree item naming conventions.";
 		attribute<string> geom_def:= const('Geometry_MW',.), descr = "Reference to geometry definition, to be findable in RegionalUnits/[label]/[geom_def], adhering to GeoDMS tree item naming conventions.";
 		attribute<string> label_def:= 'RegionalUnits/'+label+'/Label', descr = "Reference to label definition, to be findable in RegionalUnits/[label]/[label_def], adhering to GeoDMS tree item naming conventions.";
-		attribute<string> code_def: ['ISO3','RegionalUnits/Continents_uint32/Code','RegionalUnits/World_uint32/Code'], descr = "Reference to code definition, to be findable in RegionalUnits/[label]/[code_def], adhering to GeoDMS tree item naming conventions.";
+		attribute<string> code_def: ['ISO3','RegionalUnits/Continents_uint32/Code','RegionalUnits/World_uint32/Code', 'RegionalUnits/UN_countries/Code', 'RegionalUnits/UN_intermediate_regions/Code'], descr = "Reference to code definition, to be findable in RegionalUnits/[label]/[code_def], adhering to GeoDMS tree item naming conventions.";
 	}
 	
 	unit<uint32> ClassificationSchemes: nrofrows = 4, descr = "Templated classification schemes for aggregation. Classification units need to be uint8, and contain a code and label attribute (string)." {
@@ -14,7 +14,14 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 		attribute<string> classification_ref: ['classify_degurba_mozaik_lvl1', 'classify_degurba_mozaik_lvl2', 'classify_builtup_binned', 'classify_population_binned'], Descr = "Reference to the classification grids in the Mozaiking section.";
 	}
 	
-	Container per_boundaryset:= for_each_ne('ru_'+BoundarySets/label, 'T_gen_by_BoundarySet('+BoundarySets/label+','+quote(BoundarySets/geom_def)+','+quote(BoundarySets/label_def)+','+quote(BoundarySets/code_def)+')');
+	Container per_boundaryset:= for_each_ne('ru_'+BoundarySets/label
+		, 'T_gen_by_BoundarySet('
+			+BoundarySets/label
+			+','+quote(BoundarySets/geom_def)
+			+','+quote(BoundarySets/label_def)
+			+','+quote(BoundarySets/code_def)
+			+','+quote(BoundarySets/label)
+			+')');
 	
 	// code below ready for creating templates
 	Template T_gen_by_BoundarySet {
@@ -23,6 +30,7 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 		parameter<string> geom_def:= 'Geometry_MW';
 		parameter<string> label_def:= 'RegionalUnits/Countries/Label';
 		parameter<string> code_def:= 'ISO3';
+		parameter<string> boundaryset_name;
 		
 		unit<uint32> ReportingUnit:= inUnit, Descr = "This is the set of borders by which statistics are produced" {
 			attribute<Mollweide_base> Geometry (polygon):= =geom_def; // hardcoded projection system for easiness.
@@ -31,11 +39,17 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 		}
 		attribute<ReportingUnit> ru_rel (world_domain):= poly2grid(ReportingUnit/Geometry, world_domain), Descr = "Grid with relational attributes for reporting unit";
 		
-		container per_ClassificationScheme:= for_each_ne('cs_'+ClassificationSchemes/label, 'T_gen_by_ClassificationScheme('+ClassificationSchemes/label+', '+quote(ClassificationSchemes/classification_ref)+')');
+		container per_ClassificationScheme:= for_each_ne('cs_'+ClassificationSchemes/label
+			, 'T_gen_by_ClassificationScheme('
+				+ClassificationSchemes/label
+				+', '+quote(ClassificationSchemes/classification_ref)
+				+', '+quote(boundaryset_name+'_'+ClassificationSchemes/label)
+				+')');
 	}
 	Template T_gen_by_ClassificationScheme {
 		unit<uint8> ClassificationUnit;
 		parameter<string> classification_map_container:= '';
+		parameter<string> file_spec;
 		
 		unit<uint32> BoundarySet_x_ClassificationScheme:= combine(ReportingUnit, ClassificationUnit), Descr = "code to aggregate statistics to the classification unit per reporting unit" {
 			attribute<string> label:= cls_label + ' ' + ru_label;
@@ -53,8 +67,10 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 			container emergence:= for_each_nedv(AllYears/name, 'sum(Population_Emergence_grids/'+AllYears/name+'[uint32], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint32);
 		}
 			
-		unit<uint32> store_long_format:= ='union_unit('+asitemlist(const('BoundarySet_x_ClassificationScheme', AllYears, string))+')' {//, storagename = "= '%LocalDataProjDir%/Indicators/World/Indicators_lvl2_'+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
-			
+		unit<uint32> store_long_format:= 
+			='union_unit('+asitemlist(const('BoundarySet_x_ClassificationScheme', AllYears, string))+')'
+			, storagename = "= '%LocalDataProjDir%/Indicators/World/Indicators_'+file_spec+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+		{	
 			attribute<string> ru_label:=  ='union_data(., '+asitemlist(const('BoundarySet_x_ClassificationScheme/ru_label', AllYears, string))+')';
 			attribute<string> ru_code:=   ='union_data(., '+asitemlist(const('BoundarySet_x_ClassificationScheme/ru_code',  AllYears, string))+')';
 			attribute<string> cls_label:= ='union_data(., '+asitemlist(const('BoundarySet_x_ClassificationScheme/cls_label', AllYears, string))+')';
@@ -63,8 +79,8 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 			attribute<km2>	  area:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/area/'+AllYears/name)+')';
 			attribute<uint32> pop:=	 	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/pop/'+AllYears/name)+')';
 			attribute<float32>builtup:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/builtup/'+AllYears/name)+')';
-			attribute<uint32> abandoned:= ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/builtup/'+AllYears/name)+')';
-			attribute<uint32> emerged:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/builtup/'+AllYears/name)+')';
+			attribute<uint32> abandoned:= ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/abandonment/'+AllYears/name)+')';
+			attribute<uint32> emerged:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/emergence/'+AllYears/name)+')';
 			
 		}
 	}
