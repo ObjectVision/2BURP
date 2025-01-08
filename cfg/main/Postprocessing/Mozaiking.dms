@@ -10,6 +10,10 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 			attribute<string> degurba_paths:= ='union_data(., '+asitemlist('gen_mozaik_degurba/'+name+'/storepath')+')';
 		}
 		
+		container population_mozaiks_exist:= for_each_nedv(years/name, 'strlen(ExistingFile('+quote('')+', '+quote(years/pop_paths)+')) > 0', void, bool) {parameter<bool> all:= =aslist(years/name, '&&');}
+		container builtup_mozaiks_exist:= 	 for_each_nedv(years/name, 'strlen(ExistingFile('+quote('')+', '+quote(years/builtup_paths)+')) > 0', void, bool) {parameter<bool> all:= =aslist(years/name, '&&');}
+		container degurba_mozaiks_exist:= 	 for_each_nedv(years/name, 'strlen(ExistingFile('+quote('')+', '+quote(years/degurba_paths)+')) > 0', void, bool) {parameter<bool> all:= =aslist(years/name, '&&');}
+		
 		container read_population_mozaik:= for_each_ndvat(AllYears/name, world_domain, int32, years/pop_paths, 'gdal.grid'), Descr = "Reads the population mozaiks that first need to be generated through e.g. gen_mozaik_pop/button";
 		container read_builtup_mozaik:= for_each_ndvat(AllYears/name, world_domain, float32, years/builtup_paths, 'gdal.grid'), Descr = "Reads the builtup mozaiks that first need to be generated through e.g. gen_mozaik_builtup/button";
 		container read_degurba_mozaik_files:= for_each_ndvat(AllYears/name, world_domain, uint8, years/degurba_paths, 'gdal.grid'), Descr = "Reads the population mozaiks that first need to be generated through e.g. gen_mozaik_degurba/button";
@@ -51,18 +55,26 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 			attribute<float32>	bu:= read_builtup_mozaik/Y2100[org_rel];
 		}
 		
-		container gen_mozaik_pop:= for_each_ne(AllYears/name, 'T_MozaikSet_int32('+quote('/Analysis/Future/Store_Results/Read_Population/'+AllYears/name)+')')
-		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
-		container gen_mozaik_builtup:= for_each_ne(AllYears/name, 'T_MozaikSet_float32('+quote('/Analysis/Future/Store_Results/Read_BuiltUp_Total_Share/'+AllYears/name)+')')
-		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
-		container gen_mozaik_degurba:= for_each_ne(AllYears/name, 'T_MozaikSet_uint8('+quote('/Analysis/Future/Store_Results/Read_DegreesOfUrbanisation/'+AllYears/name)+')')
-		{parameter<bool> button:= True, explicitsuppliers = "= aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';')";}
+		container gen_mozaik_pop:= for_each_ne(AllYears/name, AllYears/modelled ? 
+			'T_MozaikSet_int32('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif')+')' 
+		:   'T_MozaikSet_int32('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+AllYears/name+'_'+ModelParameters/domain_EPSG+'.tif')+')')
+		{	parameter<bool> files_prepped:= =aslist(AllYears/name+'/files_check/all', '&&');parameter<bool> button:= True, explicitsuppliers = "= files_prepped ? aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';') : ''";}
+		container gen_mozaik_builtup:= for_each_ne(AllYears/name, AllYears/modelled ? 
+			'T_MozaikSet_float32('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif')+')'
+		:	'T_MozaikSet_float32('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(AllYears/name)+'_'+ModelParameters/domain_EPSG+'.tif')+')')
+		{	parameter<bool> files_prepped:= =aslist(AllYears/name+'/files_check/all', '&&');parameter<bool> button:= True, explicitsuppliers = "=  files_prepped ? aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';') : ''";}
+		container gen_mozaik_degurba:= for_each_ne(AllYears/name,  AllYears/modelled ? 
+			'T_MozaikSet_uint8('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif')+')'
+		:	'T_MozaikSet_uint8('+quote('%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+AllYears/name+'_'+ModelParameters/domain_EPSG+'.tif')+')')
+		{	parameter<bool> files_prepped:= =aslist(AllYears/name+'/files_check/all', '&&');parameter<bool> button:= True, explicitsuppliers = "=  files_prepped ? aslist(AllYears/name+'/Read_PerContinentFiles/Mozaic',';') : ''";}
 		
 		Template T_MozaikSet_int32 {
-			parameter<string> fileread_ref;
-			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> in_filepath_eval; 
 			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
 			
+			container files_check:= for_each_nedv(Continents/name
+				, 'strlen(ExistingFile('+quote('')+', replace(in_filepath_eval, ModelParameters/StudyArea, '+quote(Continents/name)+'))) > 0'
+				,void, bool) {parameter<bool> all:= =aslist(Continents/name, '&&');}
 			container Read_PerContinentFiles :=
 				for_each_ndnvat(
 					Continents/name
@@ -78,9 +90,12 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 			}
 		}
 		Template T_MozaikSet_float32 {
-			parameter<string> fileread_ref;
-			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> in_filepath_eval;
 			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
+			
+			container files_check:= for_each_nedv(Continents/name
+				, 'strlen(ExistingFile('+quote('')+', replace(in_filepath_eval, ModelParameters/StudyArea, '+quote(Continents/name)+'))) > 0'
+				,void, bool) {parameter<bool> all:= =aslist(Continents/name, '&&');}
 			
 			container Read_PerContinentFiles :=
 				for_each_ndnvat(
@@ -97,9 +112,12 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 			}
 		}
 		Template T_MozaikSet_uint8 {
-			parameter<string> fileread_ref;
-			parameter<string> in_filepath_eval:= ='propvalue('+fileread_ref+', '+quote('StorageName')+')';
+			parameter<string> in_filepath_eval;
 			parameter<string> storepath:= replace(in_filepath_eval, ModelParameters/StudyArea, 'World');
+			
+			container files_check:= for_each_nedv(Continents/name
+				, 'strlen(ExistingFile('+quote('')+', replace(in_filepath_eval, ModelParameters/StudyArea, '+quote(Continents/name)+'))) > 0'
+				,void, bool) {parameter<bool> all:= =aslist(Continents/name, '&&');}
 			
 			container Read_PerContinentFiles :=
 				for_each_ndnvat(

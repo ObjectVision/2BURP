@@ -8,9 +8,9 @@ container MakeUnlinkedData  : using = "geography;units;sourcedata"
 		, makedefined(quote('First run '+Buttons_List/label[Buttons_List/depends]), quote('Issue with country boundaries generation in ' + Buttons_List/gen_trigger[0])), void, string),
 		Descr = "List of data items that can only be generated after prior requirements have been met (see CreateFiles list).";
 	
-	unit<uint32> Buttons_List: nrofrows = 10, descr = "Lists all data items that need to be generated requisite before running the model." {
-		attribute<string> 	label: ['a1_Countries','a2_Continents','b1_studyarea_def','b2_Coastline_InlandWater','b3_Hasland','c1_RoundPastPop_and_Builtup','c2_PastDoU', 'd1_Allocation', 'e1_reporting_countries', 'e2_reporting_regions'];
-		attribute<Buttons_List> 	depends: [null, 0, 1, 2, 3, 4, 5, 5, 8]; // check if indeed prior population and built-up grids are a requisite for running gthe model. Ditto for degurba grids (now presumed no, in fact model pushes for start year degurbas explicitly)
+	unit<uint32> Buttons_List: nrofrows = 13, descr = "Lists all data items that need to be generated requisite before running the model." {
+		attribute<string> 	label: ['a1_Countries','a2_Continents','b1_studyarea_def','b2_Coastline_InlandWater','b3_Hasland','c1_RoundPastPop_and_Builtup','c2_PastDoU', 'd1_Allocation', 'e1_reporting_countries', 'e2_reporting_regions', 'f1_pop_mozaik','f2_builtup_mozaik','f3_degurba_mozaik'];
+		attribute<Buttons_List> 	depends: [null, 0, 1, 2, 3, 4, 5, 6, 1, 1, 7, 7, 7]; // check if indeed prior population and built-up grids are a requisite for running gthe model. Ditto for degurba grids (now presumed no, in fact model pushes for start year degurbas explicitly)
 		attribute<bool> 			available:= makedefined(uint32(files_exist)[depends], 1)> 0;
 		attribute<string> checks_location: [
 			'RegionalUnits/check_country_file'
@@ -20,9 +20,12 @@ container MakeUnlinkedData  : using = "geography;units;sourcedata"
 			, 'Physical/Water/AllWater/check_file'
 			, 'Population/PerYear/check_files && Builtup/Total/file_checks'
 			, 'Preprocessing/DegreesOfUrbanisation/check_files'
-			, 'False'
+			, 'Postprocessing/Mozaiks/gen_mozaik_pop/files_prepped && Postprocessing/Mozaiks/gen_mozaik_builtup/files_prepped && Postprocessing/Mozaiks/gen_mozaik_degurba/files_prepped'
 			, 'RegionalUnits/UN_units/check_countries_UN_file'
 			, 'RegionalUnits/UN_units/check_regions_UN_file'
+			, 'Postprocessing/Mozaiks/population_mozaiks_exist/all'
+			, 'Postprocessing/Mozaiks/builtup_mozaiks_exist/all'
+			, 'Postprocessing/Mozaiks/degurba_mozaiks_exist/all'
 			];
 		attribute<bool> files_exist:= ='union_data(., '+asitemlist(checks_location)+')';
 		attribute<string> gen_trigger: [
@@ -36,6 +39,9 @@ container MakeUnlinkedData  : using = "geography;units;sourcedata"
 			, 'Analysis/Future/Store_Results/Generate_All' //May need a check on existing suitability files if temptiffiles = True
 			, 'RegionalUnits/UN_units/do_store_countries_UN'
 			, 'RegionalUnits/UN_units/do_store_regions_UN'
+			, 'Postprocessing/Mozaiks/gen_mozaik_pop/button'
+			, 'Postprocessing/Mozaiks/gen_mozaik_builtup/button'
+			, 'Postprocessing/Mozaiks/gen_mozaik_degurba/button'
 		];
 		
 		//attribute<string> 	location:= 
