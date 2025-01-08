@@ -2,11 +2,11 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 	Descr = "This container generates statistics on historic and projected land-use and population changes. Based on mozaiked modelling results which are requisite defined beforehand. 
 		Reporting units are intended to be a flexible definition. All long timespan statistics to be generated here. Output format is the long format preferred by R ggplot()" 
 {	
-	unit<uint32> BoundarySets: nrofrows = 5, descr = "Templated boundary sets for aggregation. Boundaryset units need to be uint32, and contain a code and label variable (string), and a Mollweide polygon geometry." {
-		attribute<string> label: ['Countries', 'Continents_uint32', 'World_uint32', 'UN_countries', 'UN_intermediate_regions'], descr = "Name of set, to be unique and findable in RegionalUnits, adhering to GeoDMS tree item naming conventions.";
+	unit<uint32> BoundarySets: nrofrows = 6, descr = "Templated boundary sets for aggregation. Boundaryset units need to be uint32, and contain a code and label variable (string), and a Mollweide polygon geometry." {
+		attribute<string> label: ['Countries', 'Continents_uint32', 'Continents_1RUS_uint32', 'World_uint32', 'UN_countries', 'UN_intermediate_regions'], descr = "Name of set, to be unique and findable in RegionalUnits, adhering to GeoDMS tree item naming conventions.";
 		attribute<string> geom_def:= const('Geometry_MW',.), descr = "Reference to geometry definition, to be findable in RegionalUnits/[label]/[geom_def], adhering to GeoDMS tree item naming conventions.";
 		attribute<string> label_def:= 'RegionalUnits/'+label+'/Label', descr = "Reference to label definition, to be findable in RegionalUnits/[label]/[label_def], adhering to GeoDMS tree item naming conventions.";
-		attribute<string> code_def: ['ISO3','RegionalUnits/Continents_uint32/Code','RegionalUnits/World_uint32/Code', 'RegionalUnits/UN_countries/Code', 'RegionalUnits/UN_intermediate_regions/Code'], descr = "Reference to code definition, to be findable in RegionalUnits/[label]/[code_def], adhering to GeoDMS tree item naming conventions.";
+		attribute<string> code_def: ['ISO3','RegionalUnits/Continents_uint32/Code','RegionalUnits/Continents_1RUS_uint32/Code','RegionalUnits/World_uint32/Code', 'RegionalUnits/UN_countries/Code', 'RegionalUnits/UN_intermediate_regions/Code'], descr = "Reference to code definition, to be findable in RegionalUnits/[label]/[code_def], adhering to GeoDMS tree item naming conventions.";
 	}
 	
 	unit<uint32> ClassificationSchemes: nrofrows = 4, descr = "Templated classification schemes for aggregation. Classification units need to be uint8, and contain a code and label attribute (string)." {
@@ -45,6 +45,74 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 				+', '+quote(ClassificationSchemes/classification_ref)
 				+', '+quote(boundaryset_name+'_'+ClassificationSchemes/label)
 				+')');
+				
+		container without_ClassificationScheme {
+			
+			container n_cities:= for_each_nedv(AllYears/name, 'sum(uint32(assess_clusters/'+AllYears/name+'/FindContiguousCities/Contains_urban), assess_clusters/'+AllYears/name+'/FindContiguousCities/mod_RU)',ReportingUnit, uint32);
+			container n_towns:= for_each_nedv(AllYears/name, 'sum(uint32(assess_clusters/'+AllYears/name+'/FindContiguousTowns/Contains_town), assess_clusters/'+AllYears/name+'/FindContiguousTowns/mod_RU)',ReportingUnit, uint32);
+			container n_villages:= for_each_nedv(AllYears/name, 'sum(uint32(assess_clusters/'+AllYears/name+'/FindContiguousVillages/Contains_village), assess_clusters/'+AllYears/name+'/FindContiguousVillages/mod_RU)',ReportingUnit, uint32);
+			container size_cities:= for_each_nedv(AllYears/name, 'sum(assess_clusters/'+AllYears/name+'/FindContiguousCities/Contains_urban[uint32] * assess_clusters/'+AllYears/name+'/FindContiguousCities/GroupCellSize,  assess_clusters/'+AllYears/name+'/FindContiguousCities/mod_RU)',ReportingUnit, uint32);
+			container size_towns:= for_each_nedv(AllYears/name, 'sum(assess_clusters/'+AllYears/name+'/FindContiguousTowns/Contains_town[uint32] * assess_clusters/'+AllYears/name+'/FindContiguousTowns/GroupCellSize,  assess_clusters/'+AllYears/name+'/FindContiguousTowns/mod_RU)',ReportingUnit, uint32);
+			container size_villages:= for_each_nedv(AllYears/name, 'sum(assess_clusters/'+AllYears/name+'/FindContiguousVillages/Contains_village[uint32] * assess_clusters/'+AllYears/name+'/FindContiguousVillages/GroupCellSize,  assess_clusters/'+AllYears/name+'/FindContiguousVillages/mod_RU)',ReportingUnit, uint32);
+			
+			unit<uint32> store_long_format:= 
+				='union_unit('+asitemlist(const('ReportingUnit', AllYears, string))+')'
+				, storagename = "= '%LocalDataProjDir%/Indicators/World/Indicators_'+boundaryset_name+ModelParameters/FileSuffix+'.csv'", StorageType = "gdalwrite.vect"
+			{	
+				attribute<string> ru_label:=  ='union_data(., '+asitemlist(const('ReportingUnit/Label', AllYears, string))+')';
+				attribute<string> ru_code:=   ='union_data(., '+asitemlist(const('ReportingUnit/Code',  AllYears, string))+')';
+				attribute<uint32> year:= 	  ='union_data(., '+asitemlist('const('+string(AllYears/Yr)+', ReportingUnit, uint32)')+')';
+				attribute<uint32> n_city:=	  ='union_data(., '+asitemlist('n_cities/'+AllYears/name)+')';
+				attribute<uint32> n_town:=	  ='union_data(., '+asitemlist('n_towns/'+AllYears/name)+')';
+				attribute<uint32> n_village:= ='union_data(., '+asitemlist('n_villages/'+AllYears/name)+')';
+				attribute<uint32> size_city:= ='union_data(., '+asitemlist('size_cities/'+AllYears/name)+')';
+				attribute<uint32> size_town:= ='union_data(., '+asitemlist('size_towns/'+AllYears/name)+')';
+				attribute<uint32> size_village:= ='union_data(., '+asitemlist('size_villages/'+AllYears/name)+')';
+			}
+			
+			container assess_clusters:=				  for_each_ne(AllYears/name, 'T_Assess_City_clusters(read_degurba_mozaik_files/'+AllYears/name+', read_population_mozaik/'+AllYears/name+'[float32])');
+			
+			Template T_Assess_City_clusters 
+			{
+				attribute<uint8> degurba_ref (world_domain);
+				attribute<float32> population_ref (world_domain);
+				
+				attribute<bool>  urban (world_domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Urban_Centre];
+				attribute<bool>  town (world_domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Dense_urban_cluster] || degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Semi_Dense_urban_cluster];
+				attribute<bool>  village (world_domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Rural_cluster];
+				
+				unit<uint32> FindContiguousCities := district(uint8(urban))
+				{
+					attribute<.>       GroupDomain_rel                                   (world_domain) := districts;
+					attribute<bool>	   Contains_urban 			                         		  := any(urban, GroupDomain_rel);
+					attribute<ReportingUnit> mod_RU												  := modus_weighted(ru_rel, population_ref, GroupDomain_rel);
+					attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
+					attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
+					attribute<float32>  Cluster_population								 (world_domain) := (float32(Contains_urban) * Sum_Population_perGroup)[GroupDomain_rel];
+					//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				}
+				unit<uint32> FindContiguousTowns := district(uint8(town))
+				{
+					attribute<.>       GroupDomain_rel                                   (world_domain) := districts;
+					attribute<bool>	   Contains_town			                         		  := any(town, GroupDomain_rel);
+					attribute<ReportingUnit> mod_RU												  := modus_weighted(ru_rel, population_ref, GroupDomain_rel);
+					attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
+					attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
+					attribute<float32>  Cluster_population								 (world_domain) := (float32(Contains_town) * Sum_Population_perGroup)[GroupDomain_rel];
+					//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				}
+				unit<uint32> FindContiguousVillages := district(uint8(village))
+				{
+					attribute<.>       GroupDomain_rel                                   (world_domain) := districts;
+					attribute<bool>	   Contains_village 			                         	  := any(village, GroupDomain_rel);
+					attribute<ReportingUnit> mod_RU												  := modus_weighted(ru_rel, population_ref, GroupDomain_rel);
+					attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
+					attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
+					attribute<float32>  Cluster_population								 (world_domain) := (float32(Contains_village) * Sum_Population_perGroup)[GroupDomain_rel];
+					//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
+				}
+			}
+		}
 	}
 	Template T_gen_by_ClassificationScheme {
 		unit<uint8> ClassificationUnit;
@@ -63,8 +131,8 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 			container area:= for_each_nedv(AllYears/name, 'sum(world_domain/area, yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, km2);
 			container pop:= for_each_nedv(AllYears/name, 'sum(read_population_mozaik/'+AllYears/name+'[uint32], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint32);
 			container builtup:= for_each_nedv(AllYears/name, 'sum(read_builtup_mozaik/'+AllYears/name+', yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, float32);
-			container abandonment:= for_each_nedv(AllYears/name, 'sum(Population_Abandonment_grids/'+AllYears/name+'[uint32], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint32);
-			container emergence:= for_each_nedv(AllYears/name, 'sum(Population_Emergence_grids/'+AllYears/name+'[uint32], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint32);
+			container abandonment:= for_each_nedv(AllYears/name, 'sum(Population_Abandonment_grids/'+AllYears/name+'[uint64], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint64);
+			container emergence:= for_each_nedv(AllYears/name, 'sum(Population_Emergence_grids/'+AllYears/name+'[uint64], yearly_lookup_grids/'+AllYears/name+')', BoundarySet_x_ClassificationScheme, uint64);
 		}
 			
 		unit<uint32> store_long_format:= 
@@ -77,10 +145,10 @@ Container Indicators: using="Units;SourceData;Classifications;Mozaiks;",
 			attribute<string> cls_code:=  ='union_data(., '+asitemlist(const('BoundarySet_x_ClassificationScheme/cls_code', AllYears, string))+')';
 			attribute<uint32> year:= 	  ='union_data(., '+asitemlist('const('+string(AllYears/Yr)+', BoundarySet_x_ClassificationScheme, uint32)')+')';
 			attribute<km2>	  area:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/area/'+AllYears/name)+')';
-			attribute<uint32> pop:=	 	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/pop/'+AllYears/name)+')';
+			attribute<uint64> pop:=	 	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/pop/'+AllYears/name)+')[uint64]';
 			attribute<float32>builtup:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/builtup/'+AllYears/name)+')';
-			attribute<uint32> abandoned:= ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/abandonment/'+AllYears/name)+')';
-			attribute<uint32> emerged:=	  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/emergence/'+AllYears/name)+')';
+			attribute<uint64> abandoned:= ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/abandonment/'+AllYears/name)+')';
+			attribute<uint64> emerged:=  ='union_data(., '+asitemlist('BoundarySet_x_ClassificationScheme/emergence/'+AllYears/name)+')';
 			
 		}
 	}

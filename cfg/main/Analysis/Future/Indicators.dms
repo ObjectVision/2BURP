@@ -280,43 +280,6 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<uint32>  Initial   (BU_Total_Share_Bins) := pcount(Classify(Store_Results/Builtup_Total_Share/Initial, BU_Total_Share_Bins/ClassBreaks));
 	// }
 	
-	Template T_Assess_City_clusters {
-		attribute<uint8> degurba_ref (domain);
-		attribute<float32> population_ref (domain);
-		
-		attribute<bool>  urban (domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Urban_Centre];
-		attribute<bool>  town (domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Dense_urban_cluster] || degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Semi_Dense_urban_cluster];
-		attribute<bool>  village (domain):= degurba_ref = /Classifications/TypologyK/ek[Classifications/TypologyK/V/Rural_cluster];
-		
-		unit<uint32> FindContiguousCities := district(uint8(urban))
-		{
-			attribute<.>       GroupDomain_rel                                   (domain) := districts;
-			attribute<bool>	   Contains_urban 			                         		  := any(urban, GroupDomain_rel);
-			attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
-			attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
-			attribute<float32>  Cluster_population								 (domain) := (float32(Contains_urban) * Sum_Population_perGroup)[GroupDomain_rel];
-			//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
-		}
-		unit<uint32> FindContiguousTowns := district(uint8(town))
-		{
-			attribute<.>       GroupDomain_rel                                   (domain) := districts;
-			attribute<bool>	   Contains_town			                         		  := any(town, GroupDomain_rel);
-			attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
-			attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
-			attribute<float32>  Cluster_population								 (domain) := (float32(Contains_town) * Sum_Population_perGroup)[GroupDomain_rel];
-			//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
-		}
-		unit<uint32> FindContiguousVillages := district(uint8(village))
-		{
-			attribute<.>       GroupDomain_rel                                   (domain) := districts;
-			attribute<bool>	   Contains_village 			                         		  := any(village, GroupDomain_rel);
-			attribute<uint32>  GroupCellSize                                              := pcount_uint32(districts);
-			attribute<float32>  Sum_Population_perGroup                                   := sum(population_ref,GroupDomain_rel);
-			attribute<float32>  Cluster_population								 (domain) := (float32(Contains_village) * Sum_Population_perGroup)[GroupDomain_rel];
-			//attribute<float32>  GroupPopulationSize                              (domain) := GroupCellSize != max(GroupCellSize) ? Sum_Population_perGroup[GroupDomain_rel] : null_f;
-		}
-	}
-	
 	container Adhoc
 	{	
 		container delta_BuiltUp_export:= for_each_nedva(

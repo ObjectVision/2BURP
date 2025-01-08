@@ -20,11 +20,20 @@ custom_colour_lvl2<-c(
   "Low density rural grid cell" = "#6cf32d", 
   "Very low density grid cell" = "#d1f3b1"
 )
+custom_colour_settlements<-c(
+  "city"="red",
+  "town"="#fdf96f",
+  "village"="#33a02c"
+)
+custom_indicator_settlements<-c(
+  "n"="solid",
+  "size"="dashed"
+)
 ##### Set ordering of degrees of urbanisation for graphs
-ordered_lvl1<-c(
-  "Rural grid cells",
+ordered_lvl1<-c( 
+  "Urban centre",
   "Urban cluster",
-  "Urban centre"
+  "Rural grid cells"
 )
 reversed_lvl1<-c(
   "Rural grid cells",

@@ -19,6 +19,7 @@ container RegionalUnits
 	{
 		attribute<LatLong_base>    geometry_LL    (poly) := bp_union_polygon(Countries/geometry_LL[LatLong_base_ip], Countries/continents_rel)[LatLong_base];
 		attribute<Mollweide_base>  geometry_MW    (poly) := bp_union_polygon(Countries/geometry_MW[Mollweide_base_ip], Countries/continents_rel)[Mollweide_base];
+		attribute<Mollweide_base>  geometry_1RUS_MW (poly) := bp_union_polygon(Countries/geometry_MW[Mollweide_base_ip], Countries/Continents_1RUS_rel)[Mollweide_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
 	parameter<bool> do_store_continents:= True, ExplicitSuppliers = "store_Continents;";
@@ -36,6 +37,8 @@ container RegionalUnits
 		attribute<CurrentProjection_base> Geometry (poly) := =ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'geometry_LL';
 		attribute<Continents>        Continents_rel;
 		attribute<string>            continent_name;
+		attribute<string>			 continent_1RUS_name:= ISO3 = 'ARUS' ? 'Europe' : continent_name;
+		attribute<Continents>		 Continents_1RUS_rel:= rlookup(continent_1RUS_name, Continents/name);
 		// attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
 		attribute<.>                 per_domain              (domain) := poly2grid(Geometry , domain);
 		
@@ -67,8 +70,9 @@ container RegionalUnits
 	{
 		attribute<LatLong_base>    geometry_LL       (poly);
 		attribute<Mollweide_base>  geometry_MW       (poly);
+		attribute<Mollweide_base>  geometry_1RUS_MW  (poly);
 		attribute<string>   name                  := Classifications/Continents/name;
-		attribute<string> 	code				  := '00'+string(id(.)+1b);
+		attribute<string> 	code				  := '00'+string(id(.)+1b)+'_'+name;
 		attribute<.>        per_grid     (domain) := poly2grid(geometry_LL, domain);
 		attribute<World>    World_rel             := const(0[WOrld],.);
 		
@@ -115,7 +119,12 @@ container RegionalUnits
 		attribute<string> 	label:= org_rel->name;
 		attribute<string>   code:= org_rel->code;
 	}
-	
+	unit<uint32> Continents_1RUS_uint32:= range(uint32, 0, #Continents), descr = "uint32 version of the continents unit, needed for reporting in postprocessing." {
+		attribute<Continents> org_rel:= id(.)[Continents];
+		attribute<Mollweide_base> Geometry_MW (poly):= org_rel->geometry_1RUS_MW;
+		attribute<string> 	label:= org_rel->name;
+		attribute<string>   code:= org_rel->code;
+	}
 	unit<uint8> World : nrofrows = 1
 	{
 		attribute<string>     Label           := const('World',.);

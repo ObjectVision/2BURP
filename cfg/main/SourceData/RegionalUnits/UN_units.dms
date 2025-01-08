@@ -6,6 +6,8 @@ Container UN_units: using = "Geography;Units;Classifications;" {
 	, storagetype = "gdal.vect" {
 		attribute<uint32> RasterId;
 		attribute<string> label:= iso3cd;
+		attribute<uint64> area100;
+		attribute<Countries_UN_unique> cuu_rel:= rlookup(iso3cd, Countries_UN_unique/values);
 	}
 	unit<wpoint> Countries_UN_definition_grid
 	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_fixVAT_54009_1000_nibblePOPBU_20km.tif"
@@ -15,13 +17,14 @@ Container UN_units: using = "Geography;Units;Classifications;" {
 	{
 		attribute<uint32> GridData;
 		attribute<uint32> ReadData (Impl/MakeDomain_World/domain);
-		attribute<Countries_UN_in> UN_rel (Impl/MakeDomain_World/domain):= rlookup(ReadData, Countries_UN_in/RasterId);
+		attribute<Countries_UN_in> UN_in_rel (Impl/MakeDomain_World/domain):= rlookup(ReadData, Countries_UN_in/RasterId);
+		attribute<Countries_UN_unique> UN_rel (Impl/MakeDomain_World/domain):= Countries_UN_in/cuu_rel[UN_in_rel];
 		
 		parameter<Mollweide_base> offset:= getprojectionfactor(.)[Mollweide_base];
 		
 		unit<uint64> Countries_land:= select_uint64_with_org_rel(isdefined(UN_rel)) {
 			attribute<Mollweide_base> Geometry (poly):= points2polygon_pso(makepoly/pt, makepoly/rel, makepoly/ord);
-			attribute<Countries_UN_in>Country_rel:= UN_rel[org_rel];
+			attribute<Countries_UN_unique>Country_rel:= UN_rel[org_rel];
 			attribute<Mollweide_base> topleft:= 	org_rel[Mollweide_base];
 			attribute<Mollweide_base> topright:= 	topleft  	+ 	point(0d, pointcol(offset), Mollweide_base);
 			attribute<Mollweide_base> bottomright:= topright 	+ 	point(pointrow(offset), 0d, Mollweide_base);
@@ -33,14 +36,19 @@ Container UN_units: using = "Geography;Units;Classifications;" {
 			}
 		}
 	}
-	unit<uint32> store_Countries_UN:= Countries_UN_in, storagename = "%ToBURPDataDir%/Regions/Countries_UN.fss" {
+	unit<uint32> Countries_UN_unique:= unique(Countries_UN_in/iso3cd) {
+		attribute<Countries_UN_in>cui_rel:= makedefined(max_index(Countries_UN_in/Area100, Countries_UN_in/cuu_rel), invert(Countries_UN_in/cuu_rel));
+		attribute<string> 		  m49:= replace(Countries_UN_in/m49[cui_rel], '#N/A','999');
+		attribute<string> 		  name:= replace(Countries_UN_in/UNnameROM[cui_rel], '#N/A',values);
+	}
+	unit<uint32> store_Countries_UN:= Countries_UN_unique, storagename = "%ToBURPDataDir%/Regions/Countries_UN.fss" {
 		attribute<Mollweide_base> geometry_MW (poly):= bg_union_polygon(Countries_UN_definition_grid/Countries_land/Geometry, Countries_UN_definition_grid/Countries_land/Country_rel);
-		attribute<string> 		  iso3:= iso3cd, descr = "ISO3 code";
-		attribute<string> 		  m49:= Countries_UN_in/m49;
-		attribute<string> 		  name:= UNnameROM;
-		attribute<string>		  sdg_reg:= UN_SDG_Region;
-		attribute<string>		  un_itm_reg:= UN_intermediate_group;
-		attribute<string>		  wb_inc_reg:= WB_income_group_2020;
+		attribute<string> 		  iso3:= values, descr = "ISO3 code";
+		attribute<string> 		  m49:= Countries_UN_unique/m49;
+		attribute<string> 		  name:= Countries_UN_unique/name;
+		attribute<string>		  sdg_reg:= Countries_UN_in/UN_SDG_Region[cui_rel];
+		attribute<string>		  un_itm_reg:= Countries_UN_in/UN_intermediate_group[cui_rel];
+		attribute<string>		  wb_inc_reg:= Countries_UN_in/WB_income_group_2020[cui_rel];
 	}
 	parameter<bool> do_store_countries_UN:= True, ExplicitSuppliers = "store_Countries_UN;";
 	parameter<bool> check_countries_UN_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Countries_UN.fss'))+') > 0';

@@ -16,6 +16,7 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 		
 		container classify_degurba_mozaik_lvl1:=  for_each_nedv(AllYears/name, 'classify(read_degurba_mozaik_files/'+AllYears/name+', DegUrba_lvl1/EK)', world_domain, DegUrba_lvl1);
 		container classify_degurba_mozaik_lvl2:=  for_each_nedv(AllYears/name, 'rlookup(read_degurba_mozaik_files/'+AllYears/name+', DegUrba_lvl2/EK)', world_domain, DegUrba_lvl2);
+
 		container classify_builtup_binned:= 	  for_each_nedv(AllYears/name, 
 			AllYears/modelled ? 
 				'(100f * (read_builtup_mozaik/'+AllYears/name+' > 0f ? read_builtup_mozaik/'+AllYears/name+' + 0.01f : 0f))[BU_densitybins]'
@@ -38,10 +39,10 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 					: 'const(False, world_domain)'
 				, world_domain, bool), Descr = "Code to create mozaiked boolean emergence grids. Used in later reporting.";
 		container populated_outside_un:= for_each_nedv(AllYears/name
-			, 'read_population_mozaik/'+AllYears/name+' > 0i && isnull(Countries_UN_definition_grid/UN_rel)'
+			, 'read_population_mozaik/'+AllYears/name+' > 0i && isnull(UN_units/Countries_UN_definition_grid/UN_rel)'
 			, world_domain, bool);
 		container builtup_outside_un:= for_each_nedv(AllYears/name
-			, 'read_builtup_mozaik/'+AllYears/name+' > 0f && isnull(Countries_UN_definition_grid/UN_rel)'
+			, 'read_builtup_mozaik/'+AllYears/name+' > 0f && isnull(UN_units/Countries_UN_definition_grid/UN_rel)'
 			, world_domain, bool);
 		
 		unit<uint32> populated_outside_2100:= select_with_org_rel(populated_outside_un/Y2100) {
@@ -72,8 +73,8 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 					, 'gdal.grid'
 				)
 			{	
-				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
-				attribute<int32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, int32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+				attribute<Continents>  Continent_rel (world_domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, world_domain);
+				attribute<int32>     Mozaic        (world_domain) := ='raster_merge(Continent_rel, int32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
 			}
 		}
 		Template T_MozaikSet_float32 {
@@ -91,8 +92,8 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 					, 'gdal.grid'
 				)
 			{	
-				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
-				attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+				attribute<Continents>  Continent_rel (world_domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, world_domain);
+				attribute<float32>     Mozaic        (world_domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
 			}
 		}
 		Template T_MozaikSet_uint8 {
@@ -110,11 +111,10 @@ Container Mozaiks: using = "Classifications;SourceData/RegionalUnits;Geography;"
 					, 'gdal.grid'
 				)
 			{	
-				attribute<Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
-				attribute<uint8>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, uint8, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
+				attribute<Continents>  Continent_rel (world_domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, world_domain);
+				attribute<uint8>     Mozaic        (world_domain) := ='raster_merge(Continent_rel, uint8, '+AsItemList(Continents/name)+')', StorageName = "= storepath";
 			}
 		}
-		
 		
 		container Domain_perContinent :=
 			for_each_nex(

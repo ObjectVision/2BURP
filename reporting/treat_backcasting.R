@@ -7,14 +7,14 @@
 # 
 # presupposes: 
 #      reportingdir<-"D:/ProjDir/2BURP/reporting/"
-#      boundaryset<-"UN_intermediate_regions" #or Countries, UN_countries, UN_intermediate_regions, Continents, World
+#      boundaryset<-"UN_intermediate_regions" #or Countries, UN_countries, UN_intermediate_regions, Continents, Continents_1RUS_uint32, World
 # ------------------------------------------------
 
 # create an empty dataframe to which rows can be added if available
 out_columns <- subset(indata, ru_label==-9999)
 
 # fill out_columns only if the boundaryset can be aggregated from the countries encoded in 
-if(toupper(classification)==toupper("DegUrba_lvl1") & (boundaryset=="UN_intermediate_regions" | boundaryset=="UN_countries" | boundaryset=="World")) {
+if(toupper(classification)==toupper("DegUrba_lvl1") & (boundaryset=="Continents_1RUS_uint32" | boundaryset=="UN_intermediate_regions" | boundaryset=="UN_countries" | boundaryset=="World")) {
 
   rawdata<-read.csv(paste0(reportingdir, "/", "df_smod_est_v7.csv"), stringsAsFactors = FALSE)
   rawdata<-subset(rawdata, year<1975)
@@ -30,9 +30,12 @@ if(toupper(classification)==toupper("DegUrba_lvl1") & (boundaryset=="UN_intermed
   } else if(boundaryset=="UN_countries") {
     merged$agg_field<-merged$iso3c
     merged$name_field<-merged$country
-  } else if(boundaryset==World) {
+  } else if(boundaryset=="World") {
     merged$agg_field<-"World"
     merged$name_field<-"World"
+  } else if(boundaryset=="Continents_1RUS_uint32") {
+    merged$agg_field<-merged$Continent
+    merged$name_field<-merged$Continent
   }
 
     
