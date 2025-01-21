@@ -13,7 +13,30 @@ container Physical : using = "geography;classifications"
 		// attribute<bool>  NoData(domain)   :=!IsDefined(ReadData);//visualtion purposes of nodata (null) values
 		// attribute<int16> Elevation(domain):=MakeDefined(ReadData,0s);//0--> oceans/seas - no inland lakes! essential for rank there are values otherwise null in Urban_Cali --> moving of cururb
 	// }	
-	
+	container UN_Countries_Territory {
+		unit<wpoint> Countries_UN_definition_grid
+		: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_onLAND_54009_1000.tif"
+		, storagetype = "gdal.grid"
+		, StorageReadOnly = "true"
+		, DialogData = "Mollweide_base"
+		{
+			attribute<uint32> ReadData (domain);
+			//attribute<bool>	  IsTerritory (domain):= IsDefined(ReadData) && ReadData > 0;
+			attribute<bool>	  IsTerritory (domain):= ReadData > 0;
+		}
+	}
+	container Land 
+	{
+		unit<ipoint> GHS_LAND
+		:	StorageName     = "%ToBURPDataDir%/physical/GHS_LAND_E2018_GLOBE_R2022A_54009_1000_V1_0.tif"
+		,	StorageType     = "gdal.grid"
+		,	StorageReadOnly = "True"
+		,	DialogData      = "Mollweide"
+		, 	LazyCalculated  = "true"
+		{
+			attribute<m2> ReadData   (domain);
+		}
+	}
 	container Elevation 
 	{
 		// /*

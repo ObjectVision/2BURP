@@ -5,6 +5,7 @@ container Impl
 		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear_Unrounded/'+ModelParameters/StartYear+'[Person]';
 		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 		attribute<Bool>   InStudyArea            (domain) := poly2grid(CurrentProjection/geometry, domain);
+		attribute<Bool>	  InUNCountry			 (domain) := sourcedata/Physical/UN_Countries_Territory/Countries_UN_definition_grid/IsTerritory;
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
@@ -13,6 +14,7 @@ container Impl
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 		attribute<bool>   HasLand                (domain) := SourceData/Physical/Water/AllWater/Read_HasLand;
 		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
+																&& InUNCountry							// is it within the territory of UN states as defined by Marcello Schiavina's UN countries grid?
 																&& InBU_5kmClip                         // within certain distance from bu-area.
 																&& (HasLand || HasBuiltup || HasPop)	// needs to contain some land, or built-up, or population
 																//&& (IsNotLake || HasBuiltup || HasPop)  // it is not a lake, unless there is builtup or population in a cell categorised as a lake

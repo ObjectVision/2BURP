@@ -87,4 +87,28 @@ container Store_Results: using = "Geography;Classifications;Units;"
 		{
 			attribute<uint8> Initial (domain) := Y2020;
 		}
+		
+		// ad-hoc for testing improvements to the degurba definition
+		/*container Read_DegreesOfUrbanisation_TypologyK := for_each_nedv(AllYears/name, 'invert(TypologyK/EK)[Read_DegreesOfUrbanisation/'+AllYears/name+']', domain, TypologyK);
+		container Test_DegreesOfUrbanisation := Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+			'x2100'
+			, convert(Read_BuiltUp_Total_Share/Y2100, km2) 
+			, convert(Read_BuiltUp_Total_Share/Y2100,km2) 
+			, Read_Population/Y2100[Person]);
+		container compare_DegreesOfUrbanisation {
+			unit<uint8> errors: nrofrows = 3 {
+				attribute<int8>   value:= int8(id(.)) - int8(1);
+				attribute<string> Label: ['false negative', 'none', 'false positive'];
+			}
+			unit<wpoint> load: storagename="D:/SourceData/2BURP/temp/SMOD_V1s7_O7_PopTrend_2100_L2.tif", storagereadonly = "true", storagetype="gdal.grid", dialogdata="CurrentProjection_base" {
+				attribute<uint8> GridData;
+				attribute<uint8> ReadData (domain);
+				attribute<TypologyK> degurba_domain (domain):= invert(TypologyK/EK)[ReadData];
+				attribute<TypologyK> degurba (CompactedDomain):= degurba_domain[CompactedDomain/org_rel];
+			}
+			container comparison:= for_each_nedv(TypologyK/name, 
+				'invert(errors/value)
+				[int8(Test_DegreesOfUrbanisation/ReadTypologyK='+string(id(TypologyK))+'[TypologyK]) - 
+				 int8(recollect_by_cond(domain/IsCompactedDomain, load/degurba)='+string(id(TypologyK))+'[TypologyK])]', domain, errors);
+		}*/
 	}

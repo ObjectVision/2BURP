@@ -1,7 +1,7 @@
 Container UN_units: using = "Geography;Units;Classifications;" {
 
 	unit<uint32> Countries_UN_in
-	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_54009_attributes.csv"
+	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_onLAND_54009_attributes.csv"
 	, storagereadonly = "True"
 	, storagetype = "gdal.vect" {
 		attribute<uint32> RasterId;
@@ -10,7 +10,7 @@ Container UN_units: using = "Geography;Units;Classifications;" {
 		attribute<Countries_UN_unique> cuu_rel:= rlookup(iso3cd, Countries_UN_unique/values);
 	}
 	unit<wpoint> Countries_UN_definition_grid
-	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_fixVAT_54009_1000_nibblePOPBU_20km.tif"
+	: storagename = "%ToBURPDataDir%/Regions/UNBNDA_CTY_onLAND_54009_1000.tif"
 	, storagetype = "gdal.grid"
 	, StorageReadOnly = "true"
 	, DialogData = "Mollweide_base"

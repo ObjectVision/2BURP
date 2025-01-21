@@ -152,6 +152,29 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		{
 			attribute<float32> p_Initial (RegionalUnits/FunctionalAreas):= sum(float32(Store_Results/Read_BuiltUp_Total_Share/Initial) * float32(domain/area), RegionalUnits/FunctionalAreas/per_domain);
 		}
+		container pop_drawing {
+		
+			container pop_to_draw:= for_each_nedv('pd_'+ProjectionYears/name
+				, 'Allocate_Population/'+ProjectionYears/name+'/NewState/Regional_Population_to_draw'
+				, RegionalUnits/FunctionalAreas
+				, float32);
+			container scaled_reduction:= for_each_nedv('sr_'+ProjectionYears/name
+				, 'Allocate_Population/'+ProjectionYears/name+'/NewState/Regional_Scaled_Reduction'
+				, RegionalUnits/FunctionalAreas
+				, float32);
+			container proportional_reduction:= for_each_nedv('pr_'+ProjectionYears/name
+				, 'sum(Allocate_Population/'+ProjectionYears/name+'/NewState/Additional_Proportional_Reduction, region_rel)'
+				, RegionalUnits/FunctionalAreas
+				, float32);
+			container pop_in_new_builtup:= for_each_nedv('pnbu_'+ProjectionYears/name
+				, 'sum(Allocate_Population/'+ProjectionYears/name+'/NewState/Population_in_New_BuiltUp_Area, region_rel)'
+				, RegionalUnits/FunctionalAreas
+				, float32);
+			container pop_suit_alloc:= for_each_nedv('psuit_'+ProjectionYears/name
+				, 'Allocate_Population/'+ProjectionYears/name+'/NewState/RestClaim' 
+				, RegionalUnits/FunctionalAreas
+				, float32);
+		}
 		container degurbas := 
 			for_each_ne(
 				ProjectionYears/name

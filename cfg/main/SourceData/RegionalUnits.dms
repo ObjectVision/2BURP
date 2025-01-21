@@ -140,6 +140,16 @@ container RegionalUnits
 		attribute<string> 	label:= org_rel->label;
 		attribute<string>   code:= org_rel->code;
 	}
+	unit<ipoint> FunctionalAreas_all_grid
+	: Storagename = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009_1000m.tif'"
+	, StorageType = "gdal.grid"
+	, StorageReadOnly = "true"
+	, DialogData      = "Mollweide_base"
+	{
+		attribute<uint32> ReadData (domain);
+		attribute<FunctionalAreas_all> FA_all_rel (domain):= rlookup(ReadData, uint32(FunctionalAreas_all/FAID));
+		attribute<FunctionalAreas>	 FA_rel		  (domain):= invert(FunctionalAreas/org_rel)[FA_all_rel];
+	}
 	unit<uint32> FunctionalAreas_all
 	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009.shp'"
 	, StorageType = "gdal.vect"
@@ -172,8 +182,9 @@ container RegionalUnits
 			parameter<uint32> BrushColor := null_u, DialogType = "BrushColor";
 			parameter<uint32> PenColor   := rgb(10,10,10), DialogType = "PenColor";
 		}
-		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
-		attribute<.>              per_domain                   (domain) := poly2grid(Geometry, domain);
+		attribute<string> 		  Label									:= FunctionalAreas_all/name[org_rel];
+		attribute<string>         item_name                             := AsItemName(Label);
+		attribute<.>              per_domain                   (domain) := FunctionalAreas_all_grid/FA_rel;
 		attribute<bool>           IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels)) || ModelParameters/ignore_Check_for_enough_suitable_locations/Ignore_all;
