@@ -127,11 +127,11 @@ container Physical : using = "geography;classifications"
 		{
 			attribute<LatLong>           Geometry(poly);
 			attribute<m2>                Area                    := area(Geometry[WorldMollweide], float64)[m2];
-			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater.tif'";
-			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true";
+			attribute<bool>              Write_per_grid (domain) := IsDefined(poly2grid(Inland_Water/geometry, domain)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater.tif'", StorageType = "tif";
+			attribute<bool>              Read_per_grid  (domain) : StorageName = "=PropValue(Write_per_grid, 'StorageName')", StorageReadOnly = "true", StorageType = "tif";
 			
-			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain.tif'";
-			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true";
+			attribute<bool>              Write_per_subgrid (domain_sub) := IsDefined(poly2grid(Inland_Water/geometry, domain_sub)), StorageName = "= '%ToBURPDataDir%/physical/Water/'+ModelParameters/StudyArea+'/IsInlandWater_subdomain.tif'", StorageType = "tif";
+			attribute<bool>              Read_per_subgrid  (domain_sub) : StorageName = "=PropValue(Write_per_subgrid, 'StorageName')", StorageReadOnly = "true", StorageType = "tif";
 		}
 
 		#include <rivers.dms> // dms file kan evt gedelete? ligt aan calibratie
@@ -151,7 +151,7 @@ container Physical : using = "geography;classifications"
 			attribute<uint32>  Fraction_Water0        (domain) := sum(IsWater[uint32], domain_sub/domain_rel);
 			attribute<uint32>  Fraction_Water         (domain) := ((Fraction_Water0[float32] / 36f) * 100f)[uint32];
 			
-			attribute<bool>	   HasLand				  (domain) := Fraction_Water0 < pcount(domain_sub/domain_rel)[uint32], storagename = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/HasLand.tif'";
+			attribute<bool>	   HasLand				  (domain) := Fraction_Water0 < pcount(domain_sub/domain_rel)[uint32], storagename = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/HasLand.tif'", StorageType = "tif";
 			attribute<bool>    HasLand_Read			  (domain) : StorageName = "= PropValue(HasLand, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True";
 			
 			unit<uint32> large_inland_water := select_with_org_rel(Inland_Water/area[km2] > 0.5[km2]) 
@@ -162,11 +162,11 @@ container Physical : using = "geography;classifications"
 			
 			attribute<Float32> Location2AllInland_distInfo   (CompactedDomain) := dist_info(Inland_Water/Geometry[SphericalMercator], CompactedDomain/Geometry_mer, sqr_dist);
 			attribute<km>      Location2AllInland_km         (CompactedDomain) := (Location2AllInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'";
+			attribute<km>      Location2AllInland_km_domain_export    (domain) := min_elem(Location2AllInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2AnyInland_km.tif'", StorageType = "tif";
 			
 			attribute<Float32> Location2LargeInland_distInfo (CompactedDomain) := dist_info(large_inland_water/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
 			attribute<km>      Location2LargeInland_km       (CompactedDomain) := (Location2LargeInland_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'";
+			attribute<km>      Location2LargeInland_km_domain_export  (domain) := min_elem(Location2LargeInland_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "= '%ToBURPDataDir%/Physical/water/'+ModelParameters/StudyArea+'/Location2LargeInland_km.tif'", StorageType = "tif";
 			
 			unit<ipoint> Dist_AllInland_km   : StorageName = "= PropValue(Location2AllInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}
 			unit<ipoint> Dist_LargeInland_km : StorageName = "= PropValue(Location2LargeInland_km_domain_export, 'storagename')", StorageType = "gdal.grid", StorageReadOnly = "True", DialogData = "LatLong" {attribute<km> GridData (domain);}

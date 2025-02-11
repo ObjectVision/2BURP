@@ -3,27 +3,29 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container Prep
 	{
 		container BuiltUp_Total_Share := 
-			for_each_nedva(
+			for_each_nedvat(
 				ProjectionYears/name
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
 				, domain
 				, float32
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+'.tif'
+				, 'tif'
 			)
 		{
-			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
 		}
 	
 		container Population := 
-			for_each_nedva(
+			for_each_nedvat(
 				ProjectionYears/name
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 				, domain
 				, NrPerson
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+'.tif'
+				, 'tif'
 			)
 		{
-			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'";
+			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
 		}
 			
 		container BuiltUp_Total_Area := 

@@ -69,6 +69,16 @@ container Classifications : using = "units"
 			0.108825,0.09,0.071175,0.05235,0.033525,
 			0.024179,0.020,0.015,0.010,0.005,
 			0.000
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
+			, null, null, null, null, null
 		];
 		attribute<Float32>        Moving_up_probability      := MakeDefined(Moving_up_probability_data, 0f);
 		attribute<uint32>         BrushColor                 := BU_DensityBins/BrushColor[DensityBins_rel];

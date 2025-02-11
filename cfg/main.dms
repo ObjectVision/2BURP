@@ -35,7 +35,7 @@ container toBURP : IntegrityCheck = "GeoDMSVersion() >= 14.1000" //because of xy
 		attribute<bool>   IsUrbanCentre2100 (geography/domain)       := /Analysis/Future/Indicators/Prep/DegreesOfUrbanisation/Y2100/Typology_Domain == /Classifications/TypologyK/V/Urban_Centre;
 		
 		parameter<string> result_html := 
-			'<description>2BURP indicator results, Year:2100, Regio: '+ModelParameters/StudyArea+', <br><I>version</i>: Git Revision: XXXX</description>' + 
+			'<description>2BURP indicator results, Year:2100, Regio: '+ModelParameters/StudyArea+', <br><I>version</i>: Git Revision: f64fbf3e3954e867a5a519bbf1cecc04ac7f20b1</description>' + 
 			'<result><BR>' + 
 			' Population 2100 : '    + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Population/Y2100))),'.',',') +' number of persons <br>' + 
 			' BuiltUp cells 2100 : ' + replace(string(sum(uint32(Analysis/Future/Indicators/Prep/Builtup_Total_Share/Y2100 > 0f))),'.',',') +' number of urban cells <br>' + 
