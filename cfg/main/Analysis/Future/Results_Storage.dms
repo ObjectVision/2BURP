@@ -89,8 +89,8 @@ container Store_Results: using = "Geography;Classifications;Units;"
 		}
 		
 		// ad-hoc for testing improvements to the degurba definition
-		/*container Read_DegreesOfUrbanisation_TypologyK := for_each_nedv(AllYears/name, 'invert(TypologyK/EK)[Read_DegreesOfUrbanisation/'+AllYears/name+']', domain, TypologyK);
-		container Test_DegreesOfUrbanisation := Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+		container Read_DegreesOfUrbanisation_TypologyK := for_each_nedv(AllYears/name, 'invert(TypologyK/EK)[Read_DegreesOfUrbanisation/'+AllYears/name+']', domain, TypologyK);
+		/*container Test_DegreesOfUrbanisation := Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
 			'x2100'
 			, convert(Read_BuiltUp_Total_Share/Y2100, km2) 
 			, convert(Read_BuiltUp_Total_Share/Y2100,km2) 

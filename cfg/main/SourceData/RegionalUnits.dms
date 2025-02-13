@@ -205,7 +205,7 @@ container RegionalUnits
 	unit<uint32> UN_countries:= =UN_units/check_countries_UN_file ? 'UN_units/Countries_UN' : 'World';
 	unit<uint32> UN_intermediate_regions:= =UN_units/check_regions_UN_file ? 'UN_units/UN_intermediate_regions' : 'World';
 	
-	unit<uint32> set_countries: nrofrows = 239 
+	unit<uint32> set_countries: nrofrows = 240 
 	{
 		attribute<string>          ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
 		attribute<string>          Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
@@ -347,6 +347,7 @@ container RegionalUnits
 			'LVA',	'Latvia',	'Europe',
 			'MAC',	'Macau',	'Asia',
 			'GLP',	'Guadeloupe',	'North_America',
+			'MAF',	'Saint Martin (FR)', 'North_America',
 			'MAR',	'Morocco',	'Africa',
 			'MCO',	'Monaco',	'Europe',
 			'MDA',	'Moldova',	'Europe',

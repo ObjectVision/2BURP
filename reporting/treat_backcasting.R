@@ -49,8 +49,8 @@ if(toupper(classification)==toupper("DegUrba_lvl1") & (boundaryset=="Continents_
   temp$area<-NA
   temp$pop<-temp$x
   temp$Builtup<-NA
-  temp$abandoned<-NA
-  temp$emerged<-NA
+  #temp$abandoned<-NA
+  #temp$emerged<-NA
   
   temp$Group.1<-NULL
   temp$Group.2<-NULL

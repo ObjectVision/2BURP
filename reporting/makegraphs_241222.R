@@ -1,9 +1,10 @@
 ################### specifics of run
 inputdir<-"E:/LocalData/2BURP/Indicators/World"
 reportingdir<-"D:/ProjDir/2BURP/reporting/"
-boundaryset<-"UN_intermediate_regions" #or Countries, UN_countries, UN_intermediate_regions, Continents_1RUS_uint32, Continents_uint32, World
-classification<-"DegUrba_lvl1"
-runset<-"_v8_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205" # new calibration, preferred spec?
+boundaryset<-"Continents_1RUS_uint32" #or Countries, UN_countries, UN_intermediate_regions, Continents_1RUS_uint32, Continents_uint32, World
+classification<-"DegUrba_lvl2"
+runset<-"_v9_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_nobu_Marcello" # new calibration, preferred spec?
+
 
 ################### set outputfolder (stepwise!!!)
 rootoutputdir<-"E:/LocalData/2BURP/graphs"
@@ -25,10 +26,21 @@ font_size<-20 # font size override (default font size = 14)
 
 ################### load datafiles
 indata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,"_",classification,runset,".csv"))
+#indata$ru_code<-indata$ru_label.1 temp fix unnecessary now
+
+indata<-subset(indata, select = c(ru_label, ru_code, cls_label, cls_code, year, area, pop, Builtup))
+
+# fix typo issues with degurba label
+indata$cls_label<-as.character(indata$cls_label)
+indata$cls_label[indata$cls_label=="Low-density rural grid cell"]<-"Low density rural grid cell"
+indata$cls_label[indata$cls_label=="Very low-density rural grid cell"]<-"Very low density grid cell"
+indata$cls_label<-factor(indata$cls_label)
+
+#indata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,"_",classification,runset,".csv"), sep=";")
 settldata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,runset,".csv"))
 
 source(paste0(reportingdir, "treat_backcasting.r"))
-poponlydata<-rbind(indata, out_columns)
+indata<-rbind(indata, out_columns)
 
 # loop over all unique geographies
 codeslist<-unique(indata$ru_code)
@@ -36,21 +48,27 @@ for (incode in codeslist) {
   
   # internal output to track progress
   print(incode)
-  
-  #### prep total pop and popdensity graphs by putting them into long form (required by ggplot)
+
   plotdata<-subset(indata, ru_code==incode)
-  
+    
   # only execute if unit has population at one point in time (to avoid empty plots)
   if (sum(plotdata$pop) > 0) {
-    name<-plotdata$ru_label[[1]]
+
+    name<-as.character(plotdata$ru_label[[1]])
     
     # print("Start plot")
     
     # in intermediate regions, 
     # set name so that it matches the original UN names (assumes that numerics < 10 are padded with one zero)
-    if (boundaryset=="UN_intermediate_regions") {name=substring(name, 4)}
+    if (boundaryset=="UN_intermediate_regions") {
+      incode=name  
+      name=substring(name, 4)
+    }
     
-    popplotdata<-subset(poponlydata, as.character(ru_label)==as.character(name) | ru_code==incode)
+    #### prep total pop and popdensity graphs by putting them into long form (required by ggplot)
+
+    #popplotdata<-subset(poponlydata, as.character(ru_label)==as.character(name) | ru_code==incode)
+    popplotdata<-subset(plotdata, as.character(ru_label)==as.character(name) | ru_code==incode | ru_code==as.character(name))
       
     pop_density_graph(plotdata, printname = name, storename = incode, cvar = factor(plotdata$cls_label, level=order))
     
@@ -61,13 +79,15 @@ for (incode in codeslist) {
     
     indexed_area_graph(area_graph, xvar=area_graph$year, printname = name, storename = incode, yvar=(area_graph$area.x / area_graph$area.y), cvar=factor(area_graph$cls_label, level=order))
     
-    absolute_pop_graph(popplotdata[popplotdata$pop > 0,], printname = name, storename = incode, cvar = factor(popplotdata$cls_label[popplotdata$pop > 0], level=order))
+    popplotdata<-popplotdata[order(popplotdata$year), ]
+    popplotdata$pop_cumu<-ave(popplotdata$pop, popplotdata$cls_label, FUN=cumsum)
+    absolute_pop_graph(popplotdata[popplotdata$pop_cumu > 0,], printname = name, storename = incode, cvar = factor(popplotdata$cls_label[popplotdata$pop_cumu > 0], level=order))
   
     stackdata<-subset(popplotdata, year %% 10 == 0)
     stacked_pop_graph(stackdata, printname = name, storename = incode, xvar = stackdata$year - 5, cvar = factor(stackdata$cls_label, level=rev_order))
     
     settlements<-subset(settldata, ru_code==incode, select= -c(ru_label, ru_code))
-    
+      
     settlements_long<-settlements %>%  pivot_longer(!year, names_to="Variable", values_to = "Value")
     index_settlements<-subset(settlements_long, year==2020, select= -c(year))
     settlements_long<-merge(settlements_long, index_settlements, by="Variable")       
