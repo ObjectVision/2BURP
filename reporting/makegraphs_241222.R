@@ -1,13 +1,13 @@
 ################### specifics of run
-inputdir<-"E:/LocalData/2BURP/Indicators/World"
+inputdir<-"C:/Users/asobi/Documents/Werk/2023_global_lu_model/results/20250331_Marcello"
 reportingdir<-"D:/ProjDir/2BURP/reporting/"
 boundaryset<-"Continents_1RUS_uint32" #or Countries, UN_countries, UN_intermediate_regions, Continents_1RUS_uint32, Continents_uint32, World
-classification<-"DegUrba_lvl2"
-runset<-"_v9_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_nobu_Marcello" # new calibration, preferred spec?
+classification<-"DegUrba_lvl1"
+runset<-"" #"_v9_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_nobu_Marcello" # new calibration, preferred spec?
 
 
 ################### set outputfolder (stepwise!!!)
-rootoutputdir<-"E:/LocalData/2BURP/graphs"
+rootoutputdir<-paste0(inputdir, "/graphs")
 outputdir<-rootoutputdir
 #### make folder structure
 
@@ -25,7 +25,9 @@ source(paste0(reportingdir, "graph_functions.r"))
 font_size<-20 # font size override (default font size = 14)
 
 ################### load datafiles
-indata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,"_",classification,runset,".csv"))
+#indata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,"_",classification,runset,".csv"))
+indata<-read.csv(paste0(inputdir,"/",boundaryset,"_",classification,runset,".csv"))
+
 #indata$ru_code<-indata$ru_label.1 temp fix unnecessary now
 
 indata<-subset(indata, select = c(ru_label, ru_code, cls_label, cls_code, year, area, pop, Builtup))
