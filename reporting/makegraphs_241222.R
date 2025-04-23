@@ -1,10 +1,11 @@
 ################### specifics of run
-inputdir<-"C:/Users/asobi/Documents/Werk/2023_global_lu_model/results/20250331_Marcello"
+inputdir<-"C:/Users/asobi/Documents/Werk/2023_global_lu_model/results/20250415_Marcello"
 reportingdir<-"D:/ProjDir/2BURP/reporting/"
-boundaryset<-"Continents_1RUS_uint32" #or Countries, UN_countries, UN_intermediate_regions, Continents_1RUS_uint32, Continents_uint32, World
-classification<-"DegUrba_lvl1"
+boundaryset<-"UN_countries" #or Countries, UN_countries, UN_intermediate_regions, Continents_1RUS_uint32, Continents_uint32, World
+classification<-"DegUrba_lvl2"
 runset<-"" #"_v9_IntMigr-0.01_PopRSuitScale-0.9_PopShareNewBU-1_autoresolved_calib_20241205_nobu_Marcello" # new calibration, preferred spec?
 
+settlement_graphs<-FALSE
 
 ################### set outputfolder (stepwise!!!)
 rootoutputdir<-paste0(inputdir, "/graphs")
@@ -39,7 +40,7 @@ indata$cls_label[indata$cls_label=="Very low-density rural grid cell"]<-"Very lo
 indata$cls_label<-factor(indata$cls_label)
 
 #indata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,"_",classification,runset,".csv"), sep=";")
-settldata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,runset,".csv"))
+if(settlement_graphs) {settldata<-read.csv(paste0(inputdir,"/","Indicators_",boundaryset,runset,".csv"))}
 
 source(paste0(reportingdir, "treat_backcasting.r"))
 indata<-rbind(indata, out_columns)
@@ -72,35 +73,41 @@ for (incode in codeslist) {
     #popplotdata<-subset(poponlydata, as.character(ru_label)==as.character(name) | ru_code==incode)
     popplotdata<-subset(plotdata, as.character(ru_label)==as.character(name) | ru_code==incode | ru_code==as.character(name))
       
-    pop_density_graph(plotdata, printname = name, storename = incode, cvar = factor(plotdata$cls_label, level=order))
+    #pop_density_graph(plotdata, printname = name, storename = incode, cvar = factor(plotdata$cls_label, level=order))
     
     # created indexed version for areas
-    area_graph<-subset(plotdata, select=c("year","cls_code","cls_label","area"))
-    index_areas<-subset(plotdata, year==2020, select=c("cls_code", "area"))
-    area_graph<-merge(area_graph, index_areas, by="cls_code")
+    #area_graph<-subset(plotdata, select=c("year","cls_code","cls_label","area"))
+    #index_areas<-subset(plotdata, year==2020, select=c("cls_code", "area"))
+    #area_graph<-merge(area_graph, index_areas, by="cls_code")
     
-    indexed_area_graph(area_graph, xvar=area_graph$year, printname = name, storename = incode, yvar=(area_graph$area.x / area_graph$area.y), cvar=factor(area_graph$cls_label, level=order))
+    #indexed_area_graph(area_graph, xvar=area_graph$year, printname = name, storename = incode, yvar=(area_graph$area.x / area_graph$area.y), cvar=factor(area_graph$cls_label, level=order))
     
     popplotdata<-popplotdata[order(popplotdata$year), ]
     popplotdata$pop_cumu<-ave(popplotdata$pop, popplotdata$cls_label, FUN=cumsum)
-    absolute_pop_graph(popplotdata[popplotdata$pop_cumu > 0,], printname = name, storename = incode, cvar = factor(popplotdata$cls_label[popplotdata$pop_cumu > 0], level=order))
+    popplotdata$cumu_is_value<-as.integer(popplotdata$pop == popplotdata$pop_cumu)
+    popplotdata<-popplotdata[order(popplotdata$year, decreasing = TRUE), ]
+    popplotdata$rev_first<-ave(popplotdata$cumu_is_value, popplotdata$cls_label, FUN=cumsum)
+    popplotdata$sel<-popplotdata$pop_cumu > 0 | popplotdata$rev_first == 2
+    
+    absolute_pop_graph(popplotdata[popplotdata$sel,], printname = name, storename = incode, cvar = factor(popplotdata$cls_label[popplotdata$sel], level=order))
   
     stackdata<-subset(popplotdata, year %% 10 == 0)
     stacked_pop_graph(stackdata, printname = name, storename = incode, xvar = stackdata$year - 5, cvar = factor(stackdata$cls_label, level=rev_order))
     
-    settlements<-subset(settldata, ru_code==incode, select= -c(ru_label, ru_code))
+    if(settlement_graphs) {
+      settlements<-subset(settldata, ru_code==incode, select= -c(ru_label, ru_code))
+        
+      settlements_long<-settlements %>%  pivot_longer(!year, names_to="Variable", values_to = "Value")
+      index_settlements<-subset(settlements_long, year==2020, select= -c(year))
+      settlements_long<-merge(settlements_long, index_settlements, by="Variable")       
+      settlements_long$Indicator<-substr(settlements_long$Variable, 1, regexpr("_", settlements_long$Variable) - 1)
+      settlements_long$Settlement<-substr(settlements_long$Variable, regexpr("_", settlements_long$Variable) + 1, nchar(settlements_long$Variable))
       
-    settlements_long<-settlements %>%  pivot_longer(!year, names_to="Variable", values_to = "Value")
-    index_settlements<-subset(settlements_long, year==2020, select= -c(year))
-    settlements_long<-merge(settlements_long, index_settlements, by="Variable")       
-    settlements_long$Indicator<-substr(settlements_long$Variable, 1, regexpr("_", settlements_long$Variable) - 1)
-    settlements_long$Settlement<-substr(settlements_long$Variable, regexpr("_", settlements_long$Variable) + 1, nchar(settlements_long$Variable))
-    
-    settlements_graph(settlements_long, printname = name, storename = incode, 
-        xvar=settlements_long$year, yvar=settlements_long$Value.x / settlements_long$Value.y,
-        cvar=factor(settlements_long$Settlement), tvar=factor(settlements_long$Indicator), 
-        soutputdir=paste0(rootoutputdir,"/",runset,"/",boundaryset,"/"))
-    
+      settlements_graph(settlements_long, printname = name, storename = incode, 
+          xvar=settlements_long$year, yvar=settlements_long$Value.x / settlements_long$Value.y,
+          cvar=factor(settlements_long$Settlement), tvar=factor(settlements_long$Indicator), 
+          soutputdir=paste0(rootoutputdir,"/",runset,"/",boundaryset,"/"))
+    }
   } else {
     print(paste(incode, " has no population, skipped"))
   }
@@ -108,7 +115,7 @@ for (incode in codeslist) {
 
 
 
-
+write.csv(indata, paste0(outputdir,"/","results.csv"))
 
 
 
