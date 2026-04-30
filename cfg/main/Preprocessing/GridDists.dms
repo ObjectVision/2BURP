@@ -181,6 +181,14 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 				, grid
 				, float32
 			);
+		container Euclidean_distance_atleast_to := 
+			for_each_nedv(
+				Accessibility_Variants/Label
+				// , 'makedefined(get_Grid_Costs_griddist/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific, 100f)'
+				, 'makedefined(get_Grid_Costs_netw/'+Accessibility_Variants/Label+'/lengthgrid, 100f)'
+				, grid
+				, float32
+			);
 	}
 	
 	Template T_getAccessGrids_netw 
@@ -205,8 +213,18 @@ Container Calculate_GridDistances: using = "Geography;SourceData;Classifications
 				
 				, Origins/NodeSet_rel
 				, 100f                // cut 
+			);	
+		attribute<float32> Length_to_nearest_dest (NodeSet) := 
+			impedance_table('bidirectional;startPoint(Node_rel);cut(OrgZone_max_imp)'
+				, Network/Length
+				, Network/F1
+				, Network/F2
+				
+				, Origins/NodeSet_rel
+				, 100f                // cut 
 			);
 		attribute<float32> costsgrid (grid) := Impedance_to_nearest_dest[grid/NodeSet_rel];
+		attribute<float32> lengthgrid (grid) := Length_to_nearest_dest[grid/NodeSet_rel];
 	}
 	
 	// Template T_getAccessGrids_grid 

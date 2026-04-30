@@ -82,7 +82,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		
 		attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[FunctionalAreas/per_CompactedDomain])[NrPerson];
 		attribute<NrPerson>          Write_Population_trunc_domain_result    (domain) := recollect_by_cond(domain/IsCompactedDomain, Population)
-		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'";
+		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'", storagetype = "gdalwrite.grid";
 		attribute<NrPerson>          Read_Population                         (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
 		attribute<NrPerson>			 Population_read_FA			(FunctionalAreas) := sum(Read_Population[CompactedDomain/org_rel], FunctionalAreas/per_CompactedDomain);
 		parameter<bool> 			 check_file:= ='strlen('+quote(ExistingFile('', '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'))+') > 0';

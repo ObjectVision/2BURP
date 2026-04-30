@@ -60,7 +60,7 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		parameter<bool>   check_files:= ='all(union_data(GHS_years, '+asitemlist(GHS_years/name+'/check_file')+'))';
 		
 	}
-		
+	
 	container GridDistances := 
 		for_each_ne(
 			GHS_years/name
@@ -69,6 +69,53 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	
 	#include <GridDists.dms>
 	#include <DegreeOfUrbanisation.dms>
+	
+	
+	// adhoc
+	container remoteness_grids:= for_each_ne(GHS_years/name, 'T_remoteness_WUP_degurbas('+string(GHS_years/Year)+')') 
+	{
+		container Y2025:= T_remoteness_WUP_degurbas(2025);
+		container store_all {
+			parameter<bool> store:= True, ExplicitSuppliers = "= aslist(GHS_years/name+'/Store_grid_costs_atleast_to/cities',';')";
+		}
+	}
+	
+	Template T_remoteness_WUP_degurbas: using = "Calculate_GridDistances;" {
+		
+		parameter<uint32> inyear;
+		
+		unit<wpoint> degurba:
+		storagename = "= '%LocalDataProjDir%/adhoc/GHS_WUP_DEGURBA_E'+string(inyear)+'_GLOBE_R2025A_54009_1000_V1_0/GHS_WUP_DEGURBA_E'+string(inyear)+'_GLOBE_R2025A_54009_1000_V1_0.tif'"
+		, storagetype = "gdal.grid"
+		, storagereadonly = "true"
+		, dialogdata = "Geography/Mollweide_base"
+		{
+			attribute<uint8> GridData;
+			attribute<uint8> ReadData (domain);
+			attribute<TypologyK>   ReadTypologyK (domain) := invert(TypologyK/EK)[ReadData];
+			attribute<bool> 	   Urban_centre (domain):= ReadTypologyK = TypologyK/V/Urban_Centre;
+		}
+		
+		container get_Grid_Costs_netw := 
+			for_each_ne(
+				Accessibility_Variants/Label
+				, 'T_getAccessGrids_netw(degurba/ReadTypologyK, '+string(id(Accessibility_Variants))+'[Accessibility_Variants])'
+			);
+		
+		container Store_grid_costs_atleast_to := 
+			for_each_nedvat(
+				Accessibility_Variants/Label
+				// , 'makedefined(get_Grid_Costs_griddist/'+Accessibility_Variants/Label+'/costsgrid_zonal_untiled_maximp_latitude_specific, 100f)'
+				, 'makedefined(get_Grid_Costs_netw/'+Accessibility_Variants/Label+'/costsgrid, 100f)'
+				, grid
+				, float32
+				, '%LocalDataProjDir%/adhoc/export/'+ModelParameters/StudyArea+'/'+string(inyear)+'/cost_atleast_to_'+Accessibility_Variants/Label+'.tif'
+				, 'gdalwrite.grid'
+			);
+		
+	
+	}
+	
 	
 	// Future change in population per degree of urbanisation class.
 	// container Population_perDoU := 

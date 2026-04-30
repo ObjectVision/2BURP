@@ -42,11 +42,11 @@ container ExportSettings
 				parameter<string> ComputerName := expand(., '%env:COMPUTERNAME%');
 			}
 			
-			container Git
+/*			container Git
 			{
 				parameter<string> RevisionInfo : Storagename = "=(GitImpl/WriterCode==0)?'%projDir%/git.txt':'Error '+String(GitImpl/WriterCode)+' while producing %projDir%/git.txt'", StorageType = "str";
 			}
-			
+*/			
 			container Parameters
 			{
 				parameter<string> StudyArea             := ModelParameters/StudyArea;

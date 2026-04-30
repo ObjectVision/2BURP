@@ -43,6 +43,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		// needs to be first of containers with template variables
 		// container access_to_settlements   := for_each_nedv('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, 'Socioeconomic/access_to_settlements/readgrids/'+Socioeconomic/access_to_settlements/gridslist/label+'/infile/ReadData_LL[CompactedDomain/org_rel]', CompactedDomain, uint32);
 		container gridcost_to_settlements := for_each_nedv('Grid_costs_atleast_to_'+Accessibility_Variants/Label, 'uint32(Preprocessing/GridDistances/Y2000/Grid_costs_atleast_to/'+Accessibility_Variants/Label+'[CompactedDomain/org_rel])', CompactedDomain, uint32);
+		container euclidean_distance_to_settlements := for_each_nedv('Euclidean_distance_atleast_to_'+Accessibility_Variants/Label, 'uint32(Preprocessing/GridDistances/Y2000/Euclidean_distance_atleast_to/'+Accessibility_Variants/Label+'[CompactedDomain/org_rel])', CompactedDomain, uint32);
 		//container pots_pop_2000           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2000[CompactedDomain/org_rel])', CompactedDomain, int32);
 		//container pots_pop_2020           := for_each_nedv(pot_fields/label, 'round(SourceData/Population/'+pot_fields/label+'/Y2020[CompactedDomain/org_rel])', CompactedDomain, int32);
 	}
@@ -62,6 +63,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		parameter<string> fieldnamelist:= aslist(directnames/isvalue ? directnames/name : '', fieldseparator)
 		//	+fieldseparator+aslist('Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
 			+fieldseparator+aslist('Grid_costs_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
+			+fieldseparator+aslist('Euclidean_distance_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
 		//	+fieldseparator+aslist('pop2000_'+pot_fields/label, fieldseparator)
 		//	+fieldseparator+aslist('pop2020_'+pot_fields/label, fieldseparator)	
 			;
@@ -69,6 +71,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		parameter<string> fieldreflist:= aslist(directnames/isvalue ? 'Create_DataForCalibration/'+directnames/name : '', fieldseparator)
 		//	+fieldseparator+aslist('Create_DataForCalibration/access_to_settlements/Road_distance_atleast_to_'+Socioeconomic/access_to_settlements/gridslist/label, fieldseparator)
 			+fieldseparator+aslist('Create_DataForCalibration/gridcost_to_settlements/Grid_costs_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
+			+fieldseparator+aslist('Create_DataForCalibration/euclidean_distance_to_settlements/Euclidean_distance_atleast_to_'+Accessibility_Variants/Label, fieldseparator)
 		//	+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2000/'+pot_fields/label, fieldseparator)
 		//	+fieldseparator+aslist('Create_DataForCalibration/pots_pop_2020/'+pot_fields/label, fieldseparator)
 			;
@@ -93,7 +96,13 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		  ,  StorageName = "= filename"
 		  ,  StorageType = "str";
 		
-		container Export_Tiffs_ForCalibration:= for_each_nedva(field/name, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])',domain,uint32,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif');
+		container Export_Tiffs_ForCalibration:= for_each_nedvat(field/name
+			, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])'
+			,domain
+			,uint32
+			,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif'
+			, 'gdalwrite.grid'
+		);
 	}
 	
 	container Export_BuiltUp_percentages_matrix {
