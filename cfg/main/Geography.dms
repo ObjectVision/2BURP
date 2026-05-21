@@ -137,6 +137,7 @@ container Geography : using = "units"
 		attribute<.>                 BaseGrid  (domain)    := recollect_by_cond(domain/IsCompactedDomain, ID(.));
 		attribute<float32>           lat_factor            := collect_by_cond(CompactedDomain, domain/lat_factor);
 		attribute<km2>               area                  := domain_rel->area;
+		attribute<CurrentProjection> Geometry			   := domain_rel->Geometry;
 		attribute<LatLong>           geometry_LL           := domain/geometry_LL[domain_rel];
 		attribute<SphericalMercator> geometry_mer          := convert(geometry_LL, SphericalMercator);
 		attribute<Countries>         Country_rel           := Countries/per_domain[domain_rel];

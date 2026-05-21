@@ -23,10 +23,14 @@ container Classifications : using = "units"
 	unit<uint8> ProjectionYears := range(uint8, uint8(substr(ModelParameters/StartYear, 2,2))+1b, 11b) //11b-1b becomes 2100 in this setup.
 	{
 		attribute<Year>   Yr             := (float32(id(.)) * 10f + 2000f)[Year];
+		attribute<float32> Length		 := const(10f,.,float32);
 		attribute<string> name           := 'Y'+string(Yr);
 		
 		attribute<string> prev_name      := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ] : ModelParameters/StartYear;
 		attribute<string> prevStateName  := id(.) != first(id(.)) ? name[id(.) - min_elem( id(.), 1b) ]+'/NewState' : 'InitialState';
+		
+		attribute<float32> projection_w:= value((Yr - 2025f) / 100f, float32), descr = "weight element used in the disaggregation of projections from UN to FA level (Marcello's formula)";
+		
 	}
 	
 	unit<uint32> AllYears:= union_unit(GHS_years, ProjectionYears) {
