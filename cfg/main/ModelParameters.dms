@@ -1,8 +1,9 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'World'     , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'South_America'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
 	parameter<bool>                    	 Use_TempTifFiles_manually                           := FALSE     	 , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
+	parameter<uint32> 					 ProjectionTrajectory_manually						 := 9999		 , Descr = "The UN projections trajectory selected for this run. 9999 corresponds with the medium scenario";
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
@@ -13,7 +14,7 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<string>                    Claim_fileversion                                   := 'v12'        , Descr = "Which claim file version should be used.";
 	parameter<string>                    FunctionalAreas_filedate                            := '20250428'   , Descr = "Which functional area filedate should be used.";
 
-	parameter<string>                    Additional_FileSuffix                               := '_pop_wpp24_v2_calib_20241205'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<string>                    Additional_FileSuffix                               := '_UN_WPP_80_trajectories_traj_'+string(ProjectionTrajectory)           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
@@ -42,6 +43,7 @@ container ModelParameters : using = "units;sourcedata"
 	
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
 	parameter<bool>                    	 Use_TempTifFiles                                    := bool(replace_value(expand(., '%env:Use_TempTifFiles%'), 'env:Use_TempTifFiles', string(Use_TempTifFiles_manually)))        , Descr = "This parameter extracts the use_temptiff files setting if the model is run from a batch file, if not, the Use_TempTifFiles_manually param is adopted.";
+	parameter<uint32>                  	 ProjectionTrajectory                                := uint32(replace_value(expand(., '%env:ProjectionTrajectory%'), 'env:ProjectionTrajectory', string(ProjectionTrajectory_manually)))        , Descr = "This parameter extracts the use_temptiff files setting if the model is run from a batch file, if not, the Use_TempTifFiles_manually param is adopted.";
 	parameter<string>                    coordsys_name                                       := domain_EPSG == '54009' ? 'Mollweide' : 'LatLong';
 	parameter<string>                    gridsize                                            := domain_EPSG == '54009' ? string(MW_Gridsize) : string(WGS_Gridsize)+'ss';
 	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_IntMigr-'+string(Pop_Internal_Migration_Reduction_Rate_base)+'_PopRSuitScale-'+string(Pop_Suitability_Reduction_Scale)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";

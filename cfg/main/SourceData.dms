@@ -2,7 +2,7 @@ container SourceData : using = "geography;units"
 {
 	container Claims : using = "RegionalUnits"
 	{
-		parameter<uint32> sel_trajectory:= 9999;
+		parameter<uint32> sel_trajectory:= ModelParameters/ProjectionTrajectory;
 		
 		container UN_trajectories_projections
 		: StorageName = "%ProjDir%/Data/Claims/UN_PPP2024_pop_81_trajectories.xlsx"
@@ -15,6 +15,7 @@ container SourceData : using = "geography;units"
 			attribute<UN_Countries> country_rel:= rlookup(ISO3, UN_Countries/Values);
 		}
 		unit<uint32> UN_Countries:= unique(Trajectory_sel/ISO3) {
+			attribute<uint32> nFas:= pcount(FAs/Country_rel);
 			attribute<Mollweide_base> Geometry (polygon):= geos_union_polygon(FAs/Geometry, FAs/country_rel);
 			attribute<Trajectory_sel> traj_sel_rel:= invert(Trajectory_sel/country_rel);
 			
@@ -79,7 +80,10 @@ container SourceData : using = "geography;units"
 			}
 			
 			container Pop:= for_each_nedv(Classifications/ProjectionYears/name
-				, 'scalesum(Pop_hat/'+Classifications/ProjectionYears/name+', country_rel, UN_Countries/Trajectory_pop_projections/'+Classifications/ProjectionYears/name+')'
+				, 
+				'makedefined('
+				+ 'scalesum(Pop_hat/'+Classifications/ProjectionYears/name+', country_rel, UN_Countries/Trajectory_pop_projections/'+Classifications/ProjectionYears/name+')'
+				+ ', pop_wup/'+Classifications/ProjectionYears/name+')'
 				//, 'scalesum(Pop_hat/'+Classifications/ProjectionYears/name+', country_rel, UN_Countries/WUP_pop_projections/'+Classifications/ProjectionYears/name+')'
 				, FAs
 				, float32
@@ -101,6 +105,8 @@ container SourceData : using = "geography;units"
 			attribute<Read_FA_characteristics/Data> fa_char_rel:= invert(Read_FA_characteristics/Data/FunctionalArea_all_rel);
 			attribute<float32> LDP:= float32(Read_FA_characteristics/Data/LDP[fa_char_rel]);
 			attribute<float32> LDP_CD:= float32(Read_FA_characteristics/Data/LDP_CD[fa_char_rel]);
+			attribute<float32> LAND:= float32(Read_FA_characteristics/Data/LAND[fa_char_rel]);
+			attribute<float32> MaxBUcap:= 0.5f * LAND;
 			//attribute<float32> BUD_CD:= log(BU_res[float32] / (LDP_CD * 2f));
 			
 			unit<uint32> FAs_checks:= FAs {
@@ -135,8 +141,12 @@ container SourceData : using = "geography;units"
 				, FAs, float32
 			);
 			container POPCH:= for_each_nedv(Classifications/ProjectionYears/name
-				//, 'exp(makedefined(log(Pop/'+Classifications/ProjectionYears/name+' / Pop/'+Classifications/ProjectionYears/prev_name+') / Classifications/ProjectionYears/Length['+string(id(Classifications/ProjectionYears))+'b], 0f)) - 1f'
-				, 'exp(makedefined(log(pop_wup/'+Classifications/ProjectionYears/name+' / pop_wup/'+Classifications/ProjectionYears/prev_name+') / Classifications/ProjectionYears/Length['+string(id(Classifications/ProjectionYears))+'b], 0f)) - 1f'
+				, 
+				'abs('+
+				'exp(makedefined(log(Pop/'+Classifications/ProjectionYears/name+' / Pop/'+Classifications/ProjectionYears/prev_name+') / Classifications/ProjectionYears/Length['+string(id(Classifications/ProjectionYears))+'b], 0f)) - 1f'
+				//'exp(makedefined(log(pop_wup/'+Classifications/ProjectionYears/name+' / pop_wup/'+Classifications/ProjectionYears/prev_name+') / Classifications/ProjectionYears/Length['+string(id(Classifications/ProjectionYears))+'b], 0f)) - 1f'
+				//'makedefined((pop/'+Classifications/ProjectionYears/name+' / pop/'+Classifications/ProjectionYears/prev_name+') ^ (1f / Classifications/ProjectionYears/Length['+string(id(Classifications/ProjectionYears))+'b]), 1f) - 1f'
+				+ ')'
 				, FAs, float32	
 			);
 			container BUCAPs:= for_each_nedv(Classifications/ProjectionYears/name
@@ -144,7 +154,7 @@ container SourceData : using = "geography;units"
 				, FAs, float32
 			) 
 			{
-				attribute<float32> y2020 (FAs):= (BU_tot/y2020[float32] / Pop/y2020);
+				attribute<float32> y2020 (FAs):= (BU_tot/y2020[float32] / pop_wup/y2020);
 			}
 			container ln_BUCAPs:= for_each_nedv(Classifications/ProjectionYears/name,
 				'log(BUCAPs/'+Classifications/ProjectionYears/name+')'
@@ -154,14 +164,18 @@ container SourceData : using = "geography;units"
 				attribute<float32> y2020 (FAs):= log(BUCAPs/y2020);
 			}
 			container BU_tot:= for_each_nedv(Classifications/ProjectionYears/name
-				, 'max_elem('
-					// + 'pop/'+Classifications/ProjectionYears/name+' * (BUCAPs/'+Classifications/ProjectionYears/name+')'
-					+ 'pop_wup/'+Classifications/ProjectionYears/name+' * (BUCAPs/'+Classifications/ProjectionYears/name+')' // uses Marcello's pop distribution (debugging)
+				, 
+					'min_elem('
+					+ 'max_elem('
+					+ 'pop/'+Classifications/ProjectionYears/name+' * (BUCAPs/'+Classifications/ProjectionYears/name+')'
+					//+ 'pop_wup/'+Classifications/ProjectionYears/name+' * (BUCAPs/'+Classifications/ProjectionYears/name+')' // uses Marcello's pop distribution (debugging)
 					+ ', '+Classifications/ProjectionYears/prev_name+')'
+					+ ', MaxBUcap)'
 				, FAs, float32
 			)
 			{
-				attribute<float32> y2020 (FAs):= sum(float32(Builtup/Total/Y2020), RegionalUnits/FunctionalAreas_all_grid/FA_all_rel);
+				//attribute<float32> y2020 (FAs):= sum(float32(Builtup/Total/Y2020), RegionalUnits/FunctionalAreas_all_grid/FA_all_rel);
+				attribute<float32> y2020 (FAs):= bu_wup/Y2020;
 			}
 			container BU_res:= for_each_nedv(Classifications/ProjectionYears/name
 				, 'pop/'+Classifications/ProjectionYears/name+' / (BUCAPs/'+Classifications/ProjectionYears/name+')'
@@ -173,11 +187,11 @@ container SourceData : using = "geography;units"
 				attribute<float32> y2020_hist (FAs):= float32(Read_CSV/BU_estimates/BU2020[hist_bu_rel]);
 			}
 			container BUD_CD:= for_each_nedv(Classifications/ProjectionYears/name
-				, 'log(BU_tot/'+Classifications/ProjectionYears/name+'[float32] / (LDP_CD * 2f))'
+				, 'log((2f * BU_tot/'+Classifications/ProjectionYears/name+'[float32]) / (LDP_CD))'
 				, FAs, float32
 			)
 			{
-				attribute<float32> y2020 (FAs):= log(BU_tot/y2020[float32] / (LDP_CD * 2f));
+				attribute<float32> y2020 (FAs):= log((BU_tot/y2020[float32] * 2f) / (LDP_CD));
 			}
 			container BU_WUP_projected:= for_each_nedv(Classifications/ProjectionYears/name
 				, 'float32(Read_CSV/BU_estimates/BU'+string(Classifications/ProjectionYears/Yr)+'[hist_bu_rel])'

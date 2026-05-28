@@ -3,7 +3,8 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	container Claims_BuiltUp := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
+			//, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
+			, 'convert(/sourcedata/Claims/FAs/BU_tot/'+ProjectionYears/name+'[m2], km2)[sourcedata/RegionalUnits/FunctionalAreas/org_rel] / 1[km2] * 1[BuiltUpKm2]'
 			, FunctionalAreas
 			, BuiltUpKm2
 		)
@@ -15,7 +16,8 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 	container Claims_Population := 
 		for_each_nedv(
 			ProjectionYears/name
-			, '(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+'[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
+			//, '(SourceData/Claims/Read_CSV/Pop_estimates/POP'+string(ProjectionYears/Yr)+'[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)]'
+			, '(sourcedata/Claims/FAs/Pop/'+ProjectionYears/name+'[Person])[sourcedata/RegionalUnits/FunctionalAreas/org_rel]'
 			, FunctionalAreas
 			, Person
 		)
