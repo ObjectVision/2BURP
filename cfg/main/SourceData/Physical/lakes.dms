@@ -39,7 +39,7 @@ container Lakes
 	attribute<Float32> sqr_dist                (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
 	attribute<Float32> Location2Lake_distInfo  (CompactedDomain) := dist_info(glwd_3/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
 	attribute<km>      Location2Lake_km        (CompactedDomain) := (Location2Lake_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-	attribute<km>      Location2Lake_km_domain_export (domain) := min_elem(Location2Lake_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif";
+	attribute<km>      Location2Lake_km_domain_export (domain) := min_elem(Location2Lake_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif", StorageType = "tif";
 	
 	unit<ipoint> Dist_Lake_km
 	:	StorageName     = "%ToBURPDataDir%/Physical/Water/Location2Lake_km.tif"

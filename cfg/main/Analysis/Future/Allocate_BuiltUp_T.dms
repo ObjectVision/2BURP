@@ -67,7 +67,7 @@ Template Allocate_Builtup_T
 																(Physical/Natural_Hazards/Earthquake/Earthquakes_Modified_Mercalli_Intensity/ReadData[float32]                * AutoGLM_Coeffs/Earthquakes_MMI_Index) + 
 																(Physical/Natural_Hazards/Landslide/LS_risk[float32]                                                          * AutoGLM_Coeffs/Landslide_Prone) + 
 																AutoGLM_Coeffs/Intercept'; 
-		attribute<Suit> Write_Calc (domain) := Calc, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_BU_'+ThisYear+'_'+ModelParameters/domain_EPSG+'.tif'";
+		attribute<Suit> Write_Calc (domain) := Calc, StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_BU_'+ThisYear+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
 		attribute<Suit> Read_Calc  (domain) : StorageName = "='%LocalDataProjDir%/Temp/'+ModelParameters/StudyArea+'/Suitability_'+ModelParameters/Calibration_filedate+'_BU_'+ThisYear+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "True";
 				
 		attribute<Suit>      BuiltUp               (CompactedDomain) := =ModelParameters/Use_TempTifFiles ? 'MakeDefined(Read_Calc[CompactedDomain/org_rel], -100[suit])' : 'MakeDefined(Write_Calc[CompactedDomain/org_rel], -100[suit])';
@@ -100,10 +100,10 @@ Template Allocate_Builtup_T
 		attribute<float32>   FinalProb             (CompactedDomain) := Prob * Dynamic_Expected_increase * ProbBalanceFactor;
 		
 		container adhoc_export {
-			attribute<float32> Loc_suit (domain) := recollect_by_cond(domain/IsCompactedDomain, Prob), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Locational_suitability_'+ModelParameters/StartYear+'.tif'";
-			attribute<float32> ET      	(domain) := recollect_by_cond(domain/IsCompactedDomain, Dynamic_Expected_increase), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Expected_increase_'+ModelParameters/StartYear+'.tif'";
-			attribute<float32> ET_x_suit(domain) := Loc_suit * ET, StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/ET_x_suit_'+ModelParameters/StartYear+'.tif'";
-			attribute<float32> Def_val  (domain) := recollect_by_cond(domain/IsCompactedDomain, FinalProb), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Balanced_ET_x_suit_'+ModelParameters/StartYear+'.tif'";
+			attribute<float32> Loc_suit (domain) := recollect_by_cond(domain/IsCompactedDomain, Prob), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Locational_suitability_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
+			attribute<float32> ET      	(domain) := recollect_by_cond(domain/IsCompactedDomain, Dynamic_Expected_increase), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Expected_increase_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
+			attribute<float32> ET_x_suit(domain) := Loc_suit * ET, StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/ET_x_suit_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
+			attribute<float32> Def_val  (domain) := recollect_by_cond(domain/IsCompactedDomain, FinalProb), StorageName = "='%LocalDataProjDir%/Results/adhoc_suit/'+ModelParameters/StudyArea+'/Balanced_ET_x_suit_'+ModelParameters/StartYear+'.tif'", StorageType = "tif";
 		}
 	}
 	

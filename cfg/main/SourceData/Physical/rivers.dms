@@ -42,7 +42,7 @@ container Rivers
 	attribute<Float32> sqr_dist                (CompactedDomain) := Sqr(250000[meter] / CompactedDomain/lat_factor);
 	attribute<Float32> Location2River_distInfo (CompactedDomain) := dist_info(River/geometry_mer, CompactedDomain/Geometry_mer, sqr_dist);
 	attribute<km>      Location2River_km       (CompactedDomain) := (Location2River_distInfo * CompactedDomain/lat_factor)[meter] * 0.001[km / meter];
-	attribute<km>      Location2River_km_domain_export (domain) := min_elem(Location2River_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/water/Location2River_km.tif";
+	attribute<km>      Location2River_km_domain_export (domain) := min_elem(Location2River_km[CompactedDomain/BaseGrid], 250[km]), StorageName = "%ToBURPDataDir%/Physical/water/Location2River_km.tif", StorageType = "tif";
 
 	unit<ipoint> Dist_River_km:
 	StorageName     = "%ToBURPDataDir%/physical/water/Location2River_km.tif",

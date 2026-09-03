@@ -3,29 +3,31 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	container Prep
 	{
 		container BuiltUp_Total_Share := 
-			for_each_nedva(
+			for_each_nedvat(
 				ProjectionYears/name
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
 				, domain
 				, float32
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+				, 'tif'
 			)
 		{
-			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
+			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
 		}
 	
 		container Population := 
-			for_each_nedva(
+			for_each_nedvat(
 				ProjectionYears/name
 				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
 				, domain
 				, NrPerson
 				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+				, 'tif'
 			)
 		{	
 			attribute<NrPerson> Y2020		 (domain) := Initial;
 			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
-			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'";
+			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
 		}
 			
 		container BuiltUp_Total_Area := 
@@ -435,7 +437,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 	// ad hoc cjc 29/8/24, does not adhere to use_tempfiles approach yet.
 	unit<uint32> DoU_Flow_Matrix := combine(TypologyK, TypologyK) {
 		attribute<string> Label:= TypologyK/name[first_rel]+'_to_'+TypologyK/name[second_rel];
-		attribute<upoint> uni:= point(uint32(first_rel), uint32(second_rel), upoint);
+		attribute<upoint> uni:= point_xy(uint32(first_rel), uint32(second_rel), upoint);
 		
 		container area:= for_each_nedv(Label
 			, 'sum(float32(Prep/DegreesOfUrbanisation/Initial/ReadTypologyK == '+string(first_rel)+'[uint8] && Prep/DegreesOfUrbanisation/Y2100/ReadTypologyK == '+string(second_rel)+'[uint8]))'
@@ -704,15 +706,15 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		
 		unit<uint32> countries_x_degurba_lvl2:= combine(Countries_study_area, TypologyK) {
 			attribute<uint8>  EK:= TypologyK/EK[second_rel];
-			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
+			attribute<upoint> pt:= point_xy(first_rel, EK[uint32], upoint);
 			attribute<string> Country:= Countries_study_area/Label[first_rel];
 			attribute<string> Degurba:= TypologyK/label[second_rel];
 			attribute<string> Label:= Country + ' ' + Degurba;
-			attribute<countries_x_degurba_lvl1> cd1_rel:= rlookup(point(first_rel, 10*(EK[uint32] / 10), upoint), countries_x_degurba_lvl1/pt);
+			attribute<countries_x_degurba_lvl1> cd1_rel:= rlookup(point_xy(first_rel, 10*(EK[uint32] / 10), upoint), countries_x_degurba_lvl1/pt);
 		}
 		unit<uint32> countries_x_degurba_lvl1:= combine(Countries_study_area, Degurba_lvl1) {
 			attribute<uint8>  EK:= Degurba_lvl1/EK[second_rel];
-			attribute<upoint> pt:= point(first_rel, EK[uint32], upoint);
+			attribute<upoint> pt:= point_xy(first_rel, EK[uint32], upoint);
 			attribute<string> Country:= Countries_study_area/Label[first_rel];
 			attribute<string> Degurba:= Degurba_lvl1/label[second_rel];
 			attribute<string> Label:= Country + ' ' + Degurba;
@@ -720,7 +722,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		
 		
 		container grid_rels:= for_each_nedv(AllYears/name
-			, 'rlookup(point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint), countries_x_degurba_lvl2/pt)'
+			, 'rlookup(point_xy(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint), countries_x_degurba_lvl2/pt)'
 			//, 'point(Countries_study_area/per_domain, Prep/Read_DegreesOfUrbanisation/'+AllYears/name+'[uint32], upoint)'
 			, domain
 			, countries_x_degurba_lvl2

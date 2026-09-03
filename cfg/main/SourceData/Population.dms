@@ -77,7 +77,7 @@ container Population  : using = "units;geography;classifications;sourcedata/regi
 		
 		attribute<NrPerson>          Population                     (CompactedDomain) := Population_trunc[NrPerson] + int32(Population_frac_rank < Max_rank[FunctionalAreas/per_CompactedDomain])[NrPerson];
 		attribute<NrPerson>          Write_Population_trunc_domain_result    (domain) := recollect_by_cond(domain/IsCompactedDomain, Population)
-		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'";
+		, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
 		attribute<NrPerson>          Read_Population                         (domain) : StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+Year+'_'+ModelParameters/domain_EPSG+'.tif'", StorageReadOnly = "true";
 	}
 	

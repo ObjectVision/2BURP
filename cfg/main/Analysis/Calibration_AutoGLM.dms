@@ -93,7 +93,7 @@ container Calibration : using = "geography;SourceData/RegionalUnits;SourceData;C
 		  ,  StorageName = "= filename"
 		  ,  StorageType = "str";
 		
-		container Export_Tiffs_ForCalibration:= for_each_nedva(field/name, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])',domain,uint32,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif');
+		container Export_Tiffs_ForCalibration:= for_each_nedvat(field/name, 'uint32('+field/ref+'[CompactedDomain/BaseGrid])',domain,uint32,'%LocalDataProjDir%/Calibration_export/'+ModelParameters/StudyArea+'/tiffs/'+field/name+'.tif', 'tif');
 	}
 	
 	container Export_BuiltUp_percentages_matrix {

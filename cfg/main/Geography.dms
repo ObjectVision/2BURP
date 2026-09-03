@@ -114,7 +114,7 @@ container Geography : using = "units"
 			)
 		{	
 			attribute<Classifications/Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry_MW, impl/MakeDomain_World/domain);
-			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif";
+			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif", StorageType = "tif";
 		}
 
 		container Domain_perContinent :=
@@ -189,7 +189,7 @@ container Geography : using = "units"
 			)
 		{	
 			attribute<Classifications/Continents>  Continent_rel (impl/MakeDomain_World/domain) := poly2grid(/SourceData/RegionalUnits/Continents/geometry, impl/MakeDomain_World/domain);
-			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif";
+			attribute<float32>     Mozaic        (Impl/MakeDomain_World/domain) := ='raster_merge(Continent_rel, float32, '+AsItemList(Classifications/Continents/name)+')', StorageName = "%LocalDataProjDir%/Temp/CD/World.tif", StorageType = "tif";
 		}
 
 		container Domain_perContinent :=
