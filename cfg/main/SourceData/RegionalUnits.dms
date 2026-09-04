@@ -12,15 +12,18 @@ container RegionalUnits
 		attribute<Continents>  		 Continents_rel           := rlookup(continent_name, Continents/name);
 		attribute<string>            continent_name           := Continent;
 	}
-	
+	parameter<bool> do_store_countries:= True, ExplicitSuppliers = "store_Countries;";
+	parameter<bool> check_country_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Countries.fss'))+') > 0';
 	unit<uint8> store_Continents := Classifications/Continents
 	, storagename = "%ToBURPDataDir%/Regions/Continents.fss"
 	{
 		attribute<LatLong_base>    geometry_LL    (poly) := bp_union_polygon(Countries/geometry_LL[LatLong_base_ip], Countries/continents_rel)[LatLong_base];
 		attribute<Mollweide_base>  geometry_MW    (poly) := bp_union_polygon(Countries/geometry_MW[Mollweide_base_ip], Countries/continents_rel)[Mollweide_base];
+		attribute<Mollweide_base>  geometry_1RUS_MW (poly) := bp_union_polygon(Countries/geometry_MW[Mollweide_base_ip], Countries/Continents_1RUS_rel)[Mollweide_base];
 		attribute<string>   name                  := Classifications/Continents/name;
 	}
-	
+	parameter<bool> do_store_continents:= True, ExplicitSuppliers = "store_Continents;";
+	parameter<bool> check_continent_file:= ='strlen('+quote(ExistingFile('', '%ToBURPDataDir%/Regions/Continents.fss'))+') > 0';
 	unit<uint32> Countries
 	: storagename = "= propvalue(store_Countries, 'StorageName')"
 	, StorageReadOnly = "True"
@@ -28,16 +31,38 @@ container RegionalUnits
 	, DialogData = "geometry_ll"
 	{
 		attribute<string>                 Label; 
+		attribute<string>                 Label1 := Label == 'Guadeloupe' ? 'Guadeloupe'+string(id(.)) : label; 
 		attribute<string>                 ISO3; 
 		attribute<LatLong_base>           geometry_LL (poly);
 		attribute<Mollweide_base>         Geometry_MW (poly); 
 		attribute<CurrentProjection_base> Geometry (poly) := =ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'geometry_LL';
 		attribute<Continents>        Continents_rel;
 		attribute<string>            continent_name;
+		attribute<string>			 continent_1RUS_name:= ISO3 = 'ARUS' ? 'Europe' : continent_name;
+		attribute<Continents>		 Continents_1RUS_rel:= rlookup(continent_1RUS_name, Continents/name);
 		// attribute<mainland>          mainland_rel               := rlookup(const(1u,.), mainland/values);
 		attribute<.>                 per_domain              (domain) := poly2grid(Geometry , domain);
 		
-		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
+		container V := for_each_nedv(AsItemName(Label1), String(ID(.))+'[..]', void, .);
+		container GetPerCountryGeometry := 
+			for_each_ne(
+				AsItemName(Label1)
+				, 'GetPerCountryGeometry_T('+quote(AsItemName(Label1))+')'
+			);
+			
+		Template GetPerCountryGeometry_T
+		{
+			parameter<string> name;
+			///
+			parameter<LatLong_base>   geometry_LL    (poly) := ='Countries/geometry_LL[Countries/v/'+name+']';
+			parameter<Mollweide_base> geometry_MW    (poly) := ='Countries/geometry_MW[Countries/v/'+name+']';
+			
+			unit<uint32> unit : nrofrows = 1
+			{
+				attribute<LatLong_base>   geometry_LL    (poly) := union_data(., ../geometry_LL);
+				attribute<Mollweide_base> geometry_MW    (poly) := union_data(., ../geometry_MW);
+			}
+		}
 	}
 
 	
@@ -46,7 +71,9 @@ container RegionalUnits
 	{
 		attribute<LatLong_base>    geometry_LL       (poly);
 		attribute<Mollweide_base>  geometry_MW       (poly);
+		attribute<Mollweide_base>  geometry_1RUS_MW  (poly);
 		attribute<string>   name                  := Classifications/Continents/name;
+		attribute<string> 	code				  := '00'+string(id(.)+1b)+'_'+name;
 		attribute<.>        per_grid     (domain) := poly2grid(geometry_LL, domain);
 		attribute<World>    World_rel             := const(0[WOrld],.);
 		
@@ -87,16 +114,60 @@ container RegionalUnits
 		// attribute<LatLong> geometry (poly) := bp_union_polygon(Countries/Geometry_mdegrees, Countries/mainland_rel)[LatLong];
 	// }
 	
+	unit<uint32> Continents_uint32:= range(uint32, 0, #Continents), descr = "uint32 version of the continents unit, needed for reporting in postprocessing." {
+		attribute<Continents> org_rel:= id(.)[Continents];
+		attribute<Mollweide_base> Geometry_MW (poly):= org_rel->Geometry_MW;
+		attribute<string> 	label:= org_rel->name;
+		attribute<string>   code:= org_rel->code;
+	}
+	unit<uint32> Continents_1RUS_uint32:= range(uint32, 0, #Continents), descr = "uint32 version of the continents unit, needed for reporting in postprocessing." {
+		attribute<Continents> org_rel:= id(.)[Continents];
+		attribute<Mollweide_base> Geometry_MW (poly):= org_rel->geometry_1RUS_MW;
+		attribute<string> 	label:= org_rel->name;
+		attribute<string>   code:= org_rel->code;
+	}
 	unit<uint8> World : nrofrows = 1
 	{
 		attribute<string>     Label           := const('World',.);
+		attribute<string> 	  code			  := const('000',.);
 		attribute<Mollweide_base>  geometry_MW (poly) := bp_union_polygon(Continents/geometry_MW[Mollweide_base_ip], continents/World_rel)[Mollweide_base];
 		attribute<LatLong_base>    geometry_LL (poly) := bp_union_polygon(Continents/geometry_LL[LatLong_base_ip], continents/World_rel)[LatLong_base];
 		
 		container V := for_each_nedv(AsItemName(Label), String(ID(.))+'[..]', void, .);
 	}
-	
-
+	unit<uint32> World_uint32:= range(uint32, 0, #World), descr = "uint32 version of the world unit, needed for reporting in postprocessing." {
+		attribute<World> org_rel:= id(.)[World];
+		attribute<Mollweide_base> Geometry_MW (poly):= org_rel->Geometry_MW;
+		attribute<string> 	label:= org_rel->label;
+		attribute<string>   code:= org_rel->code;
+	}
+	unit<ipoint> FunctionalAreas_all_grid
+	: Storagename = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009_1000m.tif'"
+	, StorageType = "gdal.grid"
+	, StorageReadOnly = "true"
+	, DialogData      = "Mollweide_base"
+	{
+		attribute<uint32> ReadData (domain);
+		attribute<FunctionalAreas_all> FA_all_rel (domain):= rlookup(ReadData, uint32(FunctionalAreas_all/gridval));
+		attribute<FunctionalAreas>	 FA_rel		  (domain):= invert(FunctionalAreas/org_rel)[FA_all_rel];
+	}
+	unit<ipoint> FunctionalAreas_all_grid_world
+	: Storagename = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009_1000m.tif'"
+	, StorageType = "gdal.grid"
+	, StorageReadOnly = "true"
+	, DialogData      = "Mollweide_base"
+	{
+		attribute<uint32> ReadData (Impl/MakeDomain_World/domain);
+		attribute<FunctionalAreas_all> FA_all_rel (Impl/MakeDomain_World/domain):= rlookup(ReadData, uint32(FunctionalAreas_all/gridval));
+	}
+	unit<uint32> FunctionalAreas_all_fields := FunctionalAreas_all
+	, StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009.shp'"
+	, StorageType = "gdal.vect"
+	, StorageReadOnly = "true"
+	, Descr = "Fields that only later shapefile vintages carry; read through a second view on the same file so that FunctionalAreas_all can define fallbacks for them"
+	{
+		attribute<uint32> gridval;
+	}
 	unit<uint32> FunctionalAreas_all
 	: StorageName = "='%ToBURPDataDir%/Regions/fas_combined_'+/ModelParameters/FunctionalAreas_filedate+'_54009.shp'"
 	, StorageType = "gdal.vect"
@@ -111,13 +182,16 @@ container RegionalUnits
 			parameter<uint32> PenColor   := rgb(255,0,0), DialogType = "PenColor";		
 		}
 		
-		attribute<string>                 Label                                 := name;
+		attribute<string>                 Label                                 := 'z_'+string(gridval);
 		attribute<.>                      per_domain                   (domain) := poly2grid(Geometry_, domain);
 		// attribute<.>                      per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
 		attribute<bool>                   IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<bool>                   IsStudyArea                           := modus(IsStudyArea_domain, per_domain);
-		attribute<string>                 Continent                             := rjoin(country, set_countries/zoneid, set_countries/continent);
-		attribute<set_countries>          Country_rel                           := rlookup(country, set_countries/zoneid);
+		//attribute<string>                 Continent                             := rjoin(country, set_countries/zoneid, set_countries/continent);
+		//attribute<set_countries>          Country_rel                           := rlookup(country, set_countries/zoneid);
+		attribute<uint32> 				 faid:= uint32(gridval);
+		// gridval is a field of the 20250428 shapefile; the 20240627 fallback has no such field and its raster ids equal record order + 1 (CRISP issue #132)
+		attribute<uint32>                 gridval                               := = ModelParameters/FunctionalAreas_gridval_from_order ? 'id(.) + 1' : 'FunctionalAreas_all_fields/gridval';
 	}
 	
 	unit<uint32> FunctionalAreas := select_with_org_rel(FunctionalAreas_all/IsStudyArea)
@@ -129,11 +203,12 @@ container RegionalUnits
 			parameter<uint32> BrushColor := null_u, DialogType = "BrushColor";
 			parameter<uint32> PenColor   := rgb(10,10,10), DialogType = "PenColor";
 		}
-		attribute<string>         item_name                             := AsItemName(FunctionalAreas_all/name[org_rel]);
-		attribute<.>              per_domain                   (domain) := poly2grid(Geometry, domain);
+		attribute<string> 		  Label									:= FunctionalAreas_all/label[org_rel];
+		attribute<string>         item_name                             := AsItemName(Label);
+		attribute<.>              per_domain                   (domain) := FunctionalAreas_all_grid/FA_rel;
 		attribute<bool>           IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<.>              per_CompactedDomain (CompactedDomain) := per_domain[CompactedDomain/domain_rel];
-		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));
+		attribute<bool>           ignore_check_enough_suitable_locations  := isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_suitable_locations/org_rels));// || ModelParameters/ignore_Check_for_enough_suitable_locations/Ignore_all;
 		attribute<bool>           ignore_Check_for_enough_drawn_population:= isdefined(rlookup(org_rel, ModelParameters/ignore_Check_for_enough_drawn_population/org_rels));
 		attribute<km2>            cd_area                               := sum(CompactedDomain/area, CompactedDomain/FunctionalAreas_rel);
 		attribute<string> 		  country								:= FunctionalAreas_all/country[org_rel];
@@ -148,8 +223,10 @@ container RegionalUnits
 		attribute<CurrentProjection_base> Geometry 			(poly):= 	=ModelParameters/domain_EPSG == '54009' ? 'Geometry_MW' : 'geometry_LL';
 		attribute<.>              		  per_domain        (domain):= 	poly2grid(Geometry, domain);
 	}
+	unit<uint32> UN_countries:= =UN_units/check_countries_UN_file ? 'UN_units/Countries_UN' : 'World';
+	unit<uint32> UN_intermediate_regions:= =UN_units/check_regions_UN_file ? 'UN_units/UN_intermediate_regions' : 'World';
 	
-	unit<uint32> set_countries: nrofrows = 239 
+	unit<uint32> set_countries: nrofrows = 240 
 	{
 		attribute<string>          ZoneId          := inMatrix/data[(id(.)*3+0)[inMatrix]];
 		attribute<string>          Label           := inMatrix/data[(id(.)*3+1)[inMatrix]];
@@ -291,6 +368,7 @@ container RegionalUnits
 			'LVA',	'Latvia',	'Europe',
 			'MAC',	'Macau',	'Asia',
 			'GLP',	'Guadeloupe',	'North_America',
+			'MAF',	'Saint Martin (FR)', 'North_America',
 			'MAR',	'Morocco',	'Africa',
 			'MCO',	'Monaco',	'Europe',
 			'MDA',	'Moldova',	'Europe',
@@ -402,4 +480,5 @@ container RegionalUnits
 			'ZWE',	'Zimbabwe',	'Africa'];
 		}
 	}
+	#include<UN_units.dms>
 }

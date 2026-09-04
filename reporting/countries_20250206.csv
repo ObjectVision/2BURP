@@ -1,0 +1,276 @@
+﻿CountryID;iso3cd;Name;UN intermediate region;Continent
+1;ABW;Aruba;13_Caribbean;North_America
+2;AFG;Afghanistan;10_Southern Asia;Asia
+3;AGO;Angola;02_Middle Africa;Africa
+4;AIA;Anguilla;13_Caribbean;North_America
+5;ALA;Åland Islands;15_Northern Europe;Europe
+6;ALB;Albania;18_Southern Europe;Europe
+7;AND;Andorra;18_Southern Europe;Europe
+8;ARE;United Arab Emirates;07_Western Asia;Asia
+9;ARG;Argentina;14_South America;South_America
+10;ARM;Armenia;07_Western Asia;Asia
+11;ATG;Antigua and Barbuda;13_Caribbean;North_America
+12;AUS;Australia;19_Australia and New Zealand;Australia_Oceania
+13;AUT;Austria;17_Western Europe;Europe
+14;AZE;Azerbaijan;07_Western Asia;Asia
+15;ASM;American Samoa;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+16;ATA;Antarctica;21_Antarctica;none
+17;ATF;French Southern Territories;03_Eastern Africa;Africa
+18;BDI;Burundi;03_Eastern Africa;Africa
+19;BEL;Belgium;17_Western Europe;Europe
+20;BEN;Benin;04_Western Africa;Africa
+21;SOM;Somalia;03_Eastern Africa;Africa
+22;BES;Bonaire, Sint Eustatius and Saba;13_Caribbean;North_America
+23;BFA;Burkina Faso;04_Western Africa;Africa
+24;BGD;Bangladesh;10_Southern Asia;Asia
+25;BGR;Bulgaria;16_Eastern Europe;Europe
+26;BHR;Bahrain;07_Western Asia;Asia
+27;BHS;Bahamas;13_Caribbean;North_America
+28;BIH;Bosnia and Herzegovina;18_Southern Europe;Europe
+29;BLM;Saint Barthélemy;13_Caribbean;North_America
+30;BLR;Belarus;16_Eastern Europe;Europe
+31;BLZ;Belize;12_Central America;North_America
+32;BMU;Bermuda;11_Northern America;North_America
+33;BOL;Bolivia (Plurinational State of);14_South America;South_America
+34;BRA;Brazil;14_South America;South_America
+35;MCO;Monaco;17_Western Europe;Europe
+36;MDA;Republic of Moldova;16_Eastern Europe;Europe
+37;BRB;Barbados;13_Caribbean;North_America
+38;BRN;Brunei Darussalam;09_South-eastern Asia;Asia
+39;BTN;Bhutan;10_Southern Asia;Asia
+40;BVT;Bouvet Island;05_Southern Africa;South_America
+41;BWA;Botswana;05_Southern Africa;Africa
+42;CAF;Central African Republic;02_Middle Africa;Africa
+43;CAN;Canada;11_Northern America;North_America
+44;CCK;Cocos (Keeling) Islands;19_Australia and New Zealand;Australia_Oceania
+45;CHE;Switzerland;17_Western Europe;Europe
+46;CHL;Chile;14_South America;South_America
+47;CHN;China;06_Eastern Asia;Asia
+48;CIV;Côte d'Ivoire;04_Western Africa;Africa
+49;CMR;Cameroon;02_Middle Africa;Africa
+50;COD;Democratic Republic of the Congo;02_Middle Africa;Africa
+51;COG;Congo;02_Middle Africa;Africa
+52;CYM;Cayman Islands;13_Caribbean;North_America
+53;CYP;Cyprus;07_Western Asia;Asia
+54;CZE;Czechia;16_Eastern Europe;Europe
+55;DEU;Germany;17_Western Europe;Europe
+56;DJI;Djibouti;03_Eastern Africa;Africa
+57;KNA;Saint Kitts and Nevis;13_Caribbean;North_America
+58;KOR;Republic of Korea;06_Eastern Asia;Asia
+59;COK;Cook Islands;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+60;COL;Colombia;14_South America;South_America
+61;COM;Comoros;03_Eastern Africa;Africa
+62;CPV;Cabo Verde;04_Western Africa;Africa
+63;CRI;Costa Rica;12_Central America;North_America
+64;CUB;Cuba;13_Caribbean;North_America
+65;CUW;Curaçao;13_Caribbean;North_America
+66;CXR;Christmas Island;19_Australia and New Zealand;Australia_Oceania
+67;GBR;United Kingdom;15_Northern Europe;Europe
+68;GEO;Georgia;07_Western Asia;Asia
+69;KWT;Kuwait;07_Western Asia;Asia
+70;LAO;Lao People's Democratic Republic;09_South-eastern Asia;Asia
+71;LBN;Lebanon;07_Western Asia;Asia
+72;LBR;Liberia;04_Western Africa;Africa
+73;LBY;Libya;01_Northern Africa;Africa
+74;MDG;Madagascar;03_Eastern Africa;Africa
+75;DMA;Dominica;13_Caribbean;North_America
+76;DNK;Denmark;15_Northern Europe;Europe
+77;DOM;Dominican Republic;13_Caribbean;North_America
+78;DZA;Algeria;01_Northern Africa;Africa
+79;ECU;Ecuador;14_South America;South_America
+80;EGY;Egypt;01_Northern Africa;Africa
+81;ERI;Eritrea;03_Eastern Africa;Africa
+82;ESH;Western Sahara;01_Northern Africa;Africa
+83;ESP;Spain;18_Southern Europe;Europe
+84;EST;Estonia;15_Northern Europe;Europe
+85;ETH;Ethiopia;03_Eastern Africa;Africa
+86;FIN;Finland;15_Northern Europe;Europe
+87;FJI;Fiji;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+88;FLK;Falkland Islands (Malvinas);14_South America;South_America
+89;FRA;France;17_Western Europe;Europe
+90;GGY;Guernsey;15_Northern Europe;Europe
+91;GHA;Ghana;04_Western Africa;Africa
+92;GIB;Gibraltar;18_Southern Europe;Europe
+93;GIN;Guinea;04_Western Africa;Africa
+94;IMN;Isle of Man;15_Northern Europe;Europe
+95;IND;India;10_Southern Asia;Asia
+96;IRL;Ireland;15_Northern Europe;Europe
+97;FRO;Faroe Islands;15_Northern Europe;Europe
+98;FSM;Micronesia (Fed. States of);20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+99;GAB;Gabon;02_Middle Africa;Africa
+100;GLP;Guadeloupe;13_Caribbean;North_America
+101;GMB;Gambia;04_Western Africa;Africa
+102;GNB;Guinea-Bissau;04_Western Africa;Africa
+103;GRD;Grenada;13_Caribbean;North_America
+104;GRL;Greenland;11_Northern America;North_America
+105;GTM;Guatemala;12_Central America;North_America
+106;GUF;French Guiana;14_South America;South_America
+107;IRN;Iran (Islamic Republic of);10_Southern Asia;Asia
+108;IRQ;Iraq;07_Western Asia;Asia
+109;ISL;Iceland;15_Northern Europe;Europe
+110;ISR;Israel;07_Western Asia;Asia
+111;ITA;Italy;18_Southern Europe;Europe
+112;LCA;Saint Lucia;13_Caribbean;North_America
+113;MDV;Maldives;10_Southern Asia;Asia
+114;MEX;Mexico;12_Central America;North_America
+115;MHL;Marshall Islands;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+116;MKD;North Macedonia;18_Southern Europe;Europe
+117;MLI;Mali;04_Western Africa;Africa
+118;GNQ;Equatorial Guinea;02_Middle Africa;Africa
+119;GRC;Greece;18_Southern Europe;Europe
+120;KIR;Kiribati;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+121;MAC;China, Macao SAR;06_Eastern Asia;Asia
+122;GUM;Guam;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+123;GUY;Guyana;14_South America;South_America
+124;HKG;China, Hong Kong SAR;06_Eastern Asia;Asia
+125;HMD;Heard Island and McDonald Islands;03_Eastern Africa;Australia_Oceania
+126;HND;Honduras;12_Central America;North_America
+127;HRV;Croatia;18_Southern Europe;Europe
+128;HTI;Haiti;13_Caribbean;North_America
+129;HUN;Hungary;16_Eastern Europe;Europe
+130;IDN;Indonesia;09_South-eastern Asia;Asia
+131;MAF;Saint Martin (French part);13_Caribbean;North_America
+132;MAR;Morocco;01_Northern Africa;Africa
+133;JAM;Jamaica;13_Caribbean;North_America
+134;JEY;Jersey;15_Northern Europe;Europe
+135;JOR;Jordan;07_Western Asia;Asia
+136;JPN;Japan;06_Eastern Asia;Asia
+137;KAZ;Kazakhstan;08_Central Asia;Asia
+138;KEN;Kenya;03_Eastern Africa;Africa
+139;KGZ;Kyrgyzstan;08_Central Asia;Asia
+140;KHM;Cambodia;09_South-eastern Asia;Asia
+141;LIE;Liechtenstein;17_Western Europe;Europe
+142;LKA;Sri Lanka;10_Southern Asia;Asia
+143;LSO;Lesotho;05_Southern Africa;Africa
+144;LTU;Lithuania;15_Northern Europe;Europe
+145;LUX;Luxembourg;17_Western Europe;Europe
+146;LVA;Latvia;15_Northern Europe;Europe
+147;MLT;Malta;18_Southern Europe;Europe
+148;MMR;Myanmar;09_South-eastern Asia;Asia
+149;MNE;Montenegro;18_Southern Europe;Europe
+150;MNG;Mongolia;06_Eastern Asia;Asia
+151;MNP;Northern Mariana Islands;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+152;MOZ;Mozambique;03_Eastern Africa;Africa
+153;MRT;Mauritania;04_Western Africa;Africa
+154;MSR;Montserrat;13_Caribbean;North_America
+155;MTQ;Martinique;13_Caribbean;North_America
+156;MUS;Mauritius;03_Eastern Africa;Africa
+157;MWI;Malawi;03_Eastern Africa;Africa
+158;MYS;Malaysia;09_South-eastern Asia;Asia
+159;REU;Réunion;03_Eastern Africa;Africa
+160;ROU;Romania;16_Eastern Europe;Europe
+161;RUS;Russian Federation;16_Eastern Europe;Europe
+162;RWA;Rwanda;03_Eastern Africa;Africa
+163;SAU;Saudi Arabia;07_Western Asia;Asia
+164;SDN;Sudan;01_Northern Africa;Africa
+165;SEN;Senegal;04_Western Africa;Africa
+166;MYT;Mayotte;03_Eastern Africa;Africa
+167;NAM;Namibia;05_Southern Africa;Africa
+168;NCL;New Caledonia;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+169;NER;Niger;04_Western Africa;Africa
+170;NFK;Norfolk Island;19_Australia and New Zealand;Australia_Oceania
+171;NGA;Nigeria;04_Western Africa;Africa
+172;NIC;Nicaragua;12_Central America;North_America
+173;NIU;Niue;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+174;NLD;Netherlands;17_Western Europe;Europe
+175;NOR;Norway;15_Northern Europe;Europe
+176;NPL;Nepal;10_Southern Asia;Asia
+177;NRU;Nauru;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+178;NZL;New Zealand;19_Australia and New Zealand;Australia_Oceania
+179;OMN;Oman;07_Western Asia;Asia
+180;PAK;Pakistan;10_Southern Asia;Asia
+181;PAN;Panama;12_Central America;North_America
+182;PCN;Pitcairn;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+183;PER;Peru;14_South America;South_America
+184;PHL;Philippines;09_South-eastern Asia;Asia
+185;SJM;Svalbard and Jan Mayen Islands;15_Northern Europe;Europe
+186;SLB;Solomon Islands;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+187;SLE;Sierra Leone;04_Western Africa;Africa
+188;SLV;El Salvador;12_Central America;North_America
+189;PLW;Palau;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+190;PNG;Papua New Guinea;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+191;POL;Poland;16_Eastern Europe;Europe
+192;PRI;Puerto Rico;13_Caribbean;North_America
+193;PRK;Dem. People's Republic of Korea;06_Eastern Asia;Asia
+194;PRT;Portugal;18_Southern Europe;Europe
+195;PRY;Paraguay;14_South America;South_America
+196;PSE;State of Palestine;07_Western Asia;Asia
+197;PYF;French Polynesia;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+198;QAT;Qatar;07_Western Asia;Asia
+199;SMR;San Marino;18_Southern Europe;Europe
+200;SGP;Singapore;09_South-eastern Asia;Asia
+201;SGS;South Georgia and the South Sandwich Islands;14_South America;South_America
+202;SHN;Saint Helena;04_Western Africa;Africa
+203;SPM;Saint Pierre and Miquelon;11_Northern America;North_America
+204;SRB;Serbia;18_Southern Europe;Europe
+205;XKX;Kosovo (under UNSC res. 1244);18_Southern Europe;Europe
+206;SSD;South Sudan;03_Eastern Africa;Africa
+207;STP;Sao Tome and Principe;02_Middle Africa;Africa
+208;SUR;Suriname;14_South America;South_America
+209;SVK;Slovakia;16_Eastern Europe;Europe
+210;SVN;Slovenia;18_Southern Europe;Europe
+211;SWE;Sweden;15_Northern Europe;Europe
+212;VGB;British Virgin Islands;13_Caribbean;North_America
+213;VIR;United States Virgin Islands;13_Caribbean;North_America
+214;VNM;Viet Nam;09_South-eastern Asia;Asia
+215;SWZ;Eswatini;05_Southern Africa;Africa
+216;SXM;Sint Maarten (Dutch part);13_Caribbean;North_America
+217;SYC;Seychelles;03_Eastern Africa;Africa
+218;SYR;Syrian Arab Republic;07_Western Asia;Asia
+219;VUT;Vanuatu;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+220;WLF;Wallis and Futuna Islands;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+221;TCA;Turks and Caicos Islands;13_Caribbean;North_America
+222;TCD;Chad;02_Middle Africa;Africa
+223;TGO;Togo;04_Western Africa;Africa
+224;THA;Thailand;09_South-eastern Asia;Asia
+225;TJK;Tajikistan;08_Central Asia;Asia
+226;TKL;Tokelau;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+227;TKM;Turkmenistan;08_Central Asia;Asia
+228;TLS;Timor-Leste;09_South-eastern Asia;Asia
+229;TON;Tonga;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+230;TTO;Trinidad and Tobago;13_Caribbean;North_America
+231;TUN;Tunisia;01_Northern Africa;Africa
+232;TUR;Türkiye;07_Western Asia;Asia
+233;TUV;Tuvalu;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+234;TWN;China, Taiwan Province of China;06_Eastern Asia;Asia
+235;TZA;United Republic of Tanzania;03_Eastern Africa;Africa
+236;UGA;Uganda;03_Eastern Africa;Africa
+237;UKR;Ukraine;16_Eastern Europe;Europe
+238;xSR;Scarborough Reef;09_South-eastern Asia;Asia
+239;UMI;United States Minor Outlying Islands;20_Melanesia-Micronesia-Polynesia;North_America
+240;URY;Uruguay;14_South America;South_America
+241;USA;United States of America;11_Northern America;North_America
+242;UZB;Uzbekistan;08_Central Asia;Asia
+243;VAT;Holy See;18_Southern Europe;Europe
+244;VCT;Saint Vincent and the Grenadines;13_Caribbean;North_America
+245;VEN;Venezuela (Bolivarian Republic of);14_South America;South_America
+246;WSM;Samoa;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+247;xAB;Abyei;03_Eastern Africa;Africa
+248;xAC;Aksai Chin;06_Eastern Asia;Asia
+249;xAP;Arunachal Pradesh;10_Southern Asia;Asia
+250;xJi;Jammu and Kashmir (India);10_Southern Asia;Asia
+251;xJp;Azad Kashmir and Gilgit-Baltistan (Pakistan);10_Southern Asia;Asia
+252;xJL;Jerusalem No man's land;07_Western Asia;Asia
+253;xPI;Paracel Islands;09_South-eastern Asia;Asia
+254;xRI;Kuril islands;06_Eastern Asia;Asia
+255;xSI;Spratly Islands;09_South-eastern Asia;Asia
+256;xSK;Senkaku Islands;06_Eastern Asia;Asia
+257;xUK;Akrotiri and Dhekelia;07_Western Asia;Asia
+258;YEM;Yemen;07_Western Asia;Asia
+259;ZAF;South Africa;05_Southern Africa;Africa
+260;ZMB;Zambia;03_Eastern Africa;Africa
+261;ZWE;Zimbabwe;03_Eastern Africa;Africa
+1012;AUS;Australia extended;19_Australia and New Zealand;Australia_Oceania
+1046;CHL;Chile extended;14_South America;South_America
+1059;COK;Cook Islands extended;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+1060;COL;Colombia extended;14_South America;South_America
+1062;CPV;Cabo Verde extended;04_Western Africa;Africa
+1067;GBR;United Kingdom extended;15_Northern Europe;Europe
+1114;MEX;Mexico extended;12_Central America;North_America
+1120;KIR;Kiribati extended;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+1136;JPN;Japan extended;06_Eastern Asia;Asia
+1178;NZL;New Zealand extended;19_Australia and New Zealand;Australia_Oceania
+1197;PYF;French Polynesia extended;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+1201;SGS;South Georgia and the South Sandwich Islands extended;14_South America;South_America
+1218;VUT;Vanuatu extended;20_Melanesia-Micronesia-Polynesia;Australia_Oceania
+;;;;

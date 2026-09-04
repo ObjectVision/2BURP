@@ -5,6 +5,7 @@ container Impl
 		attribute<Person> InitialPopGrid         (domain) := ='SourceData/Population/PerYear_Unrounded/'+ModelParameters/StartYear+'[Person]';
 		// attribute<Person> InitialPopGrid1990     (domain) := CompactedDomain/ISCD ? SourceData/Population/PerYear/Y1990[Person] : null_d[Person];
 		attribute<Bool>   InStudyArea            (domain) := poly2grid(CurrentProjection/geometry, domain);
+		attribute<Bool>	  InUNCountry			 (domain) := =ModelParameters/Use_UN_Country_Grid ? 'sourcedata/Physical/UN_Countries_Territory/Countries_UN_definition_grid/IsTerritory' : 'const(true, domain, bool)';
 		attribute<Bool>   HasPop                 (domain) := InitialPopGrid > 0[Person];
 		attribute<Bool>   HasBuiltup             (domain) := ='IsDefined(Countries/per_domain) ? (SourceData/Builtup/Total/'+ModelParameters/StartYear+' > 0[m2]) : false';
 		attribute<Bool>	  InBU_5kmClip           (domain) := ='IsDefined(Countries/per_domain) && (SourceData/Builtup/Total_sums_5km/'+ModelParameters/StartYear+' > 0[m2])';
@@ -13,6 +14,7 @@ container Impl
 		attribute<bool>   IsNotIce               (domain) := not(Physical/SnowIceCover/ReadData);
 		attribute<bool>   HasLand                (domain) := SourceData/Physical/Water/AllWater/Read_HasLand;
 		attribute<Bool>   FreeLand               (domain) := InStudyArea                                // is it within the study area (e.g. country border)
+																&& InUNCountry							// is it within the territory of UN states as defined by Marcello Schiavina's UN countries grid?
 																&& InBU_5kmClip                         // within certain distance from bu-area.
 																&& (HasLand || HasBuiltup || HasPop)	// needs to contain some land, or built-up, or population
 																//&& (IsNotLake || HasBuiltup || HasPop)  // it is not a lake, unless there is builtup or population in a cell categorised as a lake
@@ -62,8 +64,7 @@ container Impl
 		attribute<ProtoDomain_sub>  LB_sub := LB[ProtoDomain_sub];
 		attribute<ProtoDomain_sub>  UB_sub := UB[ProtoDomain_sub];
 	}
-
-	unit<uint32> StudyAreaTile_Create_Mollweide := StudyAreaTile_Select_Mollweide, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'" // decouple by renaming this file when produced
+	unit<uint32> StudyAreaTile_Create_Mollweide := StudyAreaTile_Select_Mollweide, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageType = "gdalwrite.vect"// decouple by renaming this file when produced
 	{
 		attribute<uint16>           LB_X := pointcol(LB);
 		attribute<uint16>           LB_y := pointrow(LB);
@@ -75,7 +76,8 @@ container Impl
 		attribute<int32>            UB_sub_X := pointcol(UB_sub);
 		attribute<int32>            UB_sub_y := pointrow(UB_sub);
 	} 
-
+	parameter<bool> 			 check_studyarea_file:= ='strlen('+quote(ExistingFile('', '%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'))+') > 0';
+	parameter<bool> 			 do_store_file:= True, ExplicitSuppliers = "StudyAreaTile_Create_Mollweide;";
 	// from here on, we only use the decoupled study area tiles and no longer have to process the full extent of the study area.
 	unit<uint32> StudyAreaTile_Mollweide: StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
 	{
@@ -135,7 +137,7 @@ container Impl
 		attribute<ProtoDomain_sub_LatLong>  UB_sub := UB[ProtoDomain_sub_LatLong];
 	}
 
-	unit<uint32> StudyAreaTile_Create_LatLong := StudyAreaTile_Select_LatLong, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_LatLong.dbf'" // decouple by renaming this file when produced
+	unit<uint32> StudyAreaTile_Create_LatLong := StudyAreaTile_Select_LatLong, StorageName = "='%projdir%/data/StudyAreaTiles_'+ModelParameters/StudyArea+'_LatLong.dbf'", StorageType = "gdalwrite.vect" // decouple by renaming this file when produced
 	{
 		attribute<uint16>           LB_X := pointcol(LB);
 		attribute<uint16>           LB_y := pointrow(LB);
@@ -179,7 +181,7 @@ container Impl
 		parameter<string> StudyArea_name;
 		///
 		
-		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageReadOnly = "true"
+		unit<uint32> StudyAreaTile: StorageName = "='%projdir%/data/StudyAreaTiles_'+StudyArea_name+'_'+/ModelParameters/domain_EPSG+'.dbf'", StorageType = "gdalwrite.vect", StorageReadOnly = "true"
 		{
 			attribute<int32>            LB_X;
 			attribute<int32>            LB_y;
@@ -199,6 +201,7 @@ container Impl
 		{
 			// attribute<LatLong>        geometry      := id(.)[LatLong];
 			attribute<Mollweide>      geometry      := id(.)[Mollweide];
+			attribute<km2>			  area			:= const(1[km2], .);
 		}
 	}
 

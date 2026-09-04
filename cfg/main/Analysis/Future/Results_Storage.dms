@@ -1,0 +1,116 @@
+container Store_Results: using = "Geography;Classifications;Units;"
+	{
+		parameter<bool> Generate_All                       := True, ExplicitSuppliers = "Generate_DegreesOfUrbanisation;Generate_Population;Generate_BuiltUp_Total_Shares";
+		parameter<bool> Generate_BuiltUp_Total_Shares      := True, ExplicitSuppliers = "='BuiltUp_Total_Share/Initial;'+AsList('BuiltUp_Total_Share/'+ProjectionYears/name, ';')";
+		parameter<bool> Generate_Population                := True, ExplicitSuppliers = "='Population/Initial;'+AsList('Population/'+ProjectionYears/name, ';')";
+		parameter<bool> Generate_DegreesOfUrbanisation     := True, ExplicitSuppliers = "='PreProcessing/DegreesOfUrbanisation/'+ModelParameters/StartYear+'/StoreTypology;'+AsList('DegreesOfUrbanisation/'+ProjectionYears/name+'/StoreTypology', ';')";
+		
+		container BuiltUp_Total_Share := 
+			for_each_nedvat(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Share)'
+				, domain
+				, float32
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+				, 'tif'
+			)
+		{
+			attribute<float32> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/BuiltUp_Total_Share), StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
+		}
+			
+		container Population := 
+			for_each_nedvat(
+				ProjectionYears/name
+				, 'recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population)'
+				, domain
+				, NrPerson
+				, '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ProjectionYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+				, 'tif'
+			)
+		{	
+			attribute<NrPerson> Y2020		 (domain) := Initial;
+			attribute<NrPerson> Initial      (domain) := recollect_by_cond(domain/IsCompactedDomain, Analysis/Future/InitialState/Population)
+			, StorageName = "='%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+ModelParameters/StartYear+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'", StorageType = "tif";
+		}
+		
+		container DegreesOfUrbanisation :=
+			for_each_ne(
+				ProjectionYears/name
+				 , 'Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+						'+quote(ProjectionYears/name)+'
+						 , recollect_by_cond(domain/IsCompactedDomain, convert(Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Total_Area, float32)[km2])
+						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Builtup/'+ProjectionYears/name+'/NewState/BuiltUp_Residential_Area[km2])
+						 , recollect_by_cond(domain/IsCompactedDomain, Allocate_Population/'+ProjectionYears/name+'/NewState/Population[Person]))'
+			)
+		{
+			container Y2020:= Initial;
+			container Initial
+			{
+				attribute<TypologyK>       Typology_Domain                                   (domain) := ='Preprocessing/DegreesOfUrbanisation/'+/ModelParameters/StartYear+'/Typology_Domain';
+				attribute<TypologyK>       ReadTypologyK                                     (domain) := ='Preprocessing/DegreesOfUrbanisation/'+/ModelParameters/StartYear+'/ReadTypologyK';
+			}
+		}
+	
+		container Read_Population := 
+			for_each_ndva(
+				AllYears/name
+				, domain
+				, NrPerson
+				, AllYears/modelled ? 
+					'%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+					: '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Population_'+AllYears/name+'_'+ModelParameters/domain_EPSG+'.tif'
+			)
+		{
+			attribute<NrPerson> Initial (domain) := Y2020;
+		}
+		
+		container Read_BuiltUp_Total_Share := 
+			for_each_ndva(
+				AllYears/name
+				, domain
+				, float32
+				, AllYears/modelled ? 
+					'%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/BuiltUp_Total_Share_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+					: '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/Builtup_total_'+string(AllYears/name)+'_'+ModelParameters/domain_EPSG+'.tif'
+			)
+		{	
+			attribute<float32> Initial (domain) := Y2020;
+		}
+		
+		container Read_DegreesOfUrbanisation :=
+			for_each_ndva(
+				AllYears/name
+				, domain
+				, uint8
+				, AllYears/modelled ? 
+					'%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+AllYears/name+ModelParameters/FileSuffix+'_'+ModelParameters/domain_EPSG+'.tif'
+					: '%LocalDataProjDir%/Results/'+ModelParameters/StudyArea+'/DegUrbaGrid_'+AllYears/name+'_'+ModelParameters/domain_EPSG+'.tif'
+			)
+		{
+			attribute<uint8> Initial (domain) := Y2020;
+		}
+		
+		// ad-hoc for testing improvements to the degurba definition
+		container Read_DegreesOfUrbanisation_TypologyK := for_each_nedv(AllYears/name, 'invert(TypologyK/EK)[Read_DegreesOfUrbanisation/'+AllYears/name+']', domain, TypologyK);
+		/*container Test_DegreesOfUrbanisation := Preprocessing/Calculate_DegreeOfUrbanisation/Gen_T(
+			'x2100'
+			, convert(Read_BuiltUp_Total_Share/Y2100, km2) 
+			, convert(Read_BuiltUp_Total_Share/Y2100,km2) 
+			, Read_Population/Y2100[Person]);
+		container compare_DegreesOfUrbanisation {
+			unit<uint8> errors: nrofrows = 3 {
+				attribute<int8>   value:= int8(id(.)) - int8(1);
+				attribute<string> Label: ['false negative', 'none', 'false positive'];
+			}
+			unit<wpoint> load: storagename="D:/SourceData/2BURP/temp/SMOD_V1s7_O7_PopTrend_2100_L2.tif", storagereadonly = "true", storagetype="gdal.grid", dialogdata="CurrentProjection_base" {
+				attribute<uint8> GridData;
+				attribute<uint8> ReadData (domain);
+				attribute<TypologyK> degurba_domain (domain):= invert(TypologyK/EK)[ReadData];
+				attribute<TypologyK> degurba (CompactedDomain):= degurba_domain[CompactedDomain/org_rel];
+			}
+			container comparison:= for_each_nedv(TypologyK/name, 
+				'invert(errors/value)
+				[int8(Test_DegreesOfUrbanisation/ReadTypologyK='+string(id(TypologyK))+'[TypologyK]) - 
+				 int8(recollect_by_cond(domain/IsCompactedDomain, load/degurba)='+string(id(TypologyK))+'[TypologyK])]', domain, errors);
+		}*/
+	}

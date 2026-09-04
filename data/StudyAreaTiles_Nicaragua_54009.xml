@@ -6,9 +6,9 @@
 	</FullName>
 	<GeoDmsVersion>GeoDms 16.0.0 [Oct 27 2024 14:36:36]
 	</GeoDmsVersion>
-	<SessionStartTime>2025-02-14 12:53:25
+	<SessionStartTime>2024-12-16 11:04:13
 	</SessionStartTime>
-	<CurrentTime>2025-02-14 14:54:10
+	<CurrentTime>2024-12-18 20:07:07
 	</CurrentTime>
 	<StatusFlags>0x537 = AdminMode SuspendForGUI ShowStateColors TreeViewVisible DetailsVisible MultiThreading1 MultiThreading2 
 	</StatusFlags>
@@ -41,27 +41,32 @@
 		Changes not staged for commit:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)<BR/>
 		  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)<BR/>
+			modified:   cfg/main.dms<BR/>
+			modified:   cfg/main/Analysis/Future/Results_Storage.dms<BR/>
+			modified:   cfg/main/Geography.dms<BR/>
+			modified:   cfg/main/Geography/impl.dms<BR/>
 			modified:   cfg/main/ModelParameters.dms<BR/>
-			modified:   cfg/main/SourceData.dms<BR/>
+			modified:   cfg/main/Preprocessing.dms<BR/>
+			modified:   cfg/main/Preprocessing/DegreeOfUrbanisation.dms<BR/>
+			modified:   cfg/main/SourceData/Builtup.dms<BR/>
+			modified:   cfg/main/SourceData/Physical.dms<BR/>
+			modified:   cfg/main/SourceData/Physical/coast.dms<BR/>
+			modified:   cfg/main/SourceData/Population.dms<BR/>
+			modified:   cfg/main/SourceData/RegionalUnits.dms<BR/>
 		<BR/>
 		Untracked files:<BR/>
 		  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)<BR/>
-			calibration/.Rhistory<BR/>
+			cfg/main/MakeUnlinkedData.dms<BR/>
 			cfg/main/Preprocessing/DegreeOfUrbanisation_old.dms<BR/>
 			cfg/test/<BR/>
-			data/Claims/FA_BU_POP_projections_v10.xlsx<BR/>
-			data/Claims/FA_BU_POP_projections_v9.xlsx<BR/>
-			data/StudyAreaTiles_Italy_54009.dbf<BR/>
-			data/StudyAreaTiles_Italy_54009.xml<BR/>
-			reporting/.Rhistory<BR/>
 		<BR/>
 		no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)<BR/>
-		aa0b5466a6686f58deec40c39c8fa7a0def307b6<BR/>
+		c88b3d9c6f00ae1ce93c964d1b68c82cbc909269<BR/>
 		
 	</RevisionInfo>
 </Git>
 <Parameters>
-	<StudyArea>North_America
+	<StudyArea>Nicaragua
 	</StudyArea>
 </Parameters>
 </DocType>

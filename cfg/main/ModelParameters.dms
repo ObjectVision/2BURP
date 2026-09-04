@@ -1,18 +1,22 @@
 container ModelParameters : using = "units;sourcedata"
 {
 	//GENERAL
-	parameter<string>                    StudyArea_manually                                  := 'Africa'      , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<string>                    StudyArea_manually                                  := 'Africa'     , Descr = "Choose the study area for the analysis. Options are: Nicaragua Nigeria Netherlands Morocco Chad Tanzania RwandaTanzKen Asia Africa Europe Australia_Oceania South_America North_America World";
+	parameter<bool>                    	 Use_TempTifFiles_manually                           := FALSE     	 , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
 	parameter<string>                    StartYear                                           := 'Y2020'      , Descr = "This indicates the starting year of the model. It should correspond to an existing GHSL year.";
 	parameter<float64>                   MW_Gridsize                                         := 1000d        , Descr = "This parameter indicates which grid size should be used for the MollWeide grids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   MW_Subgridsize                                      := 100d         , Descr = "This parameter indicates which grid size should be used for the MollWeide subgrids. 1km grid = 1,000,000 m2, 100m grid = 10,000 m2";
 	parameter<float64>                   WGS_Gridsize                                        := 30d          , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong grids, represented in arc second. Where 30ss corresponds to roughly a 1km grid at the equator.";
 	parameter<float64>                   WGS_Subgridsize                                     := 3d           , Descr = "This parameter indicates which grid size should be used for the WGS84/LatLong subgrids, represented in arc second. Where 3ss corresponds to roughly a 100m grid at the equator.";
 	parameter<string>                    domain_EPSG                                         := '54009'      , Descr = "Choose the projection to use in the model. Options: 54009 (Mollweide) or 4326 (WGS84)";  
-	parameter<string>                    Calibration_filedate                                := '20240701'   , Descr = "Which calibation filedate should be used.";
-	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used.";
-	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used.";
-	parameter<bool>                      Use_TempTifFiles                                    := FALSE        , Descr = "If working interactively in the GUI, set this value to TRUE after calculation the allocation results. Then the indicators are calculated from precalculated tif-files. Otherwise, choose false.";
-	parameter<string>                    Additional_FileSuffix                               := '_autoresolved_popdraw_stylised_Lewis_20241126'           , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
+	parameter<string>                    Calibration_filedate                                := '20241205'   , Descr = "Which calibation filedate should be used.";
+	parameter<string>                    Claim_fileversion                                   := 'v8'         , Descr = "Which claim file version should be used. v12 pairs with the 20250428 functional areas (983 areas); v8 pairs with the 20240627 fallback (1005 areas), see CRISP issue #132.";
+	parameter<string>                    FunctionalAreas_filedate                            := '20240627'   , Descr = "Which functional area filedate should be used. main asks for 20250428, which is not on the share yet (CRISP issue #132); 20240627 is the last vintage available locally.";
+	parameter<bool>                      FunctionalAreas_gridval_from_order                  := FunctionalAreas_filedate == '20240627', Descr = "The 20240627 shapefile has no gridval field; its raster fas_combined_20240627_54009_1000m.tif carries record order + 1. Later vintages carry gridval as a field.";
+	parameter<string>                    Population_fileversion                              := ''           , Descr = "Suffix of the WPP2024 population grids: '_v2' for the grids main refers to (not on the share, CRISP issue #132), '' for the July 2024 grids that are.";
+	parameter<bool>                      Use_UN_Country_Grid                                 := FALSE        , Descr = "Restrict the domain to the UN country territories in Regions/UNBNDA_CTY_onLAND_54009_1000.tif. FALSE while that grid is not on the share (CRISP issue #132).";
+
+	parameter<string>                    Additional_FileSuffix                               := '_pop_wpp24_fa20240627_calib_20241205'   , Descr = "Add text here to create distinct result/indicator file names apart from the suffix parameter already described above.";  //'_UnlimPopIncrease'
 			
 	//BUILT UP ALLOCATION
 	parameter<float32>                   BU_r_if_LocalMax                                    := 0.11f        , Descr = "Set the maximum growth rate of the built-up share if the cell is a local maximum.";
@@ -26,19 +30,21 @@ container ModelParameters : using = "units;sourcedata"
 	parameter<float32>                   Pop_Suitability_Reduction_Scale                     := 0.9f        , Descr = "Fraction of effect of probability-based suitability in proportional population reduction. Can take value between zero and one.";
 	parameter<float32>                   Pop_ShareOfRestclaim_Prefers_newBU                  := 1f           , Descr = "What share of the rest claim of population after reductions should be maximally allocated to new built-up areas";
 	
-	parameter<Person_Km2_decade>         Pop_r_if_LocalMax                                   := 3500[Person_Km2_decade]; //== 3500 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2_decade>         Pop_r_if_notLocalMax                                := 2500[Person_Km2_decade]; //== 2500 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2_decade>         Pop_r_if_notPopulated                               := 350[Person_Km2_decade];  //== 350 person per km2 of land if 50% builtup. 
-	parameter<Person_Km2>                Pop_max_saturation                                  := 100000[Person_Km2];
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_LocalMax                                   := 7000[Person_BuiltUpKm2_decade]; //== 3500 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notLocalMax                                := 5000[Person_BuiltUpKm2_decade]; //== 2500 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2_decade>  Pop_r_if_notPopulated                               := 700[Person_BuiltUpKm2_decade];  //== 350 person per km2 of land if 50% builtup. 
+	parameter<Person_BuiltUpKm2>         Pop_max_saturation                                  := 100000[Person_BuiltUpKm2];
 	parameter<Person>                    Pop_maxmax_saturation                               := 1000000[Person];
 	
-	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 1 {attribute<uint32> org_rels : [792]; }//=  const(null_u, .);} 792: Congo, 2030
+	//277, area with excessive pop / bu in Indonesia in 2030
+	unit<uint32> ignore_Check_for_enough_suitable_locations : nrofrows = 1 {attribute<uint32> org_rels : [277];} //=  const(null_u, .); parameter<bool> Ignore_all:= false;} // [792, 793, 730]; //=  const(null_u, .);} 792: Congo, 2030; 793: Congo, 2030; 730: Chad, 2030
 	
 	unit<uint32> ignore_Check_for_enough_drawn_population : nrofrows = 0
 	{attribute<uint32> org_rels:= const(null_u, .);}
 	//attribute<uint32> org_rels: [908, 480];} //908: Monaco, 480: Philippines islands group (with city)
 	
 	parameter<string>                    StudyArea                                           := replace_value(expand(., '%env:StudyArea%'), 'env:StudyArea', StudyArea_manually), Descr = "This parameter extracts the study area setting if the model is run from a batch file, if not, the StudyArea_manually paramater setting is used."; 
+	parameter<bool>                    	 Use_TempTifFiles                                    := bool(replace_value(expand(., '%env:Use_TempTifFiles%'), 'env:Use_TempTifFiles', string(Use_TempTifFiles_manually)))        , Descr = "This parameter extracts the use_temptiff files setting if the model is run from a batch file, if not, the Use_TempTifFiles_manually param is adopted.";
 	parameter<string>                    coordsys_name                                       := domain_EPSG == '54009' ? 'Mollweide' : 'LatLong';
 	parameter<string>                    gridsize                                            := domain_EPSG == '54009' ? string(MW_Gridsize) : string(WGS_Gridsize)+'ss';
 	parameter<string>                    FileSuffix                                          := '_'+Claim_fileversion+'_IntMigr-'+string(Pop_Internal_Migration_Reduction_Rate_base)+'_PopRSuitScale-'+string(Pop_Suitability_Reduction_Scale)+'_PopShareNewBU-'+string(Pop_ShareOfRestclaim_Prefers_newBU)+Additional_FileSuffix, Descr = "This sufix string is appended to all exported files .tif/.csv to create distinct files.";

@@ -56,7 +56,9 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 			)'
 		)
 	{
-		parameter<string> Generate_DegreesOfUrbanisation := 'Ready', ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+GHS_years/name+'/StoreTypology', ';')";
+		parameter<bool> Generate_DegreesOfUrbanisation := True, ExplicitSuppliers = "=AsList('DegreesOfUrbanisation/'+GHS_years/name+'/StoreTypology', ';')";
+		parameter<bool>   check_files:= ='all(union_data(GHS_years, '+asitemlist(GHS_years/name+'/check_file')+'))';
+		
 	}
 		
 	container GridDistances := 
