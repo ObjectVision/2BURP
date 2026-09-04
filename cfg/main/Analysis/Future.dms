@@ -44,8 +44,8 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 
 	container Claim
 	{
-		container Builtup    := Preprocessing/Claims_BuiltUp;
-		container Population := Preprocessing/Claims_Population;
+		container BuiltUp_Residential := Preprocessing/Claims_BuiltUp_Residential;
+		container Population          := Preprocessing/Claims_Population;
 	}
 
 	container Allocate_Builtup := 
@@ -56,7 +56,7 @@ container Future : using = "units;geography;sourcedata/regionalunits;classificat
 					','+quote(ProjectionYears/prev_name)+                      // (1) PrevYear
 					', Allocate_Builtup/'+ProjectionYears/prevStateName+       // (2) State builtup of previous period
 					', Allocate_Population/'+ProjectionYears/prevStateName+    // (3) State population of previous period (population_allocation container)
-					', Claim/Builtup/'+ProjectionYears/name+                   // (4) Expected amount of builtup per region in km2
+					', Claim/BuiltUp_Residential/'+ProjectionYears/name+       // (4) Expected amount of residential builtup per region in km2
 				')'
 		) 
 	{

@@ -1,15 +1,19 @@
 container Preprocessing : using = "Geography;Units;SourceData;SourceData/RegionalUnits;Classifications"
 {
-	container Claims_BuiltUp := 
+	container Claims_BuiltUp_Residential := 
 		for_each_nedv(
 			ProjectionYears/name
-			, 'convert(SourceData/Claims/Read_CSV/BU_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
+			, 'convert(SourceData/Claims/Read_CSV/BU_res_estimates/BU'+string(ProjectionYears/Yr)+'[m2], km2)[invert(SourceData/Claims/Read_CSV/BU_res_estimates/FunctionalArea_rel)] / 1[km2] * 1[BuiltUpKm2]'
 			, FunctionalAreas
 			, BuiltUpKm2
 		)
+		, Descr = "Claimed residential built-up (BU_res) per functional area per projection year; the allocation adds the non-residential built-up of the start year to it, see CRISP issue #131."
 	{
-		attribute<BuiltUpKm2> Y2010 (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2010, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
-		attribute<BuiltUpKm2> Y2020 (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2020, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+		// observed built-up of the past years, for comparison with the claims above; those are residential, so compare with Y2010_Residential / Y2020_Residential
+		attribute<BuiltUpKm2> Y2010_Residential (FunctionalAreas) := sum(convert(SourceData/Builtup/Residential/Y2010, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+		attribute<BuiltUpKm2> Y2020_Residential (FunctionalAreas) := sum(convert(SourceData/Builtup/Residential/Y2020, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+		attribute<BuiltUpKm2> Y2010_Total       (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2010, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
+		attribute<BuiltUpKm2> Y2020_Total       (FunctionalAreas) := sum(convert(SourceData/Builtup/Total/Y2020, km2) / 1[km2] * 1[BuiltUpKm2], FunctionalAreas/per_domain);
 	}
 	
 	container Claims_Population := 
@@ -26,10 +30,10 @@ container Preprocessing : using = "Geography;Units;SourceData;SourceData/Regiona
 		attribute<Person> Y2020_fromClaims (FunctionalAreas) := (SourceData/Claims/Read_CSV/Pop_estimates/POP2020[Person])[invert(SourceData/Claims/Read_CSV/Pop_estimates/FunctionalArea_rel)];
 	}
 	
-	// container PercDelta_Claims_Builtup := 
+	// container PercDelta_Claims_BuiltUp_Residential := 
 		// for_each_nedv(
 			// ProjectionYears_Delta/name
-			// , '(Claims_BuiltUp/'+ProjectionYears_Delta/name+' - Claims_BuiltUp/'+ProjectionYears_Delta/prev_name+') / Claims_BuiltUp/'+ProjectionYears_Delta/prev_name
+			// , '(Claims_BuiltUp_Residential/'+ProjectionYears_Delta/name+' - Claims_BuiltUp_Residential/'+ProjectionYears_Delta/prev_name+') / Claims_BuiltUp_Residential/'+ProjectionYears_Delta/prev_name
 			// , FunctionalAreas
 			// , float32
 		// );

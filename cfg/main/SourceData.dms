@@ -8,7 +8,9 @@ container SourceData : using = "geography;units"
 		, StorageReadOnly = "true"
 		{
 			unit<uint32> FA_data;
-			unit<uint32> BU_estimates
+			unit<uint32> BU_res_estimates
+			: SqlString = "select * from BU_estimates"
+			, Descr = "Residential built-up claims (BU_res) per functional area, in m2. The tab of the claim file is named BU_estimates and its columns BU<year>, but they contain residential built-up only, whereas BU in the report means total built-up (BU_res + BU_nres of the start year), see CRISP issue #131."
 			{
 				attribute<FunctionalAreas_all> FunctionalArea_all_rel := rlookup(uint32(UNIT_ID), uint32(FunctionalAreas_all/FAID));
 				attribute<FunctionalAreas>     FunctionalArea_rel     := rlookup(FunctionalArea_all_rel, FunctionalAreas/org_rel);

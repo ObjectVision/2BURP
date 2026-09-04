@@ -33,11 +33,12 @@ container Validation : using = "units;geography;sourcedata/regionalunits;classif
 
 	container Claim
 	{
-		attribute<BuiltUpKm2> Builtup    (ClaimRegion) := ='sum(SourceData/BuiltUp/Total/'+ModelYear+'[km2] / 1[km2] * 1[BuiltUpKm2], ClaimRegion/per_Domain)';
-		attribute<Person>     Population (ClaimRegion) := ='sum(SourceData/Population/PerYear/'+ModelYear+'[Person], ClaimRegion/per_Domain)';
+		// NB Allocate_Builtup_T expects a residential built-up claim (see CRISP issue #131), while BuiltUp_Total is observed total built-up
+		attribute<BuiltUpKm2> BuiltUp_Total (ClaimRegion) := ='sum(SourceData/BuiltUp/Total/'+ModelYear+'[km2] / 1[km2] * 1[BuiltUpKm2], ClaimRegion/per_Domain)';
+		attribute<Person>     Population    (ClaimRegion) := ='sum(SourceData/Population/PerYear/'+ModelYear+'[Person], ClaimRegion/per_Domain)';
 	}
 
-	container Allocate_Builtup   := Future/Allocate_Builtup_T(ModelYear, InitialState, InitialState, Claim/Builtup) 
+	container Allocate_Builtup   := Future/Allocate_Builtup_T(ModelYear, InitialState, InitialState, Claim/BuiltUp_Total) 
 	{
 		container InitialState:= Future/InitialState;
 	}

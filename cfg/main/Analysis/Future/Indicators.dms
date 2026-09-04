@@ -11,7 +11,7 @@ container Indicators : using = "units;geography;sourcedata/regionalunits;classif
 		// attribute<km2>        Total_area_in_CD   (ClaimRegion) := sum(CompactedDomain/area, ClaimRegion/per_CompactedDomain);
 		// attribute<uint32>     Total_cells_in_CD  (ClaimRegion) := pcount(ClaimRegion/per_CompactedDomain);
 		// attribute<builtupKm2> BU_area_2020_CD    (ClaimRegion) := sum(/Analysis/Future/InitialState/BuiltUp_Total_Area, ClaimRegion/per_CompactedDomain);
-		// attribute<builtupKm2> BU_area_Claim_2100 (ClaimRegion) := Claim/Builtup/Y2100;
+		// attribute<builtupKm2> BU_res_area_Claim_2100 (ClaimRegion) := Claim/BuiltUp_Residential/Y2100;
 	// }
 	
 	//parameter<string> Export_CSVs := 'Ready', 
