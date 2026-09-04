@@ -188,7 +188,7 @@ container RegionalUnits
 		attribute<bool>                   IsStudyArea_domain           (domain) := IsDefined(per_domain) && IsDefined(CurrentProjection/per_domain);
 		attribute<bool>                   IsStudyArea                           := modus(IsStudyArea_domain, per_domain);
 		//attribute<string>                 Continent                             := rjoin(country, set_countries/zoneid, set_countries/continent);
-		//attribute<set_countries>          Country_rel                           := rlookup(country, set_countries/zoneid);
+		attribute<set_countries>          Country_rel                           := rlookup(country, set_countries/zoneid); // needed by set_countries/Geometry_*; commented out in 65789d3, restored for the a1_Countries step
 		attribute<uint32> 				 faid:= uint32(gridval);
 		// gridval is a field of the 20250428 shapefile; the 20240627 fallback has no such field and its raster ids equal record order + 1 (CRISP issue #132)
 		attribute<uint32>                 gridval                               := = ModelParameters/FunctionalAreas_gridval_from_order ? 'id(.) + 1' : 'FunctionalAreas_all_fields/gridval';
