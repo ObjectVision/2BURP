@@ -82,6 +82,51 @@ Durations seen on OVSRV10 (32 cores, 128 GB) with GeoDMS 20.19.2, 1 km Mollweide
 
 The Africa figures are from the 2024 configuration; its indicator exports took another 31 min.
 
+## Getting to the indicators: run Store_Results/Generate_All first
+
+Everything under `Analysis/Future/Indicators`, `Postprocessing/Indicators` and the csv
+exports reads the stored allocation results (`Store_Results/Read_Population`,
+`Read_BuiltUp_Total_Share`, `Read_DegreesOfUrbanisation`), not the live allocation. So
+before any indicator item, run
+
+```
+/Analysis/Future/Store_Results/Generate_All
+```
+
+for the study area (this is what button d1_Allocation triggers; running the item directly
+is equivalent and is the thing to do when d1 already shows under RecreateFiles and only
+the stored grids need refreshing). It writes, per projection year, the population,
+built-up share and degree-of-urbanisation grids with the current FileSuffix into
+`c:\LocalData\CRISP\Results\<area>\`. An indicator run started without it fails on
+missing `Population_Y2030<suffix>_54009.tif` and friends, or silently uses grids of an
+older FileSuffix if those happen to exist.
+
+## Memory needed by Generate_All
+
+Measured on OVSRV10 (128 GB) with GeoDMS 20.19.2, 1 km Mollweide, the full 2030..2100 chain:
+
+| study area | domain cells (in tiles) | compacted cells | GeoDmsRun peak commit | GeoDmsRun peak live | GUI peak (working set / commit) |
+|------------|------------------------:|----------------:|----------------------:|--------------------:|--------------------------------:|
+| Europe | 34.3 M | 7.35 M | 45 GB | 42 GB | 76 GB / 81 GB |
+| Africa | 86.7 M | 19.8 M | 114 GB | 110 GB | not measured |
+
+Both runs come out at about 1.3 GB per million domain cells, or 6 GB per million
+compacted-domain cells; use that to size other study areas (Asia is roughly twice Africa).
+The GUI holds on to more than GeoDmsRun does (viewed items, all years kept for browsing),
+so plan on 1.7 times the GeoDmsRun figure when the request is made from the GUI: Europe
+needs a 96 GB machine there, Africa does not fit a 128 GB machine from the GUI and only
+just fits with GeoDmsRun. Free memory on the machine matters, not the total: another
+GeoDMS session (an IGOR run, a second GUI) competes for the same pool.
+
+Where the numbers come from, so they can be refreshed: GeoDmsRun writes a `[memory]`
+summary at the end of its log (`Highest CommitCharge`, `PeakLiveLarge`); `huge alloc ...
+live now N[MB]` lines track it during the run. For a GUI request read the process
+counters after it finishes:
+
+```powershell
+Get-Process GeoDmsGuiQt | Select-Object WorkingSet64, PeakWorkingSet64, PrivateMemorySize64, PeakPagedMemorySize64
+```
+
 ## Data prerequisites and the fallbacks in ModelParameters
 
 `main` refers to three datasets that are not on the share (CRISP issue #132):
